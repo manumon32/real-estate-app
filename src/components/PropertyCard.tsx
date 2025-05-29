@@ -1,0 +1,167 @@
+import React from 'react';
+import {View, Text, StyleSheet, TouchableOpacity, Platform} from 'react-native';
+import Image from 'react-native-fast-image';
+import IconButton from '@components/Buttons/IconButton';
+import FeaturedIcon from '@assets/svg/featured.svg';
+import { Fonts } from '@constants/font';
+
+const PropertyCard = React.memo(({items, navigation}: any) => {
+  return (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => {
+        navigation.navigate('Details');
+      }}>
+      {/* Featured badge */}
+      {items.featured && (
+        <View style={styles.badge}>
+          <FeaturedIcon />
+        </View>
+      )}
+
+      <View style={styles.imageWrapper}>
+        <Image
+          source={{
+            uri: 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM=',
+            priority: Image.priority.normal,
+          }}
+          style={styles.image}
+        />
+        <TouchableOpacity style={styles.heart}>
+          <IconButton
+            style={{backgroundColor: '#fff', borderRadius: 20, padding: 5}}
+            iconSize={18}
+            //red , heart
+            iconColor={'#171717'}
+            iconName={'heart-outline'}
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.content}>
+        <Text style={styles.title} numberOfLines={2}>
+          {items.title}
+        </Text>
+        <View style={{flexDirection: 'row'}}>
+          <IconButton
+            iconSize={16}
+            iconColor={'#171717'}
+            iconName={'map-marker'}
+          />
+          <Text style={styles.subtitle}>Avenue, West Side</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <View style={styles.infoItem}>
+            <IconButton
+              iconSize={16}
+              iconColor={'#171717'}
+              iconName={'bed-empty'}
+            />
+            {/* <BedIcon /> */}
+            <Text style={styles.infoText}>2 Beds</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <IconButton
+              iconSize={16}
+              iconColor={'#171717'}
+              iconName={'vector-line'}
+            />
+            <Text style={styles.infoText}>200 m</Text>
+          </View>
+        </View>
+
+        <Text style={styles.price}>
+          <IconButton
+            iconSize={14}
+            iconColor={'#171717'}
+            iconName={'currency-inr'}
+          />
+          1,600
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+});
+
+const styles = StyleSheet.create({
+  card: {
+    bottom: 30,
+    left: Platform.OS === 'android' ? 2 : 0,
+    width: '47%',
+    // height: 234,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    margin: 5,
+    marginBottom: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: {width: 0, height: 4},
+    elevation: 10,
+    padding: 6,
+  },
+  badge: {
+    position: 'absolute',
+    zIndex: 10,
+  },
+  badgeText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  imageWrapper: {
+    position: 'relative',
+    width: '100%',
+    height: 120,
+    overflow: 'hidden',
+    borderRadius: 8,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  heart: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+  },
+  content: {
+    padding: 5,
+  },
+  title: {
+    fontSize: 14,
+    fontFamily: Fonts.MEDIUM,
+    lineHeight: 24,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: '#777',
+    marginVertical: 2,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginVertical: 6,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: 3,
+  },
+  infoText: {
+    marginLeft: 4,
+    fontSize: 12,
+    color: '#666',
+    fontFamily: Fonts.REGULAR,
+    fontWeight: '400',
+  },
+  price: {
+    fontSize: 14,
+    fontFamily: Fonts.MEDIUM,
+    fontWeight: '500',
+    marginTop: 4,
+    marginVertical: 6,
+  },
+});
+
+export default PropertyCard;
