@@ -48,16 +48,15 @@ export const login = async (
 
 // 🔹 Hand Shake token
 
-interface HandshakeResponse {
-  data: {secretKey: string; clientId: string};
-}
-
-export const getHandshakeTokenApi = async (data: object): Promise<{secretKey: string; clientId: string}> => {
+export const getHandshakeTokenApi = async (
+  data: object,
+): Promise<{secretKey: string; clientId: string}> => {
   try {
-    const response = await api.post<HandshakeResponse>(
-      API.AUTH.HAND_SHAKE,
+    const response = await apiRequest({
+      method: 'post',
+      url: API.AUTH.HAND_SHAKE,
       data,
-    );
+    });
     return response.data.data;
   } catch (error: any) {
     throw new Error('Failed to fetch handshake token');

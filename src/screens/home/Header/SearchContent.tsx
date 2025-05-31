@@ -3,7 +3,7 @@ import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import SearchBar from '@components/SearchBar';
 import IconButton from '@components/Buttons/IconButton';
 import {Fonts} from '@constants/font';
-const FilterModal = React.lazy(() => import('@components/Filter'));
+import FilterModal from '@components/Filter'
 
 function SearchContent(): React.JSX.Element {
   const [visible, setVisible] = useState(false);

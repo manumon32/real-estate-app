@@ -29,9 +29,6 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   const [selectedBathrooms, setSelectedBathrooms] = useState(null);
   const [selectedExtras, setSelectedExtras] = useState([]);
 
-  React.useEffect(() => {
-    console.log(' Filter Modal loaded');
-  }, [visible]);
 
   const toggleItem = useCallback((item: any, setSelectedList: any) => {
     setSelectedList((prev: any[]) =>
@@ -126,7 +123,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     <Modal
       visible={visible}
       transparent={true}
-      animationType="slide"
+      animationType="fade"
       backdropColor={'red'}
       onRequestClose={onClose}
       style={{}}>

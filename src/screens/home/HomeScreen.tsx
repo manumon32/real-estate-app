@@ -81,8 +81,8 @@ function App({navigation}: any): React.JSX.Element {
   return (
     <SafeAreaView>
       <StatusBar
-        barStyle={isDarkMode ? 'dark-content' : 'dark-content'}
-        backgroundColor={theme.colors.background}
+        barStyle={isDarkMode ? 'dark-content' : 'light-content'}
+        backgroundColor={theme.colors.backgroundPalette[0]}
       />
       <FlatList
         data={products}

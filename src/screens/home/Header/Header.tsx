@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {View, StyleSheet, Text, Platform, StatusBar} from 'react-native';
+import {View, StyleSheet, Text, Platform} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import {useTheme} from '@theme/ThemeProvider';
@@ -20,7 +20,6 @@ function Header(): React.JSX.Element {
   return (
     <>
       <View style={[backgroundStyle]}>
-        <StatusBar backgroundColor={theme.colors.background} />
         <LinearGradient
           colors={theme.colors.backgroundPalette}
           start={{x: 1, y: 2}}
@@ -62,12 +61,11 @@ function Header(): React.JSX.Element {
         style={{
           borderRadius: 20,
           backgroundColor: theme.colors.backgroundHome,
-          bottom: 20,
-          height: 40,
+          bottom: 5,
           width: '100%',
         }}>
         <Text style={[styles.freshTextStyle, {color: theme.colors.text}]}>
-          Fresh Recommendations
+          {/* Fresh Recommendations */}
         </Text>
       </View>
     </>
