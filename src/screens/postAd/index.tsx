@@ -6,7 +6,7 @@ import PostAdContainer from './stepper';
 
 const PostAd = () => {
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{flex: 1, backgroundColor:'#fff'}}>
       <PostAdContainer />
     </SafeAreaView>
   );

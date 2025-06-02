@@ -109,30 +109,21 @@ const PostAdContainer = () => {
   return (
     <React.Fragment>
       <CommonHeader title="Add Property" textColor="#171717" />
-      <View style={styles.container}>
-        <View style={styles.stepperContainer}>
-          <Stepper totalSteps={5} currentStep={currentStep} />
-        </View>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-          style={{height: Platform.OS === 'ios' ? '90%' : '89.5%'}}>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'space-between',
-            }}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollContainer}
-              style={styles.scrollContainerStyle}
-              keyboardShouldPersistTaps="handled">
-              {renderStepContent()}
-            </ScrollView>
-            <Footer currentStep={currentStep} setCurrentStep={setCurrentStep} />
-          </View>
-        </KeyboardAvoidingView>
+      <View style={styles.stepperContainer}>
+        <Stepper totalSteps={5} currentStep={currentStep} />
       </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+        style={{height: Platform.OS === 'ios' ? '85%' : '80%'}}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContainer}
+          style={styles.scrollContainerStyle}
+          keyboardShouldPersistTaps="handled">
+          <View style={styles.container}>{renderStepContent()}</View>
+        </ScrollView>
+        <Footer currentStep={currentStep} setCurrentStep={setCurrentStep} />
+      </KeyboardAvoidingView>
       <CommonSuccessModal visible={visible} onClose={() => setVisible(false)} />
     </React.Fragment>
   );
@@ -145,7 +136,12 @@ const styles = StyleSheet.create({
     paddingTop: 2,
     paddingHorizontal: 12,
   },
-  stepperContainer: {paddingHorizontal: 16},
+  stepperContainer: {
+    padding: 16,
+    paddingTop: 2,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+  },
   scrollContainer: {
     paddingBottom: 24,
     // paddingVertical: 10,
@@ -159,7 +155,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderColor: '#eee',
-    bottom: 20,
   },
   chatButton: {
     flexDirection: 'row',
