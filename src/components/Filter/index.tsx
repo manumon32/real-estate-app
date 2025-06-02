@@ -10,6 +10,12 @@ import {
   Pressable,
 } from 'react-native';
 import IconButton from '@components/Buttons/IconButton';
+import TextInput from '@components/Input/textInput';
+import SelectInput, {SelectOption} from '@components/Input/selectInput';
+import CommonDistanceInput from '@components/Input/distanceInput';
+import CommonStepperInput from '@components/Input/stepperInput';
+import CommonAmenityToggle from '@components/Input/amenityToggle';
+import CommonImageUploader from '@components/Input/ImageUploader';
 
 const AMENITIES = ['Apartment', 'Villa', 'Plot', 'Studio'];
 const LISTING_TYPES = ['Sale', 'Rent', 'Lease'];
@@ -28,7 +34,6 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   const [selectedBedrooms, setSelectedBedrooms] = useState(null);
   const [selectedBathrooms, setSelectedBathrooms] = useState(null);
   const [selectedExtras, setSelectedExtras] = useState([]);
-
 
   const toggleItem = useCallback((item: any, setSelectedList: any) => {
     setSelectedList((prev: any[]) =>
@@ -118,6 +123,14 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     onApply,
     onClose,
   ]);
+  const propertyOptions: SelectOption[] = [
+    {label: 'Residential', value: 'residential'},
+    {label: 'Commercial', value: 'commercial'},
+    {label: 'Land', value: 'land'},
+  ];
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [noOfKitchens, setKitchen] = useState<number>(1);
+  const [isGym, setIsGym] = useState<boolean>(false);
 
   return (
     <Modal
@@ -132,64 +145,135 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
           style={{
             marginTop: 'auto',
             height: '85%',
-            backgroundColor: '#fff', 
+            backgroundColor: '#fff',
           }}>
-        <ScrollView
-          contentContainerStyle={{backgroundColor: '#fff', padding: 20}}>
-          <View style={{flexDirection: 'row'}}>
-            <Text style={styles.title}>Filters & Sort</Text>
-            <Pressable onPress={onClose} style={styles.closeButton}>
-              <IconButton
-                iconSize={24}
-                //red , heart
-                iconColor={'#000'}
-                iconName={'close'}
+          <ScrollView
+            contentContainerStyle={{backgroundColor: '#fff', padding: 20}}>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={styles.title}>Filters & Sort</Text>
+              <Pressable onPress={onClose} style={styles.closeButton}>
+                <IconButton
+                  iconSize={24}
+                  //red , heart
+                  iconColor={'#000'}
+                  iconName={'close'}
+                />
+              </Pressable>
+            </View>
+            <Text style={styles.label}>Amenities</Text>
+            {renderChips(AMENITIES, selectedAmenities, setSelectedAmenities)}
+
+            <Text style={styles.label}>Listing Type</Text>
+            <View style={{padding: 20}}>
+              <TextInput
+                value={'Property title'}
+                onChangeText={() => {}}
+                placeholder="Property Title"
               />
-            </Pressable>
-          </View>
-          <Text style={styles.label}>Amenities</Text>
-          {renderChips(AMENITIES, selectedAmenities, setSelectedAmenities)}
+            </View>
+            <View style={{padding: 20}}>
+              <TextInput
+                // value={}
+                onChangeText={() => {}}
+                placeholder="Property Description"
+                placeholderTextColor={'#696969'}
+                multiline
+                style={{minHeight: 100}}
+              />
+            </View>
+            <View style={{padding: 20}}>
+              <SelectInput
+                options={propertyOptions}
+                selectedValue={selectedCategory}
+                onSelect={setSelectedCategory}
+                placeholder="Select Property Category"
+              />
+            </View>
+            <View style={{padding: 20}}>
+              <CommonDistanceInput
+                label="Hospital"
+                unit="km"
+                // value={'10'}
+                onChange={() => {}}
+              />
+            </View>
+            <View style={{padding: 20}}>
+              <CommonStepperInput
+                label="Kitchen"
+                value={noOfKitchens}
+                onChange={setKitchen}
+              />
+            </View>
 
-          <Text style={styles.label}>Listing Type</Text>
-          {renderChips(
-            LISTING_TYPES,
-            selectedListingType ? [selectedListingType] : [],
-            (val: React.SetStateAction<null>[]) =>
-              setSelectedListingType(val[0]),
-          )}
+            <View style={{padding: 20}}>
+              <CommonAmenityToggle
+                label="Gym"
+                selected={isGym}
+                onToggle={() => setIsGym(prev => !prev)}
+              />
+            </View>
+            <View style={{padding: 20}}>
+              <CommonImageUploader
+                onUpload={uri => console.log('Uploaded image:', uri)}
+                label="Upload Property Images"
+              />
+            </View>
+            <View style={{padding: 20}}>
+              <CommonImageUploader
+                onUpload={uri => console.log('Uploaded image:', uri)}
+                label="Upload Floor Plan"
+              />
+            </View>
 
-          <Text style={styles.label}>Bedrooms</Text>
-          {renderChips(
-            BEDROOMS,
-            selectedBedrooms ? [selectedBedrooms] : [],
-            (val: React.SetStateAction<null>[]) => setSelectedBedrooms(val[0]),
-          )}
+            {renderChips(
+              LISTING_TYPES,
+              selectedListingType ? [selectedListingType] : [],
+              (val: React.SetStateAction<null>[]) =>
+                setSelectedListingType(val[0]),
+            )}
 
-          <Text style={styles.label}>Bathrooms</Text>
-          {renderChips(
-            BATHROOMS,
-            selectedBathrooms ? [selectedBathrooms] : [],
-            (val: React.SetStateAction<null>[]) => setSelectedBathrooms(val[0]),
-          )}
+            <Text style={styles.label}>Bedrooms</Text>
+            {renderChips(
+              BEDROOMS,
+              selectedBedrooms ? [selectedBedrooms] : [],
+              (val: React.SetStateAction<null>[]) =>
+                setSelectedBedrooms(val[0]),
+            )}
 
-          <Text style={styles.label}>Extra Amenities</Text>
-          {renderIconChips(EXTRA_AMENITIES, selectedExtras, setSelectedExtras)}
+            <Text style={styles.label}>Bathrooms</Text>
+            {renderChips(
+              BATHROOMS,
+              selectedBathrooms ? [selectedBathrooms] : [],
+              (val: React.SetStateAction<null>[]) =>
+                setSelectedBathrooms(val[0]),
+            )}
 
-          <Text style={styles.label}>Bathrooms</Text>
-          {renderChips(
-            BATHROOMS,
-            selectedBathrooms ? [selectedBathrooms] : [],
-            (val: React.SetStateAction<null>[]) => setSelectedBathrooms(val[0]),
-          )}
+            <Text style={styles.label}>Extra Amenities</Text>
+            {renderIconChips(
+              EXTRA_AMENITIES,
+              selectedExtras,
+              setSelectedExtras,
+            )}
 
-          <Text style={styles.label}>Extra Amenities</Text>
-          {renderIconChips(EXTRA_AMENITIES, selectedExtras, setSelectedExtras)}
-          
+            <Text style={styles.label}>Bathrooms</Text>
+            {renderChips(
+              BATHROOMS,
+              selectedBathrooms ? [selectedBathrooms] : [],
+              (val: React.SetStateAction<null>[]) =>
+                setSelectedBathrooms(val[0]),
+            )}
 
-          <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-            <Text style={styles.applyText}>Apply</Text>
-          </TouchableOpacity>
-        </ScrollView>
+            <Text style={styles.label}>Extra Amenities</Text>
+            {renderIconChips(
+              EXTRA_AMENITIES,
+              selectedExtras,
+              setSelectedExtras,
+            )}
+
+            <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
+              <Text style={styles.applyText}>Apply</Text>
+            </TouchableOpacity>
+          </ScrollView>
         </View>
       </View>
     </Modal>
