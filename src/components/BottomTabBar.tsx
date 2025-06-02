@@ -38,16 +38,17 @@ const BottomTabBar = ({state, navigation}: any) => {
           const color = isFocused ? '#2E7D32' : '#888';
           const onPress = () => {
             if (route.name === 'AddPost') {
-              return;
-            } // skip, handled below
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
+              navigation.navigate('PostAd');
+            } else {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              });
 
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
+              if (!isFocused && !event.defaultPrevented) {
+                navigation.navigate(route.name);
+              }
             }
           };
 
