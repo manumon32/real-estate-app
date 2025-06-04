@@ -1,12 +1,13 @@
 import axios from 'axios';
-import {createHmacSignature, createBodyHash} from './handshake';
-// import {v4 as uuidv4} from 'uuid';
-// import DeviceInfo from 'react-native-device-info';
-
-// const CLIENT_ID = await DeviceInfo.getBuildId();
+import {
+  createHmacSignature,
+  createBodyHash,
+  createHadShakeHmacSignature,
+} from './handshake';
+import uuid from 'react-native-uuid';
 const API_BASE_URL = 'https://api.example.com';
-const SECRET_KEY =
-  'c9b5123f5677aa23121b409de425e886448b81cf0e3d96f684b14f8d78382598';
+// const SECRET_KEY =
+//   'c9b5123f5677aa23121b409de425e886448b81cf0e3d96f684b14f8d78382598';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -15,27 +16,54 @@ const api = axios.create({
 
 api.interceptors.request.use(
   async (config: any) => {
-    const timestamp = new Date().toISOString();
-    const nonce = '143'; //uuidv4();
-    const bodyHash = createBodyHash(config.body);
-    const stringToSign = [
-      config.method,
-      config.path,
-      timestamp,
-      nonce,
-      bodyHash,
-    ].join('\n');
-    const signature = createHmacSignature(SECRET_KEY, stringToSign);
+    if (config.headers['X-TOKEN']) {
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const bodyHash = createBodyHash(config.body ? config.body : '');
+      const deviceId = config.headers['X-DEVICE-ID'];
+      const nonce = uuid.v4();
+      // const url = config.url || '';
 
-    config.headers = {
-      ...(config.headers || {}),
-      'X-Timestamp': timestamp,
-      'X-Signature': signature,
-      'Content-Type': 'application/json',
-      'X-CLIENT-ID': '1234',
-      'X-NONCE': nonce,
-    };
-
+      // // Parse to get only path (remove domain)
+      // let path = url;
+      // try {
+      //   const parsed = new URL(url);
+      //   path = parsed.pathname;
+      // } catch (e) {
+      //   // url might already be a relative path
+      //   path = url;
+      // }
+      const stringToSign = [
+        config.method.toUpperCase(),
+        '/property',
+        timestamp,
+        nonce,
+        bodyHash,
+      ].join('\n');
+      const signature =
+        config.method == 'get'
+          ? createHmacSignature(config.headers['X-TOKEN'], stringToSign)
+          : createHadShakeHmacSignature(
+              config.headers['X-TOKEN'],
+              stringToSign,
+            );
+      console.log(bodyHash);
+      console.log('header only', {
+        ...(config.headers || {}),
+        'X-Timestamp': timestamp,
+        'X-Signature': signature,
+        'X-NONCE': nonce,
+        'Content-Type': 'application/json',
+        'X-CLIENT-ID': deviceId,
+      });
+      config.headers = {
+        ...(config.headers || {}),
+        'X-TIMESTAMP': timestamp,
+        'X-SIGNATURE': signature,
+        'X-NONCE': nonce,
+        'Content-Type': 'application/json',
+        'X-CLIENT-ID': deviceId,
+      };
+    }
     return config;
   },
   error => Promise.reject(error),

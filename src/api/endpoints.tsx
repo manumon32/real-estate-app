@@ -8,11 +8,11 @@ export const API = {
     HAND_SHAKE: `${BASE_URL}/handshake/client-secret`,
   },
   LISTINGS: {
-    GET_ALL: `${BASE_URL}/listings`,
-    GET_BY_ID: (id: string | number) => `${BASE_URL}/listings/${id}`,
-    CREATE: `${BASE_URL}/listings`,
-    UPDATE: (id: string | number) => `${BASE_URL}/listings/${id}`,
-    DELETE: (id: string | number) => `${BASE_URL}/listings/${id}`,
+    GET_ALL: `${BASE_URL}/property`,
+    GET_BY_ID: (id: string | number) => `${BASE_URL}/property/${id}`,
+    CREATE: `${BASE_URL}/property`,
+    UPDATE: (id: string | number) => `${BASE_URL}/property/${id}`,
+    DELETE: (id: string | number) => `${BASE_URL}/property/${id}`,
   },
   USER: {
     PROFILE: `${BASE_URL}/user/profile`,

@@ -1,12 +1,27 @@
 import api from './axios';
+import {appSecret} from './constans';
 import {API} from './endpoints';
+import {createHadShakeHmacSignature} from './handshake';
 import {apiRequest} from './request';
 
 // Types
-interface Listing {
-  id: number;
-  title: string;
+interface Row {
+  _id: string;
   price: number;
+  location: object;
+  imageUrls: [];
+  isFeatured: false;
+  title: string;
+  address: string;
+  numberOfBedrooms: number;
+}
+
+interface Listing {
+  pageNum: number;
+  pageSize: number;
+  pages: number;
+  total: number;
+  rows: [Row];
 }
 
 interface User {
@@ -14,6 +29,36 @@ interface User {
   name: string;
   email: string;
 }
+
+interface Details {
+  data: Row;
+}
+
+export const getHeaders = async (
+  data: any,
+  hmac: boolean = false,
+): Promise<any> => {
+  try {
+    if (hmac) {
+      const signature = createHadShakeHmacSignature(appSecret, data);
+      return {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...(signature && {'X-APP-SIGNATURE': signature}),
+      };
+    } else {
+      return {
+        'X-TOKEN': data.token,
+        'X-DEVICE-ID': data.clientId,
+      };
+    }
+  } catch (error) {
+    return {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+  }
+};
 
 // 🔹 Listings
 export const fetchListings = async (): Promise<Listing[]> => {
@@ -52,13 +97,59 @@ export const getHandshakeTokenApi = async (
   data: object,
 ): Promise<{secretKey: string; clientId: string}> => {
   try {
+    const headers = await getHeaders(data, true);
     const response = await apiRequest({
       method: 'post',
       url: API.AUTH.HAND_SHAKE,
       data,
+      headers,
     });
-    return response.data.data;
+    return response.data;
   } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to fetch handshake token');
+  }
+};
+
+// 🔹 Hand Shake token
+
+export const fetchListingsFromAPI = async (
+  params: object,
+  configArg: any,
+): Promise<Listing> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.LISTINGS.GET_ALL,
+      params,
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to fetch handshake token');
+  }
+};
+
+export const fetchDetailsAPI = async (
+  params: string,
+  configArg: any,
+): Promise<Details> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.LISTINGS.GET_BY_ID(params),
+      params,
+      headers,
+    };
+    console.log(API.LISTINGS.GET_BY_ID(params))
+    const response = await apiRequest(apiConfig);
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
     throw new Error('Failed to fetch handshake token');
   }
 };

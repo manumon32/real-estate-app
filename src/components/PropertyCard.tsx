@@ -3,7 +3,7 @@ import {View, Text, StyleSheet, TouchableOpacity, Platform} from 'react-native';
 import Image from 'react-native-fast-image';
 import IconButton from '@components/Buttons/IconButton';
 import FeaturedIcon from '@assets/svg/featured.svg';
-import { Fonts } from '@constants/font';
+import {Fonts} from '@constants/font';
 
 const PropertyCard = React.memo(({items, navigation}: any) => {
   return (
@@ -13,7 +13,7 @@ const PropertyCard = React.memo(({items, navigation}: any) => {
         navigation.navigate('Details');
       }}>
       {/* Featured badge */}
-      {items.featured && (
+      {items.isFeatured && (
         <View style={styles.badge}>
           <FeaturedIcon />
         </View>
@@ -22,7 +22,9 @@ const PropertyCard = React.memo(({items, navigation}: any) => {
       <View style={styles.imageWrapper}>
         <Image
           source={{
-            uri: 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM=',
+            uri: items.imageUrls?.[0]
+              ? items.imageUrls[0]
+              : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM=',
             priority: Image.priority.normal,
           }}
           style={styles.image}
@@ -47,7 +49,7 @@ const PropertyCard = React.memo(({items, navigation}: any) => {
             iconColor={'#171717'}
             iconName={'map-marker'}
           />
-          <Text style={styles.subtitle}>Avenue, West Side</Text>
+          <Text style={styles.subtitle}>{items.city}</Text>
         </View>
 
         <View style={styles.infoRow}>
@@ -58,7 +60,7 @@ const PropertyCard = React.memo(({items, navigation}: any) => {
               iconName={'bed-empty'}
             />
             {/* <BedIcon /> */}
-            <Text style={styles.infoText}>2 Beds</Text>
+            <Text style={styles.infoText}>{items.numberOfBedrooms} Beds</Text>
           </View>
           <View style={styles.infoItem}>
             <IconButton
@@ -76,7 +78,7 @@ const PropertyCard = React.memo(({items, navigation}: any) => {
             iconColor={'#171717'}
             iconName={'currency-inr'}
           />
-          1,600
+          {items.price}
         </Text>
       </View>
     </TouchableOpacity>

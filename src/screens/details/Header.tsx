@@ -10,9 +10,9 @@ import {
   Text,
   Dimensions,
 } from 'react-native';
-import { Fonts } from '@constants/font';
+import {Fonts} from '@constants/font';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
 import Carousel from 'react-native-reanimated-carousel';
@@ -22,7 +22,7 @@ function Header(): React.JSX.Element {
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const {width, height} = Dimensions.get('window');
+  const {width} = Dimensions.get('window');
   const [modalVisible, setModalVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const images = [
@@ -41,7 +41,7 @@ function Header(): React.JSX.Element {
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() => handleImagePress(item, index)}>
-        <Image source={{uri: item}} style={styles.image} />
+        <Image source={{uri: item}} resizeMode="cover" style={styles.image} />
       </TouchableOpacity>
     ),
     [handleImagePress],
@@ -57,9 +57,10 @@ function Header(): React.JSX.Element {
               paddingTop: Platform.OS === 'android' ? insets.top : 10, // adjust for status bar
             },
           ]}>
-          <TouchableOpacity onPress={()=>{
-            navigation.goBack();
-          }}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.goBack();
+            }}>
             <IconButton
               style={styles.heart}
               iconSize={24}
@@ -92,7 +93,7 @@ function Header(): React.JSX.Element {
         <Carousel
           loop
           width={width}
-          height={height}
+          height={360}
           autoPlay={false}
           data={images}
           scrollAnimationDuration={1000}
@@ -125,7 +126,11 @@ function Header(): React.JSX.Element {
               <Text style={styles.icontextStyle}>Video</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              // @ts-ignore
+              navigation.navigate('ThreeDModelViewer', {id: '123'});
+            }}>
             <View style={[styles.heartBootom]}>
               <View style={styles.iconConainer}>
                 <IconButton

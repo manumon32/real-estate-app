@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   StatusBar,
   useColorScheme,
@@ -10,6 +10,7 @@ import {
   StyleSheet,
   View,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import {useTheme} from '@theme/ThemeProvider';
 import Header from './Header/Header';
@@ -17,32 +18,19 @@ import PropertyCard from '@components/PropertyCard';
 import useBoundStore from '@stores/index';
 
 function App({navigation}: any): React.JSX.Element {
-  const {listings, clientId, token} = useBoundStore();
+  const {listings, fetchListings, hasMore, loading} = useBoundStore();
   const {theme} = useTheme();
 
   const isDarkMode = useColorScheme() === 'dark';
-  const [visibleCount, setVisibleCount] = useState(20);
-  const [loading, setLoading] = useState(false);
-  const TOTAL_PRODUCTS = 1000;
-  const BATCH_SIZE = 20;
+  const [loadingMore, setLoading] = useState(false);
 
-  const products = useMemo(() => {
-    return Array.from({length: visibleCount}, (_, i) => ({
-      id: i.toString(),
-      title: `Property available in ${i + 1}`,
-      price: `$${(i + 1) * 100}`,
-      image: 'https://via.placeholder.com/150',
-      featured: i === 0 || i === 1, // Only first two are featured
-    }));
-  }, [visibleCount]);
   const loadMore = () => {
-    if (loading || visibleCount >= TOTAL_PRODUCTS) return;
+    if (loadingMore || !hasMore) return;
 
     setLoading(true);
     setTimeout(() => {
-      setVisibleCount(prev => Math.min(prev + BATCH_SIZE, TOTAL_PRODUCTS));
       setLoading(false);
-    }, 500); // Simulate network delay
+    }, 500);
   };
 
   const renderAdItem = useCallback(
@@ -53,30 +41,12 @@ function App({navigation}: any): React.JSX.Element {
   );
 
   const fetchData = async () => {
-    // const data = {
-    //   deviceId: '154789',
-    //   appVersion: '1.3.0',
-    //   signatureHash: 'aabbccddeeff',
-    //   deviceModel: 'Pixel 6',
-    //   osVersion: 'Android 13',
-    //   fingerprintHash: 'hsde123231',
-    //   rooted: false,
-    //   emulator: false,
-    //   debug: false,
-    //   installer: 'com.android.vending',
-    // };
-    // gethandShakeToken(data);
+    fetchListings();
   };
 
   React.useEffect(() => {
-    console.log('listings', listings);
-
     fetchData();
-  },[]);
-
-  React.useEffect(()=>{
-    console.log(clientId, token);
-  },[clientId, token])
+  }, []);
 
   return (
     <SafeAreaView>
@@ -85,10 +55,11 @@ function App({navigation}: any): React.JSX.Element {
         backgroundColor={theme.colors.backgroundPalette[0]}
       />
       <FlatList
-        data={products}
+        data={listings}
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
-        keyExtractor={item => item.id}
+        refreshing={true}
+        keyExtractor={item => item._id}
         numColumns={2}
         ListHeaderComponent={<Header />}
         centerContent={true}
@@ -99,14 +70,19 @@ function App({navigation}: any): React.JSX.Element {
         showsVerticalScrollIndicator={false}
         onEndReachedThreshold={0.5}
         onEndReached={loadMore}
+        refreshControl={<RefreshControl refreshing={false} />}
         ListFooterComponent={
-          visibleCount < TOTAL_PRODUCTS ? (
+          hasMore || loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator
                 size="large"
                 color={theme.colors.activityIndicatorColor}
               />
-              <Text style={styles.loadingText}>Loading more properties...</Text>
+              {!loading && (
+                <Text style={styles.loadingText}>
+                  Loading more properties...
+                </Text>
+              )}
             </View>
           ) : (
             <Text style={styles.endText}>No more products</Text>

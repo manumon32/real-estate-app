@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   Platform,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Fonts} from '@constants/font';
@@ -20,6 +21,7 @@ import Button from '@components/Buttons/Button';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 // import PropertyCard from '@components/PropertyCard';
 import Header from './Header';
+import useBoundStore from '@stores/index';
 
 const Footer = () => {
   return (
@@ -36,7 +38,8 @@ const Footer = () => {
   );
 };
 
-const PropertyDetails = React.memo(({}: any) => {
+const PropertyDetails = React.memo(({id}: any) => {
+  const {details, fetchDetails, detailLoading} = useBoundStore();
   const {theme} = useTheme();
   const property = useMemo(
     () => ({
@@ -63,7 +66,7 @@ const PropertyDetails = React.memo(({}: any) => {
     [],
   );
 
-  const details = [
+  const detailsd = [
     {label: 'Carpet Area', value: '1000 sq.ft'},
     {label: 'Built-up Area', value: '1200 sq.ft'},
     {label: 'Property Age', value: '2 years'},
@@ -100,6 +103,10 @@ const PropertyDetails = React.memo(({}: any) => {
     [],
   );
 
+  React.useEffect(() => {
+    fetchDetails('68402ac9e44a7660b70671f2');
+  }, [fetchDetails, id]);
+
   // const renderAdItem = useCallback(
   //   (items: any) => {
   //     return <PropertyCard items={items.item} navigation={navigation} />;
@@ -119,12 +126,17 @@ const PropertyDetails = React.memo(({}: any) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {detailLoading && (
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{paddingBottom: 120}}>
         <Header />
         <View style={styles.header}>
-          <Text style={styles.title}>{property.title}</Text>
+          <Text style={styles.title}>{details?.title}</Text>
           <Text style={styles.locationTitle}>
             <IconButton
               iconSize={16}
@@ -488,7 +500,7 @@ const PropertyDetails = React.memo(({}: any) => {
 
         <View style={styles.additionalDetailsContainer}>
           <Text style={styles.heading}>Additional Details</Text>
-          {details.map(item => (
+          {detailsd.map(item => (
             <View key={item.value} style={styles.adittionalDetailsRow}>
               <Text style={styles.label}>{item.label}</Text>
               <Text style={styles.value}>{item.value}</Text>
@@ -639,6 +651,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#696969',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // fills the screen
+    backgroundColor: 'rgba(0, 0, 0, 0.2)', // transparent dark overlay
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999, // ensure it's on top
   },
 });
 export default React.memo(PropertyDetails);

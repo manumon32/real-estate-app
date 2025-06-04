@@ -10,12 +10,6 @@ import {
   Pressable,
 } from 'react-native';
 import IconButton from '@components/Buttons/IconButton';
-import TextInput from '@components/Input/textInput';
-import SelectInput, {SelectOption} from '@components/Input/selectInput';
-import CommonDistanceInput from '@components/Input/distanceInput';
-import CommonStepperInput from '@components/Input/stepperInput';
-import CommonAmenityToggle from '@components/Input/amenityToggle';
-import CommonImageUploader from '@components/Input/ImageUploader';
 
 const AMENITIES = ['Apartment', 'Villa', 'Plot', 'Studio'];
 const LISTING_TYPES = ['Sale', 'Rent', 'Lease'];
@@ -123,14 +117,6 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     onApply,
     onClose,
   ]);
-  const propertyOptions: SelectOption[] = [
-    {label: 'Residential', value: 'residential'},
-    {label: 'Commercial', value: 'commercial'},
-    {label: 'Land', value: 'land'},
-  ];
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [noOfKitchens, setKitchen] = useState<number>(1);
-  const [isGym, setIsGym] = useState<boolean>(false);
 
   return (
     <Modal
@@ -164,66 +150,6 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             {renderChips(AMENITIES, selectedAmenities, setSelectedAmenities)}
 
             <Text style={styles.label}>Listing Type</Text>
-            <View style={{padding: 20}}>
-              <TextInput
-                value={'Property title'}
-                onChangeText={() => {}}
-                placeholder="Property Title"
-              />
-            </View>
-            <View style={{padding: 20}}>
-              <TextInput
-                // value={}
-                onChangeText={() => {}}
-                placeholder="Property Description"
-                placeholderTextColor={'#696969'}
-                multiline
-                style={{minHeight: 100}}
-              />
-            </View>
-            <View style={{padding: 20}}>
-              <SelectInput
-                options={propertyOptions}
-                selectedValue={selectedCategory}
-                onSelect={setSelectedCategory}
-                placeholder="Select Property Category"
-              />
-            </View>
-            <View style={{padding: 20}}>
-              <CommonDistanceInput
-                label="Hospital"
-                unit="km"
-                // value={'10'}
-                onChange={() => {}}
-              />
-            </View>
-            <View style={{padding: 20}}>
-              <CommonStepperInput
-                label="Kitchen"
-                value={noOfKitchens}
-                onChange={setKitchen}
-              />
-            </View>
-
-            <View style={{padding: 20}}>
-              <CommonAmenityToggle
-                label="Gym"
-                selected={isGym}
-                onToggle={() => setIsGym(prev => !prev)}
-              />
-            </View>
-            <View style={{padding: 20}}>
-              <CommonImageUploader
-                onUpload={uri => console.log('Uploaded image:', uri)}
-                label="Upload Property Images"
-              />
-            </View>
-            <View style={{padding: 20}}>
-              <CommonImageUploader
-                onUpload={uri => console.log('Uploaded image:', uri)}
-                label="Upload Floor Plan"
-              />
-            </View>
 
             {renderChips(
               LISTING_TYPES,
