@@ -38,7 +38,7 @@
         </dict>
       </dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+  <string>This app requires your location to show nearby listings and services while in use.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>

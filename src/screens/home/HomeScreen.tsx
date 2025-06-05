@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {
   StatusBar,
   useColorScheme,
@@ -18,19 +18,21 @@ import PropertyCard from '@components/PropertyCard';
 import useBoundStore from '@stores/index';
 
 function App({navigation}: any): React.JSX.Element {
-  const {listings, fetchListings, hasMore, loading} = useBoundStore();
+  const {
+    listings,
+    fetchListings,
+    hasMore,
+    loading,
+    triggerRefresh,
+    setTriggerRefresh,
+  } = useBoundStore();
   const {theme} = useTheme();
 
   const isDarkMode = useColorScheme() === 'dark';
-  const [loadingMore, setLoading] = useState(false);
 
   const loadMore = () => {
-    if (loadingMore || !hasMore) return;
-
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    if (loading || !hasMore) return;
+    fetchListings();
   };
 
   const renderAdItem = useCallback(
@@ -40,12 +42,16 @@ function App({navigation}: any): React.JSX.Element {
     [navigation],
   );
 
+  useEffect(() => {
+    triggerRefresh && fetchListings();
+  }, [triggerRefresh]);
+
   const fetchData = async () => {
     fetchListings();
   };
 
   React.useEffect(() => {
-    fetchData();
+    !loading && fetchData();
   }, []);
 
   return (
@@ -70,7 +76,14 @@ function App({navigation}: any): React.JSX.Element {
         showsVerticalScrollIndicator={false}
         onEndReachedThreshold={0.5}
         onEndReached={loadMore}
-        refreshControl={<RefreshControl refreshing={false} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() => {
+              setTriggerRefresh();
+            }}
+          />
+        }
         ListFooterComponent={
           hasMore || loading ? (
             <View style={styles.loadingContainer}>
@@ -78,7 +91,7 @@ function App({navigation}: any): React.JSX.Element {
                 size="large"
                 color={theme.colors.activityIndicatorColor}
               />
-              {!loading && (
+              {loading && listings?.length > 0 && (
                 <Text style={styles.loadingText}>
                   Loading more properties...
                 </Text>

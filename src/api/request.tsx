@@ -10,20 +10,30 @@ interface ApiRequestProps {
   headers?: Record<string, string>;
 }
 
-export const apiRequest = async({
+export const apiRequest = async ({
   method,
   url,
   data,
   params,
   headers,
 }: ApiRequestProps): Promise<ApiRequestProps> => {
-  const response = await api.request<ApiRequestProps>({
-    method,
-    url,
-    data,
-    params,
-    headers,
-  });
-
-  return response.data;
+  try {
+    const response = await api.request<ApiRequestProps>({
+      method,
+      url,
+      data,
+      params,
+      headers,
+    });
+    console.log('response', response);
+    return response.data;
+  } catch (error: any) {
+    console.log('--- API Error ---');
+    console.log('Message:', error.message);
+    console.log('Status:', error.response?.status);
+    console.log('Response Data:', error.response?.data);
+    console.log('Request Config:', error.config); // Optional
+    console.log('Full Error:', JSON.stringify(error, null, 2)); // For completeness
+    throw new Error('Failed to fetch Details');
+  }
 };
