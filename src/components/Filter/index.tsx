@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Modal,
   ScrollView,
@@ -10,51 +10,65 @@ import {
   Pressable,
 } from 'react-native';
 import IconButton from '@components/Buttons/IconButton';
+import StepSlider from '@components/Input/StepSlider';
+import useBoundStore from '@stores/index';
 
-const AMENITIES = ['Apartment', 'Villa', 'Plot', 'Studio'];
-const LISTING_TYPES = ['Sale', 'Rent', 'Lease'];
-const BEDROOMS = ['1BHK', '2BHK', '3BHK'];
-const BATHROOMS = ['1', '2', '3', '4+'];
-const EXTRA_AMENITIES = [
-  {label: 'Gym', icon: 'dumbbell'},
-  {label: 'Pool', icon: 'pool'},
-  {label: 'Parking', icon: 'car'},
-  {label: 'Security', icon: 'shield-check'},
-];
-
-const FilterModal = ({visible, onClose, onApply}: any) => {
-  const [selectedAmenities, setSelectedAmenities] = useState([]);
+const FilterModal = ({visible, onClose}: any) => {
+  const {setFilters, appConfigs} = useBoundStore();
+  const [selectedPropertyType, setSelectedPropertyType] = useState([]);
   const [selectedListingType, setSelectedListingType] = useState(null);
   const [selectedBedrooms, setSelectedBedrooms] = useState(null);
   const [selectedBathrooms, setSelectedBathrooms] = useState(null);
-  const [selectedExtras, setSelectedExtras] = useState([]);
+  const [priceRange, setPriceRange] = useState<number[]>([1000000, 5000000]);
+
+  const PROPERTY_TYPES = appConfigs?.propertyTypes || [];
+  const LISTING_TYPES = appConfigs?.listingTypes || [];
+  const BEDROOMS = [
+    {name: '1BHK', _id: '1BHK'},
+    {name: '2BHK', _id: '2BHK'},
+    {name: '3BHK', _id: '3BHK'},
+  ];
+  const BATHROOMS = [
+    {name: '1', _id: '1'},
+    {name: '2', _id: '1'},
+    {name: '3', _id: '1'},
+    {name: '4+', _id: '4+'},
+  ];
 
   const toggleItem = useCallback((item: any, setSelectedList: any) => {
-    setSelectedList((prev: any[]) =>
-      prev.includes(item)
-        ? prev.filter((i: any) => i !== item)
-        : [...prev, item],
-    );
+    setSelectedList((prev: any) => {
+      const isMulti = Array.isArray(prev);
+      console.log(prev);
+      return isMulti
+        ? prev?.includes(item)
+          ? prev.filter((i: any) => i !== item)
+          : [...prev, item]
+        : item;
+    });
   }, []);
 
+  useEffect(() => {
+    console.log(appConfigs);
+  }, [appConfigs]);
+
   const renderChips = useCallback(
-    (items: any[], selected: string | any[], setSelected: any) => (
+    (items: any[], selected: any, setSelected: any) => (
       <View style={styles.chipContainer}>
         {items.map((item: any, index: any) => (
           <TouchableOpacity
             key={index}
             style={[
               styles.chip,
-              selected.includes(item) && styles.chipSelected,
+              selected?.includes(item._id) && styles.chipSelected,
             ]}
-            onPress={() => toggleItem(item, setSelected)}>
+            onPress={() => toggleItem(item._id, setSelected)}>
             <Text
               style={
-                selected.includes(item)
+                selected?.includes(item._id)
                   ? styles.chipTextSelected
                   : styles.chipText
               }>
-              {item}
+              {item.name}
             </Text>
           </TouchableOpacity>
         ))}
@@ -63,58 +77,56 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     [toggleItem],
   );
 
-  const renderIconChips = useCallback(
-    (
-      items: {label: any; icon: any}[],
-      selected: string | any[],
-      setSelected: any,
-    ) => (
-      <View style={styles.chipContainer}>
-        {items.map(({label, icon}) => (
-          <TouchableOpacity
-            key={label}
-            style={[
-              styles.chip,
-              selected.includes(label) && styles.chipSelected,
-            ]}
-            onPress={() => toggleItem(label, setSelected)}>
-            <IconButton
-              iconName={icon}
-              iconSize={18}
-              iconColor={selected.includes(label) ? '#fff' : '#333'}
-              style={{marginRight: 5}}
-            />
-            <Text
-              style={
-                selected.includes(label)
-                  ? styles.chipTextSelected
-                  : styles.chipText
-              }>
-              {label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    ),
-    [toggleItem],
-  );
+  // const renderIconChips = useCallback(
+  //   (
+  //     items: {label: any; icon: any}[],
+  //     selected: string | any[],
+  //     setSelected: any,
+  //   ) => (
+  //     <View style={styles.chipContainer}>
+  //       {items.map(({label, icon}) => (
+  //         <TouchableOpacity
+  //           key={label}
+  //           style={[
+  //             styles.chip,
+  //             selected.includes(label) && styles.chipSelected,
+  //           ]}
+  //           onPress={() => toggleItem(label, setSelected)}>
+  //           <IconButton
+  //             iconName={icon}
+  //             iconSize={18}
+  //             iconColor={selected.includes(label) ? '#fff' : '#333'}
+  //             style={{marginRight: 5}}
+  //           />
+  //           <Text
+  //             style={
+  //               selected.includes(label)
+  //                 ? styles.chipTextSelected
+  //                 : styles.chipText
+  //             }>
+  //             {label}
+  //           </Text>
+  //         </TouchableOpacity>
+  //       ))}
+  //     </View>
+  //   ),
+  //   [toggleItem],
+  // );
 
   const handleApply = useCallback(() => {
-    onApply({
-      amenities: selectedAmenities,
+    setFilters({
+      amenities: selectedPropertyType,
       listingType: selectedListingType,
       bedrooms: selectedBedrooms,
       bathrooms: selectedBathrooms,
-      extras: selectedExtras,
     });
     onClose();
   }, [
-    selectedAmenities,
+    setFilters,
+    selectedPropertyType,
     selectedListingType,
     selectedBedrooms,
     selectedBathrooms,
-    selectedExtras,
-    onApply,
     onClose,
   ]);
 
@@ -132,13 +144,14 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
         <View
           style={{
             marginTop: 'auto',
-            height: '85%',
+            height: '80%',
             backgroundColor: '#fff',
             borderRadius: 20,
           }}>
           <ScrollView
             style={{
               borderRadius: 20,
+              height: '80%',
             }}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
@@ -156,60 +169,37 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
                 />
               </Pressable>
             </View>
-            <Text style={styles.label}>Amenities</Text>
-            {renderChips(AMENITIES, selectedAmenities, setSelectedAmenities)}
+            <Text style={styles.label}>Type</Text>
+            {renderChips(
+              PROPERTY_TYPES,
+              selectedPropertyType,
+              setSelectedPropertyType,
+            )}
 
             <Text style={styles.label}>Listing Type</Text>
 
             {renderChips(
               LISTING_TYPES,
-              selectedListingType ? [selectedListingType] : [],
-              (val: React.SetStateAction<null>[]) =>
-                setSelectedListingType(val[0]),
+              selectedListingType,
+              setSelectedListingType,
             )}
 
             <Text style={styles.label}>Bedrooms</Text>
-            {renderChips(
-              BEDROOMS,
-              selectedBedrooms ? [selectedBedrooms] : [],
-              (val: React.SetStateAction<null>[]) =>
-                setSelectedBedrooms(val[0]),
-            )}
+            {renderChips(BEDROOMS, selectedBedrooms, setSelectedBedrooms)}
 
             <Text style={styles.label}>Bathrooms</Text>
-            {renderChips(
-              BATHROOMS,
-              selectedBathrooms ? [selectedBathrooms] : [],
-              (val: React.SetStateAction<null>[]) =>
-                setSelectedBathrooms(val[0]),
-            )}
+            {renderChips(BATHROOMS, selectedBathrooms, setSelectedBathrooms)}
 
-            <Text style={styles.label}>Extra Amenities</Text>
-            {renderIconChips(
-              EXTRA_AMENITIES,
-              selectedExtras,
-              setSelectedExtras,
-            )}
-
-            <Text style={styles.label}>Bathrooms</Text>
-            {renderChips(
-              BATHROOMS,
-              selectedBathrooms ? [selectedBathrooms] : [],
-              (val: React.SetStateAction<null>[]) =>
-                setSelectedBathrooms(val[0]),
-            )}
-
-            <Text style={styles.label}>Extra Amenities</Text>
-            {renderIconChips(
-              EXTRA_AMENITIES,
-              selectedExtras,
-              setSelectedExtras,
-            )}
-
-            <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-              <Text style={styles.applyText}>Apply</Text>
-            </TouchableOpacity>
+            <StepSlider
+              value={priceRange}
+              onChange={setPriceRange}
+              min={10000}
+            />
           </ScrollView>
+
+          <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
+            <Text style={styles.applyText}>Apply</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>

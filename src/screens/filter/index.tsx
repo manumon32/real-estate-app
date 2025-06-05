@@ -11,13 +11,18 @@ import {
   View,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import {useTheme} from '@theme/ThemeProvider';
-import Header from './Header/Header';
+// import Header from './Header/Header';
 import PropertyCard from '@components/PropertyCard';
 import useBoundStore from '@stores/index';
+import CommonSearchHeader from '@components/Header/CommonSearchHeader';
+import IconButton from '@components/Buttons/IconButton';
+import {Fonts} from '@constants/font';
+import { useNavigation } from '@react-navigation/native';
 
-function App({navigation}: any): React.JSX.Element {
+function App(): React.JSX.Element {
   const {
     listings,
     fetchListings,
@@ -30,6 +35,7 @@ function App({navigation}: any): React.JSX.Element {
 
   const isDarkMode = useColorScheme() === 'dark';
 
+  const navigation = useNavigation();
   const loadMore = () => {
     if (loading || !hasMore) return;
     fetchListings();
@@ -37,10 +43,49 @@ function App({navigation}: any): React.JSX.Element {
 
   const renderAdItem = useCallback(
     (items: any) => {
-      return <PropertyCard items={items.item} navigation={navigation} arg={'home'} />;
+      return <PropertyCard items={items.item} navigation={navigation} />;
     },
     [navigation],
   );
+  // console.warn(renderAdItem);
+
+  const FilterView = useCallback(() => {
+    return (
+      <View
+        style={{
+          backgroundColor: '#fff',
+          paddingRight: 17,
+          padding: 12,
+          flexDirection: 'row',
+        }}>
+        <View style={{flexDirection: 'row', width: '80%'}}>
+          <View style={styles.chipContainer}>
+            <TouchableOpacity style={[styles.chip]}>
+              <IconButton
+                iconName={'filter'}
+                iconSize={20}
+                iconColor={'#2F8D79'}
+                style={{marginRight: 5}}
+              />
+              <Text style={styles.chipText}>{'Filter'}</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.chipContainer}>
+            <TouchableOpacity style={[styles.chip]}>
+              <IconButton
+                iconName={'sort'}
+                iconSize={20}
+                iconColor={'#2F8D79'}
+                style={{marginRight: 5}}
+              />
+              <Text style={styles.chipText}>{'Sort'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <Text style={styles.resusltText}>{'205 Results'}</Text>
+      </View>
+    );
+  }, [navigation]);
 
   useEffect(() => {
     triggerRefresh && fetchListings();
@@ -67,7 +112,18 @@ function App({navigation}: any): React.JSX.Element {
         refreshing={true}
         keyExtractor={item => item._id}
         numColumns={2}
-        ListHeaderComponent={<Header />}
+        ListHeaderComponent={
+          <>
+            <CommonSearchHeader
+              searchValue=""
+              onChangeSearch={() => {}}
+              onBackPress={function (): void {
+                navigation.goBack();
+              }}
+            />
+            <FilterView />
+          </>
+        }
         centerContent={true}
         contentContainerStyle={{
           paddingBottom: 100,
@@ -161,6 +217,40 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: '#555',
     fontSize: 14,
+  },
+
+  chipContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 10,
+    marginBottom: 10,
+    height: 36,
+    width: 104,
+    justifyContent: 'center',
+  },
+
+  chipText: {
+    color: '#171717',
+    fontSize: 14,
+    fontFamily: Fonts.MEDIUM,
+  },
+
+  resusltText: {
+    color: '#696969',
+    fontSize: 12,
+    fontFamily: Fonts.REGULAR,
+    top: 10,
   },
 });
 

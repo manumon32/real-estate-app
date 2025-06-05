@@ -1,9 +1,11 @@
-export type ListingType = 'rent' | 'sale';
+export type ListingType = 'rent' | 'sale' | 'lease';
 
 export interface Filters {
   priceRange: [number, number];
-  listingType: ListingType;
-  amenities: string[];
+  listingType: ListingType | null;
+  amenities: string[] | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
 }
 
 export interface FiltersSlice {
@@ -16,15 +18,17 @@ const defaultFilters: Filters = {
   priceRange: [0, 1000000],
   listingType: 'rent',
   amenities: [],
+  bedrooms: 1,
+  bathrooms: 1,
 };
 
 export const createFiltersSlice = (set: any): FiltersSlice => ({
   filters: defaultFilters,
 
-  setFilters: (updates) =>
+  setFilters: updates =>
     set((state: any) => ({
-      filters: { ...state.filters, ...updates },
+      filters: {...state.filters, ...updates},
     })),
 
-  resetFilters: () => set({ filters: defaultFilters }),
+  resetFilters: () => set({filters: defaultFilters}),
 });
