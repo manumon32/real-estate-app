@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef} from 'react';
 import {
   View,
   Image,
@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Pressable,
   Modal,
-  ActivityIndicator,
 } from 'react-native';
 import {useTheme} from '@theme/ThemeProvider';
 import Carousel from 'react-native-reanimated-carousel';
@@ -19,14 +18,18 @@ type ImageCarouselModalProps = {
   visible: boolean;
   images: string[];
   onClose: () => void;
+  currentIndex?: number;
 };
 
 const ImageCarouselModal: React.FC<ImageCarouselModalProps> = ({
   visible,
   images,
   onClose,
+  currentIndex,
 }) => {
   const {theme} = useTheme();
+
+  const carouselRef = useRef<any>(null);
   const carouselConfig = useMemo(
     () => ({
       width,
@@ -42,31 +45,18 @@ const ImageCarouselModal: React.FC<ImageCarouselModalProps> = ({
     [],
   );
 
-  const [loadingMap, setLoadingMap] = useState<boolean[]>(
-    images.map(() => true),
-  );
-
-  const handleLoadStart = useCallback((index: number) => {
-    setLoadingMap((prev: any) => {
-      const next = [...prev];
-      next[index] = true;
-      return next;
-    });
-  }, []);
-
-  const handleLoadEnd = useCallback((index: number) => {
-    setLoadingMap((prev: any) => {
-      const next = [...prev];
-      next[index] = false;
-      return next;
-    });
-  }, []);
+  useEffect(() => {
+    // Scroll to second item (index 1) on mount
+    setTimeout(() => {
+      carouselRef.current?.scrollTo({index: currentIndex, animated: true});
+    }, 100); // slight delay to ensure carousel is ready
+  }, [currentIndex]);
 
   // Callback for rendering each image item
   const renderItem = useCallback(
-    ({item, index}: {item: string; index: number}) => (
+    ({item}: {item: string; index: number}) => (
       <>
-        {loadingMap[index] && (
+        {/* {loadingMap[index] && (
           <View
             style={[
               styles.loader,
@@ -74,7 +64,7 @@ const ImageCarouselModal: React.FC<ImageCarouselModalProps> = ({
                 flex: 1, // fill the screen
                 justifyContent: 'center', // vertical center
                 alignItems: 'center', // horizontal center,
-                top:200
+                top: 100,
               },
             ]}>
             <ActivityIndicator
@@ -83,17 +73,17 @@ const ImageCarouselModal: React.FC<ImageCarouselModalProps> = ({
               style={styles.loader}
             />
           </View>
-        )}
+        )} */}
         <Image
           source={{uri: item}}
           resizeMode="contain"
           style={styles.image}
-          onLoadStart={() => handleLoadStart(index)}
-          onLoadEnd={() => handleLoadEnd(index)}
+          // onLoadStart={() => handleLoadStart(index)}
+          // onLoadEnd={() => handleLoadEnd(index)}
         />
       </>
     ),
-    [handleLoadEnd, handleLoadStart, loadingMap],
+    [],
   );
 
   // Callback for closing modal
@@ -113,7 +103,12 @@ const ImageCarouselModal: React.FC<ImageCarouselModalProps> = ({
           />
         </Pressable>
 
-        <Carousel {...carouselConfig} data={images} renderItem={renderItem} />
+        <Carousel
+          ref={carouselRef}
+          {...carouselConfig}
+          data={images}
+          renderItem={renderItem}
+        />
       </View>
     </Modal>
   );
@@ -137,7 +132,7 @@ const styles = StyleSheet.create({
   image: {
     width: width,
     height: height,
-    resizeMode: 'cover',
+    resizeMode: 'contain',
   },
   closeButton: {
     position: 'absolute',

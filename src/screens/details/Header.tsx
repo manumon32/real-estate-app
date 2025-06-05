@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   Image,
   Text,
   Dimensions,
+  Linking,
 } from 'react-native';
 import {Fonts} from '@constants/font';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -18,30 +19,28 @@ import IconButton from '@components/Buttons/IconButton';
 import Carousel from 'react-native-reanimated-carousel';
 import ImageCarouselModal from './ImageCarouselModal';
 
-function Header(): React.JSX.Element {
+function Header(props: any): React.JSX.Element {
+  const {details} = props;
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const {width} = Dimensions.get('window');
   const [modalVisible, setModalVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const images = [
-    'https://picsum.photos/id/1015/800/1200',
-    'https://picsum.photos/id/1016/800/1200',
-    'https://picsum.photos/id/1018/800/1200',
-  ];
+  const images = useMemo(() => {
+    return details?.imageUrls ?? [];
+  }, [details]);
 
-  const handleImagePress = useCallback((item: any, index: any) => {
-    console.log(item, index);
+  const handleImagePress = useCallback(() => {
     setModalVisible(true);
   }, []);
 
   const renderItem = useCallback(
-    ({item, index}: {item: string; index: number}) => (
+    ({item}: {item: string; index: number}) => (
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => handleImagePress(item, index)}>
-        <Image source={{uri: item}} resizeMode="cover" style={styles.image} />
+        onPress={() => handleImagePress()}>
+        <Image source={{uri: item}} resizeMode="contain" style={styles.image} />
       </TouchableOpacity>
     ),
     [handleImagePress],
@@ -98,21 +97,25 @@ function Header(): React.JSX.Element {
           data={images}
           scrollAnimationDuration={1000}
           onSnapToItem={index => {
-            console.log(index);
             setCurrentIndex(index);
           }}
-          // renderItem={({item}) => (
-          //   <Image
-          //     source={{uri: item}}
-          //     resizeMode="cover"
-          //     style={styles.image}
-          //   />
-          // )}
           renderItem={renderItem}
         />
 
         <View style={[styles.footerContainer]}>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={async () => {
+              const url = details?.videoUrl; // replace with your video URL
+
+                console.log("Can't open URL:", url);
+              const supported = await Linking.canOpenURL(url);
+              if (supported) {
+                console.log("open URL:", url);
+                await Linking.openURL(url);
+              } else {
+                console.log("Can't open URL:", url);
+              }
+            }}>
             <View style={[styles.heartBootom]}>
               <View style={styles.iconConainer}>
                 <IconButton
@@ -161,7 +164,7 @@ function Header(): React.JSX.Element {
         </View>
         <View style={styles.paginationContainer}>
           <Text style={{fontSize: 14, fontFamily: Fonts.MEDIUM}}>
-            {currentIndex + 1 + '/' + images.length}
+            {currentIndex + 1 + '/' + images?.length}
           </Text>
         </View>
       </View>
@@ -169,6 +172,7 @@ function Header(): React.JSX.Element {
         visible={modalVisible}
         images={images}
         onClose={() => setModalVisible(false)}
+        currentIndex={currentIndex}
       />
     </>
   );

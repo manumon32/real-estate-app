@@ -119,6 +119,7 @@ export const fetchListingsFromAPI = async (
 ): Promise<Listing> => {
   try {
     const headers = await getHeaders(configArg);
+    console.log('params', params);
     const apiConfig: any = {
       method: 'get',
       url: API.LISTINGS.GET_ALL,
@@ -142,14 +143,12 @@ export const fetchDetailsAPI = async (
     const apiConfig: any = {
       method: 'get',
       url: API.LISTINGS.GET_BY_ID(params),
-      params,
+      params: {},
       headers,
     };
-    console.log(API.LISTINGS.GET_BY_ID(params))
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    console.log(error);
-    throw new Error('Failed to fetch handshake token');
+    throw new Error('Failed to fetch Details');
   }
 };

@@ -10,7 +10,7 @@ const PropertyCard = React.memo(({items, navigation}: any) => {
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
-        navigation.navigate('Details');
+        navigation.navigate('Details', {items});
       }}>
       {/* Featured badge */}
       {items.isFeatured && (
@@ -27,6 +27,7 @@ const PropertyCard = React.memo(({items, navigation}: any) => {
               : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM=',
             priority: Image.priority.normal,
           }}
+          resizeMode='contain'
           style={styles.image}
         />
         <TouchableOpacity style={styles.heart}>

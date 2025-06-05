@@ -125,16 +125,26 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
       animationType="fade"
       backdropColor={'red'}
       onRequestClose={onClose}
-      style={{}}>
+      style={{
+        borderRadius: 20,
+      }}>
       <View style={styles.container}>
         <View
           style={{
             marginTop: 'auto',
             height: '85%',
             backgroundColor: '#fff',
+            borderRadius: 20,
           }}>
           <ScrollView
-            contentContainerStyle={{backgroundColor: '#fff', padding: 20}}>
+            style={{
+              borderRadius: 20,
+            }}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              backgroundColor: '#fff',
+              padding: 20,
+            }}>
             <View style={{flexDirection: 'row'}}>
               <Text style={styles.title}>Filters & Sort</Text>
               <Pressable onPress={onClose} style={styles.closeButton}>
@@ -211,6 +221,7 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     height: '100%',
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: 20,
   },
   closeButton: {
     backgroundColor: '#fff',
