@@ -22,7 +22,6 @@ const renderTabIcon = (routeName: string) => {
 
 const BottomTabBar = ({state, navigation}: any) => {
   const {theme} = useTheme();
-  const routes = state.routes.filter((item: any) => item.name !== 'filter');
   return (
     // eslint-disable-next-line react-native/no-inline-styles
     <View
@@ -33,7 +32,7 @@ const BottomTabBar = ({state, navigation}: any) => {
         },
       ]}>
       <View style={styles.tabBar}>
-        {routes.map((route: any, index: number) => {
+        {state.routes.map((route: any, index: number) => {
           const isFocused = state.index === index;
 
           const color = isFocused ? '#2E7D32' : '#888';

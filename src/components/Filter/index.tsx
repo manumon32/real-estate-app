@@ -8,12 +8,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   Pressable,
+  Platform,
 } from 'react-native';
 import IconButton from '@components/Buttons/IconButton';
 import StepSlider from '@components/Input/StepSlider';
 import useBoundStore from '@stores/index';
+import {Fonts} from '@constants/font';
 
-const FilterModal = ({visible, onClose}: any) => {
+const FilterModal = ({visible, onClose, onApply}: any) => {
   const {setFilters, appConfigs} = useBoundStore();
   const [selectedPropertyType, setSelectedPropertyType] = useState([]);
   const [selectedListingType, setSelectedListingType] = useState(null);
@@ -120,14 +122,14 @@ const FilterModal = ({visible, onClose}: any) => {
       bedrooms: selectedBedrooms,
       bathrooms: selectedBathrooms,
     });
-    onClose();
+    onApply();
   }, [
     setFilters,
     selectedPropertyType,
     selectedListingType,
     selectedBedrooms,
     selectedBathrooms,
-    onClose,
+    onApply,
   ]);
 
   return (
@@ -169,6 +171,16 @@ const FilterModal = ({visible, onClose}: any) => {
                 />
               </Pressable>
             </View>
+
+            <View
+              style={{
+                backgroundColor: '#EBEBEB',
+                borderWidth: 1,
+                borderColor: '#EBEBEB',
+                width: '100%',
+                // top: 15,
+              }}
+            />
             <Text style={styles.label}>Type</Text>
             {renderChips(
               PROPERTY_TYPES,
@@ -218,11 +230,13 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
     justifyContent: 'flex-end',
+    bottom: 10,
   },
   title: {
     width: '90%',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
+    fontFamily: Fonts.MEDIUM,
   },
   label: {
     fontSize: 16,
@@ -259,9 +273,12 @@ const styles = StyleSheet.create({
   applyButton: {
     backgroundColor: '#2A9D8F',
     padding: 15,
+    marginRight: 15,
+    marginLeft: 15,
+    paddingRight: 15,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: 30,
+    marginBottom: Platform.OS === 'android' ? 0 : 30,
   },
   applyText: {
     color: '#fff',

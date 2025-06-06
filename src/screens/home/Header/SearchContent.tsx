@@ -41,10 +41,12 @@ function SearchContent(): React.JSX.Element {
           visible={visible}
           onClose={() => {
             setVisible(false);
+          }}
+          onApply={() => {
+            setVisible(false);
             // @ts-ignore
             navigation.navigate('filter');
           }}
-          onApply={() => setVisible(false)}
         />
       </View>
     </>

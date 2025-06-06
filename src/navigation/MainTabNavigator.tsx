@@ -1,7 +1,6 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import HomeScreen from '@screens/home/HomeScreen';
-import FilterScreen from '@screens/filter/index';
 import BottomTabBar from '@components/BottomTabBar';
 import Chat from '@screens/chat';
 import LoginScreen from '@screens/login';
@@ -13,7 +12,7 @@ export type MainTabParamList = {
   AddPost: undefined;
   Profile: undefined;
   MyAds: undefined;
-  filter: undefined;
+  filterNew: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -42,7 +41,6 @@ const MainTabNavigator = () => {
         }}
       />
       <Tab.Screen name="Profile" component={LoginScreen} />
-      <Tab.Screen name="filter" component={FilterScreen} />
     </Tab.Navigator>
   );
 };
