@@ -32,58 +32,60 @@ const BottomTabBar = ({state, navigation}: any) => {
         },
       ]}>
       <View style={styles.tabBar}>
-        {state.routes.map((route: any, index: number) => {
-          const isFocused = state.index === index;
+        {state.routes
+          .filter((item: {name: string}) => item.name !== 'filter')
+          .map((route: any, index: number) => {
+            const isFocused = state.index === index;
 
-          const color = isFocused ? '#2E7D32' : '#888';
-          const onPress = () => {
-            if (route.name === 'AddPost') {
-              navigation.navigate('PostAd');
-            } else {
-              const event = navigation.emit({
-                type: 'tabPress',
-                target: route.key,
-                canPreventDefault: true,
-              });
+            const color = isFocused ? '#2E7D32' : '#888';
+            const onPress = () => {
+              if (route.name === 'AddPost') {
+                navigation.navigate('PostAd');
+              } else {
+                const event = navigation.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                });
 
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name);
+                if (!isFocused && !event.defaultPrevented) {
+                  navigation.navigate(route.name);
+                }
               }
-            }
-          };
+            };
 
-          return (
-            <React.Fragment key={route.key}>
-              <TouchableOpacity onPress={onPress} style={styles.button}>
-                {route.name !== 'AddPost' ? (
-                  <IconButton
-                    iconSize={22}
-                    iconColor={color}
-                    iconName={renderTabIcon(route.name)}
-                  />
-                ) : (
-                  <View style={styles.addButton}>
-                    <AdPostIcon />
-                  </View>
-                )}
-                <Text
-                  style={[
-                    isFocused ? styles.textFocusedStyle : styles.textStyle,
-                    // eslint-disable-next-line react-native/no-inline-styles
-                    {
-                      bottom: route.name === 'AddPost' ? 25 : 0,
-                    },
-                  ]}>
-                  {route.name === 'AddPost'
-                    ? 'Post Ad'
-                    : route.name === 'MyAds'
-                    ? 'My Ads'
-                    : route.name}
-                </Text>
-              </TouchableOpacity>
-            </React.Fragment>
-          );
-        })}
+            return (
+              <React.Fragment key={route.key}>
+                <TouchableOpacity onPress={onPress} style={styles.button}>
+                  {route.name !== 'AddPost' ? (
+                    <IconButton
+                      iconSize={22}
+                      iconColor={color}
+                      iconName={renderTabIcon(route.name)}
+                    />
+                  ) : (
+                    <View style={styles.addButton}>
+                      <AdPostIcon />
+                    </View>
+                  )}
+                  <Text
+                    style={[
+                      isFocused ? styles.textFocusedStyle : styles.textStyle,
+                      // eslint-disable-next-line react-native/no-inline-styles
+                      {
+                        bottom: route.name === 'AddPost' ? 25 : 0,
+                      },
+                    ]}>
+                    {route.name === 'AddPost'
+                      ? 'Post Ad'
+                      : route.name === 'MyAds'
+                      ? 'My Ads'
+                      : route.name}
+                  </Text>
+                </TouchableOpacity>
+              </React.Fragment>
+            );
+          })}
       </View>
     </View>
   );
@@ -126,6 +128,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
+    bottom:10
   },
 });
 

@@ -6,10 +6,12 @@ import {Fonts} from '@constants/font';
 import FilterModal from '@components/Filter';
 
 import {useNavigation} from '@react-navigation/native';
+import useBoundStore from '@stores/index';
 
 function SearchContent(): React.JSX.Element {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigation();
+  const {clearFilterList} = useBoundStore();
   return (
     <>
       <View style={styles.container}>
@@ -44,6 +46,7 @@ function SearchContent(): React.JSX.Element {
           }}
           onApply={() => {
             setVisible(false);
+            clearFilterList();
             // @ts-ignore
             navigation.navigate('filter');
           }}

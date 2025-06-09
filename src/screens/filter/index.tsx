@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   StatusBar,
   useColorScheme,
@@ -20,25 +20,110 @@ import useBoundStore from '@stores/index';
 import CommonSearchHeader from '@components/Header/CommonSearchHeader';
 import IconButton from '@components/Buttons/IconButton';
 import {Fonts} from '@constants/font';
-import { useNavigation } from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import SlideInView from '@components/AnimatedView';
+import FilterModal from '@components/Filter';
+
+const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
+  const {filters, filter_loading, clearFilterList} = useBoundStore();
+  const handleSort = useCallback(
+    (orderBy: string, orderByorderByDir: 'asc' | 'desc') => {
+      if (!filter_loading) {
+        clearFilterList();
+        setFilters({orderBy, orderByorderByDir});
+        fetchFilterListings();
+      }
+    },
+    [setFilters, fetchFilterListings, filters, filter_loading],
+  );
+
+  return (
+    <View
+      style={{
+        backgroundColor: '#fff',
+        paddingRight: 8,
+        padding: 2,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+      }}>
+      <TouchableOpacity
+        style={[
+          styles.chipSort,
+          filters.orderBy == 'createdAt' && styles.chipSelected,
+        ]}
+        onPress={() => handleSort('createdAt', 'asc')}>
+        <Text
+          style={[
+            styles.chipText,
+            filters.orderBy == 'createdAt' && styles.chipTextSelected,
+          ]}>
+          {'Date published'}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.chipSort,
+          filters.orderBy === 'price' &&
+            filters.orderByorderByDir === 'asc' &&
+            styles.chipSelected,
+        ]}
+        onPress={() => handleSort('price', 'asc')}>
+        <Text
+          style={[
+            styles.chipText,
+            filters.orderBy == 'price' &&
+              filters.orderByorderByDir == 'asc' &&
+              styles.chipTextSelected,
+          ]}>
+          {'Price low to high'}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.chipSort,
+          filters.orderBy === 'price' &&
+            filters.orderByorderByDir === 'desc' &&
+            styles.chipSelected,
+        ]}
+        //  styles.chipSelected
+        onPress={() => handleSort('price', 'desc')}>
+        <Text
+          style={[
+            styles.chipText,
+            filters.orderBy == 'price' &&
+              filters.orderByorderByDir == 'desc' &&
+              styles.chipTextSelected,
+          ]}>
+          {'high to low'}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 function App(): React.JSX.Element {
   const {
-    listings,
-    fetchListings,
-    hasMore,
-    loading,
-    triggerRefresh,
-    setTriggerRefresh,
+    filter_listings,
+    fetchFilterListings,
+    filter_hasMore,
+    filter_loading,
+    filter_triggerRefresh,
+    clearFilterList,
+    filterSetTriggerRefresh,
+    setFilters,
+    resetFilters,
+    filters,
   } = useBoundStore();
   const {theme} = useTheme();
+  const [visible, setVisible] = useState(false);
+  const [sort, setSort] = useState(false);
 
   const isDarkMode = useColorScheme() === 'dark';
 
   const navigation = useNavigation();
   const loadMore = () => {
-    if (loading || !hasMore) return;
-    fetchListings();
+    if (filter_loading || !filter_hasMore) return;
+    fetchFilterListings();
   };
 
   const renderAdItem = useCallback(
@@ -51,114 +136,171 @@ function App(): React.JSX.Element {
 
   const FilterView = useCallback(() => {
     return (
-      <View
-        style={{
-          backgroundColor: '#fff',
-          paddingRight: 17,
-          padding: 12,
-          flexDirection: 'row',
-        }}>
-        <View style={{flexDirection: 'row', width: '80%'}}>
-          <View style={styles.chipContainer}>
-            <TouchableOpacity style={[styles.chip]}>
-              <IconButton
-                iconName={'filter'}
-                iconSize={20}
-                iconColor={'#2F8D79'}
-                style={{marginRight: 5}}
-              />
-              <Text style={styles.chipText}>{'Filter'}</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.chipContainer}>
-            <TouchableOpacity style={[styles.chip]}>
-              <IconButton
-                iconName={'sort'}
-                iconSize={20}
-                iconColor={'#2F8D79'}
-                style={{marginRight: 5}}
-              />
-              <Text style={styles.chipText}>{'Sort'}</Text>
-            </TouchableOpacity>
+      <>
+        <View
+          style={{
+            backgroundColor: '#fff',
+            paddingRight: 17,
+            padding: 12,
+            paddingBottom: 2,
+            flexDirection: 'row',
+          }}>
+          <View style={{flexDirection: 'row', width: '80%'}}>
+            <View style={styles.chipContainer}>
+              <TouchableOpacity
+                onPress={() => {
+                  setVisible(true);
+                }}
+                style={[styles.chip]}>
+                <IconButton
+                  iconName={'filter'}
+                  iconSize={20}
+                  iconColor={'#2F8D79'}
+                  style={{marginRight: 5}}
+                />
+                <Text style={styles.chipText}>{'Filter'}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.chipContainer]}>
+              <TouchableOpacity
+                onPress={() => setSort(!sort)}
+                style={[styles.chip, sort && styles.chipSelected]}>
+                <IconButton
+                  iconName={'sort'}
+                  iconSize={20}
+                  iconColor={sort ? '#fff' : '#2F8D79'}
+                  style={{marginRight: 5}}
+                />
+                <Text style={[styles.chipText, sort && {color: '#fff'}]}>
+                  {'Sort'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.chipContainer]}>
+              <TouchableOpacity
+                onPress={() => {
+                  setSort(false);
+                  clearFilterList();
+                  resetFilters();
+                  fetchFilterListings();
+                }}
+                style={[styles.chip, {width: 120}]}>
+                <IconButton
+                  iconName={'delete'}
+                  iconSize={20}
+                  iconColor={'#2F8D79'}
+                  style={{marginRight: 5}}
+                />
+                <Text style={[styles.chipText]}>{'Clear Filters'}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-        <Text style={styles.resusltText}>{'205 Results'}</Text>
-      </View>
+        {sort && (
+          <SortChips
+            filters={filters}
+            setFilters={setFilters}
+            fetchFilterListings={fetchFilterListings}
+          />
+        )}
+
+        <Text style={styles.resusltText}>
+          {filter_listings.length + ' Results'}
+        </Text>
+      </>
     );
-  }, [navigation]);
+  }, [navigation, sort, filter_listings]);
 
   useEffect(() => {
-    triggerRefresh && fetchListings();
-  }, [triggerRefresh]);
+    filter_triggerRefresh && fetchFilterListings();
+  }, [filter_triggerRefresh]);
 
   const fetchData = async () => {
-    fetchListings();
+    fetchFilterListings();
   };
 
-  React.useEffect(() => {
-    !loading && fetchData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      !filter_loading && fetchData();
+
+      return () => {};
+    }, []),
+  );
 
   return (
-    <SafeAreaView>
-      <StatusBar
-        barStyle={isDarkMode ? 'dark-content' : 'light-content'}
-        backgroundColor={theme.colors.backgroundPalette[0]}
-      />
-      <FlatList
-        data={listings}
-        renderItem={renderAdItem}
-        keyboardShouldPersistTaps="handled"
-        refreshing={true}
-        keyExtractor={item => item._id}
-        numColumns={2}
-        ListHeaderComponent={
-          <>
-            <CommonSearchHeader
-              searchValue=""
-              onChangeSearch={() => {}}
-              onBackPress={function (): void {
-                navigation.goBack();
+    <SlideInView direction={'right'}>
+      <SafeAreaView>
+        <StatusBar
+          barStyle={isDarkMode ? 'dark-content' : 'light-content'}
+          backgroundColor={theme.colors.backgroundPalette[0]}
+        />
+        <FlatList
+          data={filter_listings}
+          renderItem={renderAdItem}
+          keyboardShouldPersistTaps="handled"
+          refreshing={true}
+          keyExtractor={item => item._id}
+          numColumns={2}
+          ListHeaderComponent={
+            <>
+              <CommonSearchHeader
+                searchValue=""
+                onChangeSearch={() => {}}
+                onBackPress={function (): void {
+                  navigation.goBack();
+                }}
+              />
+              <FilterView />
+            </>
+          }
+          centerContent={true}
+          contentContainerStyle={{
+            paddingBottom: 100,
+            backgroundColor: theme.colors.backgroundHome,
+          }}
+          showsVerticalScrollIndicator={false}
+          onEndReachedThreshold={0.5}
+          onEndReached={loadMore}
+          refreshControl={
+            <RefreshControl
+              refreshing={false}
+              onRefresh={() => {
+                filterSetTriggerRefresh();
               }}
             />
-            <FilterView />
-          </>
-        }
-        centerContent={true}
-        contentContainerStyle={{
-          paddingBottom: 100,
-          backgroundColor: theme.colors.backgroundHome,
-        }}
-        showsVerticalScrollIndicator={false}
-        onEndReachedThreshold={0.5}
-        onEndReached={loadMore}
-        refreshControl={
-          <RefreshControl
-            refreshing={false}
-            onRefresh={() => {
-              setTriggerRefresh();
-            }}
-          />
-        }
-        ListFooterComponent={
-          hasMore || loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator
-                size="large"
-                color={theme.colors.activityIndicatorColor}
-              />
-              {loading && listings?.length > 0 && (
-                <Text style={styles.loadingText}>
-                  Loading more properties...
-                </Text>
-              )}
-            </View>
-          ) : (
-            <Text style={styles.endText}>No more products</Text>
-          )
-        }
-      />
-    </SafeAreaView>
+          }
+          ListFooterComponent={
+            filter_hasMore || filter_loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator
+                  size="large"
+                  color={theme.colors.activityIndicatorColor}
+                />
+                {filter_loading && filter_listings?.length > 0 && (
+                  <Text style={styles.loadingText}>
+                    Loading more properties...
+                  </Text>
+                )}
+              </View>
+            ) : (
+              <Text style={styles.endText}>No more products</Text>
+            )
+          }
+        />
+
+        <FilterModal
+          visible={visible}
+          onClose={() => {
+            setVisible(false);
+          }}
+          onApply={() => {
+            setVisible(false);
+            clearFilterList();
+            !filter_loading && fetchFilterListings();
+          }}
+        />
+      </SafeAreaView>
+    </SlideInView>
   );
 }
 const styles = StyleSheet.create({
@@ -221,8 +363,8 @@ const styles = StyleSheet.create({
 
   chipContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+    // flexWrap: 'wrap',
+    // gap: 10,
   },
   chip: {
     flexDirection: 'row',
@@ -236,8 +378,19 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginBottom: 10,
     height: 36,
-    width: 104,
+    width: 110,
     justifyContent: 'center',
+  },
+
+  chipSort: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    margin: 5,
   },
 
   chipText: {
@@ -249,8 +402,18 @@ const styles = StyleSheet.create({
   resusltText: {
     color: '#696969',
     fontSize: 12,
-    fontFamily: Fonts.REGULAR,
-    top: 10,
+    fontFamily: Fonts.BOLD_ITALIC,
+    margin: 5,
+    marginBottom: -5,
+  },
+
+  chipTextSelected: {
+    color: '#fff',
+  },
+
+  chipSelected: {
+    backgroundColor: '#2A9D8F',
+    borderColor: '#2A9D8F',
   },
 });
 

@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   Modal,
   ScrollView,
@@ -14,70 +14,121 @@ import IconButton from '@components/Buttons/IconButton';
 import StepSlider from '@components/Input/StepSlider';
 import useBoundStore from '@stores/index';
 import {Fonts} from '@constants/font';
+import CommonAmenityToggle from '@components/Input/amenityToggle';
 
 const FilterModal = ({visible, onClose, onApply}: any) => {
-  const {setFilters, appConfigs} = useBoundStore();
-  const [selectedPropertyType, setSelectedPropertyType] = useState([]);
-  const [selectedListingType, setSelectedListingType] = useState(null);
-  const [selectedBedrooms, setSelectedBedrooms] = useState(null);
-  const [selectedBathrooms, setSelectedBathrooms] = useState(null);
-  const [priceRange, setPriceRange] = useState<number[]>([1000000, 5000000]);
+  //
+  const {appConfigs, setFilters, resetFilters, filters} = useBoundStore();
+  // const [price, setprice] = useState<number[]>([1000000, 5000000]);
+  const [fields, setFields] = useState<{}>({});
 
   const PROPERTY_TYPES = appConfigs?.propertyTypes || [];
   const LISTING_TYPES = appConfigs?.listingTypes || [];
+  const FURNISHING_STATS = appConfigs?.furnishingStatuses || [];
+  const AVAILABILITY_STATS = appConfigs?.availabilityStatuses || [];
   const BEDROOMS = [
-    {name: '1BHK', _id: '1BHK'},
-    {name: '2BHK', _id: '2BHK'},
-    {name: '3BHK', _id: '3BHK'},
+    {name: '1 BHK', _id: '1', filterName: 'numberOfBedrooms'},
+    {name: '2 BHK', _id: '2', filterName: 'numberOfBedrooms'},
+    {name: '3 BHK', _id: '3', filterName: 'numberOfBedrooms'},
+    {name: '4 BHK', _id: '4', filterName: 'numberOfBedrooms'},
+    {name: '4+ BHK', _id: '4%2B', filterName: 'numberOfBedrooms'},
   ];
   const BATHROOMS = [
-    {name: '1', _id: '1'},
-    {name: '2', _id: '1'},
-    {name: '3', _id: '1'},
-    {name: '4+', _id: '4+'},
+    {name: '1', _id: '1', filterName: 'numberOfBathrooms'},
+    {name: '2', _id: '2', filterName: 'numberOfBathrooms'},
+    {name: '3', _id: '3', filterName: 'numberOfBathrooms'},
+    {name: '4', _id: '4', filterName: 'numberOfBathrooms'},
+    {name: '4+', _id: '4%2B', filterName: 'numberOfBathrooms'},
   ];
 
-  const toggleItem = useCallback((item: any, setSelectedList: any) => {
-    setSelectedList((prev: any) => {
-      const isMulti = Array.isArray(prev);
-      console.log(prev);
-      return isMulti
-        ? prev?.includes(item)
-          ? prev.filter((i: any) => i !== item)
-          : [...prev, item]
-        : item;
+  const getMergedFields = useCallback((id: any, argFields: string[]) => {
+    setFields(prev => {
+      const newMap: any = {...prev};
+      if (newMap[id]) {
+        delete newMap[id];
+      } else {
+        newMap[id] = argFields;
+      }
+      return newMap;
     });
   }, []);
 
-  useEffect(() => {
-    console.log(appConfigs);
-  }, [appConfigs]);
+  const toggleItem = useCallback(
+    (name: string, item: any, setSelectedList?: any) => {
+      if (name) {
+        let newFilter = filters?.[name] ? filters?.[name] : [];
+        setFilters({
+          [name]: newFilter?.includes(item)
+            ? newFilter.filter((i: any) => i !== item)
+            : [...newFilter, item],
+        });
+      } else {
+        setSelectedList((prev: any) => {
+          const isMulti = Array.isArray(prev);
+          return isMulti
+            ? prev?.includes(item)
+              ? prev.filter((i: any) => i !== item)
+              : [...prev, item]
+            : item;
+        });
+      }
+    },
+    [filters, setFilters],
+  );
+
+  const updateFilter = useCallback(
+    (name: string, item: any) => {
+      if (name) {
+        setFilters({
+          [name]: item,
+        });
+      }
+    },
+    [setFilters],
+  );
+  const updatePrice = (items: any) => {
+    console.log(items);
+    updateFilter('price', items);
+  };
 
   const renderChips = useCallback(
-    (items: any[], selected: any, setSelected: any) => (
+    (items: any[], selected?: any, setSelected?: any) => (
       <View style={styles.chipContainer}>
-        {items.map((item: any, index: any) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.chip,
-              selected?.includes(item._id) && styles.chipSelected,
-            ]}
-            onPress={() => toggleItem(item._id, setSelected)}>
-            <Text
-              style={
-                selected?.includes(item._id)
-                  ? styles.chipTextSelected
-                  : styles.chipText
-              }>
-              {item.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {items.map((item: any, index: any) => {
+          const newselected = item.filterName
+            ? filters?.[item.filterName]
+            : selected;
+          return (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.chip,
+                newselected?.includes(item._id) && styles.chipSelected,
+              ]}
+              onPress={() => {
+                item.fields && getMergedFields(item._id, item.fields);
+                toggleItem(item.filterName, item._id, setSelected);
+              }}>
+              <Text
+                style={
+                  newselected?.includes(item._id)
+                    ? styles.chipTextSelected
+                    : styles.chipText
+                }>
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     ),
-    [toggleItem],
+    [filters, getMergedFields, toggleItem],
   );
+
+  const isStringInEitherArray = (value: string): boolean => {
+    const mergedUnique = [...new Set(Object.values(fields).flat())];
+    return mergedUnique.length <= 0 ? true : mergedUnique?.includes(value);
+  };
 
   // const renderIconChips = useCallback(
   //   (
@@ -116,21 +167,8 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   // );
 
   const handleApply = useCallback(() => {
-    setFilters({
-      amenities: selectedPropertyType,
-      listingType: selectedListingType,
-      bedrooms: selectedBedrooms,
-      bathrooms: selectedBathrooms,
-    });
     onApply();
-  }, [
-    setFilters,
-    selectedPropertyType,
-    selectedListingType,
-    selectedBedrooms,
-    selectedBathrooms,
-    onApply,
-  ]);
+  }, [onApply]);
 
   return (
     <Modal
@@ -162,7 +200,12 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             }}>
             <View style={{flexDirection: 'row'}}>
               <Text style={styles.title}>Filters & Sort</Text>
-              <Pressable onPress={onClose} style={styles.closeButton}>
+              <Pressable
+                onPress={() => {
+                  resetFilters();
+                  onClose();
+                }}
+                style={styles.closeButton}>
                 <IconButton
                   iconSize={24}
                   //red , heart
@@ -182,31 +225,47 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
               }}
             />
             <Text style={styles.label}>Type</Text>
-            {renderChips(
-              PROPERTY_TYPES,
-              selectedPropertyType,
-              setSelectedPropertyType,
-            )}
+            {renderChips(PROPERTY_TYPES)}
 
             <Text style={styles.label}>Listing Type</Text>
 
-            {renderChips(
-              LISTING_TYPES,
-              selectedListingType,
-              setSelectedListingType,
-            )}
+            {renderChips(LISTING_TYPES)}
 
             <Text style={styles.label}>Bedrooms</Text>
-            {renderChips(BEDROOMS, selectedBedrooms, setSelectedBedrooms)}
+            {renderChips(BEDROOMS)}
 
             <Text style={styles.label}>Bathrooms</Text>
-            {renderChips(BATHROOMS, selectedBathrooms, setSelectedBathrooms)}
+            {renderChips(BATHROOMS)}
+            <View style={{marginTop: 20, marginBottom: -20}}>
+              <StepSlider
+                value={filters?.price ? filters?.price : [10000, 2000000]}
+                onChange={updatePrice}
+                min={10000}
+              />
+            </View>
+            {isStringInEitherArray('furnishedStatus') && (
+              <>
+                <Text style={styles.label}>Furnishing Status</Text>
 
-            <StepSlider
-              value={priceRange}
-              onChange={setPriceRange}
-              min={10000}
-            />
+                {renderChips(FURNISHING_STATS)}
+              </>
+            )}
+
+            <Text style={styles.label}>Availability Status</Text>
+
+            {renderChips(AVAILABILITY_STATS)}
+            {isStringInEitherArray('reraApproved') && (
+              <>
+                <Text style={styles.label}>RERA Approved</Text>
+                <CommonAmenityToggle
+                  label="RERA Approved"
+                  selected={filters?.reraApproved}
+                  onToggle={() =>
+                    updateFilter('reraApproved', !filters?.reraApproved)
+                  }
+                />
+              </>
+            )}
           </ScrollView>
 
           <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
@@ -247,7 +306,7 @@ const styles = StyleSheet.create({
   chipContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
   chip: {
     flexDirection: 'row',
@@ -257,8 +316,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 6,
     paddingHorizontal: 12,
-    marginRight: 10,
-    marginBottom: 10,
+    // marginRight: 5,
+    // marginBottom: 5,
   },
   chipSelected: {
     backgroundColor: '#2A9D8F',

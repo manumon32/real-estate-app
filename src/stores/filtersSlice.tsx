@@ -1,25 +1,21 @@
 export type ListingType = 'rent' | 'sale' | 'lease';
 
 export interface Filters {
-  priceRange: [number, number];
-  listingType: ListingType | null;
-  amenities: string[] | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
+  propertyType?:{},
+  priceRange?: [number, number];
+  listingType?: [ListingType];
+  amenities?: [];
+  bedrooms?: [number] ;
+  bathrooms?: [number] ;
 }
 
 export interface FiltersSlice {
-  filters: Filters;
-  setFilters: (updates: Partial<Filters>) => void;
+  filters: any;
+  setFilters: (updates: Partial<any>) => void;
   resetFilters: () => void;
 }
 
-const defaultFilters: Filters = {
-  priceRange: [0, 1000000],
-  listingType: 'rent',
-  amenities: [],
-  bedrooms: 1,
-  bathrooms: 1,
+const defaultFilters: any = {
 };
 
 export const createFiltersSlice = (set: any): FiltersSlice => ({
