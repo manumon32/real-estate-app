@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {StyleSheet, View, Text} from 'react-native';
 import SelectInput, {SelectOption} from '@components/Input/selectInput';
 import {Fonts} from '@constants/font';
-import SlideInView from './animatedView';
+import SlideInView from '../../components/AnimatedView';
 import CommonStepperInput from '@components/Input/stepperInput';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
 

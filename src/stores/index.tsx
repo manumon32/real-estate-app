@@ -7,6 +7,11 @@ import {createListingsSlice, ListingsSlice} from './listingsSlice';
 import {createFavoritesSlice, FavoritesSlice} from './favoritesSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createDetailSlice, DetailSlice} from './detailSlice';
+import {createAppConfigStore, AppConfigState} from './useAppConfigStore';
+import {
+  createFilterListingsSlice,
+  FilterListingsSlice,
+} from './filterListingsSlice';
 // import {zustandStorage} from './storage';
 
 type StoreState = HandShakeSlice &
@@ -14,6 +19,8 @@ type StoreState = HandShakeSlice &
   FiltersSlice &
   ListingsSlice &
   DetailSlice &
+  AppConfigState &
+  FilterListingsSlice &
   FavoritesSlice;
 
 // get
@@ -23,6 +30,8 @@ const useBoundStore = create<StoreState>()(
       (set, get) => ({
         ...createAuthSlice(set),
         ...createHandShakeSlice(set),
+        ...createAppConfigStore(set, get),
+        ...createFilterListingsSlice(set, get),
         ...createFiltersSlice(set),
         ...createListingsSlice(set, get),
         ...createDetailSlice(set, get),

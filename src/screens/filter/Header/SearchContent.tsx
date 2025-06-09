@@ -3,15 +3,10 @@ import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import SearchBar from '@components/SearchBar';
 import IconButton from '@components/Buttons/IconButton';
 import {Fonts} from '@constants/font';
-import FilterModal from '@components/Filter';
-
-import {useNavigation} from '@react-navigation/native';
-import useBoundStore from '@stores/index';
+import FilterModal from '@components/Filter'
 
 function SearchContent(): React.JSX.Element {
   const [visible, setVisible] = useState(false);
-  const navigation = useNavigation();
-  const {clearFilterList} = useBoundStore();
   return (
     <>
       <View style={styles.container}>
@@ -41,15 +36,8 @@ function SearchContent(): React.JSX.Element {
         </TouchableOpacity>
         <FilterModal
           visible={visible}
-          onClose={() => {
-            setVisible(false);
-          }}
-          onApply={() => {
-            setVisible(false);
-            clearFilterList();
-            // @ts-ignore
-            navigation.navigate('filter');
-          }}
+          onClose={() => setVisible(false)}
+          onApply={() => setVisible(false)}
         />
       </View>
     </>

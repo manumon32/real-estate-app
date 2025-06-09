@@ -111,7 +111,28 @@ export const getHandshakeTokenApi = async (
   }
 };
 
-// 🔹 Hand Shake token
+// 🔹 GET App Config Data's
+
+export const getAppConfigData = async (
+  configArg: object,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.LISTINGS.GET_CONFIGS,
+      params: {},
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to fetch handshake token');
+  }
+};
+
+// 🔹 Fetch Ads
 
 export const fetchListingsFromAPI = async (
   params: object,
@@ -133,6 +154,7 @@ export const fetchListingsFromAPI = async (
     throw new Error('Failed to fetch handshake token');
   }
 };
+getAppConfigData;
 
 export const fetchDetailsAPI = async (
   params: string,

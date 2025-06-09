@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Platform} from 'react-native';
 import Image from 'react-native-fast-image';
@@ -5,10 +6,16 @@ import IconButton from '@components/Buttons/IconButton';
 import FeaturedIcon from '@assets/svg/featured.svg';
 import {Fonts} from '@constants/font';
 
-const PropertyCard = React.memo(({items, navigation}: any) => {
+const PropertyCard = React.memo(({items, navigation, arg}: any) => {
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[
+        styles.card,
+        {
+          bottom: arg ? 30 : 0,
+          top: arg ? -30 : 10,
+        },
+      ]}
       onPress={() => {
         navigation.navigate('Details', {items});
       }}>
@@ -27,7 +34,7 @@ const PropertyCard = React.memo(({items, navigation}: any) => {
               : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM=',
             priority: Image.priority.normal,
           }}
-          resizeMode='contain'
+          resizeMode="contain"
           style={styles.image}
         />
         <TouchableOpacity style={styles.heart}>
@@ -88,7 +95,6 @@ const PropertyCard = React.memo(({items, navigation}: any) => {
 
 const styles = StyleSheet.create({
   card: {
-    bottom: 30,
     left: Platform.OS === 'android' ? 2 : 0,
     width: '47%',
     // height: 234,

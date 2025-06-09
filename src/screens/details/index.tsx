@@ -79,6 +79,20 @@ const PropertyDetails = React.memo(() => {
     );
   }, []);
 
+  const isValidLatLng = (lat: any, lng: any): boolean => {
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+
+    return (
+      !isNaN(latNum) &&
+      !isNaN(lngNum) &&
+      latNum >= -90 &&
+      latNum <= 90 &&
+      lngNum >= -180 &&
+      lngNum <= 180
+    );
+  };
+
   const renderNearby = useCallback(
     (item: any, index: number) => {
       return (
@@ -113,8 +127,8 @@ const PropertyDetails = React.memo(() => {
   );
 
   useEffect(() => {
-    items?._id && fetchDetails(items._id);
-  }, [fetchDetails, items._id]);
+    items?._id && fetchDetails(items?._id);
+  }, [fetchDetails, items]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -384,24 +398,28 @@ const PropertyDetails = React.memo(() => {
         )}
 
         <Text style={styles.section}>Location</Text>
-        {Platform.OS === 'android' && (
-          <MapView
-            provider={PROVIDER_GOOGLE}
-            style={styles.map}
-            region={{
-              latitude: Number(property?.location?.coordinates[0]),
-              longitude: Number(property?.location?.coordinates[1]),
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}>
-            <Marker
-              coordinate={{
+        {Platform.OS === 'android' &&
+          isValidLatLng(
+            property?.location?.coordinates[0],
+            property?.location?.coordinates[1],
+          ) && (
+            <MapView
+              provider={PROVIDER_GOOGLE}
+              style={styles.map}
+              region={{
                 latitude: Number(property?.location?.coordinates[0]),
                 longitude: Number(property?.location?.coordinates[1]),
-              }}
-            />
-          </MapView>
-        )}
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}>
+              <Marker
+                coordinate={{
+                  latitude: Number(property?.location?.coordinates[0]),
+                  longitude: Number(property?.location?.coordinates[1]),
+                }}
+              />
+            </MapView>
+          )}
         {Platform.OS !== 'android' && (
           <MapView
             style={styles.map}

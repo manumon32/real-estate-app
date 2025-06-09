@@ -37,7 +37,7 @@ function App({navigation}: any): React.JSX.Element {
 
   const renderAdItem = useCallback(
     (items: any) => {
-      return <PropertyCard items={items.item} navigation={navigation} />;
+      return <PropertyCard items={items.item} navigation={navigation} arg={'home'} />;
     },
     [navigation],
   );

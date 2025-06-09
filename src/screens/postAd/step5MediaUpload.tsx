@@ -1,7 +1,7 @@
 import React from 'react';
 import {StyleSheet, View, Text} from 'react-native';
 import {Fonts} from '@constants/font';
-import SlideInView from './animatedView';
+import SlideInView from '../../components/AnimatedView';
 import TextInput from '@components/Input/textInput';
 import CommonImageUploader from '@components/Input/ImageUploader';
 

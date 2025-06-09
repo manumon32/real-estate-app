@@ -4,7 +4,7 @@ import TextInput from '@components/Input/textInput';
 import SelectInput, {SelectOption} from '@components/Input/selectInput';
 import CommonDistanceInput from '@components/Input/distanceInput';
 import {Fonts} from '@constants/font';
-import SlideInView from './animatedView';
+import SlideInView from '../../components/AnimatedView';
 
 const Step1BasicInfo = ({currentStep}: any) => {
   const propertyOptions: SelectOption[] = [

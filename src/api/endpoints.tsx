@@ -12,6 +12,7 @@ export const API = {
     CREATE: '/property',
     UPDATE: (id: string | number) => `/property/${id}`,
     DELETE: (id: string | number) => `/property/${id}`,
+    GET_CONFIGS: '/all-filters',
   },
   USER: {
     PROFILE: '/user/profile',

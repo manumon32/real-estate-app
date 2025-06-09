@@ -3,7 +3,7 @@ import {StyleSheet, View, Text} from 'react-native';
 import TextInput from '@components/Input/textInput';
 import SelectInput, {SelectOption} from '@components/Input/selectInput';
 import {Fonts} from '@constants/font';
-import SlideInView from './animatedView';
+import SlideInView from '../../components/AnimatedView';
 import CommonDistanceInput from '@components/Input/distanceInput';
 
 const Step3LocationDetails = ({currentStep}: any) => {

@@ -2,19 +2,14 @@
 /* eslint-disable react-native/no-inline-styles */
 // AppInitializer.tsx
 import React, {useEffect, useRef, useState} from 'react';
-import {
-  View,
-  Animated,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import {View, Animated, StyleSheet, Text, TouchableOpacity} from 'react-native';
 import useBoundStore from '@stores/index';
 import DeviceInfo from 'react-native-device-info';
 import {Fonts} from '@constants/font';
 
 function Index({navigation}: any): React.JSX.Element {
-  const {token, gethandShakeToken, handShakeError, clientId} = useBoundStore();
+  const {token, gethandShakeToken, handShakeError, clientId, getConfigData} =
+    useBoundStore();
   const [error, setError] = useState(true);
 
   const getDeviceId = () => {
@@ -40,6 +35,10 @@ function Index({navigation}: any): React.JSX.Element {
     gethandShakeToken(data);
   };
 
+  const getAppConfigData = async () => {
+    getConfigData();
+  };
+
   useEffect(() => {
     const initialize = async () => {
       setError(false);
@@ -47,6 +46,7 @@ function Index({navigation}: any): React.JSX.Element {
         if (!token || !clientId) {
           fetchData();
         } else {
+          getAppConfigData();
           navigation.navigate('Main');
         }
       } catch (err) {
@@ -83,16 +83,17 @@ function Index({navigation}: any): React.JSX.Element {
         source={require('@assets/images/logo.png')}
         style={[styles.image, {transform: [{scale: scaleAnim}]}]}
       />
-      {error || handShakeError && (
-        <View style={{alignItems: 'center', marginTop: 100}}>
-          <Text style={{marginBottom: 10, fontFamily: Fonts.MEDIUM}}>
-            🔌 APP Initialization failed. Please try again.
-          </Text>
-          <TouchableOpacity style={styles.loginBtn} onPress={fetchData}>
-            <Text style={styles.loginText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {error ||
+        (handShakeError && (
+          <View style={{alignItems: 'center', marginTop: 100}}>
+            <Text style={{marginBottom: 10, fontFamily: Fonts.MEDIUM}}>
+              🔌 APP Initialization failed. Please try again.
+            </Text>
+            <TouchableOpacity style={styles.loginBtn} onPress={fetchData}>
+              <Text style={styles.loginText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
     </View>
   );
 }
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: 'center',
     marginBottom: 16,
-    width:150,
+    width: 150,
   },
   loginText: {
     color: '#fff',
