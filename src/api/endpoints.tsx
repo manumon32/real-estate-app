@@ -1,7 +1,7 @@
 export const API = {
   AUTH: {
     LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
+    SEND_OTP: '/auth/send-otp',
     REFRESH: '/auth/refresh',
     HAND_SHAKE: '/handshake/client-secret',
   },

@@ -94,7 +94,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
               filters.orderByorderByDir == 'desc' &&
               styles.chipTextSelected,
           ]}>
-          {'high to low'}
+          {'Price high to low'}
         </Text>
       </TouchableOpacity>
     </View>
@@ -145,7 +145,7 @@ function App(): React.JSX.Element {
             paddingBottom: 2,
             flexDirection: 'row',
           }}>
-          <View style={{flexDirection: 'row', width: '80%'}}>
+          <View style={{flexDirection: 'row', width: '90%'}}>
             <View style={styles.chipContainer}>
               <TouchableOpacity
                 onPress={() => {
@@ -184,7 +184,7 @@ function App(): React.JSX.Element {
                   resetFilters();
                   fetchFilterListings();
                 }}
-                style={[styles.chip, {width: 120}]}>
+                style={[styles.chip]}>
                 <IconButton
                   iconName={'delete'}
                   iconSize={20}
@@ -194,6 +194,9 @@ function App(): React.JSX.Element {
                 <Text style={[styles.chipText]}>{'Clear Filters'}</Text>
               </TouchableOpacity>
             </View>
+            <Text style={styles.resusltText}>
+              {filter_listings.length + ' Results'}
+            </Text>
           </View>
         </View>
         {sort && (
@@ -203,10 +206,6 @@ function App(): React.JSX.Element {
             fetchFilterListings={fetchFilterListings}
           />
         )}
-
-        <Text style={styles.resusltText}>
-          {filter_listings.length + ' Results'}
-        </Text>
       </>
     );
   }, [navigation, sort, filter_listings]);
@@ -377,8 +376,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginRight: 10,
     marginBottom: 10,
-    height: 36,
-    width: 110,
     justifyContent: 'center',
   },
 
@@ -404,7 +401,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.BOLD_ITALIC,
     margin: 5,
-    marginBottom: -5,
+    top:5
   },
 
   chipTextSelected: {

@@ -1,11 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 // AppInitializer.tsx
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {View, Animated, StyleSheet, Text, TouchableOpacity} from 'react-native';
 import useBoundStore from '@stores/index';
 import DeviceInfo from 'react-native-device-info';
 import {Fonts} from '@constants/font';
+import {useFocusEffect} from '@react-navigation/native';
 
 function Index({navigation}: any): React.JSX.Element {
   const {token, gethandShakeToken, handShakeError, clientId, getConfigData} =
@@ -39,23 +40,27 @@ function Index({navigation}: any): React.JSX.Element {
     getConfigData();
   };
 
-  useEffect(() => {
-    const initialize = async () => {
-      setError(false);
-      try {
-        if (!token || !clientId) {
-          fetchData();
-        } else {
-          getAppConfigData();
-          navigation.navigate('Main');
+  useFocusEffect(
+    useCallback(() => {
+      const initialize = async () => {
+        setError(false);
+        try {
+          if (!token || !clientId) {
+            fetchData();
+          } else {
+            getAppConfigData();
+            navigation.navigate('Main');
+          }
+        } catch (err) {
+          setError(true);
         }
-      } catch (err) {
-        setError(true);
-      }
-    };
+      };
 
-    initialize();
-  }, [token, navigation]);
+      initialize();
+
+      return () => {};
+    }, [token, navigation]),
+  );
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
 

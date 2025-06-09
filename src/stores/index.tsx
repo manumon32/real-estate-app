@@ -28,7 +28,7 @@ const useBoundStore = create<StoreState>()(
   devtools(
     persist(
       (set, get) => ({
-        ...createAuthSlice(set),
+        ...createAuthSlice(set, get),
         ...createHandShakeSlice(set),
         ...createAppConfigStore(set, get),
         ...createFilterListingsSlice(set, get),

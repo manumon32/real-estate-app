@@ -1,7 +1,7 @@
 import api from './axios';
 import {appSecret} from './constans';
 import {API} from './endpoints';
-import {createHadShakeHmacSignature} from './handshake';
+import {createHandShakeHmacSignature} from './handshake';
 import {apiRequest} from './request';
 
 // Types
@@ -40,7 +40,7 @@ export const getHeaders = async (
 ): Promise<any> => {
   try {
     if (hmac) {
-      const signature = createHadShakeHmacSignature(appSecret, data);
+      const signature = createHandShakeHmacSignature(appSecret, data);
       return {
         'Content-Type': 'application/json',
         Accept: 'application/json',
@@ -83,13 +83,41 @@ export const getUserProfile = async (): Promise<User> => {
 };
 
 // 🔹 Auth
-export const login = async (
-  email: string,
-  password: string,
-): Promise<string> => {
-  const res = await api.post(API.AUTH.LOGIN, {email, password});
-  return res.data.token;
+export const login = async (data: object, configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.AUTH.SEND_OTP,
+      data, //: JSON.stringify(data),
+      headers,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to fetch handshake token');
+  }
 };
+
+
+// 🔹 verifyOTP
+export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.AUTH.LOGIN,
+      data, //: JSON.stringify(data),
+      headers,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to fetch handshake token');
+  }
+};
+
+
 
 // 🔹 Hand Shake token
 
@@ -113,9 +141,7 @@ export const getHandshakeTokenApi = async (
 
 // 🔹 GET App Config Data's
 
-export const getAppConfigData = async (
-  configArg: object,
-): Promise<any> => {
+export const getAppConfigData = async (configArg: object): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const apiConfig: any = {

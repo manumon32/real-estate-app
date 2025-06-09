@@ -18,6 +18,7 @@ export const apiRequest = async ({
   headers,
 }: ApiRequestProps): Promise<ApiRequestProps> => {
   try {
+    console.log('data', data);
     const response = await api.request<ApiRequestProps>({
       method,
       url,
@@ -33,7 +34,6 @@ export const apiRequest = async ({
     console.log('Status:', error.response?.status);
     console.log('Response Data:', error.response?.data);
     console.log('Request Config:', error.config); // Optional
-    console.log('Full Error:', JSON.stringify(error, null, 2)); // For completeness
     throw new Error('Failed to fetch Details');
   }
 };

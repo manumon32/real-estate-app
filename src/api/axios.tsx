@@ -2,7 +2,7 @@ import axios from 'axios';
 import {
   createHmacSignature,
   createBodyHash,
-  createHadShakeHmacSignature,
+  // createHadShakeHmacSignature,
 } from './handshake';
 import uuid from 'react-native-uuid';
 const API_BASE_URL = 'http://13.61.181.173:8081';
@@ -18,7 +18,7 @@ api.interceptors.request.use(
   async (config: any) => {
     if (config.headers['X-TOKEN']) {
       const timestamp = Math.floor(Date.now() / 1000).toString();
-      const bodyHash = createBodyHash(config.body ? config.body : '');
+      const bodyHash = createBodyHash(config.data ? config.data : '');
       const deviceId = config.headers['X-DEVICE-ID'];
       const nonce = uuid.v4();
       const url = config.url || '';
@@ -30,13 +30,10 @@ api.interceptors.request.use(
         nonce,
         bodyHash,
       ].join('\n');
-      const signature =
-        config.method == 'get'
-          ? createHmacSignature(config.headers['X-TOKEN'], stringToSign)
-          : createHadShakeHmacSignature(
-              config.headers['X-TOKEN'],
-              stringToSign,
-            );
+      const signature = createHmacSignature(
+        config.headers['X-TOKEN'],
+        stringToSign,
+      );
       console.log('header only', {
         ...(config.headers || {}),
         'X-TIMESTAMP': timestamp,

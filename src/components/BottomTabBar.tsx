@@ -4,6 +4,8 @@ import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
 import AdPostIcon from '@assets/svg/post.svg';
 import {Fonts} from '@constants/font';
+import LoginModal from './Modal/LoginModal';
+import useBoundStore from '@stores/index';
 
 const renderTabIcon = (routeName: string) => {
   switch (routeName) {
@@ -22,6 +24,7 @@ const renderTabIcon = (routeName: string) => {
 
 const BottomTabBar = ({state, navigation}: any) => {
   const {theme} = useTheme();
+  const {visible, setVisible, bearerToken} = useBoundStore();
   return (
     // eslint-disable-next-line react-native/no-inline-styles
     <View
@@ -39,7 +42,15 @@ const BottomTabBar = ({state, navigation}: any) => {
 
             const color = isFocused ? '#2E7D32' : '#888';
             const onPress = () => {
-              if (route.name === 'AddPost') {
+              if (
+                (route.name === 'AddPost' ||
+                  route.name === 'Chat' ||
+                  route.name === 'Profile' ||
+                  route.name === 'MyAds') &&
+                !bearerToken
+              ) {
+                setVisible();
+              } else if (route.name === 'AddPost') {
                 navigation.navigate('PostAd');
               } else {
                 const event = navigation.emit({
@@ -86,6 +97,7 @@ const BottomTabBar = ({state, navigation}: any) => {
               </React.Fragment>
             );
           })}
+        <LoginModal visible={visible} onClose={() => setVisible()} />
       </View>
     </View>
   );
@@ -128,7 +140,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
-    bottom:10
+    bottom: 10,
   },
 });
 

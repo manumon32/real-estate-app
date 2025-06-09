@@ -1,31 +1,76 @@
+import {login, verifyOTP} from '@api/services';
 import * as Keychain from 'react-native-keychain';
 
 export interface AuthSlice {
   user: any | null;
-  token: string | null;
-  login: (user: any, token: string) => Promise<void>;
+  bearerToken: string | null;
+  otp: string | null;
+  visible: boolean;
+  loginError: boolean;
+  login: (falg: any) => Promise<void>;
+  setVisible: () => Promise<void>;
   logout: () => Promise<void>;
+  clearOTP: () => Promise<void>;
   loadToken: () => Promise<void>;
+  verifyOTP: (falg: any) => Promise<void>;
 }
 
-export const createAuthSlice = (set: any,): AuthSlice => ({
+export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   user: null,
-  token: null,
-
-  login: async (user, token) => {
-    await Keychain.setGenericPassword('auth', token);
-    set({ user, token });
+  bearerToken: null,
+  otp: null,
+  loginError: false,
+  visible: false,
+  login: async payload => {
+    try {
+      const resp = await login(payload, {
+        token: get().token,
+        clientId: get().clientId,
+      });
+      if (resp?.otp) {
+        set({
+          otp: resp.otp,
+        });
+      } else {
+        set({loginError: true});
+      }
+    } catch (error) {
+      set({loginError: true});
+    }
   },
-
+  verifyOTP: async payload => {
+    try {
+      const resp = await verifyOTP(payload, {
+        token: get().token,
+        clientId: get().clientId,
+      });
+      if (resp?.token) {
+        set({
+          bearerToken: resp.token,
+          visible: false,
+        });
+      } else {
+        set({loginError: true,visible: false});
+      }
+    } catch (error) {
+      set({loginError: true});
+    }
+  },
+  setVisible: async () => {
+    set({visible: !get().visible});
+  },
+  clearOTP: async () => {
+    set({otp: null});
+  },
   logout: async () => {
     await Keychain.resetGenericPassword();
-    set({ user: null, token: null });
+    set({user: null, bearerToken: null});
   },
 
   loadToken: async () => {
     const creds = await Keychain.getGenericPassword();
     if (creds) {
-      set({ token: creds.password });
+      set({bearerToken: creds.password});
     }
   },
 });

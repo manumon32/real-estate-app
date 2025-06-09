@@ -130,42 +130,6 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     return mergedUnique.length <= 0 ? true : mergedUnique?.includes(value);
   };
 
-  // const renderIconChips = useCallback(
-  //   (
-  //     items: {label: any; icon: any}[],
-  //     selected: string | any[],
-  //     setSelected: any,
-  //   ) => (
-  //     <View style={styles.chipContainer}>
-  //       {items.map(({label, icon}) => (
-  //         <TouchableOpacity
-  //           key={label}
-  //           style={[
-  //             styles.chip,
-  //             selected.includes(label) && styles.chipSelected,
-  //           ]}
-  //           onPress={() => toggleItem(label, setSelected)}>
-  //           <IconButton
-  //             iconName={icon}
-  //             iconSize={18}
-  //             iconColor={selected.includes(label) ? '#fff' : '#333'}
-  //             style={{marginRight: 5}}
-  //           />
-  //           <Text
-  //             style={
-  //               selected.includes(label)
-  //                 ? styles.chipTextSelected
-  //                 : styles.chipText
-  //             }>
-  //             {label}
-  //           </Text>
-  //         </TouchableOpacity>
-  //       ))}
-  //     </View>
-  //   ),
-  //   [toggleItem],
-  // );
-
   const handleApply = useCallback(() => {
     onApply();
   }, [onApply]);
@@ -188,6 +152,30 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             backgroundColor: '#fff',
             borderRadius: 20,
           }}>
+          <View style={{flexDirection: 'row', padding: 20, paddingBottom:0}}>
+            <Text style={styles.title}>Filters & Sort</Text>
+            <Pressable
+              onPress={() => {
+                resetFilters();
+                onClose();
+              }}
+              style={styles.closeButton}>
+              <IconButton
+                iconSize={24}
+                //red , heart
+                iconColor={'#000'}
+                iconName={'close'}
+              />
+            </Pressable>
+          </View>
+
+          <View
+            style={{
+              backgroundColor: '#EBEBEB',
+              borderWidth: 1,
+              borderColor: '#EBEBEB',
+            }}
+          />
           <ScrollView
             style={{
               borderRadius: 20,
@@ -197,34 +185,9 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             contentContainerStyle={{
               backgroundColor: '#fff',
               padding: 20,
+              paddingTop:0
             }}>
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.title}>Filters & Sort</Text>
-              <Pressable
-                onPress={() => {
-                  resetFilters();
-                  onClose();
-                }}
-                style={styles.closeButton}>
-                <IconButton
-                  iconSize={24}
-                  //red , heart
-                  iconColor={'#000'}
-                  iconName={'close'}
-                />
-              </Pressable>
-            </View>
-
-            <View
-              style={{
-                backgroundColor: '#EBEBEB',
-                borderWidth: 1,
-                borderColor: '#EBEBEB',
-                width: '100%',
-                // top: 15,
-              }}
-            />
-            <Text style={styles.label}>Type</Text>
+            <Text style={[styles.label]}>Type</Text>
             {renderChips(PROPERTY_TYPES)}
 
             <Text style={styles.label}>Listing Type</Text>
