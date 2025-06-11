@@ -18,6 +18,7 @@ import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
 import Carousel from 'react-native-reanimated-carousel';
 import ImageCarouselModal from './ImageCarouselModal';
+import FavoriteButton from '@components/FavoriteButton';
 
 function Header(props: any): React.JSX.Element {
   const {details} = props;
@@ -37,9 +38,7 @@ function Header(props: any): React.JSX.Element {
 
   const renderItem = useCallback(
     ({item}: {item: string; index: number}) => (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={() => handleImagePress()}>
+      <TouchableOpacity activeOpacity={0.9} onPress={() => handleImagePress()}>
         <Image source={{uri: item}} resizeMode="contain" style={styles.image} />
       </TouchableOpacity>
     ),
@@ -78,7 +77,7 @@ function Header(props: any): React.JSX.Element {
                 iconName={'share-variant'}
               />
             </TouchableOpacity>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
               <IconButton
                 style={[styles.heartRight]}
                 iconSize={24}
@@ -86,7 +85,8 @@ function Header(props: any): React.JSX.Element {
                 iconColor={theme.colors.text}
                 iconName={'heart-outline'}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+            <FavoriteButton IconButtonStyle={styles.heartRight} iconSize={24} item={details} />
           </View>
         </View>
         <Carousel
@@ -107,10 +107,10 @@ function Header(props: any): React.JSX.Element {
             onPress={async () => {
               const url = details?.videoUrl; // replace with your video URL
 
-                console.log("Can't open URL:", url);
+              console.log("Can't open URL:", url);
               const supported = await Linking.canOpenURL(url);
               if (supported) {
-                console.log("open URL:", url);
+                console.log('open URL:', url);
                 await Linking.openURL(url);
               } else {
                 console.log("Can't open URL:", url);

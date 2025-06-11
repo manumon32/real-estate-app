@@ -256,6 +256,7 @@ function App(): React.JSX.Element {
           contentContainerStyle={{
             paddingBottom: 100,
             backgroundColor: theme.colors.backgroundHome,
+            minHeight:800
           }}
           showsVerticalScrollIndicator={false}
           onEndReachedThreshold={0.5}
@@ -282,7 +283,11 @@ function App(): React.JSX.Element {
                 )}
               </View>
             ) : (
-              <Text style={styles.endText}>No more products</Text>
+              <Text style={styles.endText}>
+                {filter_listings.length <= 0
+                  ? 'Oops.. we cannot find anything for this search.'
+                  : ''}
+              </Text>
             )
           }
         />
@@ -401,7 +406,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.BOLD_ITALIC,
     margin: 5,
-    top:5
+    top: 5,
   },
 
   chipTextSelected: {

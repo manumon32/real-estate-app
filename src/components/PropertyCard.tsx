@@ -5,6 +5,7 @@ import Image from 'react-native-fast-image';
 import IconButton from '@components/Buttons/IconButton';
 import FeaturedIcon from '@assets/svg/featured.svg';
 import {Fonts} from '@constants/font';
+import FavoriteButton from './FavoriteButton';
 
 const PropertyCard = React.memo(({items, navigation, arg}: any) => {
   return (
@@ -37,15 +38,14 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
           resizeMode="contain"
           style={styles.image}
         />
-        <TouchableOpacity style={styles.heart}>
-          <IconButton
-            style={{backgroundColor: '#fff', borderRadius: 20, padding: 5}}
-            iconSize={18}
-            //red , heart
-            iconColor={'#171717'}
-            iconName={'heart-outline'}
-          />
-        </TouchableOpacity>
+        <FavoriteButton
+          item={items}
+          tuchableStyle={{
+            position: 'absolute',
+            top: 4,
+            right: 4,
+          }}
+        />
       </View>
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
@@ -70,14 +70,20 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
             {/* <BedIcon /> */}
             <Text style={styles.infoText}>{items.numberOfBedrooms} Beds</Text>
           </View>
-          <View style={styles.infoItem}>
-            <IconButton
-              iconSize={16}
-              iconColor={'#171717'}
-              iconName={'vector-line'}
-            />
-            <Text style={styles.infoText}>200 m</Text>
-          </View>
+          {items?.distance && (
+            <View style={styles.infoItem}>
+              <IconButton
+                iconSize={16}
+                iconColor={'#171717'}
+                iconName={'vector-line'}
+              />
+              <Text style={styles.infoText}>
+                {items?.distance < 1000
+                  ? (items?.distance).toFixed(2) + ' m'
+                  : (items?.distance * 0.001).toFixed(2) + ' km'}
+              </Text>
+            </View>
+          )}
         </View>
 
         <Text style={styles.price}>

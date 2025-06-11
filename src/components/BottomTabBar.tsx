@@ -6,6 +6,7 @@ import AdPostIcon from '@assets/svg/post.svg';
 import {Fonts} from '@constants/font';
 import LoginModal from './Modal/LoginModal';
 import useBoundStore from '@stores/index';
+import CommonLocationModal from './Modal/LocationSearchModal';
 
 const renderTabIcon = (routeName: string) => {
   switch (routeName) {
@@ -24,7 +25,15 @@ const renderTabIcon = (routeName: string) => {
 
 const BottomTabBar = ({state, navigation}: any) => {
   const {theme} = useTheme();
-  const {visible, setVisible, bearerToken} = useBoundStore();
+  const {
+    visible,
+    setVisible,
+    bearerToken,
+    locationModalvisible,
+    setlocationModalVisible,
+    setLocation,
+    locationHistory,
+  } = useBoundStore();
   return (
     // eslint-disable-next-line react-native/no-inline-styles
     <View
@@ -98,6 +107,12 @@ const BottomTabBar = ({state, navigation}: any) => {
             );
           })}
         <LoginModal visible={visible} onClose={() => setVisible()} />
+        <CommonLocationModal
+          visible={locationModalvisible}
+          onClose={() => setlocationModalVisible()}
+          onSelectLocation={setLocation}
+          locationHistory={locationHistory}
+        />
       </View>
     </View>
   );

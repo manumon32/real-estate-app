@@ -9,7 +9,8 @@ import {
   ViewStyle,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {Fonts} from '@constants/font';
 
 interface CommonHeaderProps {
   title: string;
@@ -19,6 +20,7 @@ interface CommonHeaderProps {
   backgroundColor?: string;
   textColor?: string;
   containerStyle?: ViewStyle;
+  rightText?: string;
 }
 
 const CommonHeader: React.FC<CommonHeaderProps> = ({
@@ -29,11 +31,12 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
   backgroundColor = '#fff',
   textColor = '#1C1C1E',
   containerStyle,
+  rightText,
 }) => {
   const navigation = useNavigation();
 
   return (
-    <View style={[styles.wrapper, { backgroundColor }, containerStyle]}>
+    <View style={[styles.wrapper, {backgroundColor}, containerStyle]}>
       <StatusBar
         backgroundColor={backgroundColor}
         barStyle={Platform.OS === 'android' ? 'dark-content' : 'dark-content'}
@@ -41,8 +44,7 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={onBackPress || navigation.goBack}
-        >
+          onPress={onBackPress || navigation.goBack}>
           <MaterialCommunityIcons
             name="chevron-left"
             size={24}
@@ -50,7 +52,7 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
           />
         </TouchableOpacity>
 
-        <Text style={[styles.title, { color: textColor }]} numberOfLines={1}>
+        <Text style={[styles.title, {color: textColor}]} numberOfLines={1}>
           {title}
         </Text>
 
@@ -64,6 +66,13 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
           </TouchableOpacity>
         ) : (
           <View style={styles.rightPlaceholder} />
+        )}
+        {rightText ? (
+          <Text style={{fontSize: 14, fontFamily: Fonts.MEDIUM}}>
+            {rightText}
+          </Text>
+        ) : (
+          <></>
         )}
       </View>
     </View>
@@ -97,6 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '500',
     marginHorizontal: 12,
+    fontFamily: Fonts.MEDIUM,
   },
   rightButton: {
     width: 32,

@@ -9,8 +9,15 @@ import {Fonts} from '@constants/font';
 import {useFocusEffect} from '@react-navigation/native';
 
 function Index({navigation}: any): React.JSX.Element {
-  const {token, gethandShakeToken, handShakeError, clientId, getConfigData} =
-    useBoundStore();
+  const {
+    token,
+    gethandShakeToken,
+    handShakeError,
+    clientId,
+    getConfigData,
+    fetchFavouriteAds,
+    bearerToken,
+  } = useBoundStore();
   const [error, setError] = useState(true);
 
   const getDeviceId = () => {
@@ -48,6 +55,9 @@ function Index({navigation}: any): React.JSX.Element {
           if (!token || !clientId) {
             fetchData();
           } else {
+            if (bearerToken) {
+              fetchFavouriteAds();
+            }
             getAppConfigData();
             navigation.navigate('Main');
           }

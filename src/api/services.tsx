@@ -2,7 +2,7 @@ import api from './axios';
 import {appSecret} from './constans';
 import {API} from './endpoints';
 import {createHandShakeHmacSignature} from './handshake';
-import {apiRequest} from './request';
+import {apiRequest, RequestMethod} from './request';
 
 // Types
 interface Row {
@@ -50,6 +50,7 @@ export const getHeaders = async (
       return {
         'X-TOKEN': data.token,
         'X-DEVICE-ID': data.clientId,
+        Authorization: 'Bearer ' + data.bearerToken,
       };
     }
   } catch (error) {
@@ -99,7 +100,6 @@ export const login = async (data: object, configArg: any): Promise<any> => {
   }
 };
 
-
 // 🔹 verifyOTP
 export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
   try {
@@ -116,8 +116,6 @@ export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
     throw new Error('Failed to fetch handshake token');
   }
 };
-
-
 
 // 🔹 Hand Shake token
 
@@ -165,8 +163,8 @@ export const fetchListingsFromAPI = async (
   configArg: any,
 ): Promise<Listing> => {
   try {
-    const headers = await getHeaders(configArg);
     console.log('params', params);
+    const headers = await getHeaders(configArg);
     const apiConfig: any = {
       method: 'get',
       url: API.LISTINGS.GET_ALL,
@@ -180,7 +178,46 @@ export const fetchListingsFromAPI = async (
     throw new Error('Failed to fetch handshake token');
   }
 };
-getAppConfigData;
+
+// 🔹 Fav Ads
+
+export const UpdateFavouritesAPI = async (
+  data: object,
+  configArg: any,
+  method: RequestMethod,
+): Promise<Listing> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method,
+      url: API.FAVOURITES,
+      data,
+      headers,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to Do so');
+  }
+};
+
+export const fetchFavoritessAPI = async (configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.FAVOURITES,
+      params: {
+        pageSize: 500,
+      },
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch Details');
+  }
+};
 
 export const fetchDetailsAPI = async (
   params: string,

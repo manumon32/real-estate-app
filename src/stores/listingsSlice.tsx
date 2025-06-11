@@ -22,6 +22,7 @@ export interface ListingsSlice {
   triggerRefresh: boolean;
   setTriggerRefresh: () => void;
   fetchListings: (filters?: any, page?: number) => Promise<void>;
+  setTriggerRelaod: () => void;
 }
 
 export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
@@ -35,7 +36,17 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchListings: async () => {
     set({loading: true, triggerRefresh: false});
-    let filters = {pageNum: get().page + 1};
+    let filters = {
+      pageNum: get().page + 1,
+    };
+    if (get().location?.lat && get().location?.lng) {
+      filters = {
+        ...filters,
+        ...{
+          filter_near: [get().location?.lat, get().location?.lng, 10].join(','),
+        },
+      };
+    }
     try {
       const res = await fetchListingsFromAPI(filters, {
         token: get().token,
@@ -54,7 +65,13 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
   },
   setTriggerRefresh: () =>
     set({
-      page:0,
+      page: 0,
       triggerRefresh: true,
+    }),
+
+  setTriggerRelaod: () =>
+    set({
+      page: 0,
+      listings: [],
     }),
 });

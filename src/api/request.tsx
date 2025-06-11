@@ -18,7 +18,6 @@ export const apiRequest = async ({
   headers,
 }: ApiRequestProps): Promise<ApiRequestProps> => {
   try {
-    console.log('data', data);
     const response = await api.request<ApiRequestProps>({
       method,
       url,

@@ -41,6 +41,7 @@ export const createFilterListingsSlice = (
     set({
       filter_loading: true,
       filter_triggerRefresh: false,
+      filter_listings: get().filter_page == 0 ? [] : get().filter_listings,
     });
     let filters = {pageNum: get().filter_page + 1};
     let filterData = get().filters;
@@ -61,7 +62,6 @@ export const createFilterListingsSlice = (
         filters = {...filters, ...{[filter]: filterData[filter]}};
       }
     });
-    console.log('filters', filters);
     try {
       const res = await fetchListingsFromAPI(filters, {
         token: get().token,
@@ -92,5 +92,7 @@ export const createFilterListingsSlice = (
     set({
       filter_page: 0,
       filter_triggerRefresh: true,
+      filter_hasMore: false,
+      filter_loading: false,
     }),
 });

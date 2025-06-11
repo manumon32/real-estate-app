@@ -12,6 +12,7 @@ import {
   createFilterListingsSlice,
   FilterListingsSlice,
 } from './filterListingsSlice';
+import { createLocationSlice, LocationSlice } from './LocationSlice';
 // import {zustandStorage} from './storage';
 
 type StoreState = HandShakeSlice &
@@ -21,6 +22,7 @@ type StoreState = HandShakeSlice &
   DetailSlice &
   AppConfigState &
   FilterListingsSlice &
+  LocationSlice &
   FavoritesSlice;
 
 // get
@@ -33,9 +35,10 @@ const useBoundStore = create<StoreState>()(
         ...createAppConfigStore(set, get),
         ...createFilterListingsSlice(set, get),
         ...createFiltersSlice(set),
+        ...createLocationSlice(set, get),
         ...createListingsSlice(set, get),
         ...createDetailSlice(set, get),
-        ...createFavoritesSlice(set),
+        ...createFavoritesSlice(set, get),
       }),
       {
         name: 'auth-storage',
@@ -43,6 +46,8 @@ const useBoundStore = create<StoreState>()(
         partialize: state => ({
           token: state.token,
           clientId: state.clientId,
+          bearerToken: state.bearerToken,
+          location: state.location,
         }),
         onRehydrateStorage: () => state => {
           console.log('🔄 Rehydrated Zustand state:', state);

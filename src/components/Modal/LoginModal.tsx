@@ -1,4 +1,6 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback,
+  //  useEffect, 
+   useState} from 'react';
 import {
   Modal,
   View,
@@ -9,6 +11,7 @@ import {
   Pressable,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 import LogoIcon from '@assets/svg/logo.svg';
 import GroupIcon from '@assets/svg/group.svg';
@@ -23,23 +26,55 @@ type Props = {
 };
 
 const LoginModal: React.FC<Props> = ({visible, onClose}) => {
-  const {login, otp, clearOTP, verifyOTP} = useBoundStore();
+  const {login, otp, clearOTP, verifyOTP, loginError} = useBoundStore();
   const [loginVar, setLoginVar] = useState('');
+  const [message, setMessage] = useState('');
   const {theme} = useTheme();
+
+  const isValidEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const isValidPhone = (phone: string) => {
+    const regex = /^\d{10}$/;
+    return regex.test(phone);
+  };
+
   const handleClose = useCallback(() => {
     onClose?.();
   }, [onClose]);
 
-  React.useEffect(() => {
-    console.log('otp', otp);
-  }, [otp]);
-
   const handleSubmit = () => {
-    login({phone: loginVar});
+    if (isValidEmail(loginVar) || isValidPhone(loginVar)) {
+      login({phone: loginVar});
+    } else {
+      setMessage('❌  Invalid input');
+    }
   };
 
   const veryFyOTP = (arg: any) => {
-    verifyOTP({phone: loginVar, otp: arg});
+    verifyOTP({phone: loginVar, email: null, otp: arg});
+  };
+
+  // useEffect(() => {
+  //   GoogleSignin.configure({
+  //     webClientId:
+  //       // '888933323180-hb2t8o1bm16981prm0q8dcios6n8qsph.apps.googleusercontent.com',
+  //       // '888933323180-1pflhpbmfpph3s9jke2lit42rkcvt57l.apps.googleusercontent.com',
+  //       '888933323180-ecjddjlmr785c82mvg9mv4o3437l3u0f.apps.googleusercontent.com',
+  //     offlineAccess: true, // if using with Firebase or for getting refresh tokens
+  //   });
+  // }, []);
+
+  const signInWithGoogle = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log('Google user', userInfo);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -75,11 +110,24 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
               value={loginVar}
               onChangeText={text => {
                 setLoginVar(text);
+                setMessage('');
               }}
-              placeholder=""
+              placeholder="Phone number or Email"
+              placeholderTextColor={'#ccc'}
               style={styles.input}
               keyboardType="phone-pad"
             />
+            {(message || loginError) && (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: '#ff4d4f',
+                  margin: 5,
+                  marginTop: -5,
+                }}>
+                {'Please enter valid Phone number or Email'}
+              </Text>
+            )}
 
             {/* Login Button */}
             <TouchableOpacity onPress={handleSubmit} style={styles.loginBtn}>
@@ -108,7 +156,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
                 color="#000"
                 size={22}
                 borderRadius={10}
-                onPress={() => {}}
+                onPress={signInWithGoogle}
               />
               <Icon.Button
                 name="facebook"
@@ -261,4 +309,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginModal;
+export default React.memo(LoginModal);

@@ -5,6 +5,7 @@ import DetailsScreen from '@screens/details';
 import PostAd from '@screens/postAd';
 import HomePage from '@screens/home';
 import ThreeDModelViewer from '@screens/details/ThreeDModelViewer';
+import FavAds from '@screens/FavAds';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,6 +17,7 @@ const RootNavigator = () => {
       <Stack.Screen name="Details" component={DetailsScreen} />
       <Stack.Screen name="ThreeDModelViewer" component={ThreeDModelViewer} />
       <Stack.Screen name="PostAd" component={PostAd} />
+      <Stack.Screen name="FavAds" component={FavAds} />
     </Stack.Navigator>
   );
 };

@@ -9,9 +9,9 @@ import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 
 function SearchContent(): React.JSX.Element {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisibles] = useState(false);
   const navigation = useNavigation();
-  const {clearFilterList} = useBoundStore();
+  const {clearFilterList, bearerToken, setVisible} = useBoundStore();
   return (
     <>
       <View style={styles.container}>
@@ -22,7 +22,16 @@ function SearchContent(): React.JSX.Element {
             editable={false}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.favIcon}>
+        <TouchableOpacity
+          onPress={() => {
+            if (bearerToken) {
+              // @ts-ignore
+              navigation.navigate('FavAds');
+            } else {
+              setVisible();
+            }
+          }}
+          style={styles.favIcon}>
           <IconButton
             iconSize={24}
             //red , heart
@@ -31,7 +40,7 @@ function SearchContent(): React.JSX.Element {
           />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => setVisible(true)}
+          onPress={() => setVisibles(true)}
           style={styles.favIcon}>
           <IconButton
             iconSize={24}
@@ -42,10 +51,10 @@ function SearchContent(): React.JSX.Element {
         <FilterModal
           visible={visible}
           onClose={() => {
-            setVisible(false);
+            setVisibles(false);
           }}
           onApply={() => {
-            setVisible(false);
+            setVisibles(false);
             clearFilterList();
             // @ts-ignore
             navigation.navigate('filter');

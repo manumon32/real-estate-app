@@ -1,0 +1,348 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-native/no-inline-styles */
+import React, {useState, useCallback} from 'react';
+import {
+  View,
+  Text,
+  Modal,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  PermissionsAndroid,
+  Platform,
+  Alert,
+} from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {Fonts} from '@constants/font';
+
+const GOOGLE_API_KEY = 'AIzaSyD1PiJC7RtzJzVlKsZkNIB8meCqklPRgvQ'; // Replace this
+
+interface Props {
+  visible: boolean;
+  onClose: () => void;
+  locationHistory: any;
+  onSelectLocation: (location: {
+    name: string;
+    lat: number;
+    lng: number;
+  }) => void;
+}
+
+const CommonLocationModal: React.FC<Props> = ({
+  visible,
+  onClose,
+  onSelectLocation,
+  locationHistory,
+}) => {
+  const [query, setQuery] = useState('');
+  const [predictions, setPredictions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<any>(null);
+
+  const fetchPredictions = useCallback(async (text: string) => {
+    setQuery(text);
+    if (text.length < 2) {
+      setPredictions([]);
+      return;
+    }
+
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_API_KEY}&language=en`;
+    try {
+      const res = await fetch(url);
+      const json = await res.json();
+      setPredictions(json?.predictions || []);
+    } catch (err) {
+      console.error('Prediction fetch failed', err);
+    }
+  }, []);
+
+  const fetchPlaceDetails = async (placeId: string) => {
+    setLoading(true);
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`;
+    try {
+      const res = await fetch(url);
+      const json = await res.json();
+      console.log('res', json.result);
+      const location = json.result.geometry.location;
+      onSelectLocation({
+        name: json.result.formatted_address,
+        lat: location.lat,
+        lng: location.lng,
+      });
+      setQuery('');
+      setPredictions([]);
+      onClose();
+    } catch (err) {
+      console.error('Details fetch failed', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    getCurrentLocation();
+  }, []);
+
+  const useCurrentLocation = () => {
+    if (currentLocation?.name) {
+      onSelectLocation(currentLocation);
+      onClose();
+    } else {
+      getCurrentLocation(true);
+    }
+  };
+
+  const getCurrentLocation = async (arg = false) => {
+    setLoading(true);
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        );
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert('Permission Denied', 'Location permission is required.');
+          return;
+        }
+      }
+
+      Geolocation.getCurrentPosition(
+        async position => {
+          const {latitude, longitude} = position.coords;
+          const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`;
+
+          const res = await fetch(url);
+          const json = await res.json();
+          const address =
+            json.results[0]?.formatted_address || 'Current Location';
+
+          setCurrentLocation({
+            name: address,
+            lat: latitude,
+            lng: longitude,
+          });
+          if (arg) {
+            onSelectLocation({
+              name: address,
+              lat: latitude,
+              lng: longitude,
+            });
+            onClose();
+          }
+        },
+        error => {
+          Alert.alert('Error', error.message);
+          setLoading(false);
+        },
+        {enableHighAccuracy: true, timeout: 10000, maximumAge: 1000},
+      );
+    } catch (err) {
+      Alert.alert('Error', 'Failed to get location.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderItem = ({item}: {item: any}) => (
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => fetchPlaceDetails(item.place_id)}>
+      <MaterialCommunityIcons
+        name="map-marker"
+        size={20}
+        color="#696969"
+        style={{marginRight: 10}}
+      />
+      <Text style={styles.itemText}>{item.description}</Text>
+    </TouchableOpacity>
+  );
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}>
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Location</Text>
+            <TouchableOpacity onPress={onClose}>
+              <MaterialCommunityIcons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.inputContainer}>
+            <MaterialCommunityIcons name="magnify" size={20} color="#696969" />
+            <TextInput
+              value={query}
+              onChangeText={fetchPredictions}
+              placeholder="Enter location"
+              style={styles.input}
+            />
+          </View>
+          <TouchableOpacity
+            style={styles.currentLocationBtn}
+            onPress={useCurrentLocation}>
+            <View
+              style={{
+                width: '10%',
+              }}>
+              <MaterialCommunityIcons
+                name="crosshairs-gps"
+                size={20}
+                color="#2F8D79"
+              />
+            </View>
+            <View>
+              <Text style={styles.currentLocationText}>
+                Use Current Location
+              </Text>
+              {currentLocation?.name && (
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 12,
+                    color: 'rgba(0, 0, 0, 0.55)',
+                    textAlign: 'left',
+                    maxWidth: 250,
+                  }}>
+                  {currentLocation?.name}
+                </Text>
+              )}
+            </View>
+          </TouchableOpacity>
+
+          {loading ? (
+            <ActivityIndicator style={{marginTop: 20}} />
+          ) : (
+            <FlatList
+              data={predictions}
+              keyExtractor={item => item.place_id}
+              renderItem={renderItem}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{
+                backgroundColor: '#fff',
+                borderRadius: 12,
+                borderColor: '#EBEBEB',
+                borderWidth: 1,
+                marginTop: 10,
+                padding: 8,
+              }}
+              ListFooterComponent={
+                <View>
+                  {
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        marginTop: 15,
+                        color: '#696969',
+                        margin: 5,
+                      }}>
+                      Recent Searches
+                    </Text>
+                  }
+                  {locationHistory?.map(
+                    (item: {lat: any; name: string; lng: any}, index: number) =>
+                      index <= 4 && (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.item}
+                          onPress={() => {
+                            onSelectLocation(item);
+                            onClose();
+                          }}>
+                          <MaterialCommunityIcons
+                            name="clock"
+                            size={20}
+                            color="#696969"
+                            style={{marginRight: 10}}
+                          />
+                          <Text style={styles.itemText}>{item.name}</Text>
+                        </TouchableOpacity>
+                      ),
+                  )}
+                </View>
+              }
+            />
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+};
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  container: {
+    backgroundColor: '#F6FCFF',
+    height: '90%',
+    padding: 16,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    padding: 5,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: Fonts.MEDIUM,
+    textAlign: 'center',
+    color: '#171717',
+  },
+  inputContainer: {
+    height: 48,
+    borderWidth: 1,
+    borderColor: '#EBEBEB',
+    borderRadius: 12,
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    width: '100%',
+    paddingHorizontal: 12,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  input: {
+    height: 48,
+    width: '80%',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    fontSize: 16,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  itemText: {
+    fontSize: 14,
+    flex: 1,
+    color: 'rgba(0, 0, 0, 0.82)',
+  },
+  currentLocationBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    height: 56,
+    borderWidth: 1,
+    borderColor: '#EBEBEB',
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  currentLocationText: {
+    color: '#2F8D79',
+    fontSize: 14,
+    marginBottom: 2,
+  },
+});
+
+export default CommonLocationModal;

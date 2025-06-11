@@ -1,5 +1,4 @@
 import {login, verifyOTP} from '@api/services';
-import * as Keychain from 'react-native-keychain';
 
 export interface AuthSlice {
   user: any | null;
@@ -11,7 +10,6 @@ export interface AuthSlice {
   setVisible: () => Promise<void>;
   logout: () => Promise<void>;
   clearOTP: () => Promise<void>;
-  loadToken: () => Promise<void>;
   verifyOTP: (falg: any) => Promise<void>;
 }
 
@@ -50,7 +48,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           visible: false,
         });
       } else {
-        set({loginError: true,visible: false});
+        set({loginError: true, visible: false});
       }
     } catch (error) {
       set({loginError: true});
@@ -63,14 +61,6 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
     set({otp: null});
   },
   logout: async () => {
-    await Keychain.resetGenericPassword();
     set({user: null, bearerToken: null});
-  },
-
-  loadToken: async () => {
-    const creds = await Keychain.getGenericPassword();
-    if (creds) {
-      set({bearerToken: creds.password});
-    }
   },
 });

@@ -1,9 +1,9 @@
 import IconButton from '@components/Buttons/IconButton';
 import React from 'react';
-import {View, StyleSheet, Dimensions, Pressable} from 'react-native';
+import {View, StyleSheet, Pressable} from 'react-native';
 import {WebView} from 'react-native-webview';
 
-const deviceWidth = Dimensions.get('window').width;
+// const deviceWidth = Dimensions.get('window').width;
 const modelURL = 'https://modelviewer.dev/shared-assets/models/Astronaut.glb'; // Replace with your model URL
 
 import {useNavigation} from '@react-navigation/native';
@@ -29,7 +29,6 @@ const htmlContent = `
   </body>
 </html>
 `;
-console.log(deviceWidth);
 
 const ThreeDModelViewer = () => {
   const navigation = useNavigation();

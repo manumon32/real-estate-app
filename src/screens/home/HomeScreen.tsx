@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import {
   StatusBar,
   useColorScheme,
@@ -16,6 +16,7 @@ import {useTheme} from '@theme/ThemeProvider';
 import Header from './Header/Header';
 import PropertyCard from '@components/PropertyCard';
 import useBoundStore from '@stores/index';
+import { Fonts } from '@constants/font';
 
 function App({navigation}: any): React.JSX.Element {
   const {
@@ -25,10 +26,28 @@ function App({navigation}: any): React.JSX.Element {
     loading,
     triggerRefresh,
     setTriggerRefresh,
+    location,
+    setTriggerRelaod,
   } = useBoundStore();
   const {theme} = useTheme();
 
   const isDarkMode = useColorScheme() === 'dark';
+
+  const prevFiltersRef = useRef<string[] | null>(null);
+
+  useEffect(() => {
+    if (
+      // @ts-ignore
+      prevFiltersRef.current?.lat &&
+      // @ts-ignore
+      prevFiltersRef.current?.lat !== location.lat &&
+      !loading
+    ) {
+      setTriggerRelaod();
+      fetchListings();
+    }
+    prevFiltersRef.current = location;
+  }, [location]);
 
   const loadMore = () => {
     if (loading || !hasMore) return;
@@ -37,7 +56,9 @@ function App({navigation}: any): React.JSX.Element {
 
   const renderAdItem = useCallback(
     (items: any) => {
-      return <PropertyCard items={items.item} navigation={navigation} arg={'home'} />;
+      return (
+        <PropertyCard items={items.item} navigation={navigation} arg={'home'} />
+      );
     },
     [navigation],
   );
@@ -72,6 +93,7 @@ function App({navigation}: any): React.JSX.Element {
         contentContainerStyle={{
           paddingBottom: 100,
           backgroundColor: theme.colors.backgroundHome,
+          minHeight:900
         }}
         showsVerticalScrollIndicator={false}
         onEndReachedThreshold={0.5}
@@ -98,7 +120,11 @@ function App({navigation}: any): React.JSX.Element {
               )}
             </View>
           ) : (
-            <Text style={styles.endText}>No more products</Text>
+            <Text style={styles.endText}>
+              {listings.length <= 0
+                ? 'Oops.. we cannot find anything for this search.'
+                : ''}
+            </Text>
           )
         }
       />
@@ -150,7 +176,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#888',
     padding: 12,
-    fontStyle: 'italic',
+    fontWeight:500,
+    fontFamily:Fonts.BOLD,
   },
   loadingContainer: {
     paddingVertical: 20,

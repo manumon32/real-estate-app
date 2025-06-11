@@ -1,17 +1,19 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {View, StyleSheet, Text, Platform} from 'react-native';
+import {View, StyleSheet, Text, Platform, TouchableOpacity} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
-import { Fonts } from '@constants/font';
+import {Fonts} from '@constants/font';
 import SearchContent from './SearchContent';
 import HeaderIconContent from './HeaderIconContent';
+import useBoundStore from '@stores/index';
 
 function Header(): React.JSX.Element {
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
+  const {setlocationModalVisible, location} = useBoundStore();
 
   const backgroundStyle = {
     backgroundColor: theme.colors.background,
@@ -31,22 +33,26 @@ function Header(): React.JSX.Element {
             },
           ]}>
           <View style={styles.headerContainer}>
-            <View style={styles.locationContainer}>
+            <TouchableOpacity
+              onPress={() => {
+                setlocationModalVisible();
+              }}
+              style={styles.locationContainer}>
               <IconButton
                 iconSize={16}
                 style={styles.iconStyle}
                 iconColor={theme.colors.text}
                 iconName={'map-marker'}
               />
-              <Text style={[styles.textStyle, {color: theme.colors.text}]}>
-                HSR Layout, Bangalore
+              <Text numberOfLines={1} style={[styles.textStyle, {color: theme.colors.text}]}>
+                {location?.name}
               </Text>
               <IconButton
                 iconSize={18}
                 iconColor={theme.colors.text}
                 iconName={'chevron-down'}
               />
-            </View>
+            </TouchableOpacity>
             <IconButton
               iconSize={20}
               iconColor={theme.colors.text}
@@ -74,8 +80,7 @@ function Header(): React.JSX.Element {
 
 const styles = StyleSheet.create({
   container: {
-    height:
-      230 + (Platform.OS === 'android' ? 20 : 0),
+    height: 230 + (Platform.OS === 'android' ? 20 : 0),
     backgroundColor: 'transparent',
   },
   headerContainer: {
@@ -101,6 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.MEDIUM,
     marginRight: 5,
+    maxWidth:250,
   },
   iconStyle: {
     marginRight: 5,

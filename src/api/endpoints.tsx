@@ -18,4 +18,5 @@ export const API = {
     PROFILE: '/user/profile',
     UPDATE_PROFILE: '/user/update',
   },
+  FAVOURITES:'/favorites',
 };
