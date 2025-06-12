@@ -45,7 +45,7 @@ function Header(): React.JSX.Element {
                 iconName={'map-marker'}
               />
               <Text numberOfLines={1} style={[styles.textStyle, {color: theme.colors.text}]}>
-                {location?.name}
+                {location?.name || 'Kerala'}
               </Text>
               <IconButton
                 iconSize={18}
