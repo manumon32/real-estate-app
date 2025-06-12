@@ -54,7 +54,7 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
       });
       set((state: any) => ({
         listings:
-          state.page === 0 ? res.rows : [...state.listings, ...res.rows],
+          filters.pageNum === 1 ? res.rows : [...state.listings, ...res.rows],
         page: res.pageNum,
         hasMore: res.pageNum < res.pages ? true : false,
         loading: false,

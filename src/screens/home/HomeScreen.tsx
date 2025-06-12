@@ -47,7 +47,7 @@ function App({navigation}: any): React.JSX.Element {
     ) {
       setTriggerRelaod();
       setTimeout(() => {
-        fetchListings();
+       !loading && fetchListings();
       }, 300);
     }
     prevFiltersRef.current = location;
@@ -72,7 +72,7 @@ function App({navigation}: any): React.JSX.Element {
   }, [triggerRefresh]);
 
   const fetchData = async () => {
-    fetchListings();
+    !loading && fetchListings();
   };
 
   React.useEffect(() => {

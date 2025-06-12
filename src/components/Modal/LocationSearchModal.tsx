@@ -10,12 +10,19 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  PermissionsAndroid,
   Platform,
+  Alert,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Fonts} from '@constants/font';
+import {
+  check,
+  request,
+  openSettings,
+  PERMISSIONS,
+  RESULTS,
+} from 'react-native-permissions';
 
 const GOOGLE_API_KEY = 'AIzaSyD1PiJC7RtzJzVlKsZkNIB8meCqklPRgvQ'; // Replace this
 
@@ -58,6 +65,42 @@ const CommonLocationModal: React.FC<Props> = ({
     }
   }, []);
 
+  const checkAndRequestPermission = async () => {
+    const permission =
+      Platform.OS === 'ios'
+        ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
+        : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
+
+    let status = await check(permission);
+
+    if (status === RESULTS.GRANTED) {
+      console.log('Permission granted');
+      return true;
+    }
+
+    if (status === RESULTS.DENIED || status === RESULTS.LIMITED) {
+      status = await request(permission);
+      if (status === RESULTS.GRANTED) {
+        console.log('Permission granted after request');
+        return true;
+      }
+    }
+
+    if (status === RESULTS.BLOCKED) {
+      Alert.alert(
+        'Permission Required',
+        'Please enable location permission in settings to continue.',
+        [
+          {text: 'Cancel', style: 'cancel'},
+          {text: 'Open Settings', onPress: () => openSettings()},
+        ],
+      );
+      return false;
+    }
+
+    return false;
+  };
+
   const fetchPlaceDetails = async (placeId: string) => {
     setLoading(true);
     const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`;
@@ -90,69 +133,47 @@ const CommonLocationModal: React.FC<Props> = ({
       onSelectLocation(currentLocation);
       onClose();
     } else {
-      getCurrentLocation(true);
+      getCurrentLocation();
     }
   };
 
-  const getCurrentLocation = async (arg = false) => {
-    setLoading(true);
-    try {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        );
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          onSelectLocation({
-            name: 'Keralam',
-            lat: 10.16,
-            lng: 76.64,
-          });
-          return;
-        }
-      }
+  const setLocation = (location: any) => {
+    if ((!visible && !currentLocation.lat) || visible) {
+      onSelectLocation(location);
+    }
+    setCurrentLocation(location);
+  };
 
-      Geolocation.getCurrentPosition(
-        async position => {
-          const {latitude, longitude} = position.coords;
-          const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`;
+  const getCurrentLocation = async () => {
+    if (await checkAndRequestPermission()) {
+      try {
+        setLoading(true);
+        Geolocation.getCurrentPosition(
+          async position => {
+            const {latitude, longitude} = position.coords;
+            const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`;
 
-          const res = await fetch(url);
-          const json = await res.json();
-          const address =
-            json.results[0]?.formatted_address || 'Current Location';
+            const res = await fetch(url);
+            const json = await res.json();
+            const address =
+              json.results[0]?.formatted_address || 'Current Location';
 
-          setCurrentLocation({
-            name: address,
-            lat: latitude,
-            lng: longitude,
-          });
-          if (arg || !visible) {
-            onSelectLocation({
+            setLocation({
               name: address,
               lat: latitude,
               lng: longitude,
             });
             visible && onClose();
-          }
-        },
-        () => {
-          onSelectLocation({
-            name: 'Keralam',
-            lat: 10.16,
-            lng: 76.64,
-          });
-          setLoading(false);
-        },
-        {enableHighAccuracy: true, timeout: 10000, maximumAge: 1000},
-      );
-    } catch (err) {
-      onSelectLocation({
-        name: 'Keralam',
-        lat: 10.16,
-        lng: 76.64,
-      });
-    } finally {
-      setLoading(false);
+          },
+          () => {
+            setLoading(false);
+          },
+          {enableHighAccuracy: true, timeout: 10000, maximumAge: 1000},
+        );
+      } catch (err) {
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
