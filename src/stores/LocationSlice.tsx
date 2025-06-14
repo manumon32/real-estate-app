@@ -6,7 +6,10 @@ export interface Location {
 
 export interface LocationSlice {
   locationModalvisible: boolean;
+  adPostModal: boolean;
   setlocationModalVisible: () => Promise<void>;
+  setadPostModal: () => Promise<void>;
+  locationForAdpost: any;
   location: any;
   locationHistory: [];
   setLocation: (updates: Partial<any>) => void;
@@ -30,19 +33,30 @@ const uniqueObjects = (arr: any[]) => {
 
 export const createLocationSlice = (set: any, get: any): LocationSlice => ({
   location: defaultLocation,
+  locationForAdpost: defaultLocation,
   locationModalvisible: false,
   locationHistory: [],
+  adPostModal: false,
   setLocation: updates => {
-    let serchers = [{...updates}, ...get().locationHistory];
-    const result = uniqueObjects(serchers);
-    set(() => ({
-      location: updates,
-      locationHistory: result,
-    }));
+    if (get().adPostModal) {
+      let serchers = [{...updates}, ...get().locationHistory];
+      const result = uniqueObjects(serchers);
+      set(() => ({
+        location: updates,
+        locationHistory: result,
+        adPostModal: false,
+      }));
+    }else{
+      set(() => ({
+        locationForAdpost: updates,
+        adPostModal: false,
+      }));
+    }
   },
   setlocationModalVisible: () =>
     set((state: any) => ({
       locationModalvisible: !state.locationModalvisible,
     })),
   resetLocation: () => set({location: defaultLocation}),
+  setadPostModal: () => set({adPostModal: true}),
 });

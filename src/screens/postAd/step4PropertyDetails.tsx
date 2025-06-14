@@ -4,49 +4,77 @@ import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
 import CommonStepperInput from '@components/Input/stepperInput';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
+import useBoundStore from '@stores/index';
 
-const Step4PropertyDetails = ({currentStep}: any) => {
-
+const Step4PropertyDetails = (props: any) => {
   const [isGym, setIsGym] = useState<boolean>(false);
+  const {appConfigs} = useBoundStore();
 
-  const [noOfKitchens, setKitchen] = useState<number>(1);
+  const {
+    currentStep,
+    setFieldValue,
+    values,
+    // handleBlur,
+    // touched,
+    // errors,
+    isStringInEitherArray,
+  } = props;
 
+  const AMENITIES = appConfigs?.amenities || [];
   return (
     <SlideInView direction={currentStep === 3 ? 'right' : 'left'}>
       <Text style={styles.headingText}>Property Features</Text>
 
-      <View style={styles.inputContainer}>
-        <CommonStepperInput
-          label="Kitchen"
-          value={noOfKitchens}
-          onChange={setKitchen}
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <CommonStepperInput
-          label="Balconies"
-          value={noOfKitchens}
-          onChange={setKitchen}
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <CommonStepperInput
-          label="Car Parking"
-          value={noOfKitchens}
-          onChange={setKitchen}
-        />
-      </View>
+      {isStringInEitherArray('kitchen') && (
+        <View style={styles.inputContainer}>
+          <CommonStepperInput
+            label="Kitchen"
+            value={values.carParking}
+            onChange={value => {
+              setFieldValue(`carParking`, value);
+            }}
+          />
+        </View>
+      )}
+      {isStringInEitherArray('balcony') && (
+        <View style={styles.inputContainer}>
+          <CommonStepperInput
+            label="Balconies"
+            value={values.numberOfBalconies}
+            onChange={value => {
+              setFieldValue(`numberOfBalconies`, value);
+            }}
+          />
+        </View>
+      )}
+      {isStringInEitherArray('carParking') && (
+        <View style={styles.inputContainer}>
+          <CommonStepperInput
+            label="Car Parking"
+            value={values.carParking}
+            onChange={value => {
+              setFieldValue(`carParking`, value);
+            }}
+          />
+        </View>
+      )}
 
-      <Text style={styles.headingText}>Property Features</Text>
+      <Text style={styles.headingText}>Amenities</Text>
 
-      <View style={styles.inputContainer}>
-        <CommonAmenityToggle
-          label="Gym"
-          selected={isGym}
-          onToggle={() => setIsGym(prev => !prev)}
-        />
-      </View>
-      <View style={styles.inputContainer}>
+      {isStringInEitherArray('amenities') &&
+        AMENITIES.map(
+          items =>
+            items.name && (
+              <View style={styles.inputContainer}>
+                <CommonAmenityToggle
+                  label={items.name}
+                  selected={isGym}
+                  onToggle={() => setIsGym(prev => !prev)}
+                />
+              </View>
+            ),
+        )}
+      {/* <View style={styles.inputContainer}>
         <CommonAmenityToggle
           label="Pool"
           selected={isGym}
@@ -60,7 +88,7 @@ const Step4PropertyDetails = ({currentStep}: any) => {
           selected={isGym}
           onToggle={() => setIsGym(prev => !prev)}
         />
-      </View>
+      </View> */}
     </SlideInView>
   );
 };

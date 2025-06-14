@@ -25,5 +25,5 @@ export const createPostAdSlice = (set: any): PostAdSlice => ({
       postAd: {...state.postAd, ...updates},
     })),
 
-  resetPostAd: () => set({postAd: defaultPostAd}),
+  resetPostAd: () => set({postAd: {}}),
 });

@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {StyleSheet, View, Text} from 'react-native';
+import React from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 import TextInput from '@components/Input/textInput';
 // import SelectInput, {SelectOption} from '@components/Input/selectInput';
 import {Fonts} from '@constants/font';
@@ -7,73 +7,98 @@ import SlideInView from '../../components/AnimatedView';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
 import CommonDistanceInput from '@components/Input/distanceInput';
 
-const Step2BasicInfo = ({currentStep}: any) => {
-  const [isGym, setIsGym] = useState<boolean>(false);
+const Step2BasicInfo = (props: any) => {
+  const {
+    currentStep,
+    setFieldValue,
+    values,
+    handleBlur,
+    touched,
+    errors,
+    isStringInEitherArray,
+  } = props;
 
   return (
     <SlideInView direction={currentStep === 1 ? 'right' : 'left'}>
-      <Text style={styles.headingText}>Price Details</Text>
+      {/* <Text style={styles.headingText}>Price Details</Text> */}
       <View style={styles.inputContainer}>
         <TextInput
           iconName="currency-inr"
           iconColor="#696969"
-          onChangeText={text => {
-            const numericValue = text.replace(/[^0-9]/g, '');
-            console.log(numericValue);
-          }}
+          onChangeText={text => setFieldValue('price', text)}
+          value={values?.price}
           placeholder="Price"
+          placeholderTextColor={'#ccc'}
+          onBlur={handleBlur('price')}
+          error={touched?.price && errors?.price ? true : false}
           keyboardType="numeric"
         />
       </View>
+      {touched?.price && errors?.price && (
+        <Text style={styles.error}>{errors?.price}</Text>
+      )}
       <View style={styles.inputContainer}>
         <CommonAmenityToggle
           label="Price Negotiable"
-          selected={isGym}
-          onToggle={() => setIsGym(prev => !prev)}
+          selected={values.isNegotiable}
+          onToggle={() => setFieldValue('isNegotiable', !values.isNegotiable)}
         />
       </View>
       <View style={styles.inputContainer}>
         <CommonAmenityToggle
           label="Featured Property"
-          selected={isGym}
-          onToggle={() => setIsGym(prev => !prev)}
+          selected={values.isFeatured}
+          onToggle={() => setFieldValue('isFeatured', !values.isFeatured)}
         />
       </View>
-      <View style={styles.inputContainer}>
-        <CommonDistanceInput
-          label="Maintance Charge"
-          unit="/Month"
-          // value={'10'}
-          onChange={() => {}}
-        />
-      </View>
-
-      <View style={styles.inputContainer}>
-        <CommonDistanceInput
-          label="Property Tax"
-          unit="/Annum"
-          // value={'10'}
-          onChange={() => {}}
-        />
-
+      {isStringInEitherArray('maintanceCharge') && (
         <View style={styles.inputContainer}>
-          <CommonAmenityToggle
-            label="Loan Eligible"
-            selected={isGym}
-            onToggle={() => setIsGym(prev => !prev)}
+          <CommonDistanceInput
+            label="Maintance Charge"
+            unit="/Month"
+            value={values.maintenanceCharge}
+            onChange={text => setFieldValue('maintenanceCharge', text)}
           />
         </View>
+      )}
 
-        <View style={styles.inputContainer}>
-          <CommonAmenityToggle
-            label="RERA Approved"
-            selected={isGym}
-            onToggle={() => setIsGym(prev => !prev)}
+      <View style={styles.inputContainer}>
+        {isStringInEitherArray('propertyTax') && (
+          <CommonDistanceInput
+            label="Property Tax"
+            unit="/Annum"
+            value={values.propertyTax}
+            onChange={text => setFieldValue('propertyTax', text)}
           />
-        </View>
-        <View style={styles.inputContainer}>
-          <TextInput onChangeText={() => {}} placeholder="RERA ID" />
-        </View>
+        )}
+        {isStringInEitherArray('loanEligible') && (
+          <View style={styles.inputContainer}>
+            <CommonAmenityToggle
+              label="Loan Eligible"
+              selected={values.loanEligible}
+              onToggle={() =>
+                setFieldValue('loanEligible', !values.loanEligible)
+              }
+            />
+          </View>
+        )}
+
+        {isStringInEitherArray('reraApproved') && (
+          <View style={styles.inputContainer}>
+            <CommonAmenityToggle
+              label="RERA Approved"
+              selected={values.reraApproved}
+              onToggle={() =>
+                setFieldValue('reraApproved', !values.reraApproved)
+              }
+            />
+          </View>
+        )}
+        {isStringInEitherArray('reraId') && (
+          <View style={styles.inputContainer}>
+            <TextInput onChangeText={() => {}} placeholder="RERA ID" />
+          </View>
+        )}
       </View>
     </SlideInView>
   );
@@ -100,6 +125,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     margin: 10,
     marginTop: 20,
+  },
+  error: {
+    color: 'red',
+    marginBottom: 2,
+    marginTop: 3,
+    left: 10,
+    fontSize: 12,
+    fontFamily: Fonts.REGULAR,
   },
 });
 

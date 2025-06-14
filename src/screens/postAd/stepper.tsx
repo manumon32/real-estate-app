@@ -2,14 +2,18 @@
 import Stepper from '@components/stepper';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
+  Modal,
   Platform,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import Step1BasicInfo from './step1BasicInfo';
 import Step2 from './step2PriceDetails';
 import Step3LocationDetails from './step3LocationDetails';
@@ -18,6 +22,7 @@ import Step5MediaUpload from './step5MediaUpload';
 import CommonHeader from '@components/Header/CommonHeader';
 import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
 import useBoundStore from '@stores/index';
+import Preview from './preview';
 
 interface FooterProps {
   currentStep: number;
@@ -26,6 +31,7 @@ interface FooterProps {
   isLastStep?: boolean;
   onCancel?: () => void;
   onNext?: () => void;
+  onBackPress: any;
 }
 
 const Footer: React.FC<FooterProps> = ({
@@ -35,11 +41,15 @@ const Footer: React.FC<FooterProps> = ({
   isLastStep = false,
   onCancel,
   onNext,
+  onBackPress,
 }) => {
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
     } else {
+      if(currentStep ==1 ){
+        onBackPress();
+      }
       currentStep !== 1 && setCurrentStep(prev => Math.max(prev - 1, 0));
     }
   };
@@ -67,24 +77,29 @@ const Footer: React.FC<FooterProps> = ({
         style={styles.buyButton}
         accessibilityRole="button"
         disabled={isLastStep}>
-        <Text style={styles.buyText}>Next</Text>
+        <Text style={styles.buyText}>
+          {currentStep == 5 ? 'Post Now' : 'Next'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 const PostAdContainer = (props: any) => {
-  const {handleSubmit,errors, touched, setTouched} = props;
+  const {handleSubmit, errors, touched, setTouched, setFieldValue, values} = props;
+  // console.log('payload', values);
+  const navigation = useNavigation();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [visible, setVisible] = useState(false);
+  const [preview, setPreview] = useState(false);
   const [fields, setFields] = useState<{}>({});
   const prevCountRef = useRef<number | null>(null);
-  const {setPostAd, postAd} = useBoundStore();
+  const {setPostAd, postAd, resetPostAd} = useBoundStore();
 
   useEffect(() => {
-    prevCountRef.current = currentStep;
-    if (currentStep == 5) {
-      handleSubmit();
+    if (currentStep == 6) {
+      setPreview(true);
+      // handleSubmit();
     } else {
       setVisible(false);
     }
@@ -96,12 +111,11 @@ const PostAdContainer = (props: any) => {
     (id: any, argFields: string[]) => {
       setFields((prev: any) => {
         const newMap: any = {...prev};
-        if (newMap[id]) {
-          delete newMap[id];
-        } else {
-          newMap[id] = argFields;
-        }
-        console.log(newMap);
+        // if (newMap[id]) {
+        //   delete newMap[id];
+        // } else {
+        newMap[id] = argFields;
+        // }
         return newMap;
       });
     },
@@ -118,8 +132,10 @@ const PostAdContainer = (props: any) => {
       if (name) {
         if (postAd[name] && postAd[name][0] === item) {
           delete postAd[name];
+          setFieldValue(name, '');
         } else {
           postAd[name] = [item];
+          setFieldValue(name, item);
         }
         setPostAd({...postAd});
       } else {
@@ -130,9 +146,8 @@ const PostAdContainer = (props: any) => {
         });
       }
     },
-    [postAd, setPostAd],
+    [postAd, setPostAd, setFieldValue],
   );
-
   const renderChips = useCallback(
     (items: any[], selected?: any, setSelected?: any) => {
       return (
@@ -157,6 +172,7 @@ const PostAdContainer = (props: any) => {
                   newselected?.includes(item._id) && styles.chipSelected,
                 ]}
                 onPress={() => {
+                  console.log(item.fields);
                   item.fields && getMergedFields(item.filterName, item.fields);
                   toggleItem(item.filterName, item._id, setSelected);
                 }}>
@@ -178,21 +194,33 @@ const PostAdContainer = (props: any) => {
   );
 
   const checkErrors = () => {
-    const requiredFields = ['title', 'description'];
+    const requiredFields = {
+      1: ['title', 'description', 'propertyTypeId', 'listingTypeId'],
+      2: ['price'],
+      // 3: ['nearbyLandmarks'],
+    };
+    prevCountRef.current = currentStep;
     setTouched(
-      requiredFields.reduce((acc, key) => {
+      // @ts-ignore
+      requiredFields[currentStep]?.reduce((acc, key) => {
         acc[key] = true;
         return acc;
       }, {} as {[key: string]: boolean}),
       true, // validate after touching
     );
+
+    setCurrentStep(prev => prev + 1);
     if (
       currentStep === 1 &&
-      requiredFields.some(field => !!errors[field] || !touched[field])
+      // @ts-ignore
+      requiredFields[currentStep].some(
+        // @ts-ignore
+        field => !!errors[field] || !touched[field],
+      )
     ) {
       return false;
     } else {
-      setCurrentStep(prev => prev + 1);
+      // setCurrentStep(prev => prev + 1);
     }
   };
 
@@ -217,6 +245,7 @@ const PostAdContainer = (props: any) => {
             getMergedFields={getMergedFields}
             toggleItem={toggleItem}
             renderChips={renderChips}
+            {...props}
           />
         );
       case 3:
@@ -227,6 +256,7 @@ const PostAdContainer = (props: any) => {
             getMergedFields={getMergedFields}
             toggleItem={toggleItem}
             renderChips={renderChips}
+            {...props}
           />
         );
       case 4:
@@ -235,6 +265,7 @@ const PostAdContainer = (props: any) => {
             currentStep={prevStep}
             isStringInEitherArray={isStringInEitherArray}
             getMergedFields={getMergedFields}
+            {...props}
           />
         );
       case 5:
@@ -252,9 +283,27 @@ const PostAdContainer = (props: any) => {
     }
   };
 
+  const onBackPress = () => {
+    Alert.alert('Quit without saving?', 'You will lose your progress.', [
+      {text: 'Cancel', style: 'cancel'},
+      {
+        text: 'Quit',
+        onPress: () => {
+          resetPostAd();
+          setFields([]);
+          navigation.goBack();
+        },
+      },
+    ]);
+  };
+
   return (
     <React.Fragment>
-      <CommonHeader title="Add Property" textColor="#171717" />
+      <CommonHeader
+        title="Add Property"
+        textColor="#171717"
+        onBackPress={onBackPress}
+      />
       <View style={styles.stepperContainer}>
         <Stepper totalSteps={5} currentStep={currentStep} />
       </View>
@@ -272,9 +321,24 @@ const PostAdContainer = (props: any) => {
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
           onNext={checkErrors}
+          onBackPress={onBackPress}
         />
       </KeyboardAvoidingView>
       <CommonSuccessModal visible={visible} onClose={() => setVisible(false)} />
+      <Modal
+        visible={preview}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setPreview(false);
+        }}>
+        <SafeAreaView style={[]}>
+          <TouchableOpacity onPress={() => setPreview(false)}>
+            <Text>Colse</Text>
+          </TouchableOpacity>
+          <Preview  items={values}/>
+        </SafeAreaView>
+      </Modal>
     </React.Fragment>
   );
 };
@@ -341,12 +405,14 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     paddingVertical: 6,
     paddingHorizontal: 8,
     marginRight: 5,
+    minWidth: 50,
     // marginBottom: 5,
   },
   chipSelected: {
@@ -362,4 +428,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PostAdContainer;
+export default React.memo(PostAdContainer);

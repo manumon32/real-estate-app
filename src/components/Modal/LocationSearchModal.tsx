@@ -138,7 +138,7 @@ const CommonLocationModal: React.FC<Props> = ({
   };
 
   const setLocation = (location: any) => {
-    if ((!visible && !currentLocation.lat) || visible) {
+    if ((!visible && !currentLocation?.lat) || visible) {
       onSelectLocation(location);
     }
     setCurrentLocation(location);

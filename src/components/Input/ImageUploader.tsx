@@ -4,7 +4,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import * as ImagePicker from 'react-native-image-picker';
 
 interface CommonImageUploaderProps {
-  onUpload: (uri: string) => void;
+  onUpload: (uri: any) => void;
   label:string
 }
 
@@ -14,9 +14,9 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
 }) => {
   const handlePickImage = async () => {
     const response = await ImagePicker.launchImageLibrary({
-      mediaType: 'mixed',
+      mediaType: 'photo',
       quality: 0.7,
-      selectionLimit: 0,
+      selectionLimit: 10,
     });
     if (response.didCancel) {
       console.log('User cancelled');
@@ -25,7 +25,7 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
     } else if (response.assets) {
       const imageUris = response.assets.map(asset => asset.uri);
       console.log('Selected images:', imageUris);
-      onUpload('image.uri');
+      onUpload(response.assets);
       // Use array of URIs as needed
     }
   };
