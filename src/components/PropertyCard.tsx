@@ -57,20 +57,11 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
             iconColor={'#171717'}
             iconName={'map-marker'}
           />
-          <Text style={styles.subtitle}>{items.city}</Text>
+          <Text numberOfLines={1} style={styles.subtitle}>{items.address}</Text>
         </View>
 
         <View style={styles.infoRow}>
-          <View style={styles.infoItem}>
-            <IconButton
-              iconSize={16}
-              iconColor={'#171717'}
-              iconName={'bed-empty'}
-            />
-            {/* <BedIcon /> */}
-            <Text style={styles.infoText}>{items.numberOfBedrooms} Beds</Text>
-          </View>
-          {items?.distance && (
+          {items?.distance ?  (
             <View style={styles.infoItem}>
               <IconButton
                 iconSize={16}
@@ -83,7 +74,7 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
                   : (items?.distance * 0.001).toFixed(2) + ' km'}
               </Text>
             </View>
-          )}
+          ):<></>}
         </View>
 
         <Text style={styles.price}>
@@ -153,6 +144,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#777',
     marginVertical: 2,
+    maxWidth:150,
   },
   infoRow: {
     flexDirection: 'row',

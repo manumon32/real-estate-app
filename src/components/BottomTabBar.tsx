@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
@@ -34,6 +34,11 @@ const BottomTabBar = ({state, navigation}: any) => {
     // setLocation,
     // locationHistory,
   } = useBoundStore();
+
+  useEffect(() => {
+    console.log('bearerToken', bearerToken);
+  }, [bearerToken]);
+
   return (
     // eslint-disable-next-line react-native/no-inline-styles
     <View
@@ -51,6 +56,7 @@ const BottomTabBar = ({state, navigation}: any) => {
 
             const color = isFocused ? '#2E7D32' : '#888';
             const onPress = () => {
+              console.log(bearerToken);
               if (
                 (route.name === 'AddPost' ||
                   route.name === 'Chat' ||

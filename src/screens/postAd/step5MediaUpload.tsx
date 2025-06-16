@@ -1,20 +1,23 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {StyleSheet, View, Text, FlatList, Image, Pressable} from 'react-native';
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
 import TextInput from '@components/Input/textInput';
 import CommonImageUploader from '@components/Input/ImageUploader';
+import ImagePickerModal from '@components/Modal/ImagePickerModal';
+import useBoundStore from '@stores/index';
 
 const Step5MediaUpload = (props: any) => {
   const [assets, setAssets] = useState<any[]>([]);
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const {setImages} = useBoundStore();
   const {
     currentStep,
     // handleSubmit,
-    // errors,
-    // touched,
+    errors,
+    touched,
     // setTouched,
-    // setFieldValue,
+    setFieldValue,
     isStringInEitherArray,
   } = props;
 
@@ -40,19 +43,23 @@ const Step5MediaUpload = (props: any) => {
     ),
     [removeAsset],
   );
+  useEffect(()=>{
+    setImages(assets);
+    setFieldValue('imageUrls', assets)
+  },[assets, setFieldValue, setImages])
 
   const keyExtractor = useCallback(
     (item: any) => item.uri ?? item.fileName ?? Math.random().toString(),
     [],
   );
-const dedupByUri = (arr: any[]) => {
-  const seen = new Set<string>();
-  return arr.filter(item => {
-    if (!item?.uri || seen.has(item.uri)) return false;
-    seen.add(item.uri);
-    return true;
-  });
-};
+  const dedupByUri = (arr: any[]) => {
+    const seen = new Set<string>();
+    return arr.filter(item => {
+      if (!item?.uri || seen.has(item.uri)) return false;
+      seen.add(item.uri);
+      return true;
+    });
+  };
   const previews = useMemo(
     () => (
       <FlatList
@@ -69,13 +76,18 @@ const dedupByUri = (arr: any[]) => {
 
   return (
     <SlideInView direction={currentStep === 4 ? 'right' : 'left'}>
-      <Text style={styles.headingText}>Property Features</Text>
+      <Text style={styles.headingText}>Image Upload</Text>
       <View style={styles.inputContainer}>
         <CommonImageUploader
-          onUpload={uri => setAssets(prev => dedupByUri([...prev, ...(uri ?? [])]))}
+          onUpload={uri =>
+            setAssets(prev => dedupByUri([...prev, ...(uri ?? [])]))
+          }
           label="Upload Property Images"
+          // handleOnpress={()=> setModalVisible(true)}
         />
-
+        {touched?.imageUrls && errors?.imageUrls && (
+          <Text style={styles.error}>{errors?.imageUrls}</Text>
+        )}
         {previews}
       </View>
       <View style={styles.inputContainer}>
@@ -96,6 +108,12 @@ const dedupByUri = (arr: any[]) => {
           />
         </View>
       )}
+
+      <ImagePickerModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onImagesSelected={setAssets}
+      />
     </SlideInView>
   );
 };
@@ -148,6 +166,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
     lineHeight: 20,
+  },
+  error: {
+    color: 'red',
+    marginBottom: 2,
+    marginTop: 3,
+    left: 10,
+    fontSize: 12,
+    fontFamily: Fonts.REGULAR,
   },
 });
 

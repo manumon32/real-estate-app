@@ -6,7 +6,6 @@ export interface HandShakeSlice {
   token: string | null;
   handShakeError: boolean;
   gethandShakeToken: (data: any) => Promise<void>;
-  logout: () => Promise<void>;
   loadToken: () => Promise<void>;
 }
 
@@ -30,11 +29,6 @@ export const createHandShakeSlice = (set: any): HandShakeSlice => ({
       set({handShakeError: true});
     }
   },
-  logout: async () => {
-    await Keychain.resetGenericPassword();
-    set({clientId: null, token: null});
-  },
-
   loadToken: async () => {
     const creds = await Keychain.getGenericPassword();
     if (creds) {

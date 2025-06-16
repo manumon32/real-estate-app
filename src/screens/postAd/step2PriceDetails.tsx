@@ -20,13 +20,13 @@ const Step2BasicInfo = (props: any) => {
 
   return (
     <SlideInView direction={currentStep === 1 ? 'right' : 'left'}>
-      {/* <Text style={styles.headingText}>Price Details</Text> */}
+      <Text style={styles.headingText}>Price Details</Text>
       <View style={styles.inputContainer}>
         <TextInput
           iconName="currency-inr"
           iconColor="#696969"
           onChangeText={text => setFieldValue('price', text)}
-          value={values?.price}
+          value={String(values?.price)}
           placeholder="Price"
           placeholderTextColor={'#ccc'}
           onBlur={handleBlur('price')}

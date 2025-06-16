@@ -42,13 +42,12 @@ function App({navigation}: any): React.JSX.Element {
       // @ts-ignore
       (prevFiltersRef.current?.lat &&
         // @ts-ignore
-        prevFiltersRef.current?.lat !== location.lat &&
-        !loading)
+        prevFiltersRef.current?.lat !== location.lat)
     ) {
       setTriggerRelaod();
       setTimeout(() => {
        !loading && fetchListings();
-      }, 300);
+      }, 100);
     }
     prevFiltersRef.current = location;
   }, [location]);

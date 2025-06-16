@@ -6,6 +6,7 @@ import PostAd from '@screens/postAd';
 import HomePage from '@screens/home';
 import ThreeDModelViewer from '@screens/details/ThreeDModelViewer';
 import FavAds from '@screens/FavAds';
+import EditProfile from '@screens/profile/EditProfile';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,7 @@ const RootNavigator = () => {
       <Stack.Screen name="ThreeDModelViewer" component={ThreeDModelViewer} />
       <Stack.Screen name="PostAd" component={PostAd} />
       <Stack.Screen name="FavAds" component={FavAds} />
+      <Stack.Screen name="EditProfile" component={EditProfile} />
     </Stack.Navigator>
   );
 };

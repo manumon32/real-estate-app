@@ -5,6 +5,7 @@ import BottomTabBar from '@components/BottomTabBar';
 import Chat from '@screens/chat';
 import FilterScreen from '@screens/filter/index';
 import MyAds from '@screens/MyAds';
+import Profile from '@screens/profile';
 
 export type MainTabParamList = {
   Home: undefined;
@@ -35,12 +36,12 @@ const MainTabNavigator = () => {
       <Tab.Screen
         name="MyAds"
         component={MyAds}
-        options={{
-          headerShown: true,
-          headerTitle: 'My Ads',
-        }}
       />
-      <Tab.Screen name="Profile" component={HomeScreen} />
+      <Tab.Screen name="Profile" component={Profile} 
+        options={{
+          headerShown: false,
+          headerTitle: 'My Profile',
+        }}/>
       <Tab.Screen name="filter" component={FilterScreen} />
     </Tab.Navigator>
   );

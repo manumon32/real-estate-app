@@ -239,7 +239,7 @@ const PropertyDetails = React.memo(() => {
               {property?.areaSize}
             </Text>
             <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
-              {property?.areaUnitId?.name}
+              {'Sq.ft'}
             </Text>
           </View>
           <View style={styles.iconsContainer}>

@@ -14,6 +14,7 @@ interface CommonDistanceInputProps {
   name?: string;
   placeholderUnit?: string;
   placeholderValue?: string;
+  error?: boolean;
 }
 
 const CommonDistanceInput: React.FC<CommonDistanceInputProps> = ({
@@ -21,6 +22,7 @@ const CommonDistanceInput: React.FC<CommonDistanceInputProps> = ({
   label,
   value,
   name,
+  error,
   onChange,
   placeholder = '',
   placeholderUnit,
@@ -30,7 +32,14 @@ const CommonDistanceInput: React.FC<CommonDistanceInputProps> = ({
   onChangeText,
 }) => {
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        error && {
+          borderWidth: 1,
+          borderColor: 'red',
+        },
+      ]}>
       {!editable && (
         <>
           <Text style={styles.label}>{label}</Text>

@@ -11,6 +11,7 @@ import {
   // ScrollView,
   FlatList,
   Text,
+  RefreshControl,
 } from 'react-native';
 import {Fonts} from '@constants/font';
 
@@ -48,6 +49,14 @@ const FavAds = () => {
           backgroundColor: theme.colors.backgroundHome,
           minHeight: 900,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() => {
+              fetchFavouriteAds();
+            }}
+          />
+        }
         ListFooterComponent={
           favorites.length <= 0 ? (
             <Text style={styles.endText}>You havent liked anything yet</Text>

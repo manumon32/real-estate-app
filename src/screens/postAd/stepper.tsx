@@ -23,6 +23,7 @@ import CommonHeader from '@components/Header/CommonHeader';
 import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
 import useBoundStore from '@stores/index';
 import Preview from './preview';
+import {postAdAPI, uploadImages} from '@api/services';
 
 interface FooterProps {
   currentStep: number;
@@ -32,6 +33,7 @@ interface FooterProps {
   onCancel?: () => void;
   onNext?: () => void;
   onBackPress: any;
+  submitPostAd?: any;
 }
 
 const Footer: React.FC<FooterProps> = ({
@@ -42,12 +44,13 @@ const Footer: React.FC<FooterProps> = ({
   onCancel,
   onNext,
   onBackPress,
+  submitPostAd,
 }) => {
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
     } else {
-      if(currentStep ==1 ){
+      if (currentStep == 1) {
         onBackPress();
       }
       currentStep !== 1 && setCurrentStep(prev => Math.max(prev - 1, 0));
@@ -55,6 +58,9 @@ const Footer: React.FC<FooterProps> = ({
   };
 
   const handleNext = () => {
+    if (currentStep === 5) {
+      submitPostAd();
+    }
     if (onNext) {
       onNext();
     } else {
@@ -86,25 +92,26 @@ const Footer: React.FC<FooterProps> = ({
 };
 
 const PostAdContainer = (props: any) => {
-  const {handleSubmit, errors, touched, setTouched, setFieldValue, values} = props;
-  // console.log('payload', values);
+  const {errors, setTouched, setFieldValue, values} = props;
+
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [visible, setVisible] = useState(false);
   const [preview, setPreview] = useState(false);
   const [fields, setFields] = useState<{}>({});
   const prevCountRef = useRef<number | null>(null);
-  const {setPostAd, postAd, resetPostAd} = useBoundStore();
-
-  useEffect(() => {
-    if (currentStep == 6) {
-      setPreview(true);
-      // handleSubmit();
-    } else {
-      setVisible(false);
-    }
-  }, [currentStep, handleSubmit]);
-
+  const {
+    setPostAd,
+    resetPostAd,
+    images,
+    postAd,
+    token,
+    clientId,
+    bearerToken,
+    location,
+    locationForAdpost,
+  } = useBoundStore();
   const prevStep = prevCountRef.current;
 
   const getMergedFields = useCallback(
@@ -197,7 +204,10 @@ const PostAdContainer = (props: any) => {
     const requiredFields = {
       1: ['title', 'description', 'propertyTypeId', 'listingTypeId'],
       2: ['price'],
-      // 3: ['nearbyLandmarks'],
+      3: ['areaSize'],
+      4: [],
+      5: [],
+      // 3: imageUrls ['nearbyLandmarks'],
     };
     prevCountRef.current = currentStep;
     setTouched(
@@ -208,19 +218,16 @@ const PostAdContainer = (props: any) => {
       }, {} as {[key: string]: boolean}),
       true, // validate after touching
     );
-
-    setCurrentStep(prev => prev + 1);
     if (
-      currentStep === 1 &&
       // @ts-ignore
-      requiredFields[currentStep].some(
+      requiredFields[currentStep]?.some(
         // @ts-ignore
-        field => !!errors[field] || !touched[field],
+        field => !!errors[field],
       )
     ) {
       return false;
     } else {
-      // setCurrentStep(prev => prev + 1);
+      currentStep < 5 && setCurrentStep(prev => prev + 1);
     }
   };
 
@@ -276,6 +283,7 @@ const PostAdContainer = (props: any) => {
             getMergedFields={getMergedFields}
             toggleItem={toggleItem}
             renderChips={renderChips}
+            {...props}
           />
         );
       default:
@@ -296,6 +304,70 @@ const PostAdContainer = (props: any) => {
       },
     ]);
   };
+
+  const submitPostAd = useCallback(async () => {
+    if (Object.keys(errors).length == 0) {
+      setLoading(true);
+      let formData = new FormData();
+      images.map((items: any, index: any) => {
+        formData.append('images', {
+          uri: items.uri, // local path or blob URL
+          name: `photo_${index}.jpg`, // ⬅ server sees this
+          type: 'image/jpeg',
+        } as any);
+      });
+      try {
+        /* 1. upload ------------------------------------------------------ */
+        const imageUrls = await uploadImages(formData, {
+          token: token,
+          clientId: clientId,
+          bearerToken: bearerToken,
+        });
+        const paylod = {
+          latitude: locationForAdpost.lat
+            ? locationForAdpost.lat
+            : location.lat,
+          longitude: locationForAdpost.lng
+            ? locationForAdpost.lng
+            : location.lng,
+          address: locationForAdpost.name
+            ? locationForAdpost.name
+            : location.name,
+          imageUrls: imageUrls,
+        };
+        let mergedPayload = {...values, ...paylod};
+        console.log('postAd payload', mergedPayload);
+        /* 2. post ad ----------------------------------------------------- */
+        await postAdAPI(mergedPayload, {
+          token: token,
+          clientId: clientId,
+          bearerToken: bearerToken,
+        });
+        setVisible(true);
+      } catch (err: any) {
+        Alert.alert('Something went wrong', 'Failed to post ad, please try again later');
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [
+    errors,
+    images,
+    token,
+    clientId,
+    bearerToken,
+    locationForAdpost.lat,
+    locationForAdpost.lng,
+    locationForAdpost.name,
+    location.lat,
+    location.lng,
+    location.name,
+    values,
+  ]);
+
+  useEffect(() => {
+    setVisible(false);
+  }, []);
 
   return (
     <React.Fragment>
@@ -322,9 +394,15 @@ const PostAdContainer = (props: any) => {
           setCurrentStep={setCurrentStep}
           onNext={checkErrors}
           onBackPress={onBackPress}
+          submitPostAd={submitPostAd}
         />
       </KeyboardAvoidingView>
-      <CommonSuccessModal visible={visible} onClose={() => setVisible(false)} />
+      <CommonSuccessModal
+        visible={visible}
+        onClose={() => {
+          setVisible(false);
+        }}
+      />
       <Modal
         visible={preview}
         transparent
@@ -336,7 +414,7 @@ const PostAdContainer = (props: any) => {
           <TouchableOpacity onPress={() => setPreview(false)}>
             <Text>Colse</Text>
           </TouchableOpacity>
-          <Preview  items={values}/>
+          <Preview items={values} />
         </SafeAreaView>
       </Modal>
     </React.Fragment>

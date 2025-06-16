@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {useCallback,
   //  useEffect, 
    useState} from 'react';
@@ -156,7 +157,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
                 color="#000"
                 size={22}
                 borderRadius={10}
-                onPress={signInWithGoogle}
+                // onPress={signInWithGoogle}
               />
               <Icon.Button
                 name="facebook"

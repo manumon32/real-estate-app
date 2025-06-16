@@ -10,8 +10,16 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import useBoundStore from '@stores/index';
 
 const Step3LocationDetails = (props: any) => {
-  const {currentStep, setFieldValue, values, errors, isStringInEitherArray} = props;
-  const {setlocationModalVisible, locationForAdpost} = useBoundStore();
+  const {
+    currentStep,
+    setFieldValue,
+    values,
+    errors,
+    isStringInEitherArray,
+    touched,
+  } = props;
+  const {setlocationModalVisible, locationForAdpost, setadPostModal} =
+    useBoundStore();
   //
 
   return (
@@ -19,7 +27,10 @@ const Step3LocationDetails = (props: any) => {
       <Text style={styles.headingText}>Location and Area Details</Text>
       <TouchableOpacity
         onPress={() => {
-          setlocationModalVisible();
+          setadPostModal();
+          setTimeout(() => {
+            setlocationModalVisible();
+          }, 200);
         }}
         style={[styles.inputContainer, {flexDirection: 'row'}]}>
         <View style={{width: '85%'}}>
@@ -83,30 +94,40 @@ const Step3LocationDetails = (props: any) => {
       </View> */}
 
       <Text style={styles.headingText}>Area Details</Text>
-      {isStringInEitherArray('area') && (<View style={styles.inputContainer}>
-        <CommonDistanceInput
-          label="Area Size"
-          unit="/Sq.ft"
-          value={values.areaSize}
-          onChange={text => setFieldValue('areaSize', text)}
-        />
-      </View>)}
-      {isStringInEitherArray('carpetArea') && (<View style={styles.inputContainer}>
-        <CommonDistanceInput
-          label="Carpet Area"
-          unit="/Sq.ft"
-          value={values.carpetArea}
-          onChange={text => setFieldValue('carpetArea', text)}
-        />
-      </View>)}
-      {isStringInEitherArray('buildUpArea') && (<View style={styles.inputContainer}>
-        <CommonDistanceInput
-          label="Build-up Area"
-          unit="/Sq.ft"
-          value={values.builtUpArea}
-          onChange={text => setFieldValue('builtUpArea', text)}
-        />
-      </View>)}
+      {isStringInEitherArray('area') && (
+        <View style={styles.inputContainer}>
+          <CommonDistanceInput
+            label="Area Size"
+            unit="/Sq.ft"
+            value={values.areaSize}
+            error={touched?.areaSize && errors?.areaSize}
+            onChange={text => setFieldValue('areaSize', text)}
+          />
+          {touched?.areaSize && errors?.areaSize && (
+            <Text style={styles.error}>{errors?.areaSize}</Text>
+          )}
+        </View>
+      )}
+      {isStringInEitherArray('carpetArea') && (
+        <View style={styles.inputContainer}>
+          <CommonDistanceInput
+            label="Carpet Area"
+            unit="/Sq.ft"
+            value={values.carpetArea}
+            onChange={text => setFieldValue('carpetArea', text)}
+          />
+        </View>
+      )}
+      {isStringInEitherArray('buildUpArea') && (
+        <View style={styles.inputContainer}>
+          <CommonDistanceInput
+            label="Build-up Area"
+            unit="/Sq.ft"
+            value={values.builtUpArea}
+            onChange={text => setFieldValue('builtUpArea', text)}
+          />
+        </View>
+      )}
 
       {isStringInEitherArray('superBuildUpArea') && (
         <View style={styles.inputContainer}>

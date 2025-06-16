@@ -23,6 +23,7 @@ import {
   PERMISSIONS,
   RESULTS,
 } from 'react-native-permissions';
+import useBoundStore from '@stores/index';
 
 const GOOGLE_API_KEY = 'AIzaSyD1PiJC7RtzJzVlKsZkNIB8meCqklPRgvQ'; // Replace this
 
@@ -43,6 +44,9 @@ const CommonLocationModal: React.FC<Props> = ({
   onSelectLocation,
   locationHistory,
 }) => {
+   const {
+    location,
+  } = useBoundStore();
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -108,11 +112,11 @@ const CommonLocationModal: React.FC<Props> = ({
       const res = await fetch(url);
       const json = await res.json();
       console.log('res', json.result);
-      const location = json.result.geometry.location;
+      const locations = json.result.geometry.location;
       onSelectLocation({
         name: json.result.formatted_address,
-        lat: location.lat,
-        lng: location.lng,
+        lat: locations.lat,
+        lng: locations.lng,
       });
       setQuery('');
       setPredictions([]);
@@ -137,11 +141,11 @@ const CommonLocationModal: React.FC<Props> = ({
     }
   };
 
-  const setLocation = (location: any) => {
-    if ((!visible && !currentLocation?.lat) || visible) {
-      onSelectLocation(location);
+  const setLocation = (updatelocation: any) => {
+    if ((!visible && !location?.lat) || visible) {
+      onSelectLocation(updatelocation);
     }
-    setCurrentLocation(location);
+    setCurrentLocation(updatelocation);
   };
 
   const getCurrentLocation = async () => {

@@ -1,13 +1,18 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {StyleSheet, View, Text} from 'react-native';
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
 import CommonStepperInput from '@components/Input/stepperInput';
-import CommonAmenityToggle from '@components/Input/amenityToggle';
 import useBoundStore from '@stores/index';
+import {CommonMultiSelect} from '@components/Input/CommonMultiSelect';
 
 const Step4PropertyDetails = (props: any) => {
-  const [isGym, setIsGym] = useState<boolean>(false);
+  // const amenityOptions = [
+  //   {label: 'Pool', value: 'pool'},
+  //   {label: 'Gym', value: 'gym'},
+  //   {label: 'Parking', value: 'parking'},
+  // ];
+
   const {appConfigs} = useBoundStore();
 
   const {
@@ -23,7 +28,11 @@ const Step4PropertyDetails = (props: any) => {
   const AMENITIES = appConfigs?.amenities || [];
   return (
     <SlideInView direction={currentStep === 3 ? 'right' : 'left'}>
-      <Text style={styles.headingText}>Property Features</Text>
+      {(isStringInEitherArray('kitchen') ||
+        isStringInEitherArray('balcony') ||
+        isStringInEitherArray('carParking')) && (
+        <Text style={styles.headingText}>Property Features</Text>
+      )}
 
       {isStringInEitherArray('kitchen') && (
         <View style={styles.inputContainer}>
@@ -59,21 +68,21 @@ const Step4PropertyDetails = (props: any) => {
         </View>
       )}
 
-      <Text style={styles.headingText}>Amenities</Text>
-
-      {isStringInEitherArray('amenities') &&
-        AMENITIES.map(
-          items =>
-            items.name && (
-              <View style={styles.inputContainer}>
-                <CommonAmenityToggle
-                  label={items.name}
-                  selected={isGym}
-                  onToggle={() => setIsGym(prev => !prev)}
-                />
-              </View>
-            ),
-        )}
+      {/* {isStringInEitherArray('amenities') && ( */}
+        <>
+          <Text style={styles.headingText}>Amenities</Text>
+          <CommonMultiSelect
+            options={AMENITIES}
+            value={values.amenityIds}
+            onChange={items => {
+              setFieldValue('amenityIds', items);
+            }}
+            placeholder="Select Amenities"
+            showSelectAll
+            maxSelect={5}
+          />
+        </>
+      {/* )} */}
       {/* <View style={styles.inputContainer}>
         <CommonAmenityToggle
           label="Pool"

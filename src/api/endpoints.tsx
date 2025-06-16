@@ -13,10 +13,13 @@ export const API = {
     UPDATE: (id: string | number) => `/property/${id}`,
     DELETE: (id: string | number) => `/property/${id}`,
     GET_CONFIGS: '/all-filters',
+    GET_MYADS: '/property/my-ads',
   },
   USER: {
+    GET:'/user',
     PROFILE: '/user/profile',
     UPDATE_PROFILE: '/user/update',
   },
   FAVOURITES:'/favorites',
+  UPLOAD_IMAGES:'/files/upload-images',
 };

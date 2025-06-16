@@ -1,16 +1,18 @@
 import React from 'react';
-import {Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {Text, TouchableOpacity, StyleSheet, View} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'react-native-image-picker';
 
 interface CommonImageUploaderProps {
   onUpload: (uri: any) => void;
-  label:string
+  label: string;
+  handleOnpress?: any;
 }
 
 const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
   onUpload,
-  label
+  label,
+  handleOnpress,
 }) => {
   const handlePickImage = async () => {
     const response = await ImagePicker.launchImageLibrary({
@@ -21,7 +23,23 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
     if (response.didCancel) {
       console.log('User cancelled');
     } else if (response.errorCode) {
-      console.error('Picker Error:', response.errorMessage);
+      console.log('Picker Error:', response.errorMessage);
+    } else if (response.assets) {
+      const imageUris = response.assets.map(asset => asset.uri);
+      console.log('Selected images:', imageUris);
+      onUpload(response.assets);
+      // Use array of URIs as needed
+    }
+  };
+
+  const openCamera = async () => {
+    const response = await ImagePicker.launchCamera({
+      mediaType: 'photo',
+    });
+    if (response.didCancel) {
+      console.log('User cancelled');
+    } else if (response.errorCode) {
+      console.log('Picker Error:', response.errorMessage);
     } else if (response.assets) {
       const imageUris = response.assets.map(asset => asset.uri);
       console.log('Selected images:', imageUris);
@@ -31,14 +49,26 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
   };
 
   return (
-    <TouchableOpacity style={styles.container} onPress={handlePickImage}>
-      <MaterialCommunityIcons
-        name="cloud-upload-outline"
-        size={40}
-        color="#219E93"
-      />
+    <View style={styles.container}>
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <TouchableOpacity>
+          <MaterialCommunityIcons
+            name="cloud-upload-outline"
+            size={40}
+            color="#219E93"
+            onPress={handleOnpress ? handleOnpress : handlePickImage}
+            style={{width:'100%', marginRight:20}}
+          />
+        </TouchableOpacity>
+        <MaterialCommunityIcons
+          name="camera"
+          size={40}
+          color="#219E93"
+          onPress={handleOnpress ? handleOnpress : openCamera}
+        />
+      </View>
       <Text style={styles.label}>{label}</Text>
-    </TouchableOpacity>
+    </View>
   );
 };
 

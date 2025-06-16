@@ -12,8 +12,9 @@ import {
   createFilterListingsSlice,
   FilterListingsSlice,
 } from './filterListingsSlice';
-import { createLocationSlice, LocationSlice } from './LocationSlice';
-import { createPostAdSlice, PostAdSlice } from './PostAdSlice';
+import {createLocationSlice, LocationSlice} from './LocationSlice';
+import {createPostAdSlice, PostAdSlice} from './PostAdSlice';
+import {createMyAdsSlice, MyAdsSlice} from './MyAdsSlice';
 // import {zustandStorage} from './storage';
 
 type StoreState = HandShakeSlice &
@@ -25,6 +26,7 @@ type StoreState = HandShakeSlice &
   FilterListingsSlice &
   LocationSlice &
   PostAdSlice &
+  MyAdsSlice &
   FavoritesSlice;
 
 // get
@@ -36,11 +38,12 @@ const useBoundStore = create<StoreState>()(
         ...createHandShakeSlice(set),
         ...createAppConfigStore(set, get),
         ...createFilterListingsSlice(set, get),
-        ...createPostAdSlice(set),
+        ...createPostAdSlice(set, get),
         ...createFiltersSlice(set),
         ...createLocationSlice(set, get),
         ...createListingsSlice(set, get),
         ...createDetailSlice(set, get),
+        ...createMyAdsSlice(set, get),
         ...createFavoritesSlice(set, get),
       }),
       {
@@ -50,6 +53,7 @@ const useBoundStore = create<StoreState>()(
           token: state.token,
           clientId: state.clientId,
           bearerToken: state.bearerToken,
+          user: state.user,
           location: state.location,
           appConfigs: state.appConfigs,
           locationHistory: state.locationHistory,
