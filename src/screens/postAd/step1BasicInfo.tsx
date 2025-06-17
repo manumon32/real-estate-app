@@ -57,7 +57,7 @@ const Step1BasicInfo = (props: any) => {
   }, []);
 
   return (
-    <SlideInView direction={currentStep == null ? 'right' : 'left'}>
+    <SlideInView direction={currentStep == null ? 'right' : 'left'} keyboardShouldPersistTaps={'handled'}>
       <>
         {/* <Text style={styles.headingText}>Basic Details</Text> */}
         <View style={styles.inputContainer}>

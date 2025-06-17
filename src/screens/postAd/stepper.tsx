@@ -2,6 +2,7 @@
 import Stepper from '@components/stepper';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Modal,
@@ -34,6 +35,7 @@ interface FooterProps {
   onNext?: () => void;
   onBackPress: any;
   submitPostAd?: any;
+  loading?: boolean;
 }
 
 const Footer: React.FC<FooterProps> = ({
@@ -45,6 +47,7 @@ const Footer: React.FC<FooterProps> = ({
   onNext,
   onBackPress,
   submitPostAd,
+  loading = false,
 }) => {
   const handleCancel = () => {
     if (onCancel) {
@@ -84,7 +87,8 @@ const Footer: React.FC<FooterProps> = ({
         accessibilityRole="button"
         disabled={isLastStep}>
         <Text style={styles.buyText}>
-          {currentStep == 5 ? 'Post Now' : 'Next'}
+          {loading && <ActivityIndicator size={'small'} color={'#fff'} />}
+          {!loading ? (currentStep == 5 ? 'Post Now' : 'Next') : ''}
         </Text>
       </TouchableOpacity>
     </View>
@@ -92,7 +96,7 @@ const Footer: React.FC<FooterProps> = ({
 };
 
 const PostAdContainer = (props: any) => {
-  const {errors, setTouched, setFieldValue, values} = props;
+  const {errors, setTouched, setFieldValue, values, touched} = props;
 
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
@@ -111,6 +115,9 @@ const PostAdContainer = (props: any) => {
     bearerToken,
     location,
     locationForAdpost,
+    floorPlans,
+    setImages,
+    setFloorPlans,
   } = useBoundStore();
   const prevStep = prevCountRef.current;
 
@@ -222,7 +229,10 @@ const PostAdContainer = (props: any) => {
       // @ts-ignore
       requiredFields[currentStep]?.some(
         // @ts-ignore
-        field => !!errors[field],
+        field =>
+          currentStep === 1
+            ? !!errors[field] || !touched[field]
+            : !!errors[field],
       )
     ) {
       return false;
@@ -299,6 +309,8 @@ const PostAdContainer = (props: any) => {
         onPress: () => {
           resetPostAd();
           setFields([]);
+          setImages([]);
+          setFloorPlans([]);
           navigation.goBack();
         },
       },
@@ -306,11 +318,19 @@ const PostAdContainer = (props: any) => {
   };
 
   const submitPostAd = useCallback(async () => {
-    if (Object.keys(errors).length == 0) {
+    if (Object.keys(errors).length == 0 && images.length > 0) {
       setLoading(true);
       let formData = new FormData();
       images.map((items: any, index: any) => {
         formData.append('images', {
+          uri: items.uri, // local path or blob URL
+          name: `photo_${index}.jpg`, // ⬅ server sees this
+          type: 'image/jpeg',
+        } as any);
+      });
+      let formDataFloor = new FormData();
+      floorPlans.map((items: any, index: any) => {
+        formDataFloor.append('images', {
           uri: items.uri, // local path or blob URL
           name: `photo_${index}.jpg`, // ⬅ server sees this
           type: 'image/jpeg',
@@ -323,6 +343,14 @@ const PostAdContainer = (props: any) => {
           clientId: clientId,
           bearerToken: bearerToken,
         });
+        const floorUrls =
+          floorPlans.length > 0
+            ? await uploadImages(formDataFloor, {
+                token: token,
+                clientId: clientId,
+                bearerToken: bearerToken,
+              })
+            : [];
         const paylod = {
           latitude: locationForAdpost.lat
             ? locationForAdpost.lat
@@ -334,6 +362,7 @@ const PostAdContainer = (props: any) => {
             ? locationForAdpost.name
             : location.name,
           imageUrls: imageUrls,
+          floorPlanUrl: floorUrls,
         };
         let mergedPayload = {...values, ...paylod};
         console.log('postAd payload', mergedPayload);
@@ -345,7 +374,10 @@ const PostAdContainer = (props: any) => {
         });
         setVisible(true);
       } catch (err: any) {
-        Alert.alert('Something went wrong', 'Failed to post ad, please try again later');
+        Alert.alert(
+          'Something went wrong',
+          'Failed to post ad, please try again later',
+        );
       } finally {
         setLoading(false);
       }
@@ -353,6 +385,7 @@ const PostAdContainer = (props: any) => {
   }, [
     errors,
     images,
+    floorPlans,
     token,
     clientId,
     bearerToken,
@@ -386,7 +419,7 @@ const PostAdContainer = (props: any) => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContainer}
           style={styles.scrollContainerStyle}
-          keyboardShouldPersistTaps="handled">
+          keyboardShouldPersistTaps="never">
           <View style={styles.container}>{renderStepContent()}</View>
         </ScrollView>
         <Footer
@@ -395,12 +428,17 @@ const PostAdContainer = (props: any) => {
           onNext={checkErrors}
           onBackPress={onBackPress}
           submitPostAd={submitPostAd}
+          loading={loading}
         />
       </KeyboardAvoidingView>
       <CommonSuccessModal
         visible={visible}
         onClose={() => {
           setVisible(false);
+          resetPostAd();
+          setFields([]);
+          // @ts-ignore
+          navigation.reset({index: 0, routes: [{name: 'Main'}]});
         }}
       />
       <Modal

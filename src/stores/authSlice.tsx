@@ -8,9 +8,11 @@ export interface AuthSlice {
   loginError: boolean;
   updateError: boolean;
   updateLoading: boolean;
+  updateSuccess: boolean;
   login: (falg: any) => Promise<void>;
   setVisible: () => Promise<void>;
   logout: () => Promise<void>;
+  setUpdateSuccess: () => Promise<void>;
   clearOTP: () => Promise<void>;
   verifyOTP: (falg: any) => Promise<void>;
   updateuser: (falg: any) => Promise<void>;
@@ -24,6 +26,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   visible: false,
   updateError: false,
   updateLoading: false,
+  updateSuccess: false,
   login: async payload => {
     try {
       const resp = await login(payload, {
@@ -52,12 +55,13 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           bearerToken: resp.token,
           user: resp.userInfo,
           visible: false,
+          otp: null,
         });
       } else {
-        set({loginError: true, visible: false});
+        set({loginError: true, visible: false, updateSuccess: false});
       }
     } catch (error) {
-      set({loginError: true});
+      set({loginError: true, updateSuccess: false});
     }
   },
   updateuser: async payload => {
@@ -73,13 +77,17 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           user: resp,
           updateError: true,
           updateLoading: false,
+          updateSuccess: true,
         });
       } else {
-        set({updateError: true, updateLoading: false});
+        set({updateError: true, updateLoading: false, updateSuccess: false});
       }
     } catch (error) {
-      set({updateError: false, updateLoading: false});
+      set({updateError: false, updateLoading: false, updateSuccess: false});
     }
+  },
+  setUpdateSuccess: async () => {
+    set({updateSuccess: false});
   },
   setVisible: async () => {
     set({visible: !get().visible});

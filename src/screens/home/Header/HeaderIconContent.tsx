@@ -8,17 +8,45 @@ import {
 } from 'react-native';
 import IconButton from '@components/Buttons/IconButton';
 import {useTheme} from '@theme/ThemeProvider';
+import {useNavigation} from '@react-navigation/native';
+import useBoundStore from '@stores/index';
 
 function HeaderIconContent(): React.JSX.Element {
   const {theme} = useTheme();
+  const navigation = useNavigation();
+  const {setFilters} = useBoundStore();
 
   const tabIcons = [
-    {label: 'Buy', icon: 'home'},
-    {label: 'Rent', icon: 'key-variant'},
-    {label: 'Commertial', icon: 'office-building'},
-    {label: 'Land', icon: 'island'},
-    {label: 'Lease', icon: 'calendar-month'},
-    {label: 'Buy', icon: 'home'},
+    {
+      label: 'Buy',
+      icon: 'home',
+      _id: '684176d84eb67a1a216b94fd',
+      type: 'listingTypeId',
+    },
+    {
+      label: 'Rent',
+      icon: 'key-variant',
+      _id: '684176e74eb67a1a216b9501',
+      type: 'listingTypeId',
+    },
+    {
+      label: 'Lease',
+      icon: 'calendar-month',
+      _id: '6841770a4eb67a1a216b9505',
+      type: 'listingTypeId',
+    },
+    {
+      label: 'Land',
+      icon: 'island',
+      _id: '6841753e4a95cf182c60a307',
+      type: 'propertyTypeId',
+    },
+    {
+      label: 'Commertial',
+      icon: 'office-building',
+      _id: '684175aa4eb67a1a216b94ed',
+      type: 'propertyTypeId',
+    },
   ];
   return (
     <ScrollView
@@ -26,7 +54,16 @@ function HeaderIconContent(): React.JSX.Element {
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}>
       {tabIcons.map((items, index) => (
-        <TouchableOpacity key={index}>
+        <TouchableOpacity
+          key={index}
+          onPress={() => {
+            let filterPayload = {
+              [`${items.type}`]: items._id,
+            };
+            setFilters(filterPayload);
+            // @ts-ignore
+            navigation.navigate('filter');
+          }}>
           <View style={styles.iconContainer}>
             <IconButton iconSize={24} iconName={items.icon} />
           </View>

@@ -25,5 +25,5 @@ export const postAdValidationSchema = Yup.object().shape({
       unit: Yup.string().required('Unit is required'),
     }),
   ),
-  // imageUrls: Yup.array().required('Please upload aleast 1 Image'),
+  imageUrls: Yup.array().required('Please upload aleast 1 Image'),
 });

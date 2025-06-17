@@ -33,6 +33,7 @@ export const apiRequest = async ({
     console.log('Status:', error.response?.status);
     console.log('Response Data:', error.response?.data);
     console.log('Request Config:', error.config); // Optional
-    throw new Error('Failed to fetch Details');
+    return error.response
+    // throw new Error('Failed to fetch Details',);
   }
 };

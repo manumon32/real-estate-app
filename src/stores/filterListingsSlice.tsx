@@ -23,6 +23,7 @@ export interface FilterListingsSlice {
   filterSetTriggerRefresh: () => void;
   clearFilterList: () => void;
   fetchFilterListings: (filters?: any, page?: number) => Promise<void>;
+  filter_totalpages: number;
 }
 
 export const createFilterListingsSlice = (
@@ -35,6 +36,7 @@ export const createFilterListingsSlice = (
   filter_loading: false,
   filter_triggerRefresh: false,
   filter_error: null,
+  filter_totalpages: 0,
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchFilterListings: async () => {
@@ -43,7 +45,11 @@ export const createFilterListingsSlice = (
       filter_triggerRefresh: false,
       filter_listings: get().filter_page == 0 ? [] : get().filter_listings,
     });
-    let filters = {pageNum: get().filter_page + 1};
+    let filters = {
+      pageNum: get().filter_page + 1,
+      filter_near: [get().location?.lat, get().location?.lng, 50].join(','),
+      pageSize: 12,
+    };
     let filterData = get().filters;
     Object.keys(filterData).map(filter => {
       if (Array.isArray(filterData[filter])) {
@@ -62,6 +68,7 @@ export const createFilterListingsSlice = (
         filters = {...filters, ...{[filter]: filterData[filter]}};
       }
     });
+    console.log('filters', filters);
     try {
       const res = await fetchListingsFromAPI(filters, {
         token: get().token,
@@ -71,10 +78,17 @@ export const createFilterListingsSlice = (
         filter_listings:
           state.filter_page === 0
             ? res.rows
-            : [...state.filter_listings, ...res.rows],
+            : [...state.filter_listings, ...res.rows].filter(
+                (item, index, self) =>
+                  index ===
+                  self.findIndex(
+                    t => JSON.stringify(t) === JSON.stringify(item),
+                  ),
+              ),
         filter_page: res.pageNum,
         filter_hasMore: res.pageNum < res.pages ? true : false,
         filter_loading: false,
+        filter_totalpages: res.total,
       }));
     } catch (err: any) {
       set({filter_error: err.message, filter_loading: false});
@@ -84,6 +98,7 @@ export const createFilterListingsSlice = (
     set({
       filter_listings: [],
       filter_page: 0,
+      filter_totalpages: 0,
       filter_hasMore: false,
       filter_loading: false,
       filter_triggerRefresh: false,
@@ -91,6 +106,7 @@ export const createFilterListingsSlice = (
   filterSetTriggerRefresh: () =>
     set({
       filter_page: 0,
+      filter_totalpages: 0,
       filter_triggerRefresh: true,
       filter_hasMore: false,
       filter_loading: false,

@@ -178,6 +178,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
             loginVar={loginVar}
             handleSubmit={handleSubmit}
             veryFyOTP={veryFyOTP}
+            otpValue={otp}
           />
         </View>
       )}

@@ -18,12 +18,22 @@ import {
 } from 'react-native';
 import {Fonts} from '@constants/font';
 import TextInput from '@components/Input/textInput';
+import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
 const EditProfile = () => {
-  const {user, updateuser, updateLoading} = useBoundStore();
+  const {user, updateuser, updateLoading, updateSuccess, setUpdateSuccess} = useBoundStore();
+  const [visible, setVisible] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.email || '');
+  const navigation = useNavigation();
+
+  React.useEffect(() => {
+    if (updateSuccess) {
+      setVisible(true);
+    }
+  }, [updateSuccess]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -125,6 +135,16 @@ const EditProfile = () => {
           {updateLoading && <ActivityIndicator color={'#fff'} size={'small'} />}
         </TouchableOpacity>
       </View>
+      <CommonSuccessModal
+        visible={visible}
+        title="Success."
+        message="Profile Updated Successfully."
+        onClose={() => {
+          setVisible(false);
+          setUpdateSuccess()
+          navigation.goBack();
+        }}
+      />
     </SafeAreaView>
   );
 };

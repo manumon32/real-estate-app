@@ -11,7 +11,8 @@ import {fetchDetailsAPI} from '@api/services';
 
 const PostAd = () => {
   const route = useRoute();
-  const {items}: any = route.params;
+  // @ts-ignore
+  const items= route?.params?.items || null;
   const {locationForAdpost, token, clientId} = useBoundStore();
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] = useState({
@@ -21,7 +22,7 @@ const PostAd = () => {
     numberOfBathrooms: '',
     propertyTypeId: '',
     listingTypeId: '',
-    price: 0,
+    price: '',
     isNegotiable: true,
     isFeatured: false,
     maintenanceCharge: 0,
@@ -43,17 +44,18 @@ const PostAd = () => {
     address: locationForAdpost?.name,
     latitude: locationForAdpost?.lat,
     longitude: locationForAdpost?.lng,
-    numberOfBalconies: 1,
+    numberOfBalconies: 0,
+    numberOfKitchens:0,
     carParking: 1,
     amenityIds: [],
     imageUrls: [],
+    floorPlanUrl:[],
+    videoUrl: '',
     // Add other fields
   });
-  if (items?._id) {
-  }
 
   const fetchDetails = useCallback(async () => {
-    if (!items?._id) return; // guard clause
+    if (!items._id) return; // guard clause
 
     setLoading(true);
     try {
@@ -71,10 +73,11 @@ const PostAd = () => {
       console.error('fetchDetails failed:', err);
       setLoading(false);
     }
-  }, [items?._id, token, clientId, initialValues]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    if (items?._id) {
+    if (items && items._id) {
       fetchDetails();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
-    bottom: 10,
+    // bottom: 10,
   },
 });
 

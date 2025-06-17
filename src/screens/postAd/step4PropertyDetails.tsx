@@ -38,9 +38,9 @@ const Step4PropertyDetails = (props: any) => {
         <View style={styles.inputContainer}>
           <CommonStepperInput
             label="Kitchen"
-            value={values.carParking}
+            value={values.numberOfKitchens}
             onChange={value => {
-              setFieldValue(`carParking`, value);
+              setFieldValue(`numberOfKitchens`, value);
             }}
           />
         </View>
@@ -79,7 +79,6 @@ const Step4PropertyDetails = (props: any) => {
             }}
             placeholder="Select Amenities"
             showSelectAll
-            maxSelect={5}
           />
         </>
       {/* )} */}

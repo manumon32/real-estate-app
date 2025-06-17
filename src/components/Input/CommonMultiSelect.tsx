@@ -29,7 +29,7 @@ export function CommonMultiSelect<V = string | number>({
   value,
   onChange,
   placeholder = 'Select…',
-  maxSelect,
+  maxSelect = 10000,
   showSelectAll = false,
   error,
 }: CommonMultiSelectProps<V>) {

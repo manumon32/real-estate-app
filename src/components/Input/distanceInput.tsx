@@ -61,7 +61,6 @@ const CommonDistanceInput: React.FC<CommonDistanceInputProps> = ({
             <TextInput
               value={name}
               onChangeText={onChangeText}
-              keyboardType="decimal-pad"
               placeholder={placeholder}
               placeholderTextColor="#ccc"
               style={styles.inputText}
@@ -81,7 +80,6 @@ const CommonDistanceInput: React.FC<CommonDistanceInputProps> = ({
             <TextInput
               value={unit}
               onChangeText={onChangeUnit}
-              keyboardType="decimal-pad"
               placeholder={placeholderUnit}
               placeholderTextColor="#ccc"
               style={styles.inputText}

@@ -138,7 +138,7 @@ export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
 
 export const getHandshakeTokenApi = async (
   data: object,
-): Promise<{secretKey: string; clientId: string}> => {
+): Promise<any> => {
   try {
     const headers = await getHeaders(data, true);
     const response = await apiRequest({
@@ -147,10 +147,10 @@ export const getHandshakeTokenApi = async (
       data,
       headers,
     });
-    return response.data;
+    return response.data ? response.data : response;
   } catch (error: any) {
-    console.log(error);
-    throw new Error('Failed to fetch handshake token');
+    return error;
+    // throw new Error('Failed to fetch handshake token');
   }
 };
 
@@ -163,7 +163,7 @@ export const updateUser = async (
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
-      method: 'post',
+      method: 'put',
       url: API.USER.GET,
       data,
       headers,

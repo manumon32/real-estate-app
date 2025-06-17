@@ -1,73 +1,72 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
 import CommonHeader from '@components/Header/CommonHeader';
-import PropertyCard from '@components/PropertyCard';
-import {useNavigation} from '@react-navigation/native';
-import useBoundStore from '@stores/index';
-import React, {useCallback, useEffect} from 'react';
-import {useTheme} from '@theme/ThemeProvider';
+import React from 'react';
 import {
   StyleSheet,
   SafeAreaView,
-  // ScrollView,
-  FlatList,
+  ScrollView,
   Text,
-  RefreshControl,
+  //   FlatList,
+  //   Text,
+  //   RefreshControl,
 } from 'react-native';
 import {Fonts} from '@constants/font';
 
-const FavAds = () => {
-  const {favorites, fetchFavouriteAds} = useBoundStore();
-  const navigation = useNavigation();
-  const {theme} = useTheme();
-  useEffect(() => {
-    fetchFavouriteAds();
-  }, []);
-  const renderAdItem = useCallback(
-    (items: any) => {
-      return <PropertyCard items={items.item} navigation={navigation} />;
-    },
-    [navigation],
-  );
-
+const TermsConditions = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <CommonHeader
-        title="Favourite Ads"
-        textColor="#171717"
-        rightText={
-          favorites.length + (favorites.length > 1 ? ' Items' : ' Item')
-        }
-      />
-      <FlatList
-        data={favorites}
-        numColumns={2}
-        keyExtractor={item => item._id}
-        renderItem={renderAdItem}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <CommonHeader title="Terms & Conditions" textColor="#171717" />
+      <ScrollView
+        style={{padding: 15}}
         contentContainerStyle={{
-          paddingBottom: 100,
-          backgroundColor: theme.colors.backgroundHome,
-          minHeight: 900,
+          borderWidth: 1,
+          borderRadius: 20,
+          borderColor: '#EBEBEB',
+          backgroundColor: '#F5F6FA',
           padding: 10,
-        }}
-        refreshControl={
-          <RefreshControl
-            refreshing={false}
-            onRefresh={() => {
-              fetchFavouriteAds();
-            }}
-          />
-        }
-        ListFooterComponent={
-          favorites.length <= 0 ? (
-            <Text style={styles.endText}>You havent liked anything yet</Text>
-          ) : (
-            <></>
-          )
-        }
-      />
+          height:'90%'
+        }}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontFamily: Fonts.MEDIUM,
+            letterSpacing: 0.1,
+            lineHeight: 32,
+          }}>
+          Your privacy is important to us. It is Brainstorming's policy to
+          respect your privacy regarding any information we may collect from you
+          across our website, and other sites we own and operate.
+        </Text>
+        <Text
+          style={{
+            top:20,
+            fontSize: 14,
+            fontFamily: Fonts.MEDIUM,
+            letterSpacing: 0.1,
+            lineHeight: 32,
+          }}>
+          We only ask for personal information when we truly need it to provide
+          a service to you. We collect it by fair and lawful means, with your
+          knowledge and consent. We also let you know why we’re collecting it
+          and how it will be used.
+        </Text>
+        <Text
+          style={{
+            top:40,
+            fontSize: 14,
+            fontFamily: Fonts.MEDIUM,
+            letterSpacing: 0.1,
+            lineHeight: 32,
+          }}>
+          We only retain collected information for as long as necessary to
+          provide you with your requested service. What data we store, we’ll
+          protect within commercially acceptable means to prevent loss and
+          theft, as well as unauthorized access, disclosure, copying, use or
+          modification. We don’t share any personally identifying information
+          publicly or with third-parties, except when required to by law.
+        </Text>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -76,6 +75,7 @@ const styles = StyleSheet.create({
   container: {
     height: '100%',
     flex: 1,
+    backgroundColor: '#fff',
   },
   card: {
     backgroundColor: '#fff',
@@ -184,4 +184,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(FavAds);
+export default React.memo(TermsConditions);

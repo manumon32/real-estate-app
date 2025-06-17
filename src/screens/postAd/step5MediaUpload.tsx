@@ -8,14 +8,17 @@ import ImagePickerModal from '@components/Modal/ImagePickerModal';
 import useBoundStore from '@stores/index';
 
 const Step5MediaUpload = (props: any) => {
-  const [assets, setAssets] = useState<any[]>([]);
+  const {setImages, setFloorPlans, images, floorPlans} = useBoundStore();
+  const [assets, setAssets] = useState<any[]>(images || []);
+  const [floorPlan, setFloorPlan] = useState<any[]>(floorPlans || []);
+
   const [modalVisible, setModalVisible] = useState(false);
-  const {setImages} = useBoundStore();
   const {
     currentStep,
     // handleSubmit,
     errors,
     touched,
+    values,
     // setTouched,
     setFieldValue,
     isStringInEitherArray,
@@ -24,6 +27,11 @@ const Step5MediaUpload = (props: any) => {
   const removeAsset = useCallback((uri: string | undefined) => {
     if (!uri) return;
     setAssets(prev => prev.filter(item => item.uri !== uri));
+  }, []);
+
+  const removeFloor = useCallback((uri: string | undefined) => {
+    if (!uri) return;
+    setFloorPlan(prev => prev.filter(item => item.uri !== uri));
   }, []);
 
   const renderItem = useCallback(
@@ -43,10 +51,32 @@ const Step5MediaUpload = (props: any) => {
     ),
     [removeAsset],
   );
-  useEffect(()=>{
+  const renderItemFloor = useCallback(
+    ({item}: {item: any}) => (
+      <View style={styles.previewContainer}>
+        <Image
+          source={{uri: item.uri}}
+          style={styles.preview}
+          resizeMode="cover"
+        />
+        <Pressable
+          style={styles.removeBtn}
+          onPress={() => removeFloor(item.uri)}>
+          <Text style={styles.removeText}>✕</Text>
+        </Pressable>
+      </View>
+    ),
+    [removeFloor],
+  );
+  useEffect(() => {
     setImages(assets);
-    setFieldValue('imageUrls', assets)
-  },[assets, setFieldValue, setImages])
+    setFieldValue('imageUrls', assets);
+  }, [assets, setFieldValue, setImages]);
+
+  useEffect(() => {
+    setFloorPlans(floorPlan);
+    setFieldValue('floorPlanUrl', floorPlan);
+  }, [assets, floorPlan, setFieldValue, setFloorPlans]);
 
   const keyExtractor = useCallback(
     (item: any) => item.uri ?? item.fileName ?? Math.random().toString(),
@@ -74,6 +104,20 @@ const Step5MediaUpload = (props: any) => {
     [assets, keyExtractor, renderItem],
   );
 
+  const previewsFloorPlan = useMemo(
+    () => (
+      <FlatList
+        data={floorPlan}
+        keyExtractor={keyExtractor}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        renderItem={renderItemFloor}
+        contentContainerStyle={styles.previewRow}
+      />
+    ),
+    [floorPlan, keyExtractor, renderItemFloor],
+  );
+
   return (
     <SlideInView direction={currentStep === 4 ? 'right' : 'left'}>
       <Text style={styles.headingText}>Image Upload</Text>
@@ -91,21 +135,24 @@ const Step5MediaUpload = (props: any) => {
         {previews}
       </View>
       <View style={styles.inputContainer}>
-        <TextInput onChangeText={() => {}} placeholder="Video URL (YouTube)" />
+        <TextInput
+          value={values?.videoUrl}
+          onChangeText={text => {
+            setFieldValue('videoUrl', text);
+          }}
+          placeholder="Video URL (YouTube)"
+        />
       </View>
 
       {isStringInEitherArray('floorPlanUrls') && (
         <View style={styles.inputContainer}>
-          <TextInput onChangeText={() => {}} placeholder="Upload Floor Plan" />
-        </View>
-      )}
-
-      {isStringInEitherArray('floorPlanUrls') && (
-        <View style={styles.inputContainer}>
           <CommonImageUploader
-            onUpload={uri => console.log('Uploaded image:', uri)}
             label="Upload Floor Plan"
+            onUpload={uri =>
+              setFloorPlan(prev => dedupByUri([...prev, ...(uri ?? [])]))
+            }
           />
+          {previewsFloorPlan}
         </View>
       )}
 

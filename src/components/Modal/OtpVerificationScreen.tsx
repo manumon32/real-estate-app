@@ -15,6 +15,7 @@ const OtpVerificationScreen = ({
   handleSubmit,
   loginVar,
   veryFyOTP,
+  otpValue
 }: any) => {
   const [otp, setOtp] = useState<string[]>(new Array(OTP_LENGTH).fill(''));
   const [timer, setTimer] = useState(72); // 1:12
@@ -79,6 +80,9 @@ const OtpVerificationScreen = ({
         <Text style={styles.subtitle}>
           We have sent the verification code to{' '}
           <Text style={styles.phone}>{loginVar}</Text>
+        </Text>
+         <Text style={styles.subtitle}>
+          OTP- {otpValue}
         </Text>
 
         <View style={styles.otpContainer}>

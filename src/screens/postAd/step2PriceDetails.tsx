@@ -96,7 +96,11 @@ const Step2BasicInfo = (props: any) => {
         )}
         {isStringInEitherArray('reraId') && (
           <View style={styles.inputContainer}>
-            <TextInput onChangeText={() => {}} placeholder="RERA ID" />
+            <TextInput
+              value={values?.reraId}
+              onChangeText={text => setFieldValue('reraId', text)}
+              placeholder="RERA ID"
+            />
           </View>
         )}
       </View>

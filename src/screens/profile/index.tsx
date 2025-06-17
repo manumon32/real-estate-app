@@ -30,7 +30,7 @@ const Profile = () => {
         backgroundColor={'#F6FCFF'}
         // onBackPress={onBackPress}
       />
-      <ScrollView contentContainerStyle={{paddingBottom: 120}}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 120}}>
         <View style={styles.container}>
           <Image
             style={{height: 72, width: 72, borderRadius: 20}}
@@ -39,13 +39,19 @@ const Profile = () => {
             }}
           />
           <View style={styles.info}>
-            <Text style={styles.name}>{user?.name?user.name:'App User'}</Text>
-           {user?.email && <Text style={styles.email}>{user?.email?user.email:''}</Text>}
+            <Text style={styles.name}>
+              {user?.name || 'App User'}
+            </Text>
+            {user?.email && (
+              <Text style={styles.email}>{user?.email || ''}</Text>
+            )}
 
-            <TouchableOpacity onPress={()=>{
-              // @ts-ignore
-              navigation.navigate('EditProfile');
-            }} style={styles.editRow}>
+            <TouchableOpacity
+              onPress={() => {
+                // @ts-ignore
+                navigation.navigate('EditProfile');
+              }}
+              style={styles.editRow}>
               <Icon name="pencil-outline" size={18} color={'#000'} />
               <Text style={[styles.editTxt, {color: '#000'}]}>
                 Edit Profile
@@ -66,7 +72,7 @@ const Profile = () => {
           <MenuLink
             icon="heart-outline"
             label="Favorite Listings"
-            value={12}
+            // value={12}
             // @ts-ignore
             onPress={() => navigation.navigate('FavAds')}
           />
@@ -82,7 +88,7 @@ const Profile = () => {
           <MenuLink
             icon="home"
             label="My Ads"
-            value={12}
+            // value={12}
             // @ts-ignore
             onPress={() => navigation.navigate('FavAds')}
           />
@@ -141,10 +147,33 @@ const Profile = () => {
               alignSelf: 'center',
             }}
           />
+
+          <MenuLink
+            icon="security"
+            label="Privacy Policy"
+            // @ts-ignore
+            onPress={() => navigation.navigate('PrivacyPolicy')}
+          />
+          <View
+            style={{
+              backgroundColor: '#EBEBEB',
+              borderWidth: 1,
+              borderColor: '#EBEBEB',
+              width: '90%',
+              alignSelf: 'center',
+            }}
+          />
+
+          <MenuLink
+            icon="text-box-check-outline"
+            label="Terms and Conditions"
+            // @ts-ignore
+            onPress={() => navigation.navigate('TermsConditions')}
+          />
         </View>
         <TouchableOpacity
           onPress={async () => {
-           await logout();
+            await logout();
             // @ts-ignore
             navigation.reset({index: 0, routes: [{name: 'Main'}]});
           }}
