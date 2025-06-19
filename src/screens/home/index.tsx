@@ -1,8 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-// AppInitializer.tsx
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {View, Animated, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Animated,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Linking,
+} from 'react-native';
 import useBoundStore from '@stores/index';
 import DeviceInfo from 'react-native-device-info';
 import {Fonts} from '@constants/font';
@@ -20,6 +26,7 @@ function Index({navigation}: any): React.JSX.Element {
     bearerToken,
   } = useBoundStore();
   const [error, setError] = useState(true);
+  const [deepLink, setDeepLink] = useState<any>(null);
 
   const getDeviceId = () => {
     return DeviceInfo.getUniqueId().then(uniqueId => {
@@ -48,6 +55,27 @@ function Index({navigation}: any): React.JSX.Element {
     getConfigData();
   };
 
+  const handleDeepLink = (event: {url: string}) => {
+    const url = event.url; // e.g., myapp://property/12345
+    const match = url.match(/property\/(\w+)/);
+    if (match) {
+      const propertyId = match[1];
+      navigation.navigate('Details', {_id: propertyId});
+    }
+  };
+
+  useEffect(() => {
+    // Listen when app is already open
+    const sub = Linking.addEventListener('url', handleDeepLink);
+
+    // Also handle when app is opened from a killed state
+    Linking.getInitialURL().then(url => {
+      if (url) setDeepLink({url});
+    });
+
+    return () => sub.remove();
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       const initialize = async () => {
@@ -60,7 +88,11 @@ function Index({navigation}: any): React.JSX.Element {
               fetchFavouriteAds();
             }
             getAppConfigData();
-            navigation.navigate('Main');
+            if (deepLink) {
+              handleDeepLink(deepLink);
+            } else {
+              navigation.navigate('Main');
+            }
           }
         } catch (err) {
           setError(true);

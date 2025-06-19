@@ -22,7 +22,7 @@ import useBoundStore from '@stores/index';
 
 const Profile = () => {
   const navigation = useNavigation();
-  const { user, fetchUserDetails, userProfileloading} = useBoundStore();
+  const {user, fetchUserDetails, userProfileloading} = useBoundStore();
   React.useEffect(() => {
     fetchUserDetails();
   }, []);
@@ -74,7 +74,7 @@ const Profile = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <PremiumCard />
+        <PremiumCard navigation={navigation} />
         <View
           style={{
             backgroundColor: '#fff',
@@ -104,7 +104,7 @@ const Profile = () => {
             icon="file"
             label="My Orders"
             // @ts-ignore
-            onPress={() => navigation.navigate('FavAds')}
+            // onPress={() => navigation.navigate('FavAds')}
           />
           <View
             style={{
@@ -119,7 +119,7 @@ const Profile = () => {
             icon="file"
             label="Reported Ads"
             // @ts-ignore
-            onPress={() => navigation.navigate('FavAds')}
+            onPress={() => navigation.navigate('ReportAd')}
           />
           <View
             style={{
@@ -149,7 +149,7 @@ const Profile = () => {
             icon="help-circle"
             label="Help and Support"
             // @ts-ignore
-            onPress={() => navigation.navigate('FavAds')}
+            // onPress={() => navigation.navigate('FavAds')}
           />
 
           <View

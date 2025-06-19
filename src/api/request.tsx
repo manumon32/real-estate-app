@@ -26,6 +26,7 @@ export const apiRequest = async ({
       params,
       headers,
     });
+    console.log('response', response);
     return response.data;
   } catch (error: any) {
     console.log('--- API Error ---');

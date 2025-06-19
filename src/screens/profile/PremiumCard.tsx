@@ -3,7 +3,7 @@ import {View, Text, StyleSheet, Pressable} from 'react-native';
 import {ProgressBar} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const PremiumCard = () => {
+const PremiumCard = ({navigation}: any) => {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -24,7 +24,7 @@ const PremiumCard = () => {
         />
       </View>
       <View style={styles.buttonContainer}>
-        <Pressable style={styles.outlineButton}>
+        <Pressable style={styles.outlineButton}   onPress={() => navigation.navigate('ManagePlans')}>
           <Text style={styles.outlineText}>Manage Plans</Text>
         </Pressable>
         <Pressable style={styles.filledButton}>

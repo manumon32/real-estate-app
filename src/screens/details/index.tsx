@@ -1,6 +1,4 @@
 /* eslint-disable react-native/no-inline-styles */
-// PropertyDetailsScreen.tsx
-
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
@@ -25,30 +23,17 @@ import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import Header from './Header';
 import useBoundStore from '@stores/index';
 import {Detail} from '@stores/detailSlice';
-
-const Footer = () => {
-  return (
-    <View style={styles.footer}>
-      <TouchableOpacity style={styles.chatButton}>
-        <Icon name="chat-outline" size={20} color="#000" />
-        <Text style={styles.chatText}>Chat</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.buyButton}>
-        <Text style={styles.buyText}>Buy Now</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
+import ReportAdModal from './ReportAdModal';
 
 const PropertyDetails = React.memo(() => {
   const route = useRoute();
   const {items}: any = route.params;
   const navigation = useNavigation();
   const [error, setError] = useState(false);
-  const {details, fetchDetails, detailLoading, clearDetails, detailsError} =
+  const {details, fetchDetails, detailLoading, clearDetails, detailsError, reportAd} =
     useBoundStore();
   const [property, setProperty] = useState<Detail | null>();
+  const [isReportVisible, setIsReportVisible] = useState(false);
   const {theme} = useTheme();
 
   const renderAmenity = useCallback((item: any, index: number) => {
@@ -126,6 +111,20 @@ const PropertyDetails = React.memo(() => {
     [theme.colors.text],
   );
 
+  const Footer = () => {
+    return (
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.chatButton}>
+          <Icon name="chat-outline" size={20} color="#000" />
+          <Text style={styles.chatText}>Chat</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.buyButton}>
+          <Text style={styles.buyText}>Buy Now</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
   useEffect(() => {
     items?._id && fetchDetails(items?._id);
   }, [fetchDetails, items]);
@@ -207,28 +206,36 @@ const PropertyDetails = React.memo(() => {
         </View>
 
         <View style={styles.row}>
-          <View style={styles.iconsContainer}>
-            <IconButton iconSize={20} iconColor={'#2F8D79'} iconName={'car'} />
-            <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
-              {property?.numberOfBedrooms}
-            </Text>
-            <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
-              Bedroom
-            </Text>
-          </View>
-          <View style={styles.iconsContainer}>
-            <IconButton
-              iconSize={20}
-              iconColor={'#2F8D79'}
-              iconName={'bathtub'}
-            />
-            <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
-              {property?.numberOfBathrooms}
-            </Text>
-            <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
-              Bathroom
-            </Text>
-          </View>
+          {property?.numberOfBedrooms && (
+            <View style={styles.iconsContainer}>
+              <IconButton
+                iconSize={20}
+                iconColor={'#2F8D79'}
+                iconName={'car'}
+              />
+              <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
+                {property?.numberOfBedrooms}
+              </Text>
+              <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
+                Bedroom
+              </Text>
+            </View>
+          )}
+          {property?.numberOfBathrooms && (
+            <View style={styles.iconsContainer}>
+              <IconButton
+                iconSize={20}
+                iconColor={'#2F8D79'}
+                iconName={'bathtub'}
+              />
+              <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
+                {property?.numberOfBathrooms}
+              </Text>
+              <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
+                Bathroom
+              </Text>
+            </View>
+          )}
           <View style={styles.iconsContainer}>
             <IconButton
               iconSize={20}
@@ -242,22 +249,22 @@ const PropertyDetails = React.memo(() => {
               {'Sq.ft'}
             </Text>
           </View>
-          <View style={styles.iconsContainer}>
-            <IconButton iconSize={20} iconColor={'#2F8D79'} iconName={'bank'} />
-            <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>1225</Text>
-            <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
-              Bank Safety
-            </Text>
-          </View>
+          {property?.loanEligible && (
+            <View style={styles.iconsContainer}>
+              <IconButton
+                iconSize={20}
+                iconColor={'#2F8D79'}
+                iconName={'bank'}
+              />
+              <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
+                Loan Eligible
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.row}>
-          <View
-            style={{flexDirection: 'row', flexWrap: 'wrap'}}
-            // horizontal
-            // showsVerticalScrollIndicator={false}
-            // showsHorizontalScrollIndicator={false}
-          >
+          <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
             {property?.furnishingStatusId?.name && (
               <Button
                 style={{margin: 5}}
@@ -373,10 +380,14 @@ const PropertyDetails = React.memo(() => {
           </View>
         </View>
 
-        <Text style={styles.section}>Amenities</Text>
-        <View style={styles.amenities}>
-          {property?.amenityIds?.map(renderAmenity)}
-        </View>
+        {property?.amenityIds && property?.amenityIds?.length > 0 && (
+          <>
+            <Text style={styles.section}>Amenities</Text>
+            <View style={styles.amenities}>
+              {property?.amenityIds?.map(renderAmenity)}
+            </View>
+          </>
+        )}
 
         <View
           style={{
@@ -396,8 +407,25 @@ const PropertyDetails = React.memo(() => {
             </View>
           </>
         )}
-
-        <Text style={styles.section}>Location</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <Text style={styles.section}>Location</Text>
+          <TouchableOpacity onPress={() => setIsReportVisible(true)}>
+            <Text
+              style={[
+                styles.section,
+                {
+                  right: 10,
+                  color: 'blue',
+                  textDecorationLine: 'underline',
+                  textDecorationStyle: 'solid',
+                  margin: 5,
+                  fontFamily: Fonts.BOLD,
+                },
+              ]}>
+              Report this Ad
+            </Text>
+          </TouchableOpacity>
+        </View>
         {Platform.OS === 'android' &&
           isValidLatLng(
             property?.location?.coordinates[0],
@@ -407,15 +435,15 @@ const PropertyDetails = React.memo(() => {
               provider={PROVIDER_GOOGLE}
               style={styles.map}
               region={{
-                latitude: Number(property?.location?.coordinates[0]),
-                longitude: Number(property?.location?.coordinates[1]),
+                latitude: Number(property?.location?.coordinates[1]),
+                longitude: Number(property?.location?.coordinates[0]),
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
               }}>
               <Marker
                 coordinate={{
-                  latitude: Number(property?.location?.coordinates[0]),
-                  longitude: Number(property?.location?.coordinates[1]),
+                  latitude: Number(property?.location?.coordinates[1]),
+                  longitude: Number(property?.location?.coordinates[0]),
                 }}
               />
             </MapView>
@@ -424,15 +452,15 @@ const PropertyDetails = React.memo(() => {
           <MapView
             style={styles.map}
             region={{
-              latitude: Number(property?.location?.coordinates[0]),
-              longitude: Number(property?.location?.coordinates[1]),
+              latitude: Number(property?.location?.coordinates[1]),
+              longitude: Number(property?.location?.coordinates[0]),
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}>
             <Marker
               coordinate={{
-                latitude: Number(property?.location?.coordinates[0]),
-                longitude: Number(property?.location?.coordinates[1]),
+                latitude: Number(property?.location?.coordinates[1]),
+                longitude: Number(property?.location?.coordinates[0]),
               }}
             />
           </MapView>
@@ -477,19 +505,10 @@ const PropertyDetails = React.memo(() => {
                 color: theme.colors.text,
                 fontSize: 18,
                 fontWeight: 500,
-                // marginTop: 2,
+                marginTop: 10,
                 letterSpacing: 1,
               }}>
               {property?.customerId?.name}
-            </Text>
-            <Text
-              style={{
-                color: theme.colors.text,
-                fontSize: 14,
-                fontWeight: 400,
-                // marginTop: 2,
-              }}>
-              Real estate agent
             </Text>
           </View>
         </View>
@@ -504,43 +523,46 @@ const PropertyDetails = React.memo(() => {
           }}
         />
 
-        <View style={styles.additionalDetailsContainer}>
-          <Text style={styles.heading}>Additional Details</Text>
-          {property?.carpetArea && (
-            <View style={styles.adittionalDetailsRow}>
-              <Text style={styles.label}>{'Carpet Area'}</Text>
-              <Text style={styles.value}>
-                {property?.carpetArea} /
-                {property?.carpetAreaUnitId?.name
-                  ? property?.carpetAreaUnitId?.name
-                  : 'Sq.ft'}
-              </Text>
-            </View>
-          )}
-          {property?.builtUpArea && (
-            <View style={styles.adittionalDetailsRow}>
-              <Text style={styles.label}>{'BuiltUp Area'}</Text>
-              <Text style={styles.value}>
-                {property?.builtUpArea} /
-                {property?.builtUpAreaUnitId?.name
-                  ? property?.builtUpAreaUnitId?.name
-                  : 'Sq.ft'}
-              </Text>
-            </View>
-          )}
-
-          {property?.superBuiltUpArea && (
-            <View style={styles.adittionalDetailsRow}>
-              <Text style={styles.label}>{'Super BuiltUp Area'}</Text>
-              <Text style={styles.value}>
-                {property?.superBuiltUpArea} /
-                {property?.superBuiltAreaUnitId?.name
-                  ? property?.superBuiltAreaUnitId?.name
-                  : 'Sq.ft'}
-              </Text>
-            </View>
-          )}
-        </View>
+        {(property?.carpetArea ||
+          property?.builtUpArea ||
+          property?.superBuiltUpArea) && (
+          <View style={styles.additionalDetailsContainer}>
+            <Text style={styles.heading}>Additional Details</Text>
+            {property?.carpetArea && (
+              <View style={styles.adittionalDetailsRow}>
+                <Text style={styles.label}>{'Carpet Area'}</Text>
+                <Text style={styles.value}>
+                  {property?.carpetArea} /
+                  {property?.carpetAreaUnitId?.name
+                    ? property?.carpetAreaUnitId?.name
+                    : 'Sq.ft'}
+                </Text>
+              </View>
+            )}
+            {property?.builtUpArea && (
+              <View style={styles.adittionalDetailsRow}>
+                <Text style={styles.label}>{'BuiltUp Area'}</Text>
+                <Text style={styles.value}>
+                  {property?.builtUpArea} /
+                  {property?.builtUpAreaUnitId?.name
+                    ? property?.builtUpAreaUnitId?.name
+                    : 'Sq.ft'}
+                </Text>
+              </View>
+            )}
+            {property?.superBuiltUpArea && (
+              <View style={styles.adittionalDetailsRow}>
+                <Text style={styles.label}>{'Super BuiltUp Area'}</Text>
+                <Text style={styles.value}>
+                  {property?.superBuiltUpArea} /
+                  {property?.superBuiltAreaUnitId?.name
+                    ? property?.superBuiltAreaUnitId?.name
+                    : 'Sq.ft'}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
         <View
           style={{
@@ -571,6 +593,19 @@ const PropertyDetails = React.memo(() => {
       </ScrollView>
 
       <Footer />
+
+      <ReportAdModal
+        visible={isReportVisible}
+        onClose={() => setIsReportVisible(false)}
+        onSubmit={(data: any) => {
+          let payload = {
+            propertyId: details?._id,
+            reason: data.reason,
+            comment: data.comment,
+          };
+          reportAd(payload);
+        }}
+      />
     </SafeAreaView>
   );
 });
@@ -596,6 +631,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
     padding: 10,
+    margin: 5,
   },
   nogotiable: {
     width: 80,
@@ -609,7 +645,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
   },
-  row: {flexDirection: 'row', justifyContent: 'space-around', padding: 8},
+  row: {flexDirection: 'row', padding: 8},
   amenities: {flexDirection: 'row', flexWrap: 'wrap', padding: 8},
   amenity: {flexDirection: 'row', alignItems: 'center', margin: 2},
   amenityText: {marginLeft: 6},

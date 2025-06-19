@@ -287,8 +287,8 @@ export const fetchMyAdsAPI = async (configArg: any): Promise<any> => {
       url: API.LISTINGS.GET_MYADS,
       params: {
         noPagination: true,
-        orderBy:'createdAt',
-        orderByDir:'desc',
+        orderBy: 'createdAt',
+        orderByDir: 'desc',
       },
       headers,
     };
@@ -296,6 +296,64 @@ export const fetchMyAdsAPI = async (configArg: any): Promise<any> => {
     return response.data;
   } catch (error: any) {
     throw new Error('Failed to fetch Details');
+  }
+};
+export const fetchReportedAd = async (configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.REPORT.GET,
+      params: {
+        noPagination: true,
+        orderBy: 'createdAt',
+        orderByDir: 'desc',
+      },
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch Details');
+  }
+};
+export const fetchPlans = async (configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.REPORT.GET,
+      params: {
+        noPagination: true,
+        orderBy: 'createdAt',
+        orderByDir: 'desc',
+      },
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch Details');
+  }
+};
+
+
+export const reportAdsAPI = async (
+  data: object,
+  configArg: any,
+): Promise<Listing> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.REPORT.GET,
+      data,
+      headers,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to Do so');
   }
 };
 

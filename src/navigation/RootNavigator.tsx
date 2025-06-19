@@ -12,6 +12,8 @@ import TermsConditions from '@screens/TermsConditions';
 import Settings from '@screens/profile/Settings';
 import Notifications from '@screens/profile/Notifications';
 import Communication from '@screens/profile/Communication';
+import ReportAd from '@screens/RepotedAds';
+import ManagePlans from '@screens/ManagePlan';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,8 +30,11 @@ const RootNavigator = () => {
       <Stack.Screen name="Settings" component={Settings} />
       <Stack.Screen name="Notifications" component={Notifications} />
       <Stack.Screen name="Communication" component={Communication} />
+      <Stack.Screen name="ReportAd" component={ReportAd} />
+      <Stack.Screen name="ManagePlans" component={ManagePlans} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
       <Stack.Screen name="TermsConditions" component={TermsConditions} />
+      
     </Stack.Navigator>
   );
 };

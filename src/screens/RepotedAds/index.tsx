@@ -42,7 +42,7 @@ const FormattedDate = (arg: string | number | Date) => {
     hour12: true,
   };
 
-  const FormattedDate = `Post on ${date
+  const FormattedDate = `Repoted on ${date
     .toLocaleString('en-US', options)
     .replace(':', '.')}`;
   return FormattedDate;
@@ -134,13 +134,16 @@ const ListingCard: React.FC<ListingCardProps> = ({
             <View style={styles.headerRow}>
               <Text style={styles.title}>{title}</Text>
               <View style={[styles.badge, {backgroundColor}]}>
-                <Text numberOfLines={2} style={[styles.badgeText, {color: textColor}]}>
+                <Text
+                  numberOfLines={2}
+                  style={[styles.badgeText, {color: textColor}]}>
                   {label}
                 </Text>
               </View>
             </View>
-            <Text style={styles.location} numberOfLines={1}>{location}</Text>
-            <Text style={styles.price}>₹{price}</Text>
+            <Text style={styles.location} numberOfLines={1}>
+              {location}
+            </Text>
           </View>
         </View>
 
@@ -155,46 +158,33 @@ const ListingCard: React.FC<ListingCardProps> = ({
           </View>
         </View>
       </TouchableOpacity>
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('PostAd', {items})}
-          style={styles.outlinedButton}>
-          <Text style={styles.buttonText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.outlinedButton}>
-          <Text style={styles.buttonText}>Mark as Sold</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
 
-const MyAds = () => {
-  const {myAds, fetchMyAds} = useBoundStore();
+const ReportAd = () => {
+  const {reportAdList, fetchReportedAd} = useBoundStore();
   const navigation = useNavigation();
   const {theme} = useTheme();
   const [filterBy, setFilterBy] = useState<any>(null);
 
   useEffect(() => {
-    fetchMyAds();
+    fetchReportedAd();
   }, []);
 
   const renderAdItem = useCallback(
     (items: any) => {
       return (
         <ListingCard
-          title={items.item?.title || ''}
-          location={items.item?.address || ''}
-          price={items.item?.price}
-          status={items.item?.adStatus}
-          date={items.item?.createdAt}
+          title={items?.item?.comment || ''}
+          location={items?.item?.reason || ''}
+          price={items?.item?.price}
+          status={items?.item?.adStatus}
+          date={items?.item?.createdAt}
           views={200}
           navigation={navigation}
-          items={items.item}
-          imageUrl={
-            items.item?.imageUrls[0]
-              ? items.item?.imageUrls[0]
-              : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM='
+          items={items?.item}
+          imageUrl={ 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM='
           }
         />
       );
@@ -207,8 +197,8 @@ const MyAds = () => {
       <FlatList
         data={
           filterBy
-            ? myAds.filter((items: any) => items.adStatus == filterBy)
-            : myAds
+            ? reportAdList.filter((items: any) => items.adStatus == filterBy)
+            : reportAdList
         }
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
@@ -221,7 +211,7 @@ const MyAds = () => {
         ListHeaderComponent={
           <>
             <CommonHeader
-              title="My Ads"
+              title="Reported Ads"
               textColor="#171717"
               // onBackPress={onBackPress}
             />
@@ -319,20 +309,20 @@ const MyAds = () => {
           <RefreshControl
             refreshing={false}
             onRefresh={() => {
-              fetchMyAds();
+              fetchReportedAd();
             }}
             colors={['#40DABE', '#40DABE', '#227465']}
           />
         }
         ListFooterComponent={
           filterBy ? (
-            myAds.filter((items: any) => items.adStatus == filterBy).length <=
-            0 ? (
+            reportAdList.filter((items: any) => items.adStatus == filterBy)
+              .length <= 0 ? (
               <Text style={styles.endText}>You dont have anything listed.</Text>
             ) : (
               <></>
             )
-          ) : myAds.length <= 0 ? (
+          ) : reportAdList.length <= 0 ? (
             <Text style={styles.endText}>You havent listed anything yet.</Text>
           ) : (
             <></>
@@ -466,4 +456,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyAds;
+export default ReportAd;

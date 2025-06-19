@@ -9,6 +9,7 @@ import {
   Text,
   Dimensions,
   Linking,
+  Share,
 } from 'react-native';
 import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
@@ -35,6 +36,14 @@ function Header(props: any): React.JSX.Element {
   const handleImagePress = useCallback(() => {
     setModalVisible(true);
   }, []);
+
+
+  const shareProperty = (id: string) => {
+    const link = `myapp://property/${id}`;
+    Share.share({
+      message: `Check out this property:\n${link}`,
+    });
+  };
 
   const renderItem = useCallback(
     ({item}: {item: string; index: number}) => (
@@ -72,7 +81,9 @@ function Header(props: any): React.JSX.Element {
             />
           </TouchableOpacity>
           <View style={styles.headerIconContainer}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={()=>{
+              shareProperty(details._id);
+            }}>
               <IconButton
                 style={[styles.heartRight]}
                 iconSize={24}

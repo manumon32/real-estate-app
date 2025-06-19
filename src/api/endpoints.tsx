@@ -17,10 +17,13 @@ export const API = {
     GET_MYADS: '/property/my-ads',
   },
   USER: {
-    GET:'/user',
+    GET: '/user',
     PROFILE: '/user/details',
     UPDATE_PROFILE: '/user/update',
   },
-  FAVOURITES:'/favorites',
-  UPLOAD_IMAGES:'/files/upload-images',
+  REPORT: {
+    GET: '/ad-report',
+  },
+  FAVOURITES: '/favorites',
+  UPLOAD_IMAGES: '/files/upload-images',
 };
