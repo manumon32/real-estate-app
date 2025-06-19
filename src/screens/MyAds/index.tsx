@@ -154,7 +154,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
       </TouchableOpacity>
       <View style={styles.buttonRow}>
         <TouchableOpacity
-          // onPress={() => navigation.navigate('PostAd',{items})}
+          onPress={() => navigation.navigate('PostAd',{items})}
           style={styles.outlinedButton}>
           <Text style={styles.buttonText}>Edit</Text>
         </TouchableOpacity>

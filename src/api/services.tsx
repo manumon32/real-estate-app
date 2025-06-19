@@ -136,9 +136,7 @@ export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
 
 // 🔹 Hand Shake token
 
-export const getHandshakeTokenApi = async (
-  data: object,
-): Promise<any> => {
+export const getHandshakeTokenApi = async (data: object): Promise<any> => {
   try {
     const headers = await getHeaders(data, true);
     const response = await apiRequest({
@@ -318,14 +316,16 @@ export const uploadImages = async (
 // postAd
 
 export const postAdAPI = async (
-  data: object,
+  data: any,
   configArg: any,
+  method: RequestMethod,
 ): Promise<Listing> => {
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
-      method: 'post',
-      url: API.LISTINGS.CREATE,
+      method,
+      url:
+        method === 'post' ? API.LISTINGS.CREATE : API.LISTINGS.UPDATE(data.id),
       data,
       headers,
     });

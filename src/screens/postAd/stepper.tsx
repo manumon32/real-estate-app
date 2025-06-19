@@ -25,6 +25,7 @@ import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
 import useBoundStore from '@stores/index';
 import Preview from './preview';
 import {postAdAPI, uploadImages} from '@api/services';
+import {RequestMethod} from '@api/request';
 
 interface FooterProps {
   currentStep: number;
@@ -36,6 +37,7 @@ interface FooterProps {
   onBackPress: any;
   submitPostAd?: any;
   loading?: boolean;
+  values: any;
 }
 
 const Footer: React.FC<FooterProps> = ({
@@ -48,6 +50,7 @@ const Footer: React.FC<FooterProps> = ({
   onBackPress,
   submitPostAd,
   loading = false,
+  values,
 }) => {
   const handleCancel = () => {
     if (onCancel) {
@@ -88,7 +91,13 @@ const Footer: React.FC<FooterProps> = ({
         disabled={isLastStep}>
         <Text style={styles.buyText}>
           {loading && <ActivityIndicator size={'small'} color={'#fff'} />}
-          {!loading ? (currentStep == 5 ? 'Post Now' : 'Next') : ''}
+          {!loading
+            ? currentStep == 5
+              ? values.id
+                ? 'Update'
+                : 'Post Now'
+              : 'Next'
+            : ''}
         </Text>
       </TouchableOpacity>
     </View>
@@ -96,14 +105,20 @@ const Footer: React.FC<FooterProps> = ({
 };
 
 const PostAdContainer = (props: any) => {
-  const {errors, setTouched, setFieldValue, values, touched} = props;
-
+  const {
+    errors,
+    setTouched,
+    setFieldValue,
+    values,
+    touched,
+    fields,
+    setFields,
+  } = props;
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [visible, setVisible] = useState(false);
   const [preview, setPreview] = useState(false);
-  const [fields, setFields] = useState<{}>({});
   const prevCountRef = useRef<number | null>(null);
   const {
     setPostAd,
@@ -119,6 +134,7 @@ const PostAdContainer = (props: any) => {
     setImages,
     setFloorPlans,
   } = useBoundStore();
+  console.log('values', values);
   const prevStep = prevCountRef.current;
 
   const getMergedFields = useCallback(
@@ -321,7 +337,11 @@ const PostAdContainer = (props: any) => {
     if (Object.keys(errors).length == 0 && images.length > 0) {
       setLoading(true);
       let formData = new FormData();
-      images.map((items: any, index: any) => {
+      // @ts-ignore
+      let newImages = images.filter(items => items?.uri);
+      // @ts-ignore
+      let newImagesWithurl = images.filter(items => !items.uri);
+      newImages.map((items: any, index: any) => {
         formData.append('images', {
           uri: items.uri, // local path or blob URL
           name: `photo_${index}.jpg`, // ⬅ server sees this
@@ -329,7 +349,11 @@ const PostAdContainer = (props: any) => {
         } as any);
       });
       let formDataFloor = new FormData();
-      floorPlans.map((items: any, index: any) => {
+      // @ts-ignore
+      let newformDataFloor = floorPlans.filter(items => items?.uri);
+      // @ts-ignore
+      let formDataFloorWithurl = floorPlans.filter(items => !items.uri);
+      newformDataFloor.map((items: any, index: any) => {
         formDataFloor.append('images', {
           uri: items.uri, // local path or blob URL
           name: `photo_${index}.jpg`, // ⬅ server sees this
@@ -338,13 +362,16 @@ const PostAdContainer = (props: any) => {
       });
       try {
         /* 1. upload ------------------------------------------------------ */
-        const imageUrls = await uploadImages(formData, {
-          token: token,
-          clientId: clientId,
-          bearerToken: bearerToken,
-        });
-        const floorUrls =
-          floorPlans.length > 0
+        const imageUrls: any =
+          newImages.length > 0
+            ? await uploadImages(formData, {
+                token: token,
+                clientId: clientId,
+                bearerToken: bearerToken,
+              })
+            : [];
+        const floorUrls: any =
+          newformDataFloor.length > 0
             ? await uploadImages(formDataFloor, {
                 token: token,
                 clientId: clientId,
@@ -361,17 +388,23 @@ const PostAdContainer = (props: any) => {
           address: locationForAdpost.name
             ? locationForAdpost.name
             : location.name,
-          imageUrls: imageUrls,
-          floorPlanUrl: floorUrls,
+          imageUrls: [...imageUrls, ...newImagesWithurl],
+          floorPlanUrl: [...floorUrls, ...formDataFloorWithurl],
         };
         let mergedPayload = {...values, ...paylod};
         console.log('postAd payload', mergedPayload);
+        let method: RequestMethod = values.id ? 'put' : 'post';
+        console.log('method', method);
         /* 2. post ad ----------------------------------------------------- */
-        await postAdAPI(mergedPayload, {
-          token: token,
-          clientId: clientId,
-          bearerToken: bearerToken,
-        });
+        await postAdAPI(
+          mergedPayload,
+          {
+            token: token,
+            clientId: clientId,
+            bearerToken: bearerToken,
+          },
+          method,
+        );
         setVisible(true);
       } catch (err: any) {
         Alert.alert(
@@ -379,6 +412,8 @@ const PostAdContainer = (props: any) => {
           'Failed to post ad, please try again later',
         );
       } finally {
+        setImages([]);
+        setFloorPlans([]);
         setLoading(false);
       }
     }
@@ -396,6 +431,8 @@ const PostAdContainer = (props: any) => {
     location.lng,
     location.name,
     values,
+    setImages,
+    setFloorPlans,
   ]);
 
   useEffect(() => {
@@ -414,7 +451,7 @@ const PostAdContainer = (props: any) => {
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-        style={{height: Platform.OS === 'ios' ? '85%' : '80%'}}>
+        style={{height: Platform.OS === 'ios' ? '85%' : '80%', flex: 1}}>
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContainer}
@@ -429,10 +466,16 @@ const PostAdContainer = (props: any) => {
           onBackPress={onBackPress}
           submitPostAd={submitPostAd}
           loading={loading}
+          values={values}
         />
       </KeyboardAvoidingView>
       <CommonSuccessModal
         visible={visible}
+        message={
+          values.id
+            ? 'Your Udaptes are saved.'
+            : 'Your listing will go live after the review.'
+        }
         onClose={() => {
           setVisible(false);
           resetPostAd();
@@ -448,7 +491,7 @@ const PostAdContainer = (props: any) => {
         onRequestClose={() => {
           setPreview(false);
         }}>
-        <SafeAreaView style={[]}>
+        <SafeAreaView>
           <TouchableOpacity onPress={() => setPreview(false)}>
             <Text>Colse</Text>
           </TouchableOpacity>
@@ -474,6 +517,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingBottom: 24,
+    flexGrow: 1,
     // paddingVertical: 10,
     // flexGrow: 1,
   },

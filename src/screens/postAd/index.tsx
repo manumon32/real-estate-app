@@ -12,9 +12,10 @@ import {fetchDetailsAPI} from '@api/services';
 const PostAd = () => {
   const route = useRoute();
   // @ts-ignore
-  const items= route?.params?.items || null;
-  const {locationForAdpost, token, clientId} = useBoundStore();
+  const items = route?.params?.items || null;
+  const {locationForAdpost, token, clientId, setPostAd, setImages, setFloorPlans} = useBoundStore();
   const [loading, setLoading] = useState(false);
+  const [fields, setFields] = useState<{}>({});
   const [initialValues, setInitialValues] = useState({
     title: '',
     description: '',
@@ -45,11 +46,11 @@ const PostAd = () => {
     latitude: locationForAdpost?.lat,
     longitude: locationForAdpost?.lng,
     numberOfBalconies: 0,
-    numberOfKitchens:0,
+    numberOfKitchens: 0,
     carParking: 1,
     amenityIds: [],
     imageUrls: [],
-    floorPlanUrl:[],
+    floorPlanUrl: [],
     videoUrl: '',
     // Add other fields
   });
@@ -63,24 +64,49 @@ const PostAd = () => {
         token,
         clientId,
       });
-      console.log(res);
       let newInitialValues = {...initialValues, ...res};
-      console.log('newInitialValues', newInitialValues);
-      setInitialValues(newInitialValues);
+      // @ts-ignore
+      const listingTypeFields = newInitialValues.listingTypeId?.fields;
+      // @ts-ignore
+      const propertyTypeFields = newInitialValues.propertyTypeId?.fields;
+      setFields([...listingTypeFields, ...propertyTypeFields]);
+      let newpostAd = {
+        // @ts-ignore
+        listingTypeId: [newInitialValues.listingTypeId?._id],
+        // @ts-ignore
+        propertyTypeId: [newInitialValues.propertyTypeId?._id],
+      };
+      let amenityIds = newInitialValues.amenityIds.map((item:any) => item._id);
+      console.log(amenityIds);
+
+      let newInitialValuesData = {
+        ...newInitialValues,
+        // @ts-ignore
+        listingTypeId: newInitialValues.listingTypeId?._id,
+        // @ts-ignore
+        propertyTypeId: newInitialValues.propertyTypeId?._id,
+        amenityIds: amenityIds,
+      };
+
+      setImages(newInitialValues?.imageUrls || []);
+      setFloorPlans(newInitialValues?.floorPlanUrl || []);
+      setPostAd(newpostAd);
+        // @ts-ignore
+      setInitialValues(newInitialValuesData);
       setLoading(false);
       // TODO: setState(res) if you need to store it
     } catch (err) {
       console.error('fetchDetails failed:', err);
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (items && items._id) {
       fetchDetails();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -111,6 +137,8 @@ const PostAd = () => {
               handleBlur={handleBlur}
               setTouched={setTouched}
               handleChange={handleChange}
+              fields={fields}
+              setFields={setFields}
             />
           )}
         </Formik>

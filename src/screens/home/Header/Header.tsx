@@ -80,7 +80,7 @@ function Header(): React.JSX.Element {
 
 const styles = StyleSheet.create({
   container: {
-    height: 230 + (Platform.OS === 'android' ? 20 : 0),
+    height: 230 + (Platform.OS === 'android' ? 10 : 0),
     backgroundColor: 'transparent',
   },
   headerContainer: {
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.MEDIUM,
     margin: 10,
-    marginBottom: 2,
+    marginBottom: 5,
   },
 });
 

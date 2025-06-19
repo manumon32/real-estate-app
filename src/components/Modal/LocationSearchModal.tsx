@@ -164,8 +164,13 @@ const CommonLocationModal: React.FC<Props> = ({
         // Alert.alert('Lat Long fetch failed');
         setLoading(false);
       },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 30000,
       // @ts-ignore
-      {enableHighAccuracy: true, timeout: 12000, maximumAge: 30000, showLocationDialog: true}
+        showLocationDialog: true,
+      },
       // {enableHighAccuracy: true, timeout: 15_000, maximumAge: 0},
     );
   };
@@ -224,7 +229,7 @@ const CommonLocationModal: React.FC<Props> = ({
               <Text style={styles.currentLocationText}>
                 Use Current Location
               </Text>
-              {currentLocation?.name && (
+              {!loading && currentLocation?.name && (
                 <Text
                   numberOfLines={1}
                   style={{
@@ -234,6 +239,18 @@ const CommonLocationModal: React.FC<Props> = ({
                     maxWidth: 250,
                   }}>
                   {currentLocation?.name}
+                </Text>
+              )}
+              {loading && (
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 12,
+                    color: 'rgba(0, 0, 0, 0.55)',
+                    textAlign: 'left',
+                    maxWidth: 250,
+                  }}>
+                  {'Fetching'}
                 </Text>
               )}
             </View>
@@ -270,7 +287,7 @@ const CommonLocationModal: React.FC<Props> = ({
                   }
                   {locationHistory?.map(
                     (item: {lat: any; name: string; lng: any}, index: number) =>
-                      index <= 4 && (
+                      index <= 4 && (currentLocation?.lat !== item.lat)  &&(
                         <TouchableOpacity
                           key={index}
                           style={styles.item}

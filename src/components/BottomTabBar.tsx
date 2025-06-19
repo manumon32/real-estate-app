@@ -99,7 +99,7 @@ const BottomTabBar = ({state, navigation}: any) => {
                       isFocused ? styles.textFocusedStyle : styles.textStyle,
                       // eslint-disable-next-line react-native/no-inline-styles
                       {
-                        bottom: route.name === 'AddPost' ? 25 : 0,
+                        bottom: route.name === 'AddPost' ? 28 : 0,
                       },
                     ]}>
                     {route.name === 'AddPost'
@@ -129,14 +129,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-  },
-  svg: {
-    position: 'absolute',
-    top: -30,
+    height:60,
+    justifyContent:'center'
   },
   tabBar: {
     flexDirection: 'row',
-    height: 87,
     backgroundColor: 'transparent',
   },
   textFocusedStyle: {
@@ -150,7 +147,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.MEDIUM,
   },
   addButton: {
-    bottom: 30,
+    bottom: 25,
     left: 0,
     right: 0,
     alignItems: 'center',

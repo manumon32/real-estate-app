@@ -35,9 +35,6 @@ const FavAds = () => {
       <CommonHeader
         title="Favourite Ads"
         textColor="#171717"
-        rightText={
-          favorites.length + (favorites.length > 1 ? ' Items' : ' Item')
-        }
       />
       <FlatList
         data={favorites}

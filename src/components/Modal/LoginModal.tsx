@@ -1,7 +1,10 @@
+/* eslint-disable react/self-closing-comp */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {useCallback,
-  //  useEffect, 
-   useState} from 'react';
+import React, {
+  useCallback,
+  //  useEffect,
+  useState,
+} from 'react';
 import {
   Modal,
   View,
@@ -10,6 +13,7 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
@@ -20,6 +24,7 @@ import IconButton from '@components/Buttons/IconButton';
 import {useTheme} from '@theme/ThemeProvider';
 import useBoundStore from '@stores/index';
 import OtpVerificationScreen from './OtpVerificationScreen';
+import LinearGradient from 'react-native-linear-gradient';
 
 type Props = {
   visible: boolean;
@@ -81,98 +86,111 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
   return (
     <Modal
       visible={visible}
-      transparent
+      transparent={false} // not overlay ‑> full sheet
+      presentationStyle={
+        Platform.OS === 'ios' ? 'fullScreen' : 'overFullScreen'
+      }
+      statusBarTranslucent
       animationType="fade"
       onRequestClose={handleClose}>
-      {!otp && (
-        <View style={styles.container}>
-          {/* Illustration */}
-          <Pressable onPress={handleClose} style={styles.closeButton}>
-            <IconButton
-              iconSize={24}
-              //red , heart
-              iconColor={theme.colors.text}
-              iconName={'close'}
-            />
-          </Pressable>
-          <View style={styles.illustration}>
-            <GroupIcon />
-          </View>
+      <View style={styles.container}>
+        {!otp && (
+          <>
+            <LinearGradient
+              colors={[
+                '#FFFFFF',
+                '#FFFFFF',
+                '#40DABE',
+                '#40DABE',
+                '#227465',
+              ]}
+              start={{x: 0.5, y: 0}}
+              end={{x: 0.5, y: 1}}
+              style={styles.gradient}>
+              {/* Illustration */}
+              <Pressable onPress={handleClose} style={styles.closeButton}>
+                <IconButton
+                  iconSize={24}
+                  iconColor={theme.colors.text}
+                  iconName={'close'}
+                />
+              </Pressable>
+              <View style={styles.illustration}>
+                <GroupIcon />
+              </View>
 
-          {/* Login Card */}
-          <View style={styles.card}>
-            {/* Logo */}
-            <LogoIcon style={styles.logo} />
-            <Text style={styles.title}>Login</Text>
+              {/* Login Card */}
+              <View style={styles.card}>
+                {/* Logo */}
+                <LogoIcon style={styles.logo} />
+                <Text style={styles.title}>Login</Text>
 
-            {/* Phone Input */}
-            <Text style={styles.label}>Phone number or Email</Text>
-            <TextInput
-              value={loginVar}
-              onChangeText={text => {
-                setLoginVar(text);
-                setMessage('');
-              }}
-              placeholder="Phone number or Email"
-              placeholderTextColor={'#ccc'}
-              style={styles.input}
-              keyboardType="phone-pad"
-            />
-            {(message || loginError) && (
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: '#ff4d4f',
-                  margin: 5,
-                  marginTop: -5,
-                }}>
-                {'Please enter valid Phone number or Email'}
-              </Text>
-            )}
+                {/* Phone Input */}
+                <Text style={styles.label}>Phone number or Email</Text>
+                <TextInput
+                  value={loginVar}
+                  onChangeText={text => {
+                    setLoginVar(text);
+                    setMessage('');
+                  }}
+                  placeholder="Phone number or Email"
+                  placeholderTextColor={'#ccc'}
+                  style={styles.input}
+                  keyboardType="phone-pad"
+                />
+                {(message || loginError) && (
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: '#ff4d4f',
+                      margin: 5,
+                      marginTop: -5,
+                    }}>
+                    {'Please enter valid Phone number or Email'}
+                  </Text>
+                )}
 
-            {/* Login Button */}
-            <TouchableOpacity onPress={handleSubmit} style={styles.loginBtn}>
-              <Text style={styles.loginText}>Login</Text>
-            </TouchableOpacity>
+                {/* Login Button */}
+                <TouchableOpacity
+                  onPress={handleSubmit}
+                  style={styles.loginBtn}>
+                  <Text style={styles.loginText}>Login</Text>
+                </TouchableOpacity>
 
-            {/* Divider */}
-            <View style={styles.dividerContainer}>
-              <View style={styles.divider} />
-              <Text style={styles.orText}>Or</Text>
-              <View style={styles.divider} />
-            </View>
+                {/* Divider */}
+                <View style={styles.dividerContainer}>
+                  <View style={styles.divider} />
+                  <Text style={styles.orText}>Or</Text>
+                  <View style={styles.divider} />
+                </View>
 
-            {/* Social Logins */}
-            <View style={styles.socialRow}>
-              <Icon.Button
-                name="apple"
-                backgroundColor="#000"
-                size={22}
-                borderRadius={10}
-                onPress={() => {}}
-              />
-              <Icon.Button
-                name="google"
-                backgroundColor="#fff"
-                color="#000"
-                size={22}
-                borderRadius={10}
-                // onPress={signInWithGoogle}
-              />
-              <Icon.Button
-                name="facebook"
-                backgroundColor="#3b5998"
-                size={22}
-                borderRadius={10}
-                onPress={() => {}}
-              />
-            </View>
-          </View>
-        </View>
-      )}
+                {/* Social Logins */}
+                <View style={styles.socialRow}>
+                  <Icon
+                    name="apple"
+                    size={36}
+                    onPress={() => {}}
+                  />
+                  <Icon
+                    name="google"
+                    color="#000"
+                    size={36}
+                    // onPress={signInWithGoogle}
+                  />
+                  <Icon
+                    name="facebook"
+                    color="#3b5998"
+                    size={36}
+                    onPress={() => {}}
+                    style={{justifyContent:'center', alignItems:'center'}}
+                  />
+                </View>
+              </View>
+            </LinearGradient>
+          </>
+        )}
 
-      {otp && (
-        <View style={styles.container}>
+        {otp && (
           <OtpVerificationScreen
             clearOTP={clearOTP}
             loginVar={loginVar}
@@ -180,8 +198,8 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
             veryFyOTP={veryFyOTP}
             otpValue={otp}
           />
-        </View>
-      )}
+        )}
+      </View>
     </Modal>
   );
 };
@@ -190,8 +208,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#15937c',
-    alignItems: 'center',
+    // alignItems: 'center',
+    // justifyContent: 'center',
+  },
+  gradient: {
+    height: '100%',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   illustration: {
     width: '80%',
@@ -305,7 +328,7 @@ const styles = StyleSheet.create({
     top: 50,
     right: 20,
     zIndex: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#ccc',
     padding: 8,
     borderRadius: 20,
   },

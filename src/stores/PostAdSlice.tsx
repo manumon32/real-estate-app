@@ -40,10 +40,14 @@ export const createPostAdSlice = (set: any, get: any): PostAdSlice => ({
       postAdError: false,
     }));
     try {
-      const resp = await postAdAPI(payload, {
-        token: get().token,
-        clientId: get().clientId,
-      });
+      const resp = await postAdAPI(
+        payload,
+        {
+          token: get().token,
+          clientId: get().clientId,
+        },
+        'post',
+      );
       if (resp.rows) {
         set({
           imageUrls: resp.rows,

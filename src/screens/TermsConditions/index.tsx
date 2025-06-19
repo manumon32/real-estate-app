@@ -18,6 +18,7 @@ const TermsConditions = () => {
     <SafeAreaView style={styles.container}>
       <CommonHeader title="Terms & Conditions" textColor="#171717" />
       <ScrollView
+        showsVerticalScrollIndicator={false}
         style={{padding: 15}}
         contentContainerStyle={{
           borderWidth: 1,
@@ -25,7 +26,7 @@ const TermsConditions = () => {
           borderColor: '#EBEBEB',
           backgroundColor: '#F5F6FA',
           padding: 10,
-          height:'90%'
+          paddingBottom: 120,
         }}>
         <Text
           style={{
@@ -40,7 +41,7 @@ const TermsConditions = () => {
         </Text>
         <Text
           style={{
-            top:20,
+            top: 20,
             fontSize: 14,
             fontFamily: Fonts.MEDIUM,
             letterSpacing: 0.1,
@@ -53,7 +54,7 @@ const TermsConditions = () => {
         </Text>
         <Text
           style={{
-            top:40,
+            top: 40,
             fontSize: 14,
             fontFamily: Fonts.MEDIUM,
             letterSpacing: 0.1,

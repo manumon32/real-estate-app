@@ -18,6 +18,7 @@ const PrivacyPolicy = () => {
     <SafeAreaView style={styles.container}>
       <CommonHeader title="Privacy Policy" textColor="#171717" />
       <ScrollView
+      showsVerticalScrollIndicator={false}
         style={{padding: 15}}
         contentContainerStyle={{
           borderWidth: 1,
@@ -25,7 +26,7 @@ const PrivacyPolicy = () => {
           borderColor: '#EBEBEB',
           backgroundColor: '#F5F6FA',
           padding: 10,
-          height:'90%'
+          paddingBottom:120,
         }}>
         <Text
           style={{
@@ -50,6 +51,21 @@ const PrivacyPolicy = () => {
           a service to you. We collect it by fair and lawful means, with your
           knowledge and consent. We also let you know why we’re collecting it
           and how it will be used.
+        </Text>
+        <Text
+          style={{
+            top:40,
+            fontSize: 14,
+            fontFamily: Fonts.MEDIUM,
+            letterSpacing: 0.1,
+            lineHeight: 32,
+          }}>
+          We only retain collected information for as long as necessary to
+          provide you with your requested service. What data we store, we’ll
+          protect within commercially acceptable means to prevent loss and
+          theft, as well as unauthorized access, disclosure, copying, use or
+          modification. We don’t share any personally identifying information
+          publicly or with third-parties, except when required to by law.
         </Text>
         <Text
           style={{

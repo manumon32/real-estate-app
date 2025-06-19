@@ -10,9 +10,9 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Platform,
-  Image,
   ActivityIndicator,
 } from 'react-native';
+import Image from 'react-native-fast-image';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {Fonts} from '@constants/font';
@@ -309,7 +309,7 @@ const PropertyDetails = React.memo(() => {
               color: theme.colors.text,
               top: 10,
             }}>
-            Description
+            Details
           </Text>
           <Text
             style={{
@@ -460,8 +460,11 @@ const PropertyDetails = React.memo(() => {
             <Image
               source={
                 error || !property?.customerId?.profilePicture
-                  ? require('@assets/images/images.jpeg') // Fallback image
-                  : property?.customerId?.profilePicture
+                  ? require('@assets/images/images.jpeg')
+                  : {
+                      uri: property?.customerId?.profilePicture,
+                      cache: Image.cacheControl.immutable,
+                    }
               }
               onError={() => setError(true)}
               resizeMode="cover"

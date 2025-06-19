@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {StyleSheet, View, Text, FlatList, Image, Pressable} from 'react-native';
+import {StyleSheet, View, Text, FlatList, Pressable} from 'react-native';
+import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
 import TextInput from '@components/Input/textInput';
@@ -26,25 +27,29 @@ const Step5MediaUpload = (props: any) => {
 
   const removeAsset = useCallback((uri: string | undefined) => {
     if (!uri) return;
-    setAssets(prev => prev.filter(item => item.uri !== uri));
+    setAssets(prev =>
+      prev.filter(item => (item.uri ? item.uri !== uri : item !== uri)),
+    );
   }, []);
 
   const removeFloor = useCallback((uri: string | undefined) => {
     if (!uri) return;
-    setFloorPlan(prev => prev.filter(item => item.uri !== uri));
+    setFloorPlan(prev =>
+      prev.filter(item => (item.uri ? item.uri !== uri : item !== uri)),
+    );
   }, []);
 
   const renderItem = useCallback(
     ({item}: {item: any}) => (
       <View style={styles.previewContainer}>
         <Image
-          source={{uri: item.uri}}
+          source={{uri: item?.uri || item, cache: Image.cacheControl.immutable}}
           style={styles.preview}
           resizeMode="cover"
         />
         <Pressable
           style={styles.removeBtn}
-          onPress={() => removeAsset(item.uri)}>
+          onPress={() => removeAsset(item?.uri || item)}>
           <Text style={styles.removeText}>✕</Text>
         </Pressable>
       </View>
@@ -55,13 +60,16 @@ const Step5MediaUpload = (props: any) => {
     ({item}: {item: any}) => (
       <View style={styles.previewContainer}>
         <Image
-          source={{uri: item.uri}}
+          source={{
+            uri: item?.uri || item,
+            cache: Image.cacheControl.immutable,
+          }}
           style={styles.preview}
           resizeMode="cover"
         />
         <Pressable
           style={styles.removeBtn}
-          onPress={() => removeFloor(item.uri)}>
+          onPress={() => removeFloor(item?.uri || item)}>
           <Text style={styles.removeText}>✕</Text>
         </Pressable>
       </View>
@@ -82,14 +90,14 @@ const Step5MediaUpload = (props: any) => {
     (item: any) => item.uri ?? item.fileName ?? Math.random().toString(),
     [],
   );
-  const dedupByUri = (arr: any[]) => {
-    const seen = new Set<string>();
-    return arr.filter(item => {
-      if (!item?.uri || seen.has(item.uri)) return false;
-      seen.add(item.uri);
-      return true;
-    });
-  };
+  // const dedupByUri = (arr: any[]) => {
+  //   const seen = new Set<string>();
+  //   return arr.filter(item => {
+  //     if (!item?.uri || seen.has(item.uri)) return false;
+  //     seen.add(item.uri);
+  //     return true;
+  //   });
+  // };
   const previews = useMemo(
     () => (
       <FlatList
@@ -123,9 +131,7 @@ const Step5MediaUpload = (props: any) => {
       <Text style={styles.headingText}>Image Upload</Text>
       <View style={styles.inputContainer}>
         <CommonImageUploader
-          onUpload={uri =>
-            setAssets(prev => dedupByUri([...prev, ...(uri ?? [])]))
-          }
+          onUpload={uri => setAssets(prev => [...prev, ...(uri ?? [])])}
           label="Upload Property Images"
           // handleOnpress={()=> setModalVisible(true)}
         />
@@ -148,9 +154,7 @@ const Step5MediaUpload = (props: any) => {
         <View style={styles.inputContainer}>
           <CommonImageUploader
             label="Upload Floor Plan"
-            onUpload={uri =>
-              setFloorPlan(prev => dedupByUri([...prev, ...(uri ?? [])]))
-            }
+            onUpload={uri => setFloorPlan(prev => [...prev, ...(uri ?? [])])}
           />
           {previewsFloorPlan}
         </View>

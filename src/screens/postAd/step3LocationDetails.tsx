@@ -93,13 +93,13 @@ const Step3LocationDetails = (props: any) => {
         <TextInput onChangeText={() => {}} placeholder="Pin code" />
       </View> */}
 
-      <Text style={styles.headingText}>Area Details</Text>
+      <Text style={styles.headingText}>Area Details.</Text>
       {isStringInEitherArray('area') && (
         <View style={styles.inputContainer}>
           <CommonDistanceInput
             label="Area Size"
             unit="/Sq.ft"
-            value={values.areaSize}
+            value={String(values.areaSize)}
             error={touched?.areaSize && errors?.areaSize}
             onChange={text => setFieldValue('areaSize', text)}
           />
