@@ -17,7 +17,6 @@ export const createMyAdsSlice = (set: any, get: any): MyAdsSlice => ({
         clientId: get().clientId,
         bearerToken: get().bearerToken,
       });
-      console.log(res.rows);
       res?.rows &&
         set(() => ({
           myAds: res.rows,

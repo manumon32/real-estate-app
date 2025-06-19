@@ -3,6 +3,7 @@ export const API = {
     LOGIN: '/auth/login',
     SEND_OTP: '/auth/send-otp',
     REFRESH: '/auth/refresh',
+    UPDATE_CONTACT: '/auth/update-contact',
     HAND_SHAKE: '/handshake/client-secret',
   },
   LISTINGS: {
@@ -17,7 +18,7 @@ export const API = {
   },
   USER: {
     GET:'/user',
-    PROFILE: '/user/profile',
+    PROFILE: '/user/details',
     UPDATE_PROFILE: '/user/update',
   },
   FAVOURITES:'/favorites',

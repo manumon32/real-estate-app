@@ -105,6 +105,7 @@ function App({navigation}: any): React.JSX.Element {
             onRefresh={() => {
               setTriggerRefresh();
             }}
+            colors={['#40DABE', '#40DABE', '#227465']}
           />
         }
         ListFooterComponent={

@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {
   View,
@@ -11,7 +12,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useNavigation} from '@react-navigation/native';
 import {Fonts} from '@constants/font';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 interface CommonHeaderProps {
   title: string;
@@ -38,7 +39,16 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
 
   const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.wrapper, {backgroundColor}, containerStyle, { paddingTop: insets.top }]}>
+    <View
+      style={[
+        styles.wrapper,
+        {backgroundColor},
+        containerStyle,
+        {
+          paddingTop: Platform.OS === 'android' ? insets.top : 10,
+          height: Platform.OS === 'android' ? 80 : 50,
+        },
+      ]}>
       <StatusBar
         backgroundColor={backgroundColor}
         barStyle={Platform.OS === 'android' ? 'dark-content' : 'dark-content'}
@@ -46,7 +56,9 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={onBackPress || navigation.goBack}>
+          onPress={() => {
+            onBackPress ? onBackPress() : navigation.goBack();
+          }}>
           <MaterialCommunityIcons
             name="chevron-left"
             size={24}
@@ -88,9 +100,9 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     paddingHorizontal: 16,
     // height:80,
-    justifyContent:'center',
-    alignContent:'center',
-    alignItems:'center'
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
   },
   container: {
     flexDirection: 'row',

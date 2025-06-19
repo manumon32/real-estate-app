@@ -110,9 +110,8 @@ export const login = async (data: object, configArg: any): Promise<any> => {
       data, //: JSON.stringify(data),
       headers,
     });
-    return response.data;
+    return response?.data;
   } catch (error: any) {
-    console.log(error);
     throw new Error('Failed to fetch handshake token');
   }
 };
@@ -127,9 +126,14 @@ export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
       data, //: JSON.stringify(data),
       headers,
     });
-    return response.data;
+    console.log('response in service', response);
+    if (response.data) {
+      return response.data;
+    } else {
+      return response;
+    }
   } catch (error: any) {
-    console.log(error);
+    console.log('error response in service', error);
     throw new Error('Failed to fetch handshake token');
   }
 };
@@ -173,6 +177,26 @@ export const updateUser = async (
   }
 };
 
+//updateContact
+
+export const updateContact = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.AUTH.UPDATE_CONTACT,
+      data,
+      headers,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error('Failed to Do so');
+  }
+};
+
 // 🔹 GET App Config Data's
 
 export const getAppConfigData = async (configArg: object): Promise<any> => {
@@ -208,7 +232,7 @@ export const fetchListingsFromAPI = async (
       headers,
     };
     const response = await apiRequest(apiConfig);
-    return response.data;
+    return response?.data;
   } catch (error: any) {
     console.log(error);
     throw new Error('Failed to fetch handshake token');
@@ -263,6 +287,8 @@ export const fetchMyAdsAPI = async (configArg: any): Promise<any> => {
       url: API.LISTINGS.GET_MYADS,
       params: {
         noPagination: true,
+        orderBy:'createdAt',
+        orderByDir:'desc',
       },
       headers,
     };
@@ -282,6 +308,22 @@ export const fetchDetailsAPI = async (
     const apiConfig: any = {
       method: 'get',
       url: API.LISTINGS.GET_BY_ID(params),
+      params: {},
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch Details');
+  }
+};
+
+export const fetchUserDetailsAPI = async (configArg: any): Promise<Details> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.USER.PROFILE,
       params: {},
       headers,
     };

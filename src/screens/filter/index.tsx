@@ -375,6 +375,7 @@ function App(): React.JSX.Element {
               onRefresh={() => {
                 filterSetTriggerRefresh();
               }}
+            colors={['#40DABE', '#40DABE', '#227465']}
             />
           }
           ListFooterComponent={

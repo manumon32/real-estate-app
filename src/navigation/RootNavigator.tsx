@@ -9,6 +9,9 @@ import FavAds from '@screens/FavAds';
 import EditProfile from '@screens/profile/EditProfile';
 import PrivacyPolicy from '@screens/PrivacyPolicy';
 import TermsConditions from '@screens/TermsConditions';
+import Settings from '@screens/profile/Settings';
+import Notifications from '@screens/profile/Notifications';
+import Communication from '@screens/profile/Communication';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,6 +25,9 @@ const RootNavigator = () => {
       <Stack.Screen name="PostAd" component={PostAd} />
       <Stack.Screen name="FavAds" component={FavAds} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
+      <Stack.Screen name="Settings" component={Settings} />
+      <Stack.Screen name="Notifications" component={Notifications} />
+      <Stack.Screen name="Communication" component={Communication} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
       <Stack.Screen name="TermsConditions" component={TermsConditions} />
     </Stack.Navigator>

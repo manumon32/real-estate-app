@@ -35,6 +35,15 @@ const BottomTabBar = ({state, navigation}: any) => {
     // locationHistory,
   } = useBoundStore();
 
+  const ingoreRoutes = [
+    'Settings',
+    'Notifications',
+    'Communication',
+    'PrivacyPolicy',
+    'TermsConditions',
+    'filter',
+  ];
+
   useEffect(() => {
     console.log('bearerToken', bearerToken);
   }, [bearerToken]);
@@ -50,7 +59,7 @@ const BottomTabBar = ({state, navigation}: any) => {
       ]}>
       <View style={styles.tabBar}>
         {state.routes
-          .filter((item: {name: string}) => item.name !== 'filter')
+          .filter((item: {name: string}) => !ingoreRoutes.includes(item.name))
           .map((route: any, index: number) => {
             const isFocused = state.index === index;
 
@@ -129,8 +138,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    height:60,
-    justifyContent:'center'
+    height: 60,
+    justifyContent: 'center',
   },
   tabBar: {
     flexDirection: 'row',

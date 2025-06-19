@@ -18,7 +18,6 @@ api.interceptors.request.use(
   async (config: any) => {
     if (config.headers['X-TOKEN']) {
       const timestamp = Math.floor(Date.now() / 1000).toString();
-      console.log(config.data);
       const bodyHash =
         config.headers['Content-Type'] !== 'multipart/form-data'
           ? createBodyHash(config.data ? config.data : '')

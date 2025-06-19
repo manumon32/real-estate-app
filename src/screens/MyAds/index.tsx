@@ -1,8 +1,9 @@
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
 import CommonHeader from '@components/Header/CommonHeader';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
-import React, {useCallback, useEffect, useMemo} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useTheme} from '@theme/ThemeProvider';
 import {
   View,
@@ -133,7 +134,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
             <View style={styles.headerRow}>
               <Text style={styles.title}>{title}</Text>
               <View style={[styles.badge, {backgroundColor}]}>
-                <Text style={[styles.badgeText, {color: textColor}]}>{label}</Text>
+                <Text style={[styles.badgeText, {color: textColor}]}>
+                  {label}
+                </Text>
               </View>
             </View>
             <Text style={styles.location}>{location}</Text>
@@ -144,7 +147,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <Icon name="eye-outline" size={16} color="#888" />
-            <Text style={[styles.metaText, ]}>{views}</Text>
+            <Text style={[styles.metaText]}>{views}</Text>
           </View>
           <View style={styles.metaItem}>
             <Icon name="clock-outline" size={16} color="#888" />
@@ -154,7 +157,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
       </TouchableOpacity>
       <View style={styles.buttonRow}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('PostAd',{items})}
+          onPress={() => navigation.navigate('PostAd', {items})}
           style={styles.outlinedButton}>
           <Text style={styles.buttonText}>Edit</Text>
         </TouchableOpacity>
@@ -170,10 +173,12 @@ const MyAds = () => {
   const {myAds, fetchMyAds} = useBoundStore();
   const navigation = useNavigation();
   const {theme} = useTheme();
+  const [filterBy, setFilterBy] = useState<any>(null);
 
   useEffect(() => {
     fetchMyAds();
   }, []);
+
   const renderAdItem = useCallback(
     (items: any) => {
       return (
@@ -198,22 +203,116 @@ const MyAds = () => {
   );
 
   return (
-    <SafeAreaView
-      style={{backgroundColor: '#fff', padding: 10, height: '100%'}}>
-      <CommonHeader
-        title="My Ads"
-        textColor="#171717"
-        // onBackPress={onBackPress}
-      />
+    <SafeAreaView style={{backgroundColor: '#fff', height: '100%'}}>
       <FlatList
-        data={myAds}
+        data={
+          filterBy
+            ? myAds.filter((items: any) => items.adStatus == filterBy)
+            : myAds
+        }
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
-          paddingBottom: 100,
+          paddingBottom: 120,
           backgroundColor: theme.colors.backgroundHome,
           minHeight: 900,
-          padding: 14,
+          //  padding: 14,
+        }}
+        ListHeaderComponent={
+          <>
+            <CommonHeader
+              title="My Ads"
+              textColor="#171717"
+              // onBackPress={onBackPress}
+            />
+            <View style={{flexDirection: 'row', padding: 10}}>
+              <TouchableOpacity
+                style={[styles.chip, !filterBy && styles.chipSelected]}
+                onPress={() => {
+                  setFilterBy(null);
+                }}>
+                <Text
+                  style={[
+                    // newselected?.includes(item._id)
+                    styles.chipText,
+                    !filterBy && styles.chipTextSelected,
+                  ]}>
+                  {'All'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  filterBy === 'active' && styles.chipSelected,
+                ]}
+                onPress={() => {
+                  setFilterBy('active');
+                }}>
+                <Text
+                  style={
+                    filterBy === 'active'
+                      ? styles.chipTextSelected
+                      : styles.chipText
+                  }>
+                  {'Active'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  filterBy === 'pending' && styles.chipSelected,
+                ]}
+                onPress={() => {
+                  setFilterBy('pending');
+                }}>
+                <Text
+                  style={
+                    filterBy === 'pending'
+                      ? styles.chipTextSelected
+                      : styles.chipText
+                  }>
+                  {'Pending'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  filterBy === 'rejected' && styles.chipSelected,
+                ]}
+                onPress={() => {
+                  setFilterBy('rejected');
+                }}>
+                <Text
+                  style={
+                    filterBy === 'rejected'
+                      ? styles.chipTextSelected
+                      : styles.chipText
+                  }>
+                  {'Rejected'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  filterBy === 'blocked' && styles.chipSelected,
+                ]}
+                onPress={() => {
+                  setFilterBy('blocked');
+                }}>
+                <Text
+                  style={
+                    filterBy === 'blocked'
+                      ? styles.chipTextSelected
+                      : styles.chipText
+                  }>
+                  {'Blocked'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        }
+        ListHeaderComponentStyle={{
+          padding: 0,
         }}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -222,11 +321,19 @@ const MyAds = () => {
             onRefresh={() => {
               fetchMyAds();
             }}
+            colors={['#40DABE', '#40DABE', '#227465']}
           />
         }
         ListFooterComponent={
-          myAds.length <= 0 ? (
-            <Text style={styles.endText}>You havent listed anything yet</Text>
+          filterBy ? (
+            myAds.filter((items: any) => items.adStatus == filterBy).length <=
+            0 ? (
+              <Text style={styles.endText}>You dont have anything listed.</Text>
+            ) : (
+              <></>
+            )
+          ) : myAds.length <= 0 ? (
+            <Text style={styles.endText}>You havent listed anything yet.</Text>
           ) : (
             <></>
           )
@@ -246,6 +353,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
+    marginHorizontal: 16,
   },
   row: {
     flexDirection: 'row',
@@ -329,6 +437,32 @@ const styles = StyleSheet.create({
     color: '#888',
     padding: 12,
     fontStyle: 'italic',
+  },
+  chipContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 5,
+    // marginBottom: 5,
+  },
+  chipSelected: {
+    backgroundColor: '#2A9D8F',
+    borderColor: '#2A9D8F',
+  },
+  chipText: {
+    color: '#333',
+  },
+  chipTextSelected: {
+    color: '#fff',
   },
 });
 

@@ -32,13 +32,12 @@ const FavAds = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <CommonHeader
-        title="Favourite Ads"
-        textColor="#171717"
-      />
       <FlatList
         data={favorites}
         numColumns={2}
+        ListHeaderComponent={
+          <CommonHeader title="Favourite Ads" textColor="#171717" />
+        }
         keyExtractor={item => item._id}
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
@@ -47,7 +46,6 @@ const FavAds = () => {
           paddingBottom: 100,
           backgroundColor: theme.colors.backgroundHome,
           minHeight: 900,
-          padding: 10,
         }}
         refreshControl={
           <RefreshControl
@@ -55,6 +53,7 @@ const FavAds = () => {
             onRefresh={() => {
               fetchFavouriteAds();
             }}
+            colors={['#40DABE', '#40DABE', '#227465']}
           />
         }
         ListFooterComponent={

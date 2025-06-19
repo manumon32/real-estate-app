@@ -1,3 +1,4 @@
+import Toast from 'react-native-toast-message';
 import api from './axios';
 
 export type RequestMethod = 'get' | 'post' | 'put' | 'delete';
@@ -25,7 +26,6 @@ export const apiRequest = async ({
       params,
       headers,
     });
-    console.log('response', response);
     return response.data;
   } catch (error: any) {
     console.log('--- API Error ---');
@@ -33,7 +33,15 @@ export const apiRequest = async ({
     console.log('Status:', error.response?.status);
     console.log('Response Data:', error.response?.data);
     console.log('Request Config:', error.config); // Optional
-    return error.response
-    // throw new Error('Failed to fetch Details',);
+
+    Toast.show({
+      type: 'error',
+      text1: error.response.data
+        ? error.response.data?.msg
+        : 'Something went wrong!',
+      position: 'bottom',
+    });
+    // return error.response?.data
+    throw new Error('Failed to fetch Details');
   }
 };

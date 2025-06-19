@@ -6,6 +6,11 @@ import Chat from '@screens/chat';
 import FilterScreen from '@screens/filter/index';
 import MyAds from '@screens/MyAds';
 import Profile from '@screens/profile';
+// import Settings from '@screens/profile/Settings';
+// import Notifications from '@screens/profile/Notifications';
+// import Communication from '@screens/profile/Communication';
+// import PrivacyPolicy from '@screens/PrivacyPolicy';
+// import TermsConditions from '@screens/TermsConditions';
 
 export type MainTabParamList = {
   Home: undefined;
@@ -13,7 +18,12 @@ export type MainTabParamList = {
   AddPost: undefined;
   Profile: undefined;
   MyAds: undefined;
-  filter: undefined;
+  filter:undefined;
+  Settings: undefined;
+  Notifications: undefined;
+  Communication: undefined;
+  PrivacyPolicy: undefined;
+  TermsConditions: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -43,6 +53,12 @@ const MainTabNavigator = () => {
           headerTitle: 'My Profile',
         }}/>
       <Tab.Screen name="filter" component={FilterScreen} />
+
+      {/* <Tab.Screen name="Settings" component={Settings} />
+      <Tab.Screen name="Notifications" component={Notifications} />
+      <Tab.Screen name="Communication" component={Communication} />
+      <Tab.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+      <Tab.Screen name="TermsConditions" component={TermsConditions} /> */}
     </Tab.Navigator>
   );
 };

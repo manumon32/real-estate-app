@@ -1,4 +1,4 @@
-import { Fonts } from '@constants/font';
+import {Fonts} from '@constants/font';
 import React from 'react';
 import {
   Text,
@@ -8,11 +8,12 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
+import { Switch } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export interface MenuLinkProps {
   /** Material‑Community‑Icons name, e.g. "heart-outline" */
-  icon: string;
+  icon?: string;
   /** Main label */
   label: string;
   /** Optional number or text shown on the right */
@@ -25,6 +26,9 @@ export interface MenuLinkProps {
   containerStyle?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
   valueStyle?: StyleProp<TextStyle>;
+  showToggle?:boolean
+  selected?:boolean
+  onToggle?: any
 }
 
 const MenuLink: React.FC<MenuLinkProps> = ({
@@ -36,19 +40,21 @@ const MenuLink: React.FC<MenuLinkProps> = ({
   containerStyle,
   labelStyle,
   valueStyle,
+  selected,
+  showToggle,
+  onToggle
 }) => {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={onPress}
-      style={[styles.row, containerStyle]}
-    >
-      <MaterialCommunityIcons
+      style={[styles.row, containerStyle]}>
+      {icon && <MaterialCommunityIcons
         name={icon}
         size={20}
         color="#9E9E9E"
         style={styles.icon}
-      />
+      />}
 
       <Text numberOfLines={1} style={[styles.label, labelStyle]}>
         {label}
@@ -66,6 +72,7 @@ const MenuLink: React.FC<MenuLinkProps> = ({
           style={styles.chevron}
         />
       )}
+      {showToggle && <Switch color='#2F8D79' value={selected} onValueChange={onToggle} />}
     </TouchableOpacity>
   );
 };
@@ -86,13 +93,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     color: '#171717',
-    fontFamily:Fonts.REGULAR
+    fontFamily: Fonts.REGULAR,
   },
   value: {
     fontSize: 14,
     color: '#171717',
-    fontFamily:Fonts.REGULAR
+    fontFamily: Fonts.REGULAR,
   },
-  chevron: {
-  },
+  chevron: {},
 });

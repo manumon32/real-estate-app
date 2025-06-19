@@ -4,6 +4,8 @@ import {ThemeProvider} from '@theme/ThemeProvider';
 import RootNavigator from '@navigation/RootNavigator';
 import CommonLocationModal from '@components/Modal/LocationSearchModal';
 import useBoundStore from '@stores/index';
+import Toast from 'react-native-toast-message';
+import { ToastConfig } from './src/config/ToastConfig';
 
 export default function App() {
   const {
@@ -23,6 +25,7 @@ export default function App() {
           onSelectLocation={setLocation}
           locationHistory={locationHistory}
         />
+        <Toast config={ToastConfig}/>
       </NavigationContainer>
     </ThemeProvider>
   );

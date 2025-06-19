@@ -15,10 +15,12 @@ const OtpVerificationScreen = ({
   handleSubmit,
   loginVar,
   veryFyOTP,
-  otpValue
+  otpValue,
+  loginErrorMessage
 }: any) => {
   const [otp, setOtp] = useState<string[]>(new Array(OTP_LENGTH).fill(''));
   const [timer, setTimer] = useState(72); // 1:12
+  const [error, setError] = useState(false);
   const inputRefs = useRef<Array<TextInput | null>>([]);
 
   // Format timer as MM:SS
@@ -33,7 +35,6 @@ const OtpVerificationScreen = ({
       const newOtp = [...otp];
       newOtp[index] = text;
       setOtp(newOtp);
-
       if (text && index < OTP_LENGTH - 1) {
         inputRefs.current[index + 1]?.focus();
       }
@@ -81,9 +82,8 @@ const OtpVerificationScreen = ({
           We have sent the verification code to{' '}
           <Text style={styles.phone}>{loginVar}</Text>
         </Text>
-         <Text style={styles.subtitle}>
-          OTP- {otpValue}
-        </Text>
+        <Text style={styles.subtitle}>OTP- {otpValue}</Text>
+        {loginErrorMessage && <Text style={[styles.subtitle,{color:'red'}]}>{loginErrorMessage}</Text>}
 
         <View style={styles.otpContainer}>
           {otp.map((digit, index) => (
@@ -100,6 +100,7 @@ const OtpVerificationScreen = ({
                 styles.otpInput,
                 digit ? styles.otpFilled : null,
                 index === otp.findIndex(d => d === '') && styles.otpActive,
+                error && {borderColor: 'red'},
               ]}
               keyboardType="number-pad"
               maxLength={1}
@@ -108,7 +109,6 @@ const OtpVerificationScreen = ({
             />
           ))}
         </View>
-
         <View style={styles.footer}>
           <TouchableOpacity onPress={resendCode} disabled={timer > 0}>
             <Text
@@ -121,10 +121,16 @@ const OtpVerificationScreen = ({
       </View>
       <TouchableOpacity
         onPress={() => {
-          otp.length == 6 && veryFyOTP((otp.join('')));
+          setError(false);
+          if (otp.join('') !== otpValue) {
+            setError(true);
+          } else {
+            setError(false);
+            veryFyOTP(otp.join(''));
+          }
         }}
         style={styles.loginBtn}>
-        <Text style={styles.loginText}>Login</Text>
+        <Text style={styles.loginText}>Verify</Text>
       </TouchableOpacity>
     </>
   );
@@ -175,7 +181,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     textAlign: 'center',
     fontSize: 24,
-    margin:2,
+    margin: 2,
     color: '#000',
     borderWidth: 1,
     borderColor: '#ccc',

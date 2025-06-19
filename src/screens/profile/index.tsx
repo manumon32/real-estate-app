@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 import CommonHeader from '@components/Header/CommonHeader';
 import MenuLink from '@components/MenuLink';
@@ -11,37 +12,51 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import PremiumCard from './PremiumCard';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+// import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import useBoundStore from '@stores/index';
 
 const Profile = () => {
   const navigation = useNavigation();
-  const {logout, user} = useBoundStore();
+  const { user, fetchUserDetails, userProfileloading} = useBoundStore();
+  React.useEffect(() => {
+    fetchUserDetails();
+  }, []);
   return (
-    <SafeAreaView
-      style={{backgroundColor: '#F6FCFF', padding: 10, height: '100%'}}>
+    <SafeAreaView style={{backgroundColor: '#F6FCFF', height: '100%'}}>
       <CommonHeader
         title="My Profile"
         textColor="#171717"
         backgroundColor={'#F6FCFF'}
         // onBackPress={onBackPress}
       />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 120}}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: 120, padding: 10}}
+        refreshControl={
+          <RefreshControl
+            refreshing={userProfileloading}
+            onRefresh={() => {
+              fetchUserDetails();
+            }}
+            colors={['#40DABE', '#40DABE', '#227465']}
+          />
+        }>
         <View style={styles.container}>
           <Image
-            style={{height: 72, width: 72, borderRadius: 20}}
+            style={{height: 72, width: 72, borderRadius: 50}}
             source={{
-              uri: 'https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes.png',
+              uri:
+                user?.profilePicture ||
+                'https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes.png',
             }}
           />
           <View style={styles.info}>
-            <Text style={styles.name}>
-              {user?.name || 'App User'}
-            </Text>
+            <Text style={styles.name}>{user?.name || 'App User'}</Text>
             {user?.email && (
               <Text style={styles.email}>{user?.email || ''}</Text>
             )}
@@ -86,9 +101,8 @@ const Profile = () => {
             }}
           />
           <MenuLink
-            icon="home"
-            label="My Ads"
-            // value={12}
+            icon="file"
+            label="My Orders"
             // @ts-ignore
             onPress={() => navigation.navigate('FavAds')}
           />
@@ -103,7 +117,7 @@ const Profile = () => {
           />
           <MenuLink
             icon="file"
-            label="My Orders"
+            label="Reported Ads"
             // @ts-ignore
             onPress={() => navigation.navigate('FavAds')}
           />
@@ -120,7 +134,7 @@ const Profile = () => {
             icon="cog-outline"
             label="Settings"
             // @ts-ignore
-            onPress={() => navigation.navigate('FavAds')}
+            onPress={() => navigation.navigate('Settings')}
           />
           <View
             style={{
@@ -171,7 +185,7 @@ const Profile = () => {
             onPress={() => navigation.navigate('TermsConditions')}
           />
         </View>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={async () => {
             await logout();
             // @ts-ignore
@@ -180,7 +194,7 @@ const Profile = () => {
           style={styles.filledButton}>
           <MaterialCommunityIcons name="logout" size={18} color="#FF3F3F" />
           <Text style={styles.filledText}>Logout</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -300,8 +314,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
-    paddingVertical: 16,
-    padding: 20,
+    paddingVertical: 2,
+    padding: 16,
     justifyContent: 'center',
   },
   name: {
