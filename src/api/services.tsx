@@ -48,6 +48,7 @@ export const getHeaders = async (
       };
     } else {
       return {
+        'Content-Type': 'application/json',
         'X-TOKEN': data.token,
         'X-DEVICE-ID': data.clientId,
         Authorization: 'Bearer ' + data.bearerToken,
@@ -56,6 +57,22 @@ export const getHeaders = async (
   } catch (error) {
     return {
       'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+  }
+};
+
+export const getMultiParHeaders = async (data: any): Promise<any> => {
+  try {
+    return {
+      'Content-Type': 'multipart/form-data',
+      'X-TOKEN': data.token,
+      'X-DEVICE-ID': data.clientId,
+      Authorization: 'Bearer ' + data.bearerToken,
+    };
+  } catch (error) {
+    return {
+      'Content-Type': 'multipart/form-data',
       Accept: 'application/json',
     };
   }
@@ -119,9 +136,7 @@ export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
 
 // 🔹 Hand Shake token
 
-export const getHandshakeTokenApi = async (
-  data: object,
-): Promise<{secretKey: string; clientId: string}> => {
+export const getHandshakeTokenApi = async (data: object): Promise<any> => {
   try {
     const headers = await getHeaders(data, true);
     const response = await apiRequest({
@@ -130,10 +145,31 @@ export const getHandshakeTokenApi = async (
       data,
       headers,
     });
-    return response.data;
+    return response.data ? response.data : response;
+  } catch (error: any) {
+    return error;
+    // throw new Error('Failed to fetch handshake token');
+  }
+};
+
+// Upload Images
+
+export const updateUser = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'put',
+      url: API.USER.GET,
+      data,
+      headers,
+    });
+    return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to fetch handshake token');
+    throw new Error('Failed to Do so');
   }
 };
 
@@ -208,7 +244,25 @@ export const fetchFavoritessAPI = async (configArg: any): Promise<any> => {
       method: 'get',
       url: API.FAVOURITES,
       params: {
-        pageSize: 500,
+        noPagination: true,
+      },
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch Details');
+  }
+};
+
+export const fetchMyAdsAPI = async (configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.LISTINGS.GET_MYADS,
+      params: {
+        noPagination: true,
       },
       headers,
     };
@@ -235,5 +289,49 @@ export const fetchDetailsAPI = async (
     return response.data;
   } catch (error: any) {
     throw new Error('Failed to fetch Details');
+  }
+};
+
+// Upload Images
+
+export const uploadImages = async (
+  data: object,
+  configArg: any,
+): Promise<Listing> => {
+  try {
+    const headers = await getMultiParHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.UPLOAD_IMAGES,
+      data,
+      headers,
+    });
+    return response?.data?.rows;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to Do so');
+  }
+};
+
+// postAd
+
+export const postAdAPI = async (
+  data: any,
+  configArg: any,
+  method: RequestMethod,
+): Promise<Listing> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method,
+      url:
+        method === 'post' ? API.LISTINGS.CREATE : API.LISTINGS.UPDATE(data.id),
+      data,
+      headers,
+    });
+    return response?.data;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to Do so');
   }
 };

@@ -6,11 +6,11 @@ import {
   Platform,
   StatusBar,
   TouchableOpacity,
-  Image,
   Text,
   Dimensions,
   Linking,
 } from 'react-native';
+import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
@@ -39,7 +39,11 @@ function Header(props: any): React.JSX.Element {
   const renderItem = useCallback(
     ({item}: {item: string; index: number}) => (
       <TouchableOpacity activeOpacity={0.9} onPress={() => handleImagePress()}>
-        <Image source={{uri: item}} resizeMode="contain" style={styles.image} />
+        <Image
+          source={{uri: item, cache: Image.cacheControl.immutable}}
+          resizeMode="contain"
+          style={styles.image}
+        />
       </TouchableOpacity>
     ),
     [handleImagePress],
@@ -86,7 +90,11 @@ function Header(props: any): React.JSX.Element {
                 iconName={'heart-outline'}
               />
             </TouchableOpacity> */}
-            <FavoriteButton IconButtonStyle={styles.heartRight} iconSize={24} item={details} />
+            <FavoriteButton
+              IconButtonStyle={styles.heartRight}
+              iconSize={24}
+              item={details}
+            />
           </View>
         </View>
         <Carousel

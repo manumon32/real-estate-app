@@ -15,7 +15,7 @@ const Step1BasicInfo = (props: any) => {
     values,
     handleBlur,
     touched,
-    errors
+    errors,
   } = props;
   // const {refs: chipScrollRefs, scrollToChipIndex} = useChipScrollRefs();
 
@@ -57,18 +57,37 @@ const Step1BasicInfo = (props: any) => {
   }, []);
 
   return (
-    <SlideInView direction={currentStep == null ? 'right' : 'left'}>
+    <SlideInView direction={currentStep == null ? 'right' : 'left'} keyboardShouldPersistTaps={'handled'}>
       <>
         {/* <Text style={styles.headingText}>Basic Details</Text> */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Type</Text>
+          <Text
+            style={[
+              styles.label,
+              touched?.propertyTypeId &&
+                errors?.propertyTypeId && {color: 'red'},
+            ]}>
+            Type*
+          </Text>
           {renderChips(PROPERTY_TYPES)}
+          {touched?.propertyTypeId && errors?.propertyTypeId && (
+            <Text style={styles.error}>{errors?.propertyTypeId}</Text>
+          )}
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Subtype</Text>
+          <Text
+            style={[
+              styles.label,
+              touched?.listingTypeId && errors?.listingTypeId && {color: 'red'},
+            ]}>
+            Subtype*
+          </Text>
 
           {renderChips(LISTING_TYPES)}
+          {touched?.listingTypeId && errors?.listingTypeId && (
+            <Text style={styles.error}>{errors?.listingTypeId}</Text>
+          )}
         </View>
 
         <View style={styles.inputContainer}>
@@ -86,10 +105,11 @@ const Step1BasicInfo = (props: any) => {
           {renderChips(AVAILABILITY_STATS)}
         </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Bedrooms</Text>
-          {renderChips(BEDROOMS)}
-          {/* <RenderChips
+        {isStringInEitherArray('bedroom') && (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Bedrooms</Text>
+            {renderChips(BEDROOMS)}
+            {/* <RenderChips
           data={BEDROOMS}
           selectedIds={[]}
           onSelect={item => console.log('Selected:', item)}
@@ -97,40 +117,43 @@ const Step1BasicInfo = (props: any) => {
           scrollRef={{current: chipScrollRefs.current.bedrooms}}
           scrollKey="bedrooms"
         /> */}
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Bathrooms</Text>
-          {renderChips(BATHROOMS)}
-        </View>
+          </View>
+        )}
+        {isStringInEitherArray('bathrooom') && (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Bathrooms</Text>
+            {renderChips(BATHROOMS)}
+          </View>
+        )}
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Title</Text>
+          <Text style={styles.label}>Title*</Text>
           {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
           <TextInput
             placeholder="Property Title"
-            value={values.title}
+            value={values?.title}
             onChangeText={text => setFieldValue('title', text)}
             onBlur={handleBlur('title')}
-            error={touched.title && errors.title ? true : false}
+            error={touched?.title && errors?.title ? true : false}
           />
-          {touched.title && errors.title && (
-            <Text style={styles.error}>{errors.title}</Text>
+          {touched?.title && errors?.title && (
+            <Text style={styles.error}>{errors?.title}</Text>
           )}
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Additional information</Text>
+          <Text style={styles.label}>Additional information*</Text>
           <TextInput
             onChangeText={text => setFieldValue('description', text)}
-            value={values.description}
+            value={values?.description}
             placeholder="Property Description"
             placeholderTextColor={'#ccc'}
             onBlur={handleBlur('description')}
             multiline
             style={{minHeight: 100, justifyContent: 'center'}}
-            error={touched.description && errors.description ? true : false}
+            error={touched?.description && errors?.description ? true : false}
           />
-          {touched.description && errors.description && (
-            <Text style={styles.error}>{errors.description}</Text>
+          {touched?.description && errors?.description && (
+            <Text style={styles.error}>{errors?.description}</Text>
           )}
         </View>
       </>
@@ -186,9 +209,11 @@ const styles = StyleSheet.create({
   },
   error: {
     color: 'red',
-    marginBottom: 8,
+    marginBottom: 2,
+    marginTop: 3,
     left: 5,
     fontSize: 12,
+    fontFamily: Fonts.REGULAR,
   },
 });
 

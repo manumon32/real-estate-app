@@ -1,6 +1,21 @@
-import React from 'react';
-import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
+/* eslint-disable react-hooks/exhaustive-deps */
+import CommonHeader from '@components/Header/CommonHeader';
+import {useNavigation} from '@react-navigation/native';
+import useBoundStore from '@stores/index';
+import React, {useCallback, useEffect, useMemo} from 'react';
+import {useTheme} from '@theme/ThemeProvider';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  RefreshControl,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+// import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
   title: string;
@@ -10,50 +25,141 @@ interface ListingCardProps {
   date: string;
   views: number;
   imageUrl: string;
+  navigation: any;
+  items: any;
+}
+
+const FormattedDate = (arg: string | number | Date) => {
+  const date = new Date(arg);
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  };
+
+  const FormattedDate = `Post on ${date
+    .toLocaleString('en-US', options)
+    .replace(':', '.')}`;
+  return FormattedDate;
+};
+
+export enum AdStatusEnum {
+  PENDING = 'pending',
+  ACTIVE = 'active',
+  REJECTED = 'rejected',
+  EXPIRED = 'expired',
+  BLOCKED = 'blocked',
+  DEACTIVATED = 'deactivated',
+  SOLD = 'sold',
 }
 
 const ListingCard: React.FC<ListingCardProps> = ({
-  title,
-  location,
-  price,
-  status,
-  date,
-  views,
-  imageUrl,
+  items,
+  title = '',
+  location = '',
+  price = 0,
+  status = 'Pending',
+  date = '',
+  views = 0,
+  imageUrl = '',
+  navigation,
 }) => {
+  const {label, backgroundColor, textColor} = useMemo(() => {
+    switch (status) {
+      case 'pending':
+        return {
+          label: 'Pending Review',
+          backgroundColor: '#FFEAD5',
+          textColor: '#AA5A00',
+        };
+      case 'active':
+        return {
+          label: 'Active',
+          backgroundColor: '#D4F4DD',
+          textColor: '#147A31',
+        };
+      case 'rejected':
+        return {
+          label: 'Rejected',
+          backgroundColor: '#C14B43',
+          textColor: '#FCE3E0',
+        };
+      case 'SOLD':
+        return {
+          label: 'Sold',
+          backgroundColor: '#E8E8FF',
+          textColor: '#4B4B9B',
+        };
+      case 'expired':
+        return {
+          label: 'Expired',
+          backgroundColor: '#FCE3E0',
+          textColor: '#C14B43',
+        };
+      case 'blocked':
+        return {
+          label: 'Blocked',
+          backgroundColor: '#FCE3E0',
+          textColor: '#C14B43',
+        };
+      case 'deactivated':
+        return {
+          label: 'Deactivated',
+          backgroundColor: '#E0E0E0',
+          textColor: '#555555',
+        };
+      case 'DRAFT':
+      default:
+        return {
+          label: 'Draft',
+          backgroundColor: '#EEEEEE',
+          textColor: '#666666',
+        };
+    }
+  }, [status]);
   return (
     <View style={styles.card}>
-      <View style={styles.row}>
-        <Image source={{uri: imageUrl}} style={styles.image} />
-        <View style={styles.info}>
-          <View style={styles.headerRow}>
-            <Text style={styles.title}>{title}</Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{status}</Text>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('Details', {items});
+        }}>
+        <View style={styles.row}>
+          <Image source={{uri: imageUrl}} style={styles.image} />
+          <View style={styles.info}>
+            <View style={styles.headerRow}>
+              <Text style={styles.title}>{title}</Text>
+              <View style={[styles.badge, {backgroundColor}]}>
+                <Text style={[styles.badgeText, {color: textColor}]}>{label}</Text>
+              </View>
             </View>
+            <Text style={styles.location}>{location}</Text>
+            <Text style={styles.price}>₹{price}</Text>
           </View>
-          <Text style={styles.location}>{location}</Text>
-          <Text style={styles.price}>₹{price}</Text>
         </View>
-      </View>
 
-      <View style={styles.metaRow}>
-        <View style={styles.metaItem}>
-          <Icon name="eye-outline" size={16} color="#888" />
-          <Text style={styles.metaText}>{views}</Text>
+        <View style={styles.metaRow}>
+          <View style={styles.metaItem}>
+            <Icon name="eye-outline" size={16} color="#888" />
+            <Text style={[styles.metaText, ]}>{views}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Icon name="clock-outline" size={16} color="#888" />
+            <Text style={styles.metaText}>{FormattedDate(date)}</Text>
+          </View>
         </View>
-        <View style={styles.metaItem}>
-          <Icon name="clock-outline" size={16} color="#888" />
-          <Text style={styles.metaText}>Posted {date}</Text>
-        </View>
-      </View>
-
+      </TouchableOpacity>
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.outlinedButton}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('PostAd',{items})}
+          style={styles.outlinedButton}>
           <Text style={styles.buttonText}>Edit</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.outlinedButton}>
-          <Text style={styles.buttonText}>Make us Sold</Text>
+          <Text style={styles.buttonText}>Mark as Sold</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -61,27 +167,72 @@ const ListingCard: React.FC<ListingCardProps> = ({
 };
 
 const MyAds = () => {
+  const {myAds, fetchMyAds} = useBoundStore();
+  const navigation = useNavigation();
+  const {theme} = useTheme();
+
+  useEffect(() => {
+    fetchMyAds();
+  }, []);
+  const renderAdItem = useCallback(
+    (items: any) => {
+      return (
+        <ListingCard
+          title={items.item?.title || ''}
+          location={items.item?.address || ''}
+          price={items.item?.price}
+          status={items.item?.adStatus}
+          date={items.item?.createdAt}
+          views={200}
+          navigation={navigation}
+          items={items.item}
+          imageUrl={
+            items.item?.imageUrls[0]
+              ? items.item?.imageUrls[0]
+              : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM='
+          }
+        />
+      );
+    },
+    [navigation],
+  );
+
   return (
-    <View style={{backgroundColor:'#fff', padding:10, height:'100%'}}>
-      <ListingCard
-        title="2 BHK Apartment"
-        location="HSR Layout - Bangalore"
-        price="25,000"
-        status="For Sale"
-        date="Apr 15, 2025"
-        views={200}
-        imageUrl="https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM="
+    <SafeAreaView
+      style={{backgroundColor: '#fff', padding: 10, height: '100%'}}>
+      <CommonHeader
+        title="My Ads"
+        textColor="#171717"
+        // onBackPress={onBackPress}
       />
-      <ListingCard
-        title="2 BHK Apartment"
-        location="HSR Layout - Bangalore"
-        price="25,000"
-        status="For Sale"
-        date="Apr 15, 2025"
-        views={200}
-        imageUrl="https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM="
+      <FlatList
+        data={myAds}
+        renderItem={renderAdItem}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          paddingBottom: 100,
+          backgroundColor: theme.colors.backgroundHome,
+          minHeight: 900,
+          padding: 14,
+        }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() => {
+              fetchMyAds();
+            }}
+          />
+        }
+        ListFooterComponent={
+          myAds.length <= 0 ? (
+            <Text style={styles.endText}>You havent listed anything yet</Text>
+          ) : (
+            <></>
+          )
+        }
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -172,6 +323,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#333',
+  },
+  endText: {
+    textAlign: 'center',
+    color: '#888',
+    padding: 12,
+    fontStyle: 'italic',
   },
 });
 

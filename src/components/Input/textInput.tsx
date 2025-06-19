@@ -43,7 +43,7 @@ const CommonTextInput: React.FC<TextInputprops> = ({
       <TextInput
         placeholder={placeholder}
         placeholderTextColor="#ccc"
-        value={value}
+        value={value ? String(value) : value}
         onChangeText={onChangeText}
         {...rest}
         style={[styles.input, style]}

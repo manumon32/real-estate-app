@@ -2,14 +2,19 @@
 import Stepper from '@components/stepper';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
+  Modal,
   Platform,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import Step1BasicInfo from './step1BasicInfo';
 import Step2 from './step2PriceDetails';
 import Step3LocationDetails from './step3LocationDetails';
@@ -18,6 +23,9 @@ import Step5MediaUpload from './step5MediaUpload';
 import CommonHeader from '@components/Header/CommonHeader';
 import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
 import useBoundStore from '@stores/index';
+import Preview from './preview';
+import {postAdAPI, uploadImages} from '@api/services';
+import {RequestMethod} from '@api/request';
 
 interface FooterProps {
   currentStep: number;
@@ -26,6 +34,10 @@ interface FooterProps {
   isLastStep?: boolean;
   onCancel?: () => void;
   onNext?: () => void;
+  onBackPress: any;
+  submitPostAd?: any;
+  loading?: boolean;
+  values: any;
 }
 
 const Footer: React.FC<FooterProps> = ({
@@ -35,16 +47,26 @@ const Footer: React.FC<FooterProps> = ({
   isLastStep = false,
   onCancel,
   onNext,
+  onBackPress,
+  submitPostAd,
+  loading = false,
+  values,
 }) => {
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
     } else {
+      if (currentStep == 1) {
+        onBackPress();
+      }
       currentStep !== 1 && setCurrentStep(prev => Math.max(prev - 1, 0));
     }
   };
 
   const handleNext = () => {
+    if (currentStep === 5) {
+      submitPostAd();
+    }
     if (onNext) {
       onNext();
     } else {
@@ -67,41 +89,63 @@ const Footer: React.FC<FooterProps> = ({
         style={styles.buyButton}
         accessibilityRole="button"
         disabled={isLastStep}>
-        <Text style={styles.buyText}>Next</Text>
+        <Text style={styles.buyText}>
+          {loading && <ActivityIndicator size={'small'} color={'#fff'} />}
+          {!loading
+            ? currentStep == 5
+              ? values.id
+                ? 'Update'
+                : 'Post Now'
+              : 'Next'
+            : ''}
+        </Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 const PostAdContainer = (props: any) => {
-  const {handleSubmit,errors, touched, setTouched} = props;
+  const {
+    errors,
+    setTouched,
+    setFieldValue,
+    values,
+    touched,
+    fields,
+    setFields,
+  } = props;
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [visible, setVisible] = useState(false);
-  const [fields, setFields] = useState<{}>({});
+  const [preview, setPreview] = useState(false);
   const prevCountRef = useRef<number | null>(null);
-  const {setPostAd, postAd} = useBoundStore();
-
-  useEffect(() => {
-    prevCountRef.current = currentStep;
-    if (currentStep == 5) {
-      handleSubmit();
-    } else {
-      setVisible(false);
-    }
-  }, [currentStep, handleSubmit]);
-
+  const {
+    setPostAd,
+    resetPostAd,
+    images,
+    postAd,
+    token,
+    clientId,
+    bearerToken,
+    location,
+    locationForAdpost,
+    floorPlans,
+    setImages,
+    setFloorPlans,
+  } = useBoundStore();
+  console.log('values', values);
   const prevStep = prevCountRef.current;
 
   const getMergedFields = useCallback(
     (id: any, argFields: string[]) => {
       setFields((prev: any) => {
         const newMap: any = {...prev};
-        if (newMap[id]) {
-          delete newMap[id];
-        } else {
-          newMap[id] = argFields;
-        }
-        console.log(newMap);
+        // if (newMap[id]) {
+        //   delete newMap[id];
+        // } else {
+        newMap[id] = argFields;
+        // }
         return newMap;
       });
     },
@@ -118,8 +162,10 @@ const PostAdContainer = (props: any) => {
       if (name) {
         if (postAd[name] && postAd[name][0] === item) {
           delete postAd[name];
+          setFieldValue(name, '');
         } else {
           postAd[name] = [item];
+          setFieldValue(name, item);
         }
         setPostAd({...postAd});
       } else {
@@ -130,9 +176,8 @@ const PostAdContainer = (props: any) => {
         });
       }
     },
-    [postAd, setPostAd],
+    [postAd, setPostAd, setFieldValue],
   );
-
   const renderChips = useCallback(
     (items: any[], selected?: any, setSelected?: any) => {
       return (
@@ -157,6 +202,7 @@ const PostAdContainer = (props: any) => {
                   newselected?.includes(item._id) && styles.chipSelected,
                 ]}
                 onPress={() => {
+                  console.log(item.fields);
                   item.fields && getMergedFields(item.filterName, item.fields);
                   toggleItem(item.filterName, item._id, setSelected);
                 }}>
@@ -178,21 +224,36 @@ const PostAdContainer = (props: any) => {
   );
 
   const checkErrors = () => {
-    const requiredFields = ['title', 'description'];
+    const requiredFields = {
+      1: ['title', 'description', 'propertyTypeId', 'listingTypeId'],
+      2: ['price'],
+      3: ['areaSize'],
+      4: [],
+      5: [],
+      // 3: imageUrls ['nearbyLandmarks'],
+    };
+    prevCountRef.current = currentStep;
     setTouched(
-      requiredFields.reduce((acc, key) => {
+      // @ts-ignore
+      requiredFields[currentStep]?.reduce((acc, key) => {
         acc[key] = true;
         return acc;
       }, {} as {[key: string]: boolean}),
       true, // validate after touching
     );
     if (
-      currentStep === 1 &&
-      requiredFields.some(field => !!errors[field] || !touched[field])
+      // @ts-ignore
+      requiredFields[currentStep]?.some(
+        // @ts-ignore
+        field =>
+          currentStep === 1
+            ? !!errors[field] || !touched[field]
+            : !!errors[field],
+      )
     ) {
       return false;
     } else {
-      setCurrentStep(prev => prev + 1);
+      currentStep < 5 && setCurrentStep(prev => prev + 1);
     }
   };
 
@@ -217,6 +278,7 @@ const PostAdContainer = (props: any) => {
             getMergedFields={getMergedFields}
             toggleItem={toggleItem}
             renderChips={renderChips}
+            {...props}
           />
         );
       case 3:
@@ -227,6 +289,7 @@ const PostAdContainer = (props: any) => {
             getMergedFields={getMergedFields}
             toggleItem={toggleItem}
             renderChips={renderChips}
+            {...props}
           />
         );
       case 4:
@@ -235,6 +298,7 @@ const PostAdContainer = (props: any) => {
             currentStep={prevStep}
             isStringInEitherArray={isStringInEitherArray}
             getMergedFields={getMergedFields}
+            {...props}
           />
         );
       case 5:
@@ -245,6 +309,7 @@ const PostAdContainer = (props: any) => {
             getMergedFields={getMergedFields}
             toggleItem={toggleItem}
             renderChips={renderChips}
+            {...props}
           />
         );
       default:
@@ -252,29 +317,187 @@ const PostAdContainer = (props: any) => {
     }
   };
 
+  const onBackPress = () => {
+    Alert.alert('Quit without saving?', 'You will lose your progress.', [
+      {text: 'Cancel', style: 'cancel'},
+      {
+        text: 'Quit',
+        onPress: () => {
+          resetPostAd();
+          setFields([]);
+          setImages([]);
+          setFloorPlans([]);
+          navigation.goBack();
+        },
+      },
+    ]);
+  };
+
+  const submitPostAd = useCallback(async () => {
+    if (Object.keys(errors).length == 0 && images.length > 0) {
+      setLoading(true);
+      let formData = new FormData();
+      // @ts-ignore
+      let newImages = images.filter(items => items?.uri);
+      // @ts-ignore
+      let newImagesWithurl = images.filter(items => !items.uri);
+      newImages.map((items: any, index: any) => {
+        formData.append('images', {
+          uri: items.uri, // local path or blob URL
+          name: `photo_${index}.jpg`, // ⬅ server sees this
+          type: 'image/jpeg',
+        } as any);
+      });
+      let formDataFloor = new FormData();
+      // @ts-ignore
+      let newformDataFloor = floorPlans.filter(items => items?.uri);
+      // @ts-ignore
+      let formDataFloorWithurl = floorPlans.filter(items => !items.uri);
+      newformDataFloor.map((items: any, index: any) => {
+        formDataFloor.append('images', {
+          uri: items.uri, // local path or blob URL
+          name: `photo_${index}.jpg`, // ⬅ server sees this
+          type: 'image/jpeg',
+        } as any);
+      });
+      try {
+        /* 1. upload ------------------------------------------------------ */
+        const imageUrls: any =
+          newImages.length > 0
+            ? await uploadImages(formData, {
+                token: token,
+                clientId: clientId,
+                bearerToken: bearerToken,
+              })
+            : [];
+        const floorUrls: any =
+          newformDataFloor.length > 0
+            ? await uploadImages(formDataFloor, {
+                token: token,
+                clientId: clientId,
+                bearerToken: bearerToken,
+              })
+            : [];
+        const paylod = {
+          latitude: locationForAdpost.lat
+            ? locationForAdpost.lat
+            : location.lat,
+          longitude: locationForAdpost.lng
+            ? locationForAdpost.lng
+            : location.lng,
+          address: locationForAdpost.name
+            ? locationForAdpost.name
+            : location.name,
+          imageUrls: [...imageUrls, ...newImagesWithurl],
+          floorPlanUrl: [...floorUrls, ...formDataFloorWithurl],
+        };
+        let mergedPayload = {...values, ...paylod};
+        console.log('postAd payload', mergedPayload);
+        let method: RequestMethod = values.id ? 'put' : 'post';
+        console.log('method', method);
+        /* 2. post ad ----------------------------------------------------- */
+        await postAdAPI(
+          mergedPayload,
+          {
+            token: token,
+            clientId: clientId,
+            bearerToken: bearerToken,
+          },
+          method,
+        );
+        setVisible(true);
+      } catch (err: any) {
+        Alert.alert(
+          'Something went wrong',
+          'Failed to post ad, please try again later',
+        );
+      } finally {
+        setImages([]);
+        setFloorPlans([]);
+        setLoading(false);
+      }
+    }
+  }, [
+    errors,
+    images,
+    floorPlans,
+    token,
+    clientId,
+    bearerToken,
+    locationForAdpost.lat,
+    locationForAdpost.lng,
+    locationForAdpost.name,
+    location.lat,
+    location.lng,
+    location.name,
+    values,
+    setImages,
+    setFloorPlans,
+  ]);
+
+  useEffect(() => {
+    setVisible(false);
+  }, []);
+
   return (
     <React.Fragment>
-      <CommonHeader title="Add Property" textColor="#171717" />
+      <CommonHeader
+        title="Add Property"
+        textColor="#171717"
+        onBackPress={onBackPress}
+      />
       <View style={styles.stepperContainer}>
         <Stepper totalSteps={5} currentStep={currentStep} />
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-        style={{height: Platform.OS === 'ios' ? '85%' : '80%'}}>
+        style={{height: Platform.OS === 'ios' ? '85%' : '80%', flex: 1}}>
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContainer}
           style={styles.scrollContainerStyle}
-          keyboardShouldPersistTaps="handled">
+          keyboardShouldPersistTaps="never">
           <View style={styles.container}>{renderStepContent()}</View>
         </ScrollView>
         <Footer
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
           onNext={checkErrors}
+          onBackPress={onBackPress}
+          submitPostAd={submitPostAd}
+          loading={loading}
+          values={values}
         />
       </KeyboardAvoidingView>
-      <CommonSuccessModal visible={visible} onClose={() => setVisible(false)} />
+      <CommonSuccessModal
+        visible={visible}
+        message={
+          values.id
+            ? 'Your Udaptes are saved.'
+            : 'Your listing will go live after the review.'
+        }
+        onClose={() => {
+          setVisible(false);
+          resetPostAd();
+          setFields([]);
+          // @ts-ignore
+          navigation.reset({index: 0, routes: [{name: 'Main'}]});
+        }}
+      />
+      <Modal
+        visible={preview}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setPreview(false);
+        }}>
+        <SafeAreaView>
+          <TouchableOpacity onPress={() => setPreview(false)}>
+            <Text>Colse</Text>
+          </TouchableOpacity>
+          <Preview items={values} />
+        </SafeAreaView>
+      </Modal>
     </React.Fragment>
   );
 };
@@ -294,6 +517,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingBottom: 24,
+    flexGrow: 1,
     // paddingVertical: 10,
     // flexGrow: 1,
   },
@@ -341,12 +565,14 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     paddingVertical: 6,
     paddingHorizontal: 8,
     marginRight: 5,
+    minWidth: 50,
     // marginBottom: 5,
   },
   chipSelected: {
@@ -362,4 +588,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PostAdContainer;
+export default React.memo(PostAdContainer);

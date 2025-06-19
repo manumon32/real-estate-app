@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   StatusBar,
   useColorScheme,
@@ -12,25 +12,42 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import {useTheme} from '@theme/ThemeProvider';
+import debounce from 'lodash.debounce';
 // import Header from './Header/Header';
 import PropertyCard from '@components/PropertyCard';
 import useBoundStore from '@stores/index';
 import CommonSearchHeader from '@components/Header/CommonSearchHeader';
 import IconButton from '@components/Buttons/IconButton';
 import {Fonts} from '@constants/font';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import SlideInView from '@components/AnimatedView';
 import FilterModal from '@components/Filter';
 
 const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
   const {filters, filter_loading, clearFilterList} = useBoundStore();
   const handleSort = useCallback(
-    (orderBy: string, orderByorderByDir: 'asc' | 'desc') => {
+    (orderBy: string, orderByDir: 'asc' | 'desc') => {
       if (!filter_loading) {
         clearFilterList();
-        setFilters({orderBy, orderByorderByDir});
+
+        let newFilters = {...filters};
+        if (
+          newFilters['orderBy'] &&
+          newFilters['orderBy'] == orderBy &&
+          newFilters['orderByDir'] == orderByDir
+        ) {
+          console.log(orderBy);
+          console.log(newFilters['orderBy']);
+          newFilters['orderBy'] = '';
+          newFilters['orderByDir'] = '';
+          console.log(newFilters);
+          setFilters(newFilters);
+        } else {
+          setFilters({orderBy, orderByDir});
+        }
         fetchFilterListings();
       }
     },
@@ -64,7 +81,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
         style={[
           styles.chipSort,
           filters.orderBy === 'price' &&
-            filters.orderByorderByDir === 'asc' &&
+            filters.orderByDir === 'asc' &&
             styles.chipSelected,
         ]}
         onPress={() => handleSort('price', 'asc')}>
@@ -72,7 +89,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
           style={[
             styles.chipText,
             filters.orderBy == 'price' &&
-              filters.orderByorderByDir == 'asc' &&
+              filters.orderByDir == 'asc' &&
               styles.chipTextSelected,
           ]}>
           {'Price low to high'}
@@ -82,7 +99,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
         style={[
           styles.chipSort,
           filters.orderBy === 'price' &&
-            filters.orderByorderByDir === 'desc' &&
+            filters.orderByDir === 'desc' &&
             styles.chipSelected,
         ]}
         //  styles.chipSelected
@@ -91,7 +108,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
           style={[
             styles.chipText,
             filters.orderBy == 'price' &&
-              filters.orderByorderByDir == 'desc' &&
+              filters.orderByDir == 'desc' &&
               styles.chipTextSelected,
           ]}>
           {'Price high to low'}
@@ -103,6 +120,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
 
 function App(): React.JSX.Element {
   const {
+    filter_totalpages,
     filter_listings,
     fetchFilterListings,
     filter_hasMore,
@@ -111,21 +129,25 @@ function App(): React.JSX.Element {
     clearFilterList,
     filterSetTriggerRefresh,
     setFilters,
+    updateFilter,
     resetFilters,
     filters,
+    setlocationModalVisible,
+    location,
   } = useBoundStore();
   const {theme} = useTheme();
   const [visible, setVisible] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const [sort, setSort] = useState(false);
-
+  const abortRef = useRef<AbortController | null>(null);
+  const prevFiltersRef = useRef<string[] | null>(location);
   const isDarkMode = useColorScheme() === 'dark';
-
+  const controllerRef = useRef<AbortController | null>(null);
   const navigation = useNavigation();
   const loadMore = () => {
     if (filter_loading || !filter_hasMore) return;
     fetchFilterListings();
   };
-
   const renderAdItem = useCallback(
     (items: any) => {
       return <PropertyCard items={items.item} navigation={navigation} />;
@@ -194,9 +216,6 @@ function App(): React.JSX.Element {
                 <Text style={[styles.chipText]}>{'Clear Filters'}</Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.resusltText}>
-              {filter_listings.length + ' Results'}
-            </Text>
           </View>
         </View>
         {sort && (
@@ -206,6 +225,11 @@ function App(): React.JSX.Element {
             fetchFilterListings={fetchFilterListings}
           />
         )}
+        <>
+          <Text style={styles.resusltText}>
+            {'Showing ' + filter_listings.length + ' of ' + filter_totalpages}
+          </Text>
+        </>
       </>
     );
   }, [navigation, sort, filter_listings]);
@@ -214,17 +238,63 @@ function App(): React.JSX.Element {
     filter_triggerRefresh && fetchFilterListings();
   }, [filter_triggerRefresh]);
 
+  useEffect(() => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    if (
+      // @ts-ignore
+      prevFiltersRef.current?.lat &&
+      // @ts-ignore
+      prevFiltersRef.current?.lat !== location.lat
+    ) {
+      clearFilterList();
+      prevFiltersRef.current = location;
+    }
+
+    if (!visible) {
+      controllerRef.current?.abort();
+
+      // ▶️ 2. Create a fresh controller for this request
+      const controller = new AbortController();
+      controllerRef.current = controller;
+      !filter_loading && fetchData();
+    }
+
+    // cleanup when component unmounts
+    return () => controller.abort();
+  }, [filters, location]);
+
   const fetchData = async () => {
     fetchFilterListings();
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      !filter_loading && fetchData();
+  const updateData = () => {
+    console.log(searchText);
+    if (searchText.length > 2) {
+      clearFilterList();
+      setFilters({
+        search: searchText,
+      });
+    } else {
+      let newFilter = {...filters};
+      delete newFilter.search;
+      updateFilter(newFilter);
+    }
+  };
 
-      return () => {};
-    }, []),
+  const debouncedFetch: () => void = useMemo(
+    () => debounce(updateData, 500), // wait 500ms after typing stops
+    [updateData],
   );
+  useEffect(() => {
+    return () => {
+      controllerRef.current?.abort();
+      // @ts-ignore
+      debouncedFetch?.cancel();
+    };
+  }, [debouncedFetch]);
 
   return (
     <SlideInView direction={'right'}>
@@ -241,22 +311,60 @@ function App(): React.JSX.Element {
           keyExtractor={item => item._id}
           numColumns={2}
           ListHeaderComponent={
-            <>
+            <View style={{backgroundColor: '#fff'}}>
+              <TouchableOpacity
+                onPress={() => {
+                  setlocationModalVisible();
+                }}
+                style={styles.locationContainer}>
+                <IconButton
+                  iconSize={16}
+                  style={styles.iconStyle}
+                  iconColor={theme.colors.text}
+                  iconName={'map-marker'}
+                />
+                <Text
+                  numberOfLines={1}
+                  style={[styles.textStyle, {color: theme.colors.text}]}>
+                  {location?.name || 'Kerala'}
+                </Text>
+                <IconButton
+                  iconSize={18}
+                  iconColor={theme.colors.text}
+                  iconName={'chevron-down'}
+                />
+              </TouchableOpacity>
               <CommonSearchHeader
-                searchValue=""
-                onChangeSearch={() => {}}
+                searchValue={searchText}
+                onChangeSearch={text => {
+                  setSearchText(text);
+                  // debouncedFetch();
+                  setTimeout(() => {
+                    if (text.length > 2) {
+                      clearFilterList();
+                      setFilters({
+                        search: text,
+                      });
+                    } else {
+                      let newFilter = {...filters};
+                      delete newFilter.search;
+                      updateFilter(newFilter);
+                    }
+                  }, 2000);
+                }}
                 onBackPress={function (): void {
+                  clearFilterList();
                   navigation.goBack();
                 }}
               />
               <FilterView />
-            </>
+            </View>
           }
           centerContent={true}
           contentContainerStyle={{
             paddingBottom: 100,
             backgroundColor: theme.colors.backgroundHome,
-            minHeight:800
+            minHeight: 800,
           }}
           showsVerticalScrollIndicator={false}
           onEndReachedThreshold={0.5}
@@ -282,12 +390,24 @@ function App(): React.JSX.Element {
                   </Text>
                 )}
               </View>
+            ) : filter_listings.length <= 0 ? (
+              <>
+                <Image
+                  source={require('@assets/images/noads.png')}
+                  style={{
+                    height: 200,
+                    width: 200,
+                    alignContent: 'center',
+                    justifyContent: 'center',
+                    alignSelf: 'center',
+                  }}
+                />
+                <Text style={styles.endText}>
+                  Oops.. we cannot find anything for this search.
+                </Text>
+              </>
             ) : (
-              <Text style={styles.endText}>
-                {filter_listings.length <= 0
-                  ? 'Oops.. we cannot find anything for this search.'
-                  : ''}
-              </Text>
+              <></>
             )
           }
         />
@@ -353,6 +473,8 @@ const styles = StyleSheet.create({
     color: '#888',
     padding: 12,
     fontStyle: 'italic',
+    top: -40,
+    fontFamily: Fonts.MEDIUM_ITALIC,
   },
   loadingContainer: {
     paddingVertical: 20,
@@ -416,6 +538,25 @@ const styles = StyleSheet.create({
   chipSelected: {
     backgroundColor: '#2A9D8F',
     borderColor: '#2A9D8F',
+  },
+
+  locationContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    top: 30,
+    zIndex: 10,
+    padding: 5,
+    backgroundColor: '#fff',
+  },
+
+  textStyle: {
+    fontSize: 14,
+    fontFamily: Fonts.MEDIUM,
+    marginRight: 5,
+    maxWidth: 250,
+  },
+  iconStyle: {
+    marginRight: 5,
   },
 });
 

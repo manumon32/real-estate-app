@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
 import CommonHeader from '@components/Header/CommonHeader';
 import PropertyCard from '@components/PropertyCard';
@@ -11,6 +12,7 @@ import {
   // ScrollView,
   FlatList,
   Text,
+  RefreshControl,
 } from 'react-native';
 import {Fonts} from '@constants/font';
 
@@ -33,9 +35,6 @@ const FavAds = () => {
       <CommonHeader
         title="Favourite Ads"
         textColor="#171717"
-        rightText={
-          favorites.length + (favorites.length > 1 ? ' Items' : ' Item')
-        }
       />
       <FlatList
         data={favorites}
@@ -43,11 +42,21 @@ const FavAds = () => {
         keyExtractor={item => item._id}
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 100,
           backgroundColor: theme.colors.backgroundHome,
           minHeight: 900,
+          padding: 10,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() => {
+              fetchFavouriteAds();
+            }}
+          />
+        }
         ListFooterComponent={
           favorites.length <= 0 ? (
             <Text style={styles.endText}>You havent liked anything yet</Text>
@@ -62,7 +71,6 @@ const FavAds = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
     height: '100%',
     flex: 1,
   },

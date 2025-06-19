@@ -34,6 +34,7 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
               ? items.imageUrls[0]
               : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM=',
             priority: Image.priority.normal,
+            cache: Image.cacheControl.immutable,
           }}
           resizeMode="contain"
           style={styles.image}
@@ -57,20 +58,13 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
             iconColor={'#171717'}
             iconName={'map-marker'}
           />
-          <Text style={styles.subtitle}>{items.city}</Text>
+          <Text numberOfLines={1} style={styles.subtitle}>
+            {items.address}
+          </Text>
         </View>
 
         <View style={styles.infoRow}>
-          <View style={styles.infoItem}>
-            <IconButton
-              iconSize={16}
-              iconColor={'#171717'}
-              iconName={'bed-empty'}
-            />
-            {/* <BedIcon /> */}
-            <Text style={styles.infoText}>{items.numberOfBedrooms} Beds</Text>
-          </View>
-          {items?.distance && (
+          {items?.distance ? (
             <View style={styles.infoItem}>
               <IconButton
                 iconSize={16}
@@ -83,6 +77,8 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
                   : (items?.distance * 0.001).toFixed(2) + ' km'}
               </Text>
             </View>
+          ) : (
+            <></>
           )}
         </View>
 
@@ -153,6 +149,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#777',
     marginVertical: 2,
+    maxWidth: 150,
   },
   infoRow: {
     flexDirection: 'row',

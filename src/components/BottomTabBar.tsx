@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
@@ -6,7 +6,7 @@ import AdPostIcon from '@assets/svg/post.svg';
 import {Fonts} from '@constants/font';
 import LoginModal from './Modal/LoginModal';
 import useBoundStore from '@stores/index';
-import CommonLocationModal from './Modal/LocationSearchModal';
+// import CommonLocationModal from './Modal/LocationSearchModal';
 
 const renderTabIcon = (routeName: string) => {
   switch (routeName) {
@@ -29,11 +29,16 @@ const BottomTabBar = ({state, navigation}: any) => {
     visible,
     setVisible,
     bearerToken,
-    locationModalvisible,
-    setlocationModalVisible,
-    setLocation,
-    locationHistory,
+    // locationModalvisible,
+    // setlocationModalVisible,
+    // setLocation,
+    // locationHistory,
   } = useBoundStore();
+
+  useEffect(() => {
+    console.log('bearerToken', bearerToken);
+  }, [bearerToken]);
+
   return (
     // eslint-disable-next-line react-native/no-inline-styles
     <View
@@ -51,6 +56,7 @@ const BottomTabBar = ({state, navigation}: any) => {
 
             const color = isFocused ? '#2E7D32' : '#888';
             const onPress = () => {
+              console.log(bearerToken);
               if (
                 (route.name === 'AddPost' ||
                   route.name === 'Chat' ||
@@ -93,7 +99,7 @@ const BottomTabBar = ({state, navigation}: any) => {
                       isFocused ? styles.textFocusedStyle : styles.textStyle,
                       // eslint-disable-next-line react-native/no-inline-styles
                       {
-                        bottom: route.name === 'AddPost' ? 25 : 0,
+                        bottom: route.name === 'AddPost' ? 28 : 0,
                       },
                     ]}>
                     {route.name === 'AddPost'
@@ -107,12 +113,12 @@ const BottomTabBar = ({state, navigation}: any) => {
             );
           })}
         <LoginModal visible={visible} onClose={() => setVisible()} />
-        <CommonLocationModal
+        {/* <CommonLocationModal
           visible={locationModalvisible}
           onClose={() => setlocationModalVisible()}
           onSelectLocation={setLocation}
           locationHistory={locationHistory}
-        />
+        /> */}
       </View>
     </View>
   );
@@ -123,14 +129,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-  },
-  svg: {
-    position: 'absolute',
-    top: -30,
+    height:60,
+    justifyContent:'center'
   },
   tabBar: {
     flexDirection: 'row',
-    height: 87,
     backgroundColor: 'transparent',
   },
   textFocusedStyle: {
@@ -144,7 +147,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.MEDIUM,
   },
   addButton: {
-    bottom: 30,
+    bottom: 25,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -155,7 +158,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
-    bottom: 10,
+    // bottom: 10,
   },
 });
 

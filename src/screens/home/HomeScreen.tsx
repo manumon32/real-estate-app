@@ -11,6 +11,7 @@ import {
   View,
   ActivityIndicator,
   RefreshControl,
+  Image,
 } from 'react-native';
 import {useTheme} from '@theme/ThemeProvider';
 import Header from './Header/Header';
@@ -35,24 +36,6 @@ function App({navigation}: any): React.JSX.Element {
 
   const prevFiltersRef = useRef<string[] | null>(null);
 
-  useEffect(() => {
-    if (
-      // @ts-ignore
-      (!prevFiltersRef.current?.lat && location.lat) ||
-      // @ts-ignore
-      (prevFiltersRef.current?.lat &&
-        // @ts-ignore
-        prevFiltersRef.current?.lat !== location.lat &&
-        !loading)
-    ) {
-      setTriggerRelaod();
-      setTimeout(() => {
-       !loading && fetchListings();
-      }, 300);
-    }
-    prevFiltersRef.current = location;
-  }, [location]);
-
   const loadMore = () => {
     if (loading || !hasMore) return;
     fetchListings();
@@ -76,8 +59,22 @@ function App({navigation}: any): React.JSX.Element {
   };
 
   React.useEffect(() => {
+    if (
+      // @ts-ignore
+      (!prevFiltersRef.current?.lat && location.lat) ||
+      // @ts-ignore
+      (prevFiltersRef.current?.lat &&
+        // @ts-ignore
+        prevFiltersRef.current?.lat !== location.lat)
+    ) {
+      setTriggerRelaod();
+      setTimeout(() => {
+        !loading && fetchListings();
+      }, 100);
+    }
+    prevFiltersRef.current = location;
     !loading && fetchData();
-  }, []);
+  }, [location]);
 
   return (
     <SafeAreaView>
@@ -123,12 +120,24 @@ function App({navigation}: any): React.JSX.Element {
                 </Text>
               )}
             </View>
+          ) : listings.length <= 0 ? (
+            <>
+              <Image
+                source={require('@assets/images/noads.png')}
+                style={{
+                  height: 200,
+                  width: 200,
+                  alignContent: 'center',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
+                }}
+              />
+              <Text style={styles.endText}>
+                Oops.. we cannot find anything for this search.
+              </Text>
+            </>
           ) : (
-            <Text style={styles.endText}>
-              {listings.length <= 0
-                ? 'Oops.. we cannot find anything for this search.'
-                : ''}
-            </Text>
+            <></>
           )
         }
       />
@@ -182,6 +191,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontWeight: 500,
     fontFamily: Fonts.BOLD,
+    top: -40,
   },
   loadingContainer: {
     paddingVertical: 20,

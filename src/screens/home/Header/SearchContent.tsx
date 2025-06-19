@@ -15,7 +15,9 @@ function SearchContent(): React.JSX.Element {
   return (
     <>
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => {}} style={styles.searchicon}>
+        <TouchableOpacity
+          onPress={() => setVisibles(true)}
+          style={styles.searchicon}>
           <SearchBar
             onChangeText={text => console.log(text)}
             autoCorrect={false}

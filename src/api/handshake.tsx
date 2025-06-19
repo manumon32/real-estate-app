@@ -16,7 +16,7 @@ export const createHandShakeHmacSignature = (
   );
 };
 
-export const createBodyHash = (rawBody: object): string => {
+export const createBodyHash = (rawBody: any): string => {
   return CryptoJS.SHA256(rawBody ? JSON.stringify(rawBody) : rawBody).toString(
     CryptoJS.enc.Hex,
   );

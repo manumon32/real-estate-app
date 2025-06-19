@@ -22,8 +22,8 @@ type Props = {
 const CommonSuccessModal: React.FC<Props> = ({
   visible,
   onClose,
-  title = 'Your listing is live!',
-  message = 'You’ve successfully uploaded your property.',
+  title = 'Success.',
+  message = 'Your listing will go live after the review.',
   iconName = 'check-circle-outline',
   iconColor = '#00C851',
   buttonText = 'Done',

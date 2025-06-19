@@ -18,7 +18,11 @@ api.interceptors.request.use(
   async (config: any) => {
     if (config.headers['X-TOKEN']) {
       const timestamp = Math.floor(Date.now() / 1000).toString();
-      const bodyHash = createBodyHash(config.data ? config.data : '');
+      console.log(config.data);
+      const bodyHash =
+        config.headers['Content-Type'] !== 'multipart/form-data'
+          ? createBodyHash(config.data ? config.data : '')
+          : createBodyHash('');
       const deviceId = config.headers['X-DEVICE-ID'];
       const nonce = uuid.v4();
       const url = config.url || '';
@@ -39,7 +43,6 @@ api.interceptors.request.use(
         'X-TIMESTAMP': timestamp,
         'X-SIGNATURE': signature,
         'X-NONCE': nonce,
-        'Content-Type': 'application/json',
         'X-CLIENT-ID': deviceId,
       });
       config.headers = {
@@ -47,7 +50,6 @@ api.interceptors.request.use(
         'X-TIMESTAMP': timestamp,
         'X-SIGNATURE': signature,
         'X-NONCE': nonce,
-        'Content-Type': 'application/json',
         'X-CLIENT-ID': deviceId,
       };
     }

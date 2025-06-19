@@ -23,6 +23,7 @@ import {
   PERMISSIONS,
   RESULTS,
 } from 'react-native-permissions';
+import useBoundStore from '@stores/index';
 
 const GOOGLE_API_KEY = 'AIzaSyD1PiJC7RtzJzVlKsZkNIB8meCqklPRgvQ'; // Replace this
 
@@ -43,6 +44,7 @@ const CommonLocationModal: React.FC<Props> = ({
   onSelectLocation,
   locationHistory,
 }) => {
+  const {location} = useBoundStore();
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -74,15 +76,13 @@ const CommonLocationModal: React.FC<Props> = ({
     let status = await check(permission);
 
     if (status === RESULTS.GRANTED) {
-      console.log('Permission granted');
-      return true;
+      getCurrentLocation();
     }
 
     if (status === RESULTS.DENIED || status === RESULTS.LIMITED) {
       status = await request(permission);
       if (status === RESULTS.GRANTED) {
-        console.log('Permission granted after request');
-        return true;
+        getCurrentLocation();
       }
     }
 
@@ -95,10 +95,7 @@ const CommonLocationModal: React.FC<Props> = ({
           {text: 'Open Settings', onPress: () => openSettings()},
         ],
       );
-      return false;
     }
-
-    return false;
   };
 
   const fetchPlaceDetails = async (placeId: string) => {
@@ -108,11 +105,11 @@ const CommonLocationModal: React.FC<Props> = ({
       const res = await fetch(url);
       const json = await res.json();
       console.log('res', json.result);
-      const location = json.result.geometry.location;
+      const locations = json.result.geometry.location;
       onSelectLocation({
         name: json.result.formatted_address,
-        lat: location.lat,
-        lng: location.lng,
+        lat: locations.lat,
+        lng: locations.lng,
       });
       setQuery('');
       setPredictions([]);
@@ -125,7 +122,7 @@ const CommonLocationModal: React.FC<Props> = ({
   };
 
   React.useEffect(() => {
-    getCurrentLocation();
+    checkAndRequestPermission();
   }, []);
 
   const useCurrentLocation = () => {
@@ -133,48 +130,49 @@ const CommonLocationModal: React.FC<Props> = ({
       onSelectLocation(currentLocation);
       onClose();
     } else {
-      getCurrentLocation();
+      checkAndRequestPermission();
     }
   };
 
-  const setLocation = (location: any) => {
-    if ((!visible && !currentLocation.lat) || visible) {
-      onSelectLocation(location);
+  const setLocation = (updatelocation: any) => {
+    if ((!visible && !location?.lat) || visible) {
+      onSelectLocation(updatelocation);
     }
-    setCurrentLocation(location);
+    setCurrentLocation(updatelocation);
   };
 
   const getCurrentLocation = async () => {
-    if (await checkAndRequestPermission()) {
-      try {
-        setLoading(true);
-        Geolocation.getCurrentPosition(
-          async position => {
-            const {latitude, longitude} = position.coords;
-            const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`;
+    setLoading(true);
+    Geolocation.getCurrentPosition(
+      async position => {
+        const {latitude, longitude} = position.coords;
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`;
 
-            const res = await fetch(url);
-            const json = await res.json();
-            const address =
-              json.results[0]?.formatted_address || 'Current Location';
-
-            setLocation({
-              name: address,
-              lat: latitude,
-              lng: longitude,
-            });
-            visible && onClose();
-          },
-          () => {
-            setLoading(false);
-          },
-          {enableHighAccuracy: true, timeout: 10000, maximumAge: 1000},
-        );
-      } catch (err) {
-      } finally {
+        const res = await fetch(url);
+        const json = await res.json();
+        const address =
+          json.results[0]?.formatted_address || 'Current Location';
+        setLocation({
+          name: address,
+          lat: latitude,
+          lng: longitude,
+        });
+        visible && onClose();
         setLoading(false);
-      }
-    }
+      },
+      () => {
+        // Alert.alert('Lat Long fetch failed');
+        setLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 30000,
+      // @ts-ignore
+        showLocationDialog: true,
+      },
+      // {enableHighAccuracy: true, timeout: 15_000, maximumAge: 0},
+    );
   };
 
   const renderItem = ({item}: {item: any}) => (
@@ -231,7 +229,7 @@ const CommonLocationModal: React.FC<Props> = ({
               <Text style={styles.currentLocationText}>
                 Use Current Location
               </Text>
-              {currentLocation?.name && (
+              {!loading && currentLocation?.name && (
                 <Text
                   numberOfLines={1}
                   style={{
@@ -241,6 +239,18 @@ const CommonLocationModal: React.FC<Props> = ({
                     maxWidth: 250,
                   }}>
                   {currentLocation?.name}
+                </Text>
+              )}
+              {loading && (
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 12,
+                    color: 'rgba(0, 0, 0, 0.55)',
+                    textAlign: 'left',
+                    maxWidth: 250,
+                  }}>
+                  {'Fetching'}
                 </Text>
               )}
             </View>
@@ -277,7 +287,7 @@ const CommonLocationModal: React.FC<Props> = ({
                   }
                   {locationHistory?.map(
                     (item: {lat: any; name: string; lng: any}, index: number) =>
-                      index <= 4 && (
+                      index <= 4 && (currentLocation?.lat !== item.lat)  &&(
                         <TouchableOpacity
                           key={index}
                           style={styles.item}

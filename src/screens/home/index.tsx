@@ -13,6 +13,7 @@ function Index({navigation}: any): React.JSX.Element {
     token,
     gethandShakeToken,
     handShakeError,
+    // habdshakeErrorLog,
     clientId,
     getConfigData,
     fetchFavouriteAds,
@@ -30,8 +31,8 @@ function Index({navigation}: any): React.JSX.Element {
     setError(false);
     const deviceId = await getDeviceId();
     const data = {
-      deviceId: deviceId,
-      appVersion: '1.3.0',
+      deviceId: deviceId ? deviceId : '123456',
+      appVersion: '0.0.1',
       deviceModel: 'Pixel 6',
       osVersion: 'Android 13',
       fingerprintHash: 'hsde123231',
@@ -104,6 +105,9 @@ function Index({navigation}: any): React.JSX.Element {
             <Text style={{marginBottom: 10, fontFamily: Fonts.MEDIUM}}>
               🔌 APP Initialization failed. Please try again.
             </Text>
+            {/* <Text style={{marginBottom: 10, fontFamily: Fonts.MEDIUM}}>
+              {JSON.stringify(habdshakeErrorLog)}
+            </Text> */}
             <TouchableOpacity style={styles.loginBtn} onPress={fetchData}>
               <Text style={styles.loginText}>Retry</Text>
             </TouchableOpacity>

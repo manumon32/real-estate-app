@@ -38,6 +38,7 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
     set({loading: true, triggerRefresh: false});
     let filters = {
       pageNum: get().page + 1,
+      pageSize: 12,
     };
     if (get().location?.lat && get().location?.lng) {
       filters = {
@@ -54,7 +55,15 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
       });
       set((state: any) => ({
         listings:
-          filters.pageNum === 1 ? res.rows : [...state.listings, ...res.rows],
+          filters.pageNum === 1
+            ? res.rows
+            : [...state.listings, ...res.rows]?.filter(
+                (item, index, self) =>
+                  index ===
+                  self.findIndex(
+                    t => JSON.stringify(t) === JSON.stringify(item),
+                  ),
+              ),
         page: res.pageNum,
         hasMore: res.pageNum < res.pages ? true : false,
         loading: false,
