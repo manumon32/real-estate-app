@@ -1,0 +1,1 @@
+../../../Target Support Files/react-native-cameraroll/react-native-cameraroll-umbrella.h

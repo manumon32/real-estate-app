@@ -1,0 +1,2 @@
+export const appSecret =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0IjoicGF0aEZpbmRlciIsImRpZ2VzdCI6ImFkbWlucG9ydGFsIiwieWVhciI6MjAyNH0.N7SBlUFqSNo_kPDgwYSRSAb6yNQ9s2-e53DGG3mizvY';
