@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import ImageViewerModal from '@components/Modal/ImageViewerModal';
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
@@ -34,7 +35,7 @@ export default function ChatBubble(props: any) {
             style={styles.avatar}
           />
           <View style={styles.messageWrapper}>
-            <Text style={styles.name}>Arnold Schurli</Text>
+            {/* <Text style={styles.name}>Arnold Schurli</Text> */}
 
             <View style={styles.bubble}>
               {items.type == 'image' && (

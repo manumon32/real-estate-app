@@ -19,6 +19,7 @@ import Transactions from '@screens/Transactions';
 import HelpSupport from '@screens/profile/HelpSupport';
 import VerifyListing from '@screens/VerifyListing';
 import NotificationList from '@screens/Notifications';
+import VerifyBank from '@screens/VerifyBank';
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +44,7 @@ const RootNavigator = () => {
       <Stack.Screen name="HelpSupport" component={HelpSupport} />
       <Stack.Screen name="ChatDetails" component={ChatDetails} />
       <Stack.Screen name="VerifyListing" component={VerifyListing} />
+      <Stack.Screen name="VerifyBankList" component={VerifyBank} />
       <Stack.Screen name="NotificationList" component={NotificationList} />
     </Stack.Navigator>
   );

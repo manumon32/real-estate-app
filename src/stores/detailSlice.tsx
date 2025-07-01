@@ -23,6 +23,7 @@ export interface Detail {
   nearbyLandmarks: string[];
   chatEnabled: boolean;
   isNegotiable: boolean;
+  isVerified: boolean;
   isVerifiedContact: boolean;
   isFeatured: boolean;
   isEnabled: boolean;

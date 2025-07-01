@@ -18,7 +18,12 @@ export const API = {
     VERIFICATION:{
       GET:'/property-verify',
       GET_MESSAGES:'/property-verify-msg',
-      VERIFY_LISTING:'/property-verifymsg',
+      VERIFY_LISTING:'/property-verify-msg',
+    },
+    BANK:{
+      GET:'/bank',
+      GET_MESSAGES:'/bank-verify-msg',
+      VERIFY_LISTING:'/bank-verify',
     },
   },
   USER: {

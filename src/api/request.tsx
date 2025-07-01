@@ -42,13 +42,11 @@ export const apiRequest = async ({
         text1: 'Please login.',
         position: 'bottom',
       });
-      // logoutAndRedirect();
+      logoutAndRedirect();
     } else {
       Toast.show({
         type: 'error',
-        text1: error.response.data
-          ? error.response.data?.msg
-          : 'Something went wrong!',
+        text1: 'Something went wrong, please try again later.',
         position: 'bottom',
       });
     }

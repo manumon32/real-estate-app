@@ -305,6 +305,90 @@ export const fetchverificationDetailsAPI = async (
 
 
 
+// Bank list
+export const fetchBanksAPI = async (
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.LISTINGS.BANK.GET,
+      params: {},
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response?.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch handshake token');
+  }
+};
+
+
+export const startBankVerificationAPI = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.LISTINGS.BANK.VERIFY_LISTING,
+      data,
+      headers,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error('Failed to Do so');
+  }
+};
+
+
+
+// verification list
+export const fetchVerifiedBankAPI = async (
+  params: any,
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.LISTINGS.BANK.VERIFY_LISTING,
+      params: params,
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response?.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch handshake token');
+  }
+};
+
+// verification list
+export const fetchBankVerificationDetailsAPI = async (
+  params: any,
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.LISTINGS.BANK.GET_MESSAGES,
+      params: params,
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response?.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch handshake token');
+  }
+};
+
+//Verify Listing
+
+
+
 export const startVerificationAPI = async (
   data: object,
   configArg: any,
@@ -660,6 +744,27 @@ export const sendVerificationDetails = async (
     const response = await apiRequest({
       method:'post',
       url:API.LISTINGS.VERIFICATION.VERIFY_LISTING ,
+      data,
+      headers,
+    });
+    return response?.data;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to Do so');
+  }
+};
+
+
+//send Bank Chat
+export const sendBankDetails = async (
+  data: any,
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method:'post',
+      url:API.LISTINGS.BANK.GET_MESSAGES ,
       data,
       headers,
     });

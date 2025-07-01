@@ -24,7 +24,7 @@ export interface VerificationSlice {
   updateVerificationDetails: (msg?: any) => Promise<any>;
 
   fetchverificationDetails: (filters?: any, page?: number) => Promise<void>;
-  resetverificationDetails: (msg?: any) => Promise<any>;
+  resetverificationDetails: () => Promise<any>;
 }
 
 export const createVerificationSlice = (
@@ -39,13 +39,18 @@ export const createVerificationSlice = (
   verification_totalpages: 0,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startVerification: async payload => {
-    set({verification_loading: true, verification_page: 0});
+    set({
+      verification_loading: true,
+      verification_page: 0,
+      verificationDetails: [],
+    });
     try {
       const res = await startVerificationAPI(payload, {
         token: get().token,
         clientId: get().clientId,
         bearerToken: get().bearerToken,
       });
+      set({verification_loading: false});
       navigate('VerifyListing', {items: {id: res._id}});
     } catch (err: any) {
       // navigate('VerifyListing', {items: {id: '6853e34e05711055c493ff3b'}});
@@ -58,7 +63,7 @@ export const createVerificationSlice = (
       verificationDetails: [...state.verificationDetails, msg],
     })),
   fetchverificationDetails: async (id: any) => {
-    set({verification_loading: true});
+    set({verification_loading: true, verificationDetails: []});
     try {
       let filters = {
         filter_verificationId: id,
@@ -80,10 +85,12 @@ export const createVerificationSlice = (
     }
   },
 
-  resetverificationDetails: (msg: any) =>
-    set(() => ({
-      verificationDetails: msg,
+  resetverificationDetails: () => {
+    return set(() => ({
+      verificationDetails: [],
       verification_page: 0,
       verification_hasMore: false,
-    })),
+      verification_loading: false,
+    }));
+  },
 });

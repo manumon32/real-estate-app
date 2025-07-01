@@ -30,6 +30,8 @@ import {Detail} from '@stores/detailSlice';
 import ReportAdModal from './ReportAdModal';
 import {createRoomAPI, postAdAPI} from '@api/services';
 import {getSocket} from '@soket/index';
+import BankSelectModal from '@components/Modal/BankListModal';
+import {navigate} from '@navigation/RootNavigation';
 
 const AdStatusEnum: any = {
   pending: 'Pending',
@@ -46,6 +48,8 @@ const PropertyDetails = React.memo(() => {
   const {items}: any = route.params;
   const navigation = useNavigation();
   const [error, setError] = useState(false);
+  const [bankModalVisible, setBankModalVisible] = useState(false);
+  const [selectedBank, setSelectedBank] = useState('');
   const {
     details,
     fetchDetails,
@@ -61,6 +65,7 @@ const PropertyDetails = React.memo(() => {
     user,
     verification_loading,
     startVerification,
+    startBankVerification,
   } = useBoundStore();
   const [property, setProperty] = useState<Detail | null>();
   const [isReportVisible, setIsReportVisible] = useState(false);
@@ -358,17 +363,23 @@ const PropertyDetails = React.memo(() => {
                 fontFamily: Fonts.MEDIUM,
                 fontWeight: '500',
               }}>
-              Verify your listing to get more offers.
+              {details?.isVerified
+                ? 'Your listing is verified'
+                : 'Verify your listing to get more offers.'}
             </Text>
           </View>
           <View style={{flexDirection: 'row'}}>
-             {!verification_loading && <IconButton
-              iconSize={24}
-              iconColor={'#fff'}
-              iconName={'arrow-right'}
-            />}
+            {!verification_loading && (
+              <IconButton
+                iconSize={24}
+                iconColor={'#fff'}
+                iconName={'arrow-right'}
+              />
+            )}
 
-              {verification_loading && <ActivityIndicator size={'small'} color={'#fff'}/>}
+            {verification_loading && (
+              <ActivityIndicator size={'small'} color={'#fff'} />
+            )}
           </View>
         </TouchableOpacity>
         <View style={styles.header}>
@@ -537,8 +548,51 @@ const PropertyDetails = React.memo(() => {
             top: 15,
           }}
         />
+        <TouchableOpacity
+          onPress={async () => {
+            (await items?._id) && startBankVerification(items?._id);
+            setBankModalVisible(true);
+          }}
+          style={{
+            top: 15,
+            margin: 16,
+            padding: 16,
+            backgroundColor: '#E3FFF8',
+            borderRadius: 10,
+            height: 56,
+            alignItems: 'center',
+            flexDirection: 'row',
+            borderWidth: 1,
+            borderColor: '#88E4CF',
+          }}>
+          <View
+            style={{width: '95%', flexDirection: 'row', alignItems: 'center'}}>
+            <IconButton
+              iconSize={24}
+              iconColor={'#2F8D79'}
+              iconName={'finance'}
+              style={{marginRight: 10}}
+            />
+            <Text
+              style={{
+                color: '#2F8D79',
+                fontSize: 14,
+                fontFamily: Fonts.MEDIUM,
+                fontWeight: '500',
+              }}>
+              Check your loan offers.
+            </Text>
+          </View>
+          <View style={{flexDirection: 'row'}}>
+            <IconButton
+              iconSize={24}
+              iconColor={'#2F8D79'}
+              iconName={'arrow-right'}
+            />
+          </View>
+        </TouchableOpacity>
 
-        <View
+        {/* <View
           style={{
             top: 15,
             margin: 16,
@@ -576,7 +630,7 @@ const PropertyDetails = React.memo(() => {
               iconName={'arrow-right'}
             />
           </View>
-        </View>
+        </View> */}
 
         {property?.amenityIds && property?.amenityIds?.length > 0 && (
           <>
@@ -814,6 +868,17 @@ const PropertyDetails = React.memo(() => {
           };
           reportAd(payload);
         }}
+      />
+
+      <BankSelectModal
+        visible={bankModalVisible}
+        onDismiss={() => setBankModalVisible(false)}
+        onSelect={(data: any) => {
+          console.log(data)
+          setSelectedBank(data);
+          navigate('VerifyBankList', {items: {id: data}});
+        }}
+        selectedBank={selectedBank}
       />
     </SafeAreaView>
   );

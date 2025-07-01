@@ -26,7 +26,7 @@ import {useFocusEffect, useRoute} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 import AttachFileModal from './AttachFileModal';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import {sendVerificationDetails, uploadImages} from '@api/services';
+import {sendBankDetails, uploadImages} from '@api/services';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -80,15 +80,15 @@ const Verification = ({navigation}: any) => {
   const {theme} = useTheme();
   const route = useRoute();
   const {
-    fetchverificationDetails,
-    verificationDetails,
-    verification_hasMore,
-    resetverificationDetails,
-    updateVerificationDetails,
+    fetchBankVerificationDetails,
+    bankVerificationDetails,
+    bankVerification_hasMore,
+    resetBankVerificationDetails,
+    updateBankVerificationDetails,
     token,
     clientId,
     bearerToken,
-    verification_loading,
+    bankVerification_loading,
   } = useBoundStore();
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
@@ -96,9 +96,10 @@ const Verification = ({navigation}: any) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      items?.id && fetchverificationDetails(items?.id);
+      console.log(items?.id)
+      items?.id && fetchBankVerificationDetails(items?.id);
       return () => {
-        resetverificationDetails();
+        resetBankVerificationDetails();
       };
     }, [items?._id]),
   );
@@ -174,49 +175,46 @@ const Verification = ({navigation}: any) => {
   };
   const sendImageUrlToApi = async (imageUrl: string): Promise<any> => {
     let payload = {
-      verificationId: items?.id,
+      bankVerificationId: items?.id,
       senderType: 'user',
       message: null,
       files: [imageUrl],
     };
-    updateVerificationDetails(payload);
-    await sendVerificationDetails(payload, {
+    updateBankVerificationDetails(payload);
+    await sendBankDetails(payload, {
       token,
       clientId,
       bearerToken,
     });
 
-    return fetchverificationDetails(items?.id);
+    return fetchBankVerificationDetails(items?.id);
   };
 
   const handleSend = async (message: string) => {
     if (message.trim()) {
       let payload = {
-        verificationId: items?.id,
+        bankVerificationId: items?.id,
         senderType: 'user',
         message: message,
+        createdAt: new Date()
       };
-      updateVerificationDetails(payload);
+      updateBankVerificationDetails(payload);
       try {
-        await sendVerificationDetails(payload, {
+        await sendBankDetails(payload, {
           token,
           clientId,
           bearerToken,
         });
-        fetchverificationDetails(items?.id);
+        fetchBankVerificationDetails(items?.id);
       } catch (error) {
         console.log(error);
       }
     }
   };
-
-  console.log('verification_loading', verification_loading);
-
-  console.log('verificationDetails', verificationDetails);
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
       <CommonHeader
-        title={items?.user?.name ?? 'Verify Listing'}
+        title={items?.user?.name ?? 'Loan Offers'}
         textColor="#171717"
       />
       <KeyboardAvoidingView
@@ -256,7 +254,7 @@ const Verification = ({navigation}: any) => {
         {(
           <FlatList
             inverted
-            data={[...verificationDetails].reverse()}
+            data={[...bankVerificationDetails].reverse()}
             renderItem={renderAdItem}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{
@@ -272,20 +270,20 @@ const Verification = ({navigation}: any) => {
             showsVerticalScrollIndicator={false}
             ListFooterComponent={
               <>
-                {verification_hasMore || verification_loading ? (
+                {bankVerification_hasMore || bankVerification_loading ? (
                   <View style={styles.loadingContainer}>
                     <ActivityIndicator
                       size="large"
                       color={theme.colors.activityIndicatorColor}
                     />
-                    {verification_loading &&
-                      verificationDetails?.length > 0 && (
+                    {bankVerification_loading &&
+                      bankVerificationDetails?.length > 0 && (
                         <Text style={styles.loadingText}>
                           Loading more properties...
                         </Text>
                       )}
                   </View>
-                ) : verificationDetails.length <= 0 ? (
+                ) : bankVerificationDetails.length <= 0 ? (
                   <></>
                 ) : (
                   <></>

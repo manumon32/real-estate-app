@@ -21,6 +21,7 @@ import { ChatSlice, createChatSlice } from './ChatSlice';
 import { createTransactionsSlice, TransactionsSlice } from './TransactionsSlice';
 import { createVerificationSlice, VerificationSlice } from './VerifyListingSlice';
 import { createNotificationsSlice, NotificationsSlice } from './NotificationsSlice';
+import { BankVerificationSlice, createBankVerificationSlice } from './VerifyBankSlice';
 // import {zustandStorage} from './storage';
 
 type StoreState = HandShakeSlice &
@@ -39,6 +40,7 @@ type StoreState = HandShakeSlice &
   TransactionsSlice &
   VerificationSlice &
   NotificationsSlice &
+  BankVerificationSlice &
   FavoritesSlice;
 
 // get
@@ -59,6 +61,7 @@ const useBoundStore = create<StoreState>()(
         ...createTransactionsSlice(set,get),
         ...createChatSlice(set, get),
         ...createVerificationSlice(set,get),
+        ...createBankVerificationSlice(set,get),
         ...createNotificationsSlice(set,get),
         ...createDetailSlice(set, get),
         ...createMyAdsSlice(set, get),
