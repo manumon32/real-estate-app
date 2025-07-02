@@ -54,4 +54,5 @@ export const API = {
   },
   FAVOURITES: '/favorites',
   UPLOAD_IMAGES: '/files/upload-images',
+  SUPPORT: '/support',
 };

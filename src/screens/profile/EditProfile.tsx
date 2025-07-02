@@ -18,7 +18,7 @@ import {
 } from 'react-native';
 import {Fonts} from '@constants/font';
 import TextInput from '@components/Input/textInput';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
 import OtpVerificationScreen from '@components/Modal/OtpVerificationScreen';
@@ -30,6 +30,7 @@ const EditProfile = () => {
     updateuser,
     updateLoading,
     updateSuccess,
+    fetchUserDetails,
     setUpdateSuccess,
     login,
     updateCOntact,
@@ -58,6 +59,12 @@ const EditProfile = () => {
       setVisible(true);
     }
   }, [updateSuccess]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUserDetails();
+    }, []),
+  );
   const isValidEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
@@ -178,31 +185,42 @@ const EditProfile = () => {
               />
             </View>
             {isValidEmail(email) &&
-              ((email && email !== user.email) || !user.isEmailVerified) && (
-                <TouchableOpacity
-                  onPress={() => {
-                    sendOTP(email, 'email');
-                  }}
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-evenly',
-                    width: 100,
-                  }}>
-                  {/* <MaterialCommunityIcons name="timer" size={18} color="green" /> */}
-                  {otpLoading && <ActivityIndicator size={'small'} />}
-                  {!otpLoading && (
-                    <Text
-                      style={{
-                        color: 'green',
-                        fontSize: 12,
-                        textDecorationLine: 'underline',
-                        cursor: 'pointer',
-                      }}>
-                      Verify Email
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              )}
+            ((email && email !== user.email) || !user.isEmailVerified) ? (
+              <TouchableOpacity
+                onPress={() => {
+                  sendOTP(email, 'email');
+                }}
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-evenly',
+                  width: 100,
+                }}>
+                {/* <MaterialCommunityIcons name="timer" size={18} color="green" /> */}
+                {otpLoading && <ActivityIndicator size={'small'} />}
+                {!otpLoading && (
+                  <Text
+                    style={{
+                      color: 'green',
+                      fontSize: 12,
+                      textDecorationLine: 'underline',
+                      cursor: 'pointer',
+                    }}>
+                    Verify Email
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ) : (
+              <Text
+                style={{
+                  color: 'green',
+                  fontSize: 12,
+                  textDecorationLine: 'underline',
+                  cursor: 'pointer',
+                  marginLeft: 15,
+                }}>
+                Verified
+              </Text>
+            )}
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Phone Number</Text>
               {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
@@ -217,32 +235,42 @@ const EditProfile = () => {
               />
             </View>
             {isValidPhone(phoneNumber) &&
-              ((phoneNumber && phoneNumber !== user.phone) ||
-                !user.isPhoneVerified) && (
-                <TouchableOpacity
-                  onPress={() => {
-                    sendOTP(phoneNumber, 'phone');
-                  }}
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-evenly',
-                    width: 150,
-                  }}>
-                  {/* <MaterialCommunityIcons name="timer" size={18} color="green" /> */}
-                  {otpLoading && <ActivityIndicator size={'small'} />}
-                  {!otpLoading && (
-                    <Text
-                      style={{
-                        color: 'green',
-                        fontSize: 12,
-                        textDecorationLine: 'underline',
-                        cursor: 'pointer',
-                      }}>
-                      Verify Phone
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              )}
+            ((phoneNumber && phoneNumber !== user.phone) ||
+              !user.isPhoneVerified) ? (
+              <TouchableOpacity
+                onPress={() => {
+                  sendOTP(phoneNumber, 'phone');
+                }}
+                style={{
+                  width: 150,
+                  marginLeft: 15,
+                }}>
+                {/* <MaterialCommunityIcons name="timer" size={18} color="green" /> */}
+                {otpLoading && <ActivityIndicator size={'small'} />}
+                {!otpLoading && (
+                  <Text
+                    style={{
+                      color: 'green',
+                      fontSize: 12,
+                      textDecorationLine: 'underline',
+                      cursor: 'pointer',
+                    }}>
+                    Verify Phone
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ) : (
+              <Text
+                style={{
+                  color: 'green',
+                  fontSize: 12,
+                  textDecorationLine: 'underline',
+                  cursor: 'pointer',
+                  marginLeft: 15,
+                }}>
+                Verified
+              </Text>
+            )}
           </ScrollView>
           <View style={{padding: 12}}>
             <TouchableOpacity

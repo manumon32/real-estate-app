@@ -5,6 +5,7 @@ import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback} from 'react';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   View,
   Text,
@@ -27,6 +28,7 @@ interface MessageCardProps {
   unreadCount?: number;
   navigation: any;
   item: any;
+  type: string;
 }
 
 const MessageCard: React.FC<MessageCardProps> = ({
@@ -37,6 +39,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
   unreadCount = 0,
   navigation,
   item,
+  type,
 }) => {
   return (
     <TouchableOpacity
@@ -62,14 +65,33 @@ const MessageCard: React.FC<MessageCardProps> = ({
             </Text>
           )}
         </View>
-        <Text
-          numberOfLines={2}
-          style={[
-            styles.message,
-            unreadCount <= 0 && {fontFamily: Fonts.REGULAR},
-          ]}>
-          {message}
-        </Text>
+        {type === 'text' && (
+          <Text
+            numberOfLines={2}
+            style={[
+              styles.message,
+              unreadCount <= 0 && {fontFamily: Fonts.REGULAR},
+            ]}>
+            {message}
+          </Text>
+        )}
+        {type === 'image' && (
+          <View style={{flexDirection: 'row', width: '100%'}}>
+            <Icon
+              name="camera-outline"
+              size={16}
+              color="#000"
+            />
+            <Text
+              numberOfLines={2}
+              style={[
+                styles.message,
+                unreadCount <= 0 && {fontFamily: Fonts.REGULAR},
+              ]}>
+              {' Image'}
+            </Text>
+          </View>
+        )}
       </View>
       {unreadCount > 0 && (
         <View style={styles.badge}>
@@ -98,6 +120,7 @@ const Chat = React.memo(({navigation}: any) => {
       return (
         <MessageCard
           name={item?.item?.user?.name ?? 'User'}
+          type={item?.item?.lastMessage?.type ?? 'message'}
           message={item?.item?.lastMessage?.body}
           navigation={navigation}
           time={item?.item?.lastMessage?.createdAt}

@@ -10,12 +10,40 @@ PODS:
     - React-Core
   - DoubleConversion (1.1.6)
   - fast_float (6.1.4)
+  - FBAEMKit (18.0.0):
+    - FBSDKCoreKit_Basics (= 18.0.0)
   - FBLazyVector (0.79.2)
+  - FBSDKCoreKit (18.0.0):
+    - FBAEMKit (= 18.0.0)
+    - FBSDKCoreKit_Basics (= 18.0.0)
+  - FBSDKCoreKit_Basics (18.0.0)
+  - FBSDKGamingServicesKit (18.0.0):
+    - FBSDKCoreKit (= 18.0.0)
+    - FBSDKCoreKit_Basics (= 18.0.0)
+    - FBSDKShareKit (= 18.0.0)
+  - FBSDKLoginKit (18.0.0):
+    - FBSDKCoreKit (= 18.0.0)
+  - FBSDKShareKit (18.0.0):
+    - FBSDKCoreKit (= 18.0.0)
+  - Firebase/Auth (11.13.0):
+    - Firebase/CoreOnly
+    - FirebaseAuth (~> 11.13.0)
   - Firebase/CoreOnly (11.13.0):
     - FirebaseCore (~> 11.13.0)
   - Firebase/Messaging (11.13.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 11.13.0)
+  - FirebaseAppCheckInterop (11.15.0)
+  - FirebaseAuth (11.13.0):
+    - FirebaseAppCheckInterop (~> 11.0)
+    - FirebaseAuthInterop (~> 11.0)
+    - FirebaseCore (~> 11.13.0)
+    - FirebaseCoreExtension (~> 11.13.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GTMSessionFetcher/Core (< 5.0, >= 3.4)
+    - RecaptchaInterop (~> 101.0)
+  - FirebaseAuthInterop (11.15.0)
   - FirebaseCore (11.13.0):
     - FirebaseCoreInternal (~> 11.13.0)
     - GoogleUtilities/Environment (~> 8.1)
@@ -1445,6 +1473,21 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-fbsdk-next (13.4.1):
+    - React-Core
+    - react-native-fbsdk-next/Core (= 13.4.1)
+    - react-native-fbsdk-next/Login (= 13.4.1)
+    - react-native-fbsdk-next/Share (= 13.4.1)
+  - react-native-fbsdk-next/Core (13.4.1):
+    - FBSDKCoreKit (~> 18.0)
+    - React-Core
+  - react-native-fbsdk-next/Login (13.4.1):
+    - FBSDKLoginKit (~> 18.0)
+    - React-Core
+  - react-native-fbsdk-next/Share (13.4.1):
+    - FBSDKGamingServicesKit (~> 18.0)
+    - FBSDKShareKit (~> 18.0)
+    - React-Core
   - react-native-geolocation (3.4.0):
     - DoubleConversion
     - glog
@@ -1998,6 +2041,7 @@ PODS:
     - React-logger (= 0.79.2)
     - React-perflogger (= 0.79.2)
     - React-utils (= 0.79.2)
+  - RecaptchaInterop (101.0.0)
   - RNAudioRecorderPlayer (3.6.14):
     - React-Core
   - RNCAsyncStorage (2.2.0):
@@ -2033,6 +2077,10 @@ PODS:
   - RNFBApp (22.2.1):
     - Firebase/CoreOnly (= 11.13.0)
     - React-Core
+  - RNFBAuth (22.2.1):
+    - Firebase/Auth (= 11.13.0)
+    - React-Core
+    - RNFBApp
   - RNFBMessaging (22.2.1):
     - Firebase/Messaging (= 11.13.0)
     - FirebaseCoreExtension
@@ -2435,6 +2483,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
+  - react-native-fbsdk-next (from `../node_modules/react-native-fbsdk-next`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-geolocation-service (from `../node_modules/react-native-geolocation-service`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
@@ -2481,6 +2530,7 @@ DEPENDENCIES:
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNFastImage (from `../node_modules/react-native-fast-image`)
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
+  - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
@@ -2495,7 +2545,16 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - AppAuth
+    - FBAEMKit
+    - FBSDKCoreKit
+    - FBSDKCoreKit_Basics
+    - FBSDKGamingServicesKit
+    - FBSDKLoginKit
+    - FBSDKShareKit
     - Firebase
+    - FirebaseAppCheckInterop
+    - FirebaseAuth
+    - FirebaseAuthInterop
     - FirebaseCore
     - FirebaseCoreExtension
     - FirebaseCoreInternal
@@ -2510,6 +2569,7 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - razorpay-pod
+    - RecaptchaInterop
     - SDWebImage
     - SDWebImageWebPCoder
     - SocketRocket
@@ -2596,6 +2656,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-cameraroll:
     :path: "../node_modules/@react-native-camera-roll/camera-roll"
+  react-native-fbsdk-next:
+    :path: "../node_modules/react-native-fbsdk-next"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
   react-native-geolocation-service:
@@ -2688,6 +2750,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fast-image"
   RNFBApp:
     :path: "../node_modules/@react-native-firebase/app"
+  RNFBAuth:
+    :path: "../node_modules/@react-native-firebase/auth"
   RNFBMessaging:
     :path: "../node_modules/@react-native-firebase/messaging"
   RNGestureHandler:
@@ -2715,8 +2779,17 @@ SPEC CHECKSUMS:
   BVLinearGradient: cb006ba232a1f3e4f341bb62c42d1098c284da70
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
+  FBAEMKit: e34530df538b8eb8aeb53c35867715ba6c63ef0c
   FBLazyVector: 84b955f7b4da8b895faf5946f73748267347c975
+  FBSDKCoreKit: d3f479a69127acebb1c6aad91c1a33907bcf6c2f
+  FBSDKCoreKit_Basics: 017b6dc2a1862024815a8229e75661e627ac1e29
+  FBSDKGamingServicesKit: cdb625419879a651d07906d8f874fc76291be660
+  FBSDKLoginKit: 5875762d1fe09ddcb05d03365d4f5dc34413843d
+  FBSDKShareKit: 082d1b087d6481af36f8d8433542f25f2fc2c8dd
   Firebase: 3435bc66b4d494c2f22c79fd3aae4c1db6662327
+  FirebaseAppCheckInterop: 06fe5a3799278ae4667e6c432edd86b1030fa3df
+  FirebaseAuth: 175cb5503dfdb52191b8ff81cdd52c1d9dee9ac9
+  FirebaseAuthInterop: 7087d7a4ee4bc4de019b2d0c240974ed5d89e2fd
   FirebaseCore: c692c7f1c75305ab6aff2b367f25e11d73aa8bd0
   FirebaseCoreExtension: c048485c347616dba6165358dbef765c5197597b
   FirebaseCoreInternal: 29d7b3af4aaf0b8f3ed20b568c13df399b06f68c
@@ -2766,6 +2839,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: c3f4b608e4a59dd2f6a416ef4d47a14400194468
   React-microtasksnativemodule: 054f34e9b82f02bd40f09cebd4083828b5b2beb6
   react-native-cameraroll: 41084e42ab4ec08940452737aca3fd5e0edc63fe
+  react-native-fbsdk-next: 52f81e60eb3e8e0e06cf9728b4572d3509ca9d01
   react-native-geolocation: d43962eb0be1b0056ba5c1f95e94fb7907494268
   react-native-geolocation-service: 32b2c2a3b91e70ce2a8d0c684801aaeb0a07e0ec
   react-native-image-picker: db0b3e3c7ae57680876318d4f42e7dbedd72244a
@@ -2807,11 +2881,13 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 04d5eb15eb46be6720e17a4a7fa92940a776e584
   ReactCodegen: c63eda03ba1d94353fb97b031fc84f75a0d125ba
   ReactCommon: 76d2dc87136d0a667678668b86f0fca0c16fdeb0
+  RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   RNAudioRecorderPlayer: b5ed41ccfe72a211a870bfe09ab36c046eb27d2a
   RNCAsyncStorage: a1c8cc8a99c32de1244a9cf707bf9d83d0de0f71
   RNDeviceInfo: d863506092aef7e7af3a1c350c913d867d795047
   RNFastImage: 462a183c4b0b6b26fdfd639e1ed6ba37536c3b87
   RNFBApp: 557f15b87d602ed5879a1cbd6dc574481bccb278
+  RNFBAuth: fb0421232f23c6801923926f4447cf73e62418e8
   RNFBMessaging: e6480aaf434826565d5a40b01c422fb0f58fc8a9
   RNGestureHandler: c7986dd1eb909e329882af067c05db0702a659b3
   RNGoogleSignin: 833476f7e773cdc4a2d876bdc4e6b1b79beaf1dc

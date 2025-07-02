@@ -20,11 +20,19 @@ import TextInput from '@components/Input/textInput';
 import {useNavigation} from '@react-navigation/native';
 import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
 const HelpSupport = () => {
-  const {user,updateLoading, updateSuccess, setUpdateSuccess, otp} = useBoundStore();
+  const {
+    user,
+    updateLoading,
+    updateSuccess,
+    setUpdateSuccess,
+    otp,
+    submitRequest,
+  } = useBoundStore();
   const [visible, setVisible] = useState(false);
-  const [name, setName] = useState(user?.name ??'');
+  const [name, setName] = useState(user?.name ?? '');
   const [email, setEmail] = useState(user?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
+  const [description, setDescription] = useState('');
 
   const navigation = useNavigation();
 
@@ -76,6 +84,7 @@ const HelpSupport = () => {
               <TextInput
                 placeholder="Email"
                 value={email}
+                editable={!user?.email}
                 onChangeText={text => {
                   setEmail(text);
                 }}
@@ -89,8 +98,9 @@ const HelpSupport = () => {
               <TextInput
                 placeholder="Phone"
                 value={phoneNumber}
+                editable={!user?.phone}
                 onChangeText={text => {
-                  setPhoneNumber(text);
+                 setPhoneNumber(text);
                 }}
                 // onBlur={handleBlur('title')}
                 // error={touched?.title && errors?.title ? true : false}
@@ -102,9 +112,9 @@ const HelpSupport = () => {
               <TextInput
                 placeholder="Description"
                 multiline
-                value={phoneNumber}
+                value={description}
                 onChangeText={text => {
-                  setPhoneNumber(text);
+                  setDescription(text);
                 }}
                 style={{minHeight: 100, justifyContent: 'center'}}
                 // onBlur={handleBlur('title')}
@@ -114,7 +124,22 @@ const HelpSupport = () => {
           </ScrollView>
           <View style={{padding: 12}}>
             <TouchableOpacity
-              style={styles.buyButton}
+              onPress={() => {
+                if (name && email && phoneNumber && description) {
+                  let payload = {
+                    fullName: name,
+                    email: email,
+                    phone: phoneNumber,
+                    topic: 'Request',
+                    description: description,
+                  };
+                  submitRequest(payload);
+                }
+              }}
+              style={[
+                styles.buyButton,
+                (!name || !email || !phoneNumber || !description) && { backgroundColor:'#ccc'},
+              ]}
               accessibilityRole="button">
               {!updateLoading && <Text style={styles.buyText}>{'Submit'}</Text>}
               {updateLoading && (
@@ -125,7 +150,7 @@ const HelpSupport = () => {
           <CommonSuccessModal
             visible={visible}
             title="Success."
-            message="Profile Updated Successfully."
+            message="Thank you for reaching us, our team will contact you as soon as possible."
             onClose={() => {
               setVisible(false);
               setUpdateSuccess();

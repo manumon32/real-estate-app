@@ -19,7 +19,17 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import auth from '@react-native-firebase/auth';
+
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {
+  AccessToken,
+  LoginManager,
+  Settings,
+  Profile,
+  GraphRequest,
+  GraphRequestManager,
+} from 'react-native-fbsdk-next';
 
 import LogoIcon from '@assets/svg/logo.svg';
 import GroupIcon from '@assets/svg/group.svg';
@@ -38,8 +48,11 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
   const {login, otp, clearOTP, verifyOTP, loginError} = useBoundStore();
   const [loginVar, setLoginVar] = useState('');
   const [message, setMessage] = useState('');
+  const [userInfo, setUserInfo] = useState<any>(null);
   const {theme} = useTheme();
-
+  useEffect(() => {
+    Settings.initializeSDK();
+  }, []);
   const isValidEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
@@ -54,24 +67,50 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     onClose?.();
   }, [onClose]);
 
-  const handleSubmit = () => {
-    if (isValidEmail(loginVar) || isValidPhone(loginVar)) {
-      login({phone: loginVar});
+  const handleSubmit: any = (arg = null) => {
+    if (
+      isValidEmail(arg ? arg : loginVar) ||
+      isValidPhone(arg ? arg : loginVar)
+    ) {
+      login({phone: arg ? arg : loginVar});
     } else {
       setMessage('❌  Invalid input');
     }
   };
 
   const veryFyOTP = (arg: any) => {
-    verifyOTP({phone: loginVar, email: null, otp: arg});
+    let payload: any = {};
+    if (userInfo) {
+      payload.isSocialLogin = true;
+      payload.socialProvider = userInfo?.socialProvider;
+      payload.email = userInfo?.email ?? null;
+      payload.socialProviderId = userInfo?.id ?? '';
+      if (userInfo?.socialProvider === 'facebook') {
+        payload.profilePicture = userInfo?.picture?.data?.url ?? '';
+        payload.name = userInfo?.name;
+      }
+      if (userInfo?.socialProvider === 'google') {
+        payload.profilePicture = userInfo?.photo ?? '';
+        payload.name =
+          userInfo?.givenName || userInfo?.familyName
+            ? userInfo?.givenName + ' ' + userInfo?.familyName
+            : '';
+      }
+    } else {
+      payload = {
+        phone: isValidPhone(loginVar) ? loginVar : null,
+        email: isValidEmail(loginVar) ? loginVar : null,
+      };
+    }
+    payload.otp = arg;
+    console.log(payload);
+    verifyOTP(payload);
   };
 
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
-        // '888933323180-hb2t8o1bm16981prm0q8dcios6n8qsph.apps.googleusercontent.com',
-        // '888933323180-1pflhpbmfpph3s9jke2lit42rkcvt57l.apps.googleusercontent.com',
-        '417248412728-ongmik4n9av3qlngr7kmtfsjen5t7vf1.apps.googleusercontent.com',
+        '417248412728-viv8i4i9ah06ecgherok52lm389epujb.apps.googleusercontent.com',
       offlineAccess: true, // if using with Firebase or for getting refresh tokens
     });
   }, []);
@@ -80,11 +119,57 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      Alert.alert(JSON.stringify(userInfo))
-      console.log('Google user', userInfo);
+      setUserInfo({...userInfo?.data?.user, socialProvider: 'google'});
+      setLoginVar(userInfo?.data?.user?.email ?? '');
+      handleSubmit(userInfo?.data?.user?.email ?? null);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const signInWithFacebook = async () => {
+    try {
+      const result = await LoginManager.logInWithPermissions([
+        'public_profile',
+        'email',
+      ]);
+
+      if (!result.isCancelled) {
+        const data = await AccessToken.getCurrentAccessToken();
+        if (data) {
+          getFacebookUserInfo(data.accessToken);
+        }
+      }
+    } catch (error: any) {
+      Alert.alert('Login fail', error.message);
+    }
+  };
+
+  const getFacebookUserInfo = (token: string) => {
+    const infoRequest = new GraphRequest(
+      '/me',
+      {
+        accessToken: token,
+        parameters: {
+          fields: {
+            string: 'id, name, email, picture.type(large)',
+          },
+        },
+      },
+      (error, result) => {
+        if (error) {
+          console.log('Error fetching data: ' + error.toString());
+        } else {
+          // console.log('Success fetching data: ', result);
+          // Alert.alert(`Hi ${result.name}, email: ${result.email}`);
+          setUserInfo({...result, socialProvider: 'facebook'});
+          // @ts-ignore
+          setLoginVar(result?.email ?? '');
+          handleSubmit(result?.email ?? null);
+        }
+      },
+    );
+    new GraphRequestManager().addRequest(infoRequest).start();
   };
 
   return (
@@ -101,13 +186,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
         {!otp && (
           <>
             <LinearGradient
-              colors={[
-                '#FFFFFF',
-                '#FFFFFF',
-                '#40DABE',
-                '#40DABE',
-                '#227465',
-              ]}
+              colors={['#FFFFFF', '#FFFFFF', '#40DABE', '#40DABE', '#227465']}
               start={{x: 0.5, y: 0}}
               end={{x: 0.5, y: 1}}
               style={styles.gradient}>
@@ -156,7 +235,10 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
 
                 {/* Login Button */}
                 <TouchableOpacity
-                  onPress={handleSubmit}
+                  onPress={() => {
+                    setUserInfo(null);
+                    handleSubmit();
+                  }}
                   style={styles.loginBtn}>
                   <Text style={styles.loginText}>Login</Text>
                 </TouchableOpacity>
@@ -170,11 +252,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
 
                 {/* Social Logins */}
                 <View style={styles.socialRow}>
-                  <Icon
-                    name="apple"
-                    size={36}
-                    onPress={() => {}}
-                  />
+                  <Icon name="apple" size={36} onPress={() => {}} />
                   <Icon
                     name="google"
                     color="#000"
@@ -185,8 +263,10 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
                     name="facebook"
                     color="#3b5998"
                     size={36}
-                    onPress={() => {}}
-                    style={{justifyContent:'center', alignItems:'center'}}
+                    onPress={() => {
+                      signInWithFacebook();
+                    }}
+                    style={{justifyContent: 'center', alignItems: 'center'}}
                   />
                 </View>
               </View>

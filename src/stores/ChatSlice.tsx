@@ -8,6 +8,7 @@ export interface Chatlist {
   roomId: string;
   createdAt: string;
   updatedAt: string;
+  unreadCount: string;
   __v: number;
   lastMessage: {
     _id: string;

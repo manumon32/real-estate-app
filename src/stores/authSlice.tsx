@@ -1,6 +1,7 @@
 import {
   fetchUserDetailsAPI,
   login,
+  submitRequestAPI,
   updateContact,
   updateUser,
   verifyOTP,
@@ -27,6 +28,7 @@ export interface AuthSlice {
   updateuser: (falg: any) => Promise<void>;
   fetchUserDetails: () => Promise<void>;
   updateCOntact: (falg: any) => Promise<void>;
+  submitRequest: (falg: any) => Promise<void>;
 }
 
 export const createAuthSlice = (set: any, get: any): AuthSlice => ({
@@ -144,7 +146,28 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       if (resp) {
         set({
           user: resp,
-          updateError: true,
+          updateError: false,
+          updateLoading: false,
+          updateSuccess: true,
+        });
+      } else {
+        set({updateError: true, updateLoading: false, updateSuccess: false});
+      }
+    } catch (error) {
+      set({updateError: false, updateLoading: false, updateSuccess: false});
+    }
+  },
+  submitRequest: async payload => {
+    set({updateError: false, updateLoading: true});
+    try {
+      const resp = await submitRequestAPI(payload, {
+        token: get().token,
+        clientId: get().clientId,
+        bearerToken: get().bearerToken,
+      });
+      if (resp) {
+        set({
+          updateError: false,
           updateLoading: false,
           updateSuccess: true,
         });

@@ -54,7 +54,7 @@ const BankSelectModal = ({
       title={item.name}
       onPress={() => {
         onSelect(item._id);
-        onDismiss();
+        // onDismiss();
       }}
       left={() => (
         <Image

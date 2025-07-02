@@ -177,6 +177,28 @@ export const updateUser = async (
   }
 };
 
+
+export const submitRequestAPI = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.SUPPORT,
+      data,
+      headers,
+    });
+    return response?.data;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to Do so');
+  }
+};
+
+
+
 //updateContact
 
 export const updateContact = async (
@@ -303,12 +325,8 @@ export const fetchverificationDetailsAPI = async (
 
 //Verify Listing
 
-
-
 // Bank list
-export const fetchBanksAPI = async (
-  configArg: any,
-): Promise<any> => {
+export const fetchBanksAPI = async (configArg: any): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const apiConfig: any = {
@@ -323,7 +341,6 @@ export const fetchBanksAPI = async (
     throw new Error('Failed to fetch handshake token');
   }
 };
-
 
 export const startBankVerificationAPI = async (
   data: object,
@@ -342,8 +359,6 @@ export const startBankVerificationAPI = async (
     throw new Error('Failed to Do so');
   }
 };
-
-
 
 // verification list
 export const fetchVerifiedBankAPI = async (
@@ -386,8 +401,6 @@ export const fetchBankVerificationDetailsAPI = async (
 };
 
 //Verify Listing
-
-
 
 export const startVerificationAPI = async (
   data: object,
@@ -476,6 +489,7 @@ export const fetchTransactionsAPI = async (configArg: any): Promise<any> => {
       method: 'get',
       url: API.SUBSCRIPTIONS.GET,
       params: {
+        populate: 'subscriptionPlanId',
         noPagination: true,
         orderBy: 'createdAt',
         orderByDir: 'desc',
@@ -488,9 +502,6 @@ export const fetchTransactionsAPI = async (configArg: any): Promise<any> => {
     throw new Error('Failed to fetch Details');
   }
 };
-
-
-
 
 export const fetchReportedAd = async (configArg: any): Promise<any> => {
   try {
@@ -700,8 +711,8 @@ export const createRoomAPI = async (
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
-      method:'post',
-      url:API.CHAT.GET ,
+      method: 'post',
+      url: API.CHAT.GET,
       data,
       headers,
     });
@@ -712,17 +723,13 @@ export const createRoomAPI = async (
   }
 };
 
-
 //send chat
-export const sendChat = async (
-  data: any,
-  configArg: any,
-): Promise<any> => {
+export const sendChat = async (data: any, configArg: any): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
-      method:'post',
-      url:API.CHAT.GET_CHAT ,
+      method: 'post',
+      url: API.CHAT.GET_CHAT,
       data,
       headers,
     });
@@ -732,7 +739,6 @@ export const sendChat = async (
     throw new Error('Failed to Do so');
   }
 };
-
 
 //send chat
 export const sendVerificationDetails = async (
@@ -742,8 +748,8 @@ export const sendVerificationDetails = async (
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
-      method:'post',
-      url:API.LISTINGS.VERIFICATION.VERIFY_LISTING ,
+      method: 'post',
+      url: API.LISTINGS.VERIFICATION.VERIFY_LISTING,
       data,
       headers,
     });
@@ -753,7 +759,6 @@ export const sendVerificationDetails = async (
     throw new Error('Failed to Do so');
   }
 };
-
 
 //send Bank Chat
 export const sendBankDetails = async (
@@ -763,8 +768,8 @@ export const sendBankDetails = async (
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
-      method:'post',
-      url:API.LISTINGS.BANK.GET_MESSAGES ,
+      method: 'post',
+      url: API.LISTINGS.BANK.GET_MESSAGES,
       data,
       headers,
     });
@@ -774,4 +779,3 @@ export const sendBankDetails = async (
     throw new Error('Failed to Do so');
   }
 };
-

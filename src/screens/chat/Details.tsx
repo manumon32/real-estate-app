@@ -71,7 +71,7 @@ const ChatFooter = React.memo(({setAttachModalVisible, handleSend}: any) => {
         iconColor="#696969"
       />
 
-      <IconButton
+      {/* <IconButton
         icon="microphone"
         size={20}
         onPress={() => {
@@ -79,7 +79,7 @@ const ChatFooter = React.memo(({setAttachModalVisible, handleSend}: any) => {
           handleSend(message);
         }}
         iconColor="#696969"
-      />
+      /> */}
     </View>
   );
 });

@@ -98,6 +98,7 @@ interface Feature {
 
 export interface DetailSlice {
   details: Detail | null;
+  detailsBackUp: Detail | null;
   detailLoading: boolean;
   detailsError: string | null;
   fetchDetails: (id: string, apiConfig?: number) => Promise<void>;
@@ -108,6 +109,7 @@ export interface DetailSlice {
 
 export const createDetailSlice = (set: any, get: any): DetailSlice => ({
   details: null,
+  detailsBackUp: null,
   detailLoading: false,
   detailsError: null,
   chatRoomId: {},
@@ -127,6 +129,7 @@ export const createDetailSlice = (set: any, get: any): DetailSlice => ({
       res &&
         set(() => ({
           details: res,
+          detailsBackUp: res,
           detailLoading: false,
         }));
     } catch (err: any) {

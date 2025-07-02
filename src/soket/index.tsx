@@ -7,20 +7,20 @@ let socket: Socket | null = null;
 const SOCKET_URL = 'http://13.61.181.173:8082';
 
 const updateChatList = (msg: any) => {
-  let newChatList = useBoundStore.getState().chatList;
-  let updatedItems: any = newChatList.filter(
-    (item: any) => item?.roomId !== msg.room?._id,
-  );
   const currentScreen = getCurrentRouteName();
   if (
     currentScreen === 'ChatDetails' &&
     msg.lastMessage.roomId === useBoundStore.getState().filter_roomId
   ) {
-    console.log(msg.lastMessage);
     useBoundStore.getState().updateChat(msg.lastMessage);
   } else {
-    updatedItems = [msg, ...updatedItems];
-    useBoundStore.getState().setChatList(updatedItems);
+    const currentChatList = useBoundStore.getState().chatList || [];
+    let updatedItems: any = currentChatList.filter(
+      (item: any) => item?.roomId !== msg.room?._id,
+    );
+    let updatedChatList;
+    updatedChatList = [{...msg, roomId: msg.room?._id}, ...updatedItems];
+    useBoundStore.getState().setChatList(updatedChatList);
 
     let unreadCount = useBoundStore.getState().unreadCount + 1;
     useBoundStore.getState().setUnreadCount(unreadCount);

@@ -41,7 +41,7 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
 
 // const chats = [{id: 1}, {id: 2}, {id: 3}, {id: 4}];
 
-const ChatFooter = (({setAttachModalVisible, handleSend}: any) => {
+const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
   const [message, setMessage] = React.useState<any>('');
 
   return (
@@ -74,7 +74,7 @@ const ChatFooter = (({setAttachModalVisible, handleSend}: any) => {
       />
     </View>
   );
-});
+};
 
 const Verification = ({navigation}: any) => {
   const {theme} = useTheme();
@@ -89,6 +89,7 @@ const Verification = ({navigation}: any) => {
     clientId,
     bearerToken,
     verification_loading,
+    detailsBackUp,
   } = useBoundStore();
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
@@ -209,10 +210,6 @@ const Verification = ({navigation}: any) => {
       }
     }
   };
-
-  console.log('verification_loading', verification_loading);
-
-  console.log('verificationDetails', verificationDetails);
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
       <CommonHeader
@@ -222,38 +219,66 @@ const Verification = ({navigation}: any) => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         style={{height: Platform.OS === 'ios' ? '85%' : '80%', flex: 1}}>
-        <TouchableRipple
-          onPress={() => {}}
-          rippleColor="rgba(0, 0, 0, .1)"
-          style={styles.rippleContainer}>
-          <Surface
-            style={[
-              styles.surface,
-              {backgroundColor: theme.colors.background},
-            ]}>
-            <View style={styles.row}>
-              <MaterialCommunityIcons
-                name="clock-alert-outline"
-                size={24}
-                color={theme.colors.primary}
-                style={styles.icon}
-              />
-              <View style={styles.textWrapper}>
-                <Text style={[styles.text, {color: '#000000DE'}]}>
-                  Your listing is currently under review. You can still upload
-                  any documents you have for it.
-                </Text>
+        {!detailsBackUp?.isVerified && (
+          <TouchableRipple
+            onPress={() => {}}
+            rippleColor="rgba(0, 0, 0, .1)"
+            style={styles.rippleContainer}>
+            <Surface
+              style={[
+                styles.surface,
+                {backgroundColor: theme.colors.background},
+              ]}>
+              <View style={styles.row}>
+                <MaterialCommunityIcons
+                  name="clock-alert-outline"
+                  size={24}
+                  color={theme.colors.primary}
+                  style={styles.icon}
+                />
+                <View style={styles.textWrapper}>
+                  <Text style={[styles.text, {color: '#000000DE'}]}>
+                    Your listing is currently under review. You can still upload
+                    any documents you have for it.
+                  </Text>
+                </View>
+                <MaterialCommunityIcons
+                  name="file-upload-outline"
+                  size={22}
+                  color={theme.colors.primary}
+                  style={styles.iconRight}
+                />
               </View>
-              <MaterialCommunityIcons
-                name="file-upload-outline"
-                size={22}
-                color={theme.colors.primary}
-                style={styles.iconRight}
-              />
-            </View>
-          </Surface>
-        </TouchableRipple>
-        {(
+            </Surface>
+          </TouchableRipple>
+        )}
+        {detailsBackUp?.isVerified && (
+          <TouchableRipple
+            onPress={() => {}}
+            rippleColor="rgba(0, 0, 0, .1)"
+            style={styles.rippleContainer}>
+            <Surface
+              style={[
+                styles.surface,
+                {backgroundColor: theme.colors.background},
+              ]}>
+              <View style={styles.row}>
+                <MaterialCommunityIcons
+                  name="check"
+                  size={20}
+                  color={'green'}
+                  style={styles.icon}
+                />
+                <View style={styles.textWrapper}>
+                  <Text style={[styles.text, {color: '#000000DE'}]}>
+                    Your listing is Verified
+                  </Text>
+                </View>
+              </View>
+            </Surface>
+          </TouchableRipple>
+        )}
+        {
           <FlatList
             inverted
             data={[...verificationDetails].reverse()}
@@ -293,7 +318,7 @@ const Verification = ({navigation}: any) => {
               </>
             }
           />
-        )}
+        }
         {/* <SlideToRecordButton
           onSend={filePath => {
             console.log('📤 Sending audio file:', filePath);
@@ -317,11 +342,13 @@ const Verification = ({navigation}: any) => {
             </TouchableOpacity>
           </View>
         )}
-        <ChatFooter
-          setAttachModalVisible={setAttachModalVisible}
-          handleSend={handleSend}
-          items={items}
-        />
+        {!detailsBackUp?.isVerified && (
+          <ChatFooter
+            setAttachModalVisible={setAttachModalVisible}
+            handleSend={handleSend}
+            items={items}
+          />
+        )}
       </KeyboardAvoidingView>
 
       <AttachFileModal

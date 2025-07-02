@@ -30,14 +30,14 @@ export default function ChatBubble(props: any) {
       />
       {!left ? (
         <View style={styles.container}>
-          <Image
-            source={{uri: items?.avatarUrl}} // Replace with real image
+         {items?.profilePicture && <Image
+            source={{uri: items?.profilePicture}} // Replace with real image
             style={styles.avatar}
-          />
+          />}
           <View style={styles.messageWrapper}>
             {/* <Text style={styles.name}>Arnold Schurli</Text> */}
 
-            <View style={styles.bubble}>
+            <View style={styles.bubbleleft}>
               {items.type == 'image' && (
                 <TouchableOpacity onPress={() => setVisible(true)}>
                   <Image
@@ -138,6 +138,12 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     fontWeight: '500',
     fontFamily: Fonts.REGULAR,
+  },
+  bubbleleft: {
+    backgroundColor: 'rgba(229, 229, 229, 0.55)',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 16,
   },
   bubble: {
     backgroundColor: 'rgba(229, 229, 229, 0.55)',

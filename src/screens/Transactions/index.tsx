@@ -20,11 +20,9 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface ListingCardProps {
   title: string;
-  location: string;
   price: string;
   status: string;
   date: string;
-  views: number;
   navigation: any;
   items: any;
   markasSold?: any;
@@ -42,7 +40,7 @@ const FormattedDate = (arg: string | number | Date) => {
     hour12: true,
   };
 
-  const FormattedDate = `Post on ${date
+  const FormattedDate = `${date
     .toLocaleString('en-US', options)
     .replace(':', '.')}`;
   return FormattedDate;
@@ -56,11 +54,9 @@ const AdStatusEnum: any = {
 const ListingCard: React.FC<ListingCardProps> = ({
   items,
   title = '',
-  location = '',
   price = 0,
   status = 'Pending',
   date = '',
-  views = 0,
   navigation,
 }) => {
   const {label, backgroundColor, textColor} = useMemo(() => {
@@ -135,28 +131,21 @@ const ListingCard: React.FC<ListingCardProps> = ({
                 </Text>
               </View>
             </View>
-            {items.featured && (
-              <View style={[styles.badge]}>
-                <Text numberOfLines={2} style={[styles.badgeText]}>
-                  {'featured'}
-                </Text>
-              </View>
-            )}
-            <Text style={styles.location} numberOfLines={1}>
-              {location}
-            </Text>
             <Text style={styles.price}>₹{price}</Text>
           </View>
         </View>
 
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
-            <Icon name="eye-outline" size={16} color="#888" />
-            <Text style={[styles.metaText]}>{views}</Text>
+            <Icon name="clock-outline" size={16} color="#888" />
+            <Text style={styles.metaText}>{'Start date - '+FormattedDate(date)}</Text>
           </View>
+        </View>
+
+        <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <Icon name="clock-outline" size={16} color="#888" />
-            <Text style={styles.metaText}>{FormattedDate(date)}</Text>
+            <Text style={styles.metaText}>{'End date - ' + FormattedDate(date)}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -178,12 +167,10 @@ const Transactions = () => {
     (items: any) => {
       return (
         <ListingCard
-          title={items.item?.title || ''}
-          location={items.item?.address || ''}
-          price={items.item?.price}
+          title={items.item?.subscriptionPlanId?.name || ''}
+          price={items.item?.subscriptionPlanId?.price}
           status={items.item?.status}
-          date={items.item?.createdAt}
-          views={200}
+          date={items.item?.startDate}
           navigation={navigation}
           items={items.item}
         />

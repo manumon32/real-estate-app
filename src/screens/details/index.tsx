@@ -70,6 +70,7 @@ const PropertyDetails = React.memo(() => {
   const [property, setProperty] = useState<Detail | null>();
   const [isReportVisible, setIsReportVisible] = useState(false);
   const {theme} = useTheme();
+  const isOwner = details?.customerId?._id === user?._id;
 
   const markasSold = async (id: string) => {
     let payload = {
@@ -177,15 +178,6 @@ const PropertyDetails = React.memo(() => {
 
   const createRoom = async (payload: any) => {
     let newpayload = {...payload, postOwnerId: payload.postOwnerId?._id};
-    // @ts-ignore
-    // if (chatRoomId?.[newpayload.propertyId]) {
-    //   sendSocket(payload);
-    //   // @ts-ignore
-    //   navigation.navigate('ChatDetails', {
-    //     // @ts-ignore
-    //     items: payload,
-    //   });
-    // } else {
     try {
       const res = await createRoomAPI(newpayload, {
         token,
@@ -205,6 +197,7 @@ const PropertyDetails = React.memo(() => {
           items: {
             ...payload,
             propertyId: res?._id,
+            property: {...items, coverImage: items.imageUrls[0] ?? null},
           },
         });
       }
@@ -215,17 +208,9 @@ const PropertyDetails = React.memo(() => {
         position: 'bottom',
       });
     }
-    // }
   };
 
-  const Footer = ({
-    details,
-    user,
-    bearerToken,
-    createRoom,
-    setVisible,
-  }: any) => {
-    const isOwner = details?.customerId?._id === user?._id;
+  const Footer = ({details, bearerToken, createRoom, setVisible}: any) => {
     return (
       <View style={styles.footer}>
         {isOwner ? (
@@ -338,50 +323,56 @@ const PropertyDetails = React.memo(() => {
         style={{paddingBottom: 120}}>
         <Header details={property ? property : items} />
 
-        <TouchableOpacity
-          onPress={() => {
-            verifyListing();
-          }}
-          style={{
-            // top: 15,
-            margin: 16,
-            padding: 16,
-            backgroundColor: '#2F8D79',
-            borderRadius: 10,
-            height: 56,
-            alignItems: 'center',
-            flexDirection: 'row',
-            borderWidth: 1,
-            borderColor: '#88E4CF',
-          }}>
-          <View
-            style={{width: '95%', flexDirection: 'row', alignItems: 'center'}}>
-            <Text
+        {isOwner && (
+          <TouchableOpacity
+            onPress={() => {
+              verifyListing();
+            }}
+            style={{
+              // top: 15,
+              margin: 16,
+              padding: 16,
+              backgroundColor: '#2F8D79',
+              borderRadius: 10,
+              height: 56,
+              alignItems: 'center',
+              flexDirection: 'row',
+              borderWidth: 1,
+              borderColor: '#88E4CF',
+            }}>
+            <View
               style={{
-                color: '#fff',
-                fontSize: 14,
-                fontFamily: Fonts.MEDIUM,
-                fontWeight: '500',
+                width: '95%',
+                flexDirection: 'row',
+                alignItems: 'center',
               }}>
-              {details?.isVerified
-                ? 'Your listing is verified'
-                : 'Verify your listing to get more offers.'}
-            </Text>
-          </View>
-          <View style={{flexDirection: 'row'}}>
-            {!verification_loading && (
-              <IconButton
-                iconSize={24}
-                iconColor={'#fff'}
-                iconName={'arrow-right'}
-              />
-            )}
+              <Text
+                style={{
+                  color: '#fff',
+                  fontSize: 14,
+                  fontFamily: Fonts.MEDIUM,
+                  fontWeight: '500',
+                }}>
+                {details?.isVerified
+                  ? 'Your listing is verified'
+                  : 'Verify your listing to get more offers.'}
+              </Text>
+            </View>
+            <View style={{flexDirection: 'row'}}>
+              {!verification_loading && (
+                <IconButton
+                  iconSize={24}
+                  iconColor={'#fff'}
+                  iconName={'arrow-right'}
+                />
+              )}
 
-            {verification_loading && (
-              <ActivityIndicator size={'small'} color={'#fff'} />
-            )}
-          </View>
-        </TouchableOpacity>
+              {verification_loading && (
+                <ActivityIndicator size={'small'} color={'#fff'} />
+              )}
+            </View>
+          </TouchableOpacity>
+        )}
         <View style={styles.header}>
           <Text style={styles.title}>
             {property?.title ? property?.title : items?.title}
@@ -548,49 +539,55 @@ const PropertyDetails = React.memo(() => {
             top: 15,
           }}
         />
-        <TouchableOpacity
-          onPress={async () => {
-            (await items?._id) && startBankVerification(items?._id);
-            setBankModalVisible(true);
-          }}
-          style={{
-            top: 15,
-            margin: 16,
-            padding: 16,
-            backgroundColor: '#E3FFF8',
-            borderRadius: 10,
-            height: 56,
-            alignItems: 'center',
-            flexDirection: 'row',
-            borderWidth: 1,
-            borderColor: '#88E4CF',
-          }}>
-          <View
-            style={{width: '95%', flexDirection: 'row', alignItems: 'center'}}>
-            <IconButton
-              iconSize={24}
-              iconColor={'#2F8D79'}
-              iconName={'finance'}
-              style={{marginRight: 10}}
-            />
-            <Text
+        {isOwner && (
+          <TouchableOpacity
+            onPress={async () => {
+              (await items?._id) && startBankVerification(items?._id);
+              setBankModalVisible(true);
+            }}
+            style={{
+              top: 15,
+              margin: 16,
+              padding: 16,
+              backgroundColor: '#E3FFF8',
+              borderRadius: 10,
+              height: 56,
+              alignItems: 'center',
+              flexDirection: 'row',
+              borderWidth: 1,
+              borderColor: '#88E4CF',
+            }}>
+            <View
               style={{
-                color: '#2F8D79',
-                fontSize: 14,
-                fontFamily: Fonts.MEDIUM,
-                fontWeight: '500',
+                width: '95%',
+                flexDirection: 'row',
+                alignItems: 'center',
               }}>
-              Check your loan offers.
-            </Text>
-          </View>
-          <View style={{flexDirection: 'row'}}>
-            <IconButton
-              iconSize={24}
-              iconColor={'#2F8D79'}
-              iconName={'arrow-right'}
-            />
-          </View>
-        </TouchableOpacity>
+              <IconButton
+                iconSize={24}
+                iconColor={'#2F8D79'}
+                iconName={'finance'}
+                style={{marginRight: 10}}
+              />
+              <Text
+                style={{
+                  color: '#2F8D79',
+                  fontSize: 14,
+                  fontFamily: Fonts.MEDIUM,
+                  fontWeight: '500',
+                }}>
+                Check your loan offers.
+              </Text>
+            </View>
+            <View style={{flexDirection: 'row'}}>
+              <IconButton
+                iconSize={24}
+                iconColor={'#2F8D79'}
+                iconName={'arrow-right'}
+              />
+            </View>
+          </TouchableOpacity>
+        )}
 
         {/* <View
           style={{
@@ -874,7 +871,6 @@ const PropertyDetails = React.memo(() => {
         visible={bankModalVisible}
         onDismiss={() => setBankModalVisible(false)}
         onSelect={(data: any) => {
-          console.log(data)
           setSelectedBank(data);
           navigate('VerifyBankList', {items: {id: data}});
         }}

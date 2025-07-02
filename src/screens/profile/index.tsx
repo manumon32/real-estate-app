@@ -85,6 +85,22 @@ const Profile = () => {
             margin: 10,
           }}>
           <MenuLink
+            icon="bell"
+            label="Notifications"
+            // value={12}
+            // @ts-ignore
+            onPress={() => navigation.navigate('NotificationList')}
+          />
+          <View
+            style={{
+              backgroundColor: '#EBEBEB',
+              borderWidth: 1,
+              borderColor: '#EBEBEB',
+              width: '90%',
+              alignSelf: 'center',
+            }}
+          />
+          <MenuLink
             icon="heart-outline"
             label="Favorite Listings"
             // value={12}
@@ -100,6 +116,7 @@ const Profile = () => {
               alignSelf: 'center',
             }}
           />
+
           <MenuLink
             icon="file"
             label="My Orders"
