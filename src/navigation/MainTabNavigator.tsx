@@ -49,12 +49,6 @@ const MainTabNavigator = () => {
           headerTitle: 'My Profile',
         }}/>
       <Tab.Screen name="filter" component={FilterScreen} />
-
-      {/* <Tab.Screen name="Settings" component={Settings} />
-      <Tab.Screen name="Notifications" component={Notifications} />
-      <Tab.Screen name="Communication" component={Communication} />
-      <Tab.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-      <Tab.Screen name="TermsConditions" component={TermsConditions} /> */}
     </Tab.Navigator>
   );
 };

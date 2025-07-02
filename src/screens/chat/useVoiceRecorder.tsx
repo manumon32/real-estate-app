@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+// import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import { PermissionsAndroid, Platform } from 'react-native';
 
-const audioRecorderPlayer = new AudioRecorderPlayer();
+const audioRecorderPlayer: any =  ''; // new AudioRecorderPlayer();
 
 export const useVoiceRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -24,8 +24,8 @@ export const useVoiceRecorder = () => {
     if (!hasPermission) return;
 
     setIsRecording(true);
-    const result = await audioRecorderPlayer.startRecorder();
-    audioRecorderPlayer.addRecordBackListener((e) => {
+    const result = await audioRecorderPlayer?.startRecorder();
+    audioRecorderPlayer.addRecordBackListener((e: any) => {
       setRecordSecs(e.current_position);
     });
     setRecordedPath(result);

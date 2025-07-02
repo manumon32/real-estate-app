@@ -1,1 +1,0 @@
-../../../Target Support Files/react-native-splash-screen/react-native-splash-screen-umbrella.h
