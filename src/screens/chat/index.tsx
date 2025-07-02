@@ -77,11 +77,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
         )}
         {type === 'image' && (
           <View style={{flexDirection: 'row', width: '100%'}}>
-            <Icon
-              name="camera-outline"
-              size={16}
-              color="#000"
-            />
+            <Icon name="camera-outline" size={16} color="#000" />
             <Text
               numberOfLines={2}
               style={[

@@ -4,7 +4,7 @@ import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
 import React, {useState} from 'react';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+// import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const getTimeAgo = (timestamp: number) => {
   const now = Date.now();
@@ -90,13 +90,13 @@ export default function ChatBubble(props: any) {
                 justifyContent: 'flex-end',
                 alignItems: 'center',
               }}>
-              <MaterialCommunityIcons name="check" size={12} color="#000" />
+              {/* <MaterialCommunityIcons name="check" size={12} color="#000" />
               <MaterialCommunityIcons
                 name="check"
                 size={12}
                 color="#000"
                 style={{marginRight: 5}}
-              />
+              /> */}
 
               <Text style={[styles.timestamp, {textAlign: 'right'}]}>
                 {getTimeAgo(new Date(items?.createdAt)?.getTime())}

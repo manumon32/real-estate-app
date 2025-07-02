@@ -23,9 +23,20 @@ export default function App() {
   //   console.log('Message handled in the background!', remoteMessage);
   // });
 
+  const linking = {
+    prefixes: ['myapp://', 'https://myapp.com'],
+    config: {
+      screens: {
+        Home: 'HomeIndex',
+        Details: 'Details/:id',
+        AddPost: 'AddPost',
+      },
+    },
+  };
+
   return (
     <ThemeProvider>
-      <NavigationContainer ref={navigationRef}>
+      <NavigationContainer ref={navigationRef} linking={linking}>
         <RootNavigator />
 
         <CommonLocationModal

@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   Linking,
+  Alert,
 } from 'react-native';
 import useBoundStore from '@stores/index';
 import DeviceInfo from 'react-native-device-info';
@@ -70,7 +71,10 @@ function Index({navigation}: any): React.JSX.Element {
 
     // Also handle when app is opened from a killed state
     Linking.getInitialURL().then(url => {
-      if (url) setDeepLink({url});
+      if (url) {
+        Alert.alert(url)
+        setDeepLink({url});
+      }
     });
 
     return () => sub.remove();

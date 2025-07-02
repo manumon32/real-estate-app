@@ -39,9 +39,9 @@ function Header(props: any): React.JSX.Element {
 
 
   const shareProperty = (id: string) => {
-    const link = `myapp://property/${id}`;
+    const link = `myapp://Details/${id}`;
     Share.share({
-      message: `Check out this property:\n${link}`,
+      message: `${link}`,
     });
   };
 

@@ -210,7 +210,7 @@ const EditProfile = () => {
                 )}
               </TouchableOpacity>
             ) : (
-              <Text
+             email && <Text
                 style={{
                   color: 'green',
                   fontSize: 12,
@@ -260,7 +260,7 @@ const EditProfile = () => {
                 )}
               </TouchableOpacity>
             ) : (
-              <Text
+             phoneNumber && <Text
                 style={{
                   color: 'green',
                   fontSize: 12,

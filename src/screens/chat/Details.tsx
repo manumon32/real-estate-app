@@ -4,7 +4,7 @@
 import CommonHeader from '@components/Header/CommonHeader';
 import {Fonts} from '@constants/font';
 import {useTheme} from '@theme/ThemeProvider';
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 
 import {TextInput, IconButton} from 'react-native-paper';
 import {
@@ -37,10 +37,19 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
   return <ChatBubble items={props} />;
 };
 
-// const chats = [{id: 1}, {id: 2}, {id: 3}, {id: 4}];
 
 const ChatFooter = React.memo(({setAttachModalVisible, handleSend}: any) => {
   const [message, setMessage] = React.useState<any>('');
+  // @ts-ignore
+  const inputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      inputRef.current?.focus(); // 👈 Focus the input
+    }, 300); // Delay ensures UI is ready
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <View style={styles.chatcontainer}>
@@ -51,6 +60,7 @@ const ChatFooter = React.memo(({setAttachModalVisible, handleSend}: any) => {
         color="#000"
       />
       <TextInput
+        ref={inputRef}
         mode="outlined"
         placeholder="Say something..."
         value={message}

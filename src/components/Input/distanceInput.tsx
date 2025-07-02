@@ -50,6 +50,7 @@ const CommonDistanceInput: React.FC<CommonDistanceInputProps> = ({
               placeholder={placeholder}
               placeholderTextColor="#ccc"
               style={styles.input}
+              keyboardType='decimal-pad'
             />
             <Text style={styles.unit}>{unit}</Text>
           </View>

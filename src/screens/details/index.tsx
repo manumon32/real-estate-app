@@ -629,31 +629,18 @@ const PropertyDetails = React.memo(() => {
           </View>
         </View> */}
 
-        {property?.amenityIds && property?.amenityIds?.length > 0 && (
-          <>
-            <Text style={styles.section}>Amenities</Text>
-            <View style={styles.amenities}>
-              {property?.amenityIds?.map(renderAmenity)}
-            </View>
-          </>
-        )}
-
-        <View
-          style={{
-            backgroundColor: '#EBEBEB',
-            borderWidth: 1,
-            borderColor: '#EBEBEB',
-            width: '100%',
-            top: 15,
-          }}
-        />
-
-        {(property?.carpetArea ||
-          property?.builtUpArea ||
-          property?.superBuiltUpArea) && (
+        {
           <>
             <Text style={styles.section}>Additional Details</Text>
             <View style={styles.additionalDetailsContainer}>
+              {property?.areaSize && (
+                <View style={styles.adittionalDetailsRow}>
+                  <Text style={styles.label}>{'Area Size'}</Text>
+                  <Text style={styles.value}>
+                    {property?.areaSize} /{'Sq.ft'}
+                  </Text>
+                </View>
+              )}
               {property?.carpetArea && (
                 <View style={styles.adittionalDetailsRow}>
                   <Text style={styles.label}>{'Carpet Area'}</Text>
@@ -689,7 +676,27 @@ const PropertyDetails = React.memo(() => {
               )}
             </View>
           </>
+        }
+
+
+        {property?.amenityIds && property?.amenityIds?.length > 0 && (
+          <>
+            <Text style={styles.section}>Amenities</Text>
+            <View style={styles.amenities}>
+              {property?.amenityIds?.map(renderAmenity)}
+            </View>
+          </>
         )}
+
+        <View
+          style={{
+            backgroundColor: '#EBEBEB',
+            borderWidth: 1,
+            borderColor: '#EBEBEB',
+            width: '100%',
+            top: 15,
+          }}
+        />
 
         <View
           style={{
@@ -710,25 +717,27 @@ const PropertyDetails = React.memo(() => {
           </>
         )}
 
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <Text style={styles.section}>Location</Text>
-          <TouchableOpacity onPress={() => setIsReportVisible(true)}>
-            <Text
-              style={[
-                styles.section,
-                {
-                  right: 10,
-                  color: 'blue',
-                  textDecorationLine: 'underline',
-                  textDecorationStyle: 'solid',
-                  margin: 5,
-                  fontFamily: Fonts.BOLD,
-                },
-              ]}>
-              Report this Ad
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {!isOwner && (
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={styles.section}>Location</Text>
+            <TouchableOpacity onPress={() => setIsReportVisible(true)}>
+              <Text
+                style={[
+                  styles.section,
+                  {
+                    right: 10,
+                    color: 'blue',
+                    textDecorationLine: 'underline',
+                    textDecorationStyle: 'solid',
+                    margin: 5,
+                    fontFamily: Fonts.BOLD,
+                  },
+                ]}>
+                Report this Ad
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {Platform.OS === 'android' &&
           isValidLatLng(

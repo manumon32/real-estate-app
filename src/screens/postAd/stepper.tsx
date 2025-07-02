@@ -4,6 +4,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -12,6 +13,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -182,6 +184,7 @@ const PostAdContainer = (props: any) => {
     (items: any[], selected?: any, setSelected?: any) => {
       return (
         <ScrollView
+          keyboardShouldPersistTaps="handled"
           ref={ref => {
             if (ref) {
               // scrollRefs.current[] = ref;
@@ -223,7 +226,7 @@ const PostAdContainer = (props: any) => {
     [postAd, getMergedFields, toggleItem],
   );
 
-  const checkErrors = () => {
+  const checkErrors = async () => {
     const requiredFields = {
       1: ['title', 'description', 'propertyTypeId', 'listingTypeId'],
       2: ['price'],
@@ -232,8 +235,7 @@ const PostAdContainer = (props: any) => {
       5: [],
       // 3: imageUrls ['nearbyLandmarks'],
     };
-    prevCountRef.current = currentStep;
-    setTouched(
+    await setTouched(
       // @ts-ignore
       requiredFields[currentStep]?.reduce((acc, key) => {
         acc[key] = true;
@@ -241,6 +243,7 @@ const PostAdContainer = (props: any) => {
       }, {} as {[key: string]: boolean}),
       true, // validate after touching
     );
+    prevCountRef.current = currentStep;
     if (
       // @ts-ignore
       requiredFields[currentStep]?.some(
@@ -419,7 +422,24 @@ const PostAdContainer = (props: any) => {
         setFloorPlans([]);
       }
     }
-  }, [errors, images, floorPlans, token, clientId, bearerToken, locationForAdpost.lat, locationForAdpost.lng, locationForAdpost.name, location.lat, location.lng, location.name, values, setImages, setFloorPlans, setFields]);
+  }, [
+    errors,
+    images,
+    floorPlans,
+    token,
+    clientId,
+    bearerToken,
+    locationForAdpost.lat,
+    locationForAdpost.lng,
+    locationForAdpost.name,
+    location.lat,
+    location.lng,
+    location.name,
+    values,
+    setImages,
+    setFloorPlans,
+    setFields,
+  ]);
 
   useEffect(() => {
     setVisible(false);
@@ -435,16 +455,24 @@ const PostAdContainer = (props: any) => {
       <View style={styles.stepperContainer}>
         <Stepper totalSteps={5} currentStep={currentStep} />
       </View>
-      <KeyboardAvoidingView
+      {/* <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-        style={{height: Platform.OS === 'ios' ? '85%' : '80%', flex: 1}}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContainer}
-          style={styles.scrollContainerStyle}
-          keyboardShouldPersistTaps="handled">
-          <View style={styles.container}>{renderStepContent()}</View>
-        </ScrollView>
+        style={{height: Platform.OS === 'ios' ? '85%' : '80%', flex: 1}}> */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' :  'height'}
+        style={{flex: 1, }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{flex: 1}}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContainer}
+              style={styles.scrollContainerStyle}
+              keyboardShouldPersistTaps="handled">
+              <View style={styles.container}>{renderStepContent()}</View>
+            </ScrollView>
+          </View>
+        </TouchableWithoutFeedback>
         <Footer
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
