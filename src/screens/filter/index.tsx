@@ -2,18 +2,19 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
-  StatusBar,
-  useColorScheme,
-  SafeAreaView,
+  // SafeAreaView,
   FlatList,
   Text,
   StyleSheet,
   View,
-  ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
+  Pressable,
   Image,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import {useTheme} from '@theme/ThemeProvider';
 import debounce from 'lodash.debounce';
 // import Header from './Header/Header';
@@ -23,8 +24,8 @@ import CommonSearchHeader from '@components/Header/CommonSearchHeader';
 import IconButton from '@components/Buttons/IconButton';
 import {Fonts} from '@constants/font';
 import {useNavigation} from '@react-navigation/native';
-import SlideInView from '@components/AnimatedView';
 import FilterModal from '@components/Filter';
+import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
 
 const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
   const {filters, filter_loading, clearFilterList} = useBoundStore();
@@ -141,7 +142,6 @@ function App(): React.JSX.Element {
   const [sort, setSort] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const prevFiltersRef = useRef<string[] | null>(location);
-  const isDarkMode = useColorScheme() === 'dark';
   const controllerRef = useRef<AbortController | null>(null);
   const navigation = useNavigation();
   const loadMore = () => {
@@ -297,135 +297,124 @@ function App(): React.JSX.Element {
   }, [debouncedFetch]);
 
   return (
-    <SlideInView direction={'right'}>
-      <SafeAreaView>
-        <StatusBar
-          barStyle={isDarkMode ? 'dark-content' : 'light-content'}
-          backgroundColor={theme.colors.backgroundPalette[0]}
-        />
-        <FlatList
-          data={filter_listings}
-          renderItem={renderAdItem}
-          keyboardShouldPersistTaps="handled"
-          refreshing={true}
-          keyExtractor={item => item._id}
-          numColumns={2}
-          ListHeaderComponent={
-            <View style={{backgroundColor: '#fff'}}>
-              <TouchableOpacity
-                onPress={() => {
-                  setlocationModalVisible();
-                }}
-                style={styles.locationContainer}>
-                <IconButton
-                  iconSize={16}
-                  style={styles.iconStyle}
-                  iconColor={theme.colors.text}
-                  iconName={'map-marker'}
-                />
-                <Text
-                  numberOfLines={1}
-                  style={[styles.textStyle, {color: theme.colors.text}]}>
-                  {location?.name || 'Kerala'}
-                </Text>
-                <IconButton
-                  iconSize={18}
-                  iconColor={theme.colors.text}
-                  iconName={'chevron-down'}
-                />
-              </TouchableOpacity>
-              <CommonSearchHeader
-                searchValue={searchText}
-                onChangeSearch={text => {
-                  setSearchText(text);
-                  // debouncedFetch();
-                  setTimeout(() => {
-                    if (text.length > 2) {
-                      clearFilterList();
-                      setFilters({
-                        search: text,
-                      });
-                    } else {
-                      let newFilter = {...filters};
-                      delete newFilter.search;
-                      updateFilter(newFilter);
-                    }
-                  }, 2000);
-                }}
-                onBackPress={function (): void {
-                  clearFilterList();
-                  navigation.goBack();
+    <SafeAreaView>
+      <FlatList
+        data={filter_listings}
+        renderItem={renderAdItem}
+        keyboardShouldPersistTaps="handled"
+        refreshing={true}
+        keyExtractor={item => item._id}
+        numColumns={2}
+        ListHeaderComponent={
+          <View
+            style={{
+              backgroundColor: '#fff',
+              paddingTop:
+                Platform.OS === 'android' ? 5: 5,
+            }}>
+            <Pressable
+              onPress={() => {
+                setlocationModalVisible();
+              }}
+              style={styles.locationContainer}>
+              <IconButton
+                iconSize={16}
+                style={styles.iconStyle}
+                iconColor={theme.colors.text}
+                iconName={'map-marker'}
+              />
+              <Text
+                numberOfLines={1}
+                style={[styles.textStyle, {color: theme.colors.text}]}>
+                {location?.name || 'Kerala'}
+              </Text>
+              <IconButton
+                iconSize={18}
+                iconColor={theme.colors.text}
+                iconName={'chevron-down'}
+              />
+            </Pressable>
+            <CommonSearchHeader
+              searchValue={searchText}
+              onChangeSearch={text => {
+                setSearchText(text);
+                // debouncedFetch();
+                setTimeout(() => {
+                  if (text.length > 2) {
+                    clearFilterList();
+                    setFilters({
+                      search: text,
+                    });
+                  } else {
+                    let newFilter = {...filters};
+                    delete newFilter.search;
+                    updateFilter(newFilter);
+                  }
+                }, 2000);
+              }}
+              onBackPress={function (): void {
+                clearFilterList();
+                navigation.goBack();
+              }}
+            />
+            <FilterView />
+          </View>
+        }
+        centerContent={true}
+        contentContainerStyle={{
+          paddingBottom: 100,
+          backgroundColor: theme.colors.backgroundHome,
+          minHeight: 800,
+        }}
+        showsVerticalScrollIndicator={false}
+        onEndReachedThreshold={0.5}
+        onEndReached={loadMore}
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() => {
+              filterSetTriggerRefresh();
+            }}
+            colors={['#40DABE', '#40DABE', '#227465']}
+          />
+        }
+        ListFooterComponent={
+          filter_hasMore || filter_loading ? (
+            <HomepageSkelton />
+          ) : filter_listings.length <= 0 ? (
+            <>
+              <Image
+                source={require('@assets/images/noads.png')}
+                style={{
+                  height: 200,
+                  width: 200,
+                  alignContent: 'center',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
                 }}
               />
-              <FilterView />
-            </View>
-          }
-          centerContent={true}
-          contentContainerStyle={{
-            paddingBottom: 100,
-            backgroundColor: theme.colors.backgroundHome,
-            minHeight: 800,
-          }}
-          showsVerticalScrollIndicator={false}
-          onEndReachedThreshold={0.5}
-          onEndReached={loadMore}
-          refreshControl={
-            <RefreshControl
-              refreshing={false}
-              onRefresh={() => {
-                filterSetTriggerRefresh();
-              }}
-            colors={['#40DABE', '#40DABE', '#227465']}
-            />
-          }
-          ListFooterComponent={
-            filter_hasMore || filter_loading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator
-                  size="large"
-                  color={theme.colors.activityIndicatorColor}
-                />
-                {filter_loading && filter_listings?.length > 0 && (
-                  <Text style={styles.loadingText}>
-                    Loading more properties...
-                  </Text>
-                )}
-              </View>
-            ) : filter_listings.length <= 0 ? (
-              <>
-                <Image
-                  source={require('@assets/images/noads.png')}
-                  style={{
-                    height: 200,
-                    width: 200,
-                    alignContent: 'center',
-                    justifyContent: 'center',
-                    alignSelf: 'center',
-                  }}
-                />
-                <Text style={styles.endText}>
-                  Oops.. we cannot find anything for this search.
-                </Text>
-              </>
-            ) : (
-              <></>
-            )
-          }
-        />
+              <Text style={styles.endText}>
+                Oops.. we cannot find anything for this search.
+              </Text>
+            </>
+          ) : (
+            <></>
+          )
+        }
+      />
 
-        <FilterModal
-          visible={visible}
-          onClose={() => {
-            setVisible(false);
-          }}
-          onApply={() => {
-            setVisible(false);
-            clearFilterList();
-            !filter_loading && fetchFilterListings();
-          }}
-        />
-      </SafeAreaView>
-    </SlideInView>
+      <FilterModal
+        visible={visible}
+        onClose={() => {
+          setVisible(false);
+        }}
+        onApply={() => {
+          setVisible(false);
+          clearFilterList();
+          !filter_loading && fetchFilterListings();
+        }}
+      />
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
@@ -544,10 +533,9 @@ const styles = StyleSheet.create({
   locationContainer: {
     width: '100%',
     flexDirection: 'row',
-    top: 30,
-    zIndex: 10,
-    padding: 5,
-    backgroundColor: '#fff',
+    // // top: 30,
+    // zIndex: 10,
+    // backgroundColor: '#fff',
   },
 
   textStyle: {

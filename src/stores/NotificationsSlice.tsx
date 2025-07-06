@@ -5,6 +5,7 @@ export interface NotificationsSlice {
   notifications_List: string[];
   fetchNotifications: () => void;
   updateNotifications: (payload: any) => void;
+  resetNotifications: () => void;
 }
 
 export const createNotificationsSlice = (
@@ -34,4 +35,5 @@ export const createNotificationsSlice = (
   updateNotifications: async (payload: any) => {
     set({notifications_List: payload});
   },
+  resetNotifications: () =>set({notifications_List:[]}),
 });

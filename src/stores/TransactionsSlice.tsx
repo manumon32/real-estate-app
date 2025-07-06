@@ -4,15 +4,26 @@ export interface TransactionsSlice {
   transLoading: Boolean;
   transactions: [];
   fetchTransactions: () => void;
+  resetTransactions: () => void;
 }
 
-export const createTransactionsSlice = (set: any, get: any): TransactionsSlice => ({
+export const createTransactionsSlice = (
+  set: any,
+  get: any,
+): TransactionsSlice => ({
   transactions: [],
   transLoading: false,
   fetchTransactions: async () => {
     set({transLoading: true});
     try {
-      const res = await fetchTransactionsAPI({
+      let filter = {
+        filter_userId: get().user?._id,
+        populate: 'subscriptionPlanId',
+        noPagination: true,
+        orderBy: 'createdAt',
+        orderByDir: 'desc',
+      };
+      const res = await fetchTransactionsAPI(filter, {
         token: get().token,
         clientId: get().clientId,
         bearerToken: get().bearerToken,
@@ -27,4 +38,5 @@ export const createTransactionsSlice = (set: any, get: any): TransactionsSlice =
       set({transLoading: false});
     }
   },
+  resetTransactions: () =>set({transactions:[]}),
 });

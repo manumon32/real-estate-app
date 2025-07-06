@@ -75,7 +75,7 @@ function Header({navigation}: any): React.JSX.Element {
         style={{
           borderRadius: 20,
           backgroundColor: theme.colors.backgroundHome,
-          bottom: 5,
+          bottom: 8,
           width: '100%',
         }}>
         <Text style={[styles.freshTextStyle, {color: theme.colors.text}]}>
@@ -88,7 +88,7 @@ function Header({navigation}: any): React.JSX.Element {
 
 const styles = StyleSheet.create({
   container: {
-    height: 230 + (Platform.OS === 'android' ? 10 : 0),
+    height: 220 + (Platform.OS === 'android' ? 10 : 0),
     backgroundColor: 'transparent',
   },
   headerContainer: {

@@ -27,7 +27,7 @@ export interface ChatSlice {
   unreadCount: number;
   chatList: Chatlist[];
   chatDetails: string[];
-  loading: boolean;
+  chatListloading: boolean;
   error: string | null;
   chat_page: number;
   chat_hasMore: boolean;
@@ -47,7 +47,7 @@ export interface ChatSlice {
 export const createChatSlice = (set: any, get: any): ChatSlice => ({
   chatList: [],
   error: null,
-  loading: false,
+  chatListloading: false,
   unreadCount: 0,
   chatDetails: [],
   chat_page: 0,
@@ -59,7 +59,7 @@ export const createChatSlice = (set: any, get: any): ChatSlice => ({
   filter_roomId: '',
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchChatListings: async () => {
-    set({loading: true, chat_page: 0, filter_roomId: null});
+    set({chatListloading: true, chat_page: 0, filter_roomId: null});
     let filters = {
       filter_conversationCreated: true,
     };
@@ -71,21 +71,20 @@ export const createChatSlice = (set: any, get: any): ChatSlice => ({
       });
       set(() => ({
         chatList: res.data,
-        loading: false,
+        chatListloading: false,
         chat_page: 0,
         filter_roomId: null,
       }));
     } catch (err: any) {
-      set({error: err.message, loading: false});
+      set({error: err.message, chatListloading: false});
     }
   },
   setChatList: (list: any) => set({chatList: list}),
   fetchChatDetails: async (id: any) => {
-    set({loading: true, filter_roomId: id});
+    set({chat_loading: true, filter_roomId: id});
     try {
       let filters = {
-        pageNum: get().chat_page + 1,
-        pageSize: 30,
+        noPagination: true,
         filter_roomId: id,
       };
       const res = await fetchChatDetailsAPI(filters, {
@@ -93,22 +92,9 @@ export const createChatSlice = (set: any, get: any): ChatSlice => ({
         clientId: get().clientId,
         bearerToken: get().bearerToken,
       });
-      set((state: any) => ({
-        chatDetails:
-          filters.pageNum === 1
-            ? res.rows
-            : [...state.chatDetails, ...res.rows]?.filter(
-                (item, index, self) =>
-                  index ===
-                  self.findIndex(
-                    t => JSON.stringify(t) === JSON.stringify(item),
-                  ),
-              ),
-        chat_page: res.pageNum,
-        chat_hasMore: res.pageNum < res.pages ? true : false,
+      set(() => ({
+        chatDetails:res.rows,
         chat_loading: false,
-        chat_totalpages: res.total,
-        loading: false,
       }));
     } catch (err: any) {
       set({error: err.message, loading: false});

@@ -6,6 +6,7 @@ export interface FavoritesSlice {
   toggleFavorite: (item: any) => void;
   fetchFavouriteAds: () => void;
   isFavorite: (id: string) => boolean;
+  resetFavourites: () => void;
 }
 
 export const createFavoritesSlice = (set: any, get: any): FavoritesSlice => ({
@@ -68,6 +69,7 @@ export const createFavoritesSlice = (set: any, get: any): FavoritesSlice => ({
       // set({favorites});
     }
   },
+  resetFavourites: () =>set({favorites:[]}),
   isFavorite: _id =>
     !!get().favorites.find((fav: {_id: string}) => fav._id === _id),
 });

@@ -2,6 +2,7 @@ import {io, Socket} from 'socket.io-client';
 import useBoundStore from '@stores/index';
 import {getCurrentRouteName} from '@navigation/RootNavigation';
 import {Vibration} from 'react-native';
+import Toast from 'react-native-toast-message';
 
 let socket: Socket | null = null;
 
@@ -16,6 +17,17 @@ const updateChatList = (msg: any) => {
     useBoundStore.getState().updateChat(msg.lastMessage);
   } else {
     Vibration.vibrate(500);
+
+    let unreadCount = useBoundStore.getState().unreadCount + 1;
+    if (currentScreen === 'ChatDetails') {
+      Toast.show({
+        type: 'newMessage',
+        text1: `You have ${unreadCount} new  ${
+          unreadCount <= 1 ? 'message in another chat' : 'messages in another chats'
+        }.`,
+        position: 'top',
+      });
+    }
     const currentChatList = useBoundStore.getState().chatList || [];
     let updatedItems: any = currentChatList.filter(
       (item: any) => item?.roomId !== msg.room?._id,
@@ -27,8 +39,6 @@ const updateChatList = (msg: any) => {
     ];
     console.log(updatedChatList);
     useBoundStore.getState().setChatList(updatedChatList);
-
-    let unreadCount = useBoundStore.getState().unreadCount + 1;
     useBoundStore.getState().setUnreadCount(unreadCount);
   }
 };

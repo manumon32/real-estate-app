@@ -41,7 +41,7 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
 
 // const chats = [{id: 1}, {id: 2}, {id: 3}, {id: 4}];
 
-const ChatFooter = (({setAttachModalVisible, handleSend}: any) => {
+const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
   const [message, setMessage] = React.useState<any>('');
 
   return (
@@ -74,7 +74,7 @@ const ChatFooter = (({setAttachModalVisible, handleSend}: any) => {
       />
     </View>
   );
-});
+};
 
 const Verification = ({navigation}: any) => {
   const {theme} = useTheme();
@@ -89,6 +89,7 @@ const Verification = ({navigation}: any) => {
     clientId,
     bearerToken,
     bankVerification_loading,
+    detailsBackUp,
   } = useBoundStore();
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
@@ -96,7 +97,7 @@ const Verification = ({navigation}: any) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log(items?.id)
+      console.log(items?.id);
       items?.id && fetchBankVerificationDetails(items?.id);
       return () => {
         resetBankVerificationDetails();
@@ -196,7 +197,7 @@ const Verification = ({navigation}: any) => {
         bankVerificationId: items?.id,
         senderType: 'user',
         message: message,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
       updateBankVerificationDetails(payload);
       try {
@@ -238,7 +239,7 @@ const Verification = ({navigation}: any) => {
               />
               <View style={styles.textWrapper}>
                 <Text style={[styles.text, {color: '#000000DE'}]}>
-                  Your listing is currently under review. You can still upload
+                 You can still upload
                   any documents you have for it.
                 </Text>
               </View>
@@ -251,7 +252,7 @@ const Verification = ({navigation}: any) => {
             </View>
           </Surface>
         </TouchableRipple>
-        {(
+        {
           <FlatList
             inverted
             data={[...bankVerificationDetails].reverse()}
@@ -291,7 +292,7 @@ const Verification = ({navigation}: any) => {
               </>
             }
           />
-        )}
+        }
         {/* <SlideToRecordButton
           onSend={filePath => {
             console.log('📤 Sending audio file:', filePath);

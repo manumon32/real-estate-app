@@ -5,6 +5,7 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -16,7 +17,8 @@ const OtpVerificationScreen = ({
   loginVar,
   veryFyOTP,
   otpValue,
-  loginErrorMessage
+  loginErrorMessage,
+  otpLoading,
 }: any) => {
   const [otp, setOtp] = useState<string[]>(new Array(OTP_LENGTH).fill(''));
   const [timer, setTimer] = useState(72); // 1:12
@@ -83,7 +85,11 @@ const OtpVerificationScreen = ({
           <Text style={styles.phone}>{loginVar}</Text>
         </Text>
         <Text style={styles.subtitle}>OTP- {otpValue}</Text>
-        {loginErrorMessage && <Text style={[styles.subtitle,{color:'red'}]}>{loginErrorMessage}</Text>}
+        {loginErrorMessage && (
+          <Text style={[styles.subtitle, {color: 'red'}]}>
+            {loginErrorMessage}
+          </Text>
+        )}
 
         <View style={styles.otpContainer}>
           {otp.map((digit, index) => (
@@ -130,7 +136,8 @@ const OtpVerificationScreen = ({
           }
         }}
         style={styles.loginBtn}>
-        <Text style={styles.loginText}>Verify</Text>
+        {otpLoading && <ActivityIndicator size={'small'} color={'#fff'} />}
+        {!otpLoading && <Text style={styles.loginText}>Verify</Text>}
       </TouchableOpacity>
     </>
   );

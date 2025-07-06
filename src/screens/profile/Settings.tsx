@@ -6,6 +6,7 @@ import React from 'react';
 import {View, SafeAreaView, ScrollView, RefreshControl, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
+import { logoutAndRedirect } from '../../utils/logoutAndRedirect';
 
 const Settings = () => {
   const navigation = useNavigation();
@@ -83,7 +84,7 @@ const Settings = () => {
                   {
                     text: 'Log out',
                     onPress: async () => {
-                      await logout();
+                      await logoutAndRedirect();
                       // @ts-ignore
                       navigation.reset({index: 0, routes: [{name: 'Main'}]});
                     },

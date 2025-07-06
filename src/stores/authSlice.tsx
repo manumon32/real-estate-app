@@ -188,6 +188,18 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
     set({otp: null});
   },
   logout: async () => {
-    set({user: null, bearerToken: null});
+    set({
+      user: null,
+      bearerToken: null,
+      otp: null,
+      loginError: false,
+      loginErrorMessage: null,
+      visible: false,
+      otpLoading: false,
+      updateError: false,
+      updateLoading: false,
+      updateSuccess: false,
+      userProfileloading: false,
+    });
   },
 });

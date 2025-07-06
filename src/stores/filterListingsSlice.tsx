@@ -47,9 +47,18 @@ export const createFilterListingsSlice = (
     });
     let filters = {
       pageNum: get().filter_page + 1,
-      filter_near: [get().location?.lat, get().location?.lng, 50].join(','),
-      pageSize: 12,
+      pageSize: 6,
     };
+    if (get().location?.lat && get().location?.lng) {
+      filters = {
+        ...filters,
+        ...{
+          filter_near: [get().location?.lat, get().location?.lng, 1000].join(
+            ',',
+          ),
+        },
+      };
+    }
     let filterData = get().filters;
     Object.keys(filterData).map(filter => {
       if (Array.isArray(filterData[filter])) {

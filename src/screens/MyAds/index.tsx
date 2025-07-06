@@ -18,6 +18,9 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {postAdAPI} from '@api/services';
+import {Fonts} from '@constants/font';
+import EmptyText from '@components/EmptyText';
+import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -190,7 +193,8 @@ const ListingCard: React.FC<ListingCardProps> = ({
 };
 
 const MyAds = () => {
-  const {myAds, fetchMyAds, token, clientId, bearerToken} = useBoundStore();
+  const {myAds, fetchMyAds, token, clientId, bearerToken, myAdsLoading} =
+    useBoundStore();
   const navigation = useNavigation();
   const {theme} = useTheme();
   const [filterBy, setFilterBy] = useState<any>(null);
@@ -226,7 +230,7 @@ const MyAds = () => {
           price={items.item?.price}
           status={items.item?.adStatus}
           date={items.item?.createdAt}
-          views={200}
+          views={items.item?.viewsCount}
           navigation={navigation}
           items={items.item}
           imageUrl={
@@ -267,7 +271,8 @@ const MyAds = () => {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              style={{flexDirection: 'row', padding: 10}}>
+              contentContainerStyle={{padding: 10}}
+              style={{flexDirection: 'row'}}>
               <TouchableOpacity
                 style={[styles.chip, !filterBy && styles.chipSelected]}
                 onPress={() => {
@@ -322,18 +327,22 @@ const MyAds = () => {
           />
         }
         ListFooterComponent={
-          filterBy ? (
-            myAds.filter((items: any) => items.adStatus == filterBy).length <=
-            0 ? (
-              <Text style={styles.endText}>You dont have anything listed.</Text>
-            ) : (
-              <></>
-            )
-          ) : myAds.length <= 0 ? (
-            <Text style={styles.endText}>You havent listed anything yet.</Text>
-          ) : (
-            <></>
-          )
+          <>
+            {myAdsLoading && myAds.length <= 0 &&  <AdsListSkelton />}
+            {!myAdsLoading &&
+              (filterBy ? (
+                myAds.filter((items: any) => items.adStatus == filterBy)
+                  .length <= 0 ? (
+                  <EmptyText text="You havent listed anything here." />
+                ) : (
+                  <></>
+                )
+              ) : myAds.length <= 0 ? (
+                <EmptyText text="You havent listed anything here." />
+              ) : (
+                <></>
+              ))}
+          </>
         }
       />
     </SafeAreaView>
@@ -431,9 +440,11 @@ const styles = StyleSheet.create({
   },
   endText: {
     textAlign: 'center',
-    color: '#888',
+    color: '#000',
     padding: 12,
-    fontStyle: 'italic',
+    fontWeight: 500,
+    fontFamily: Fonts.BOLD,
+    top: -30,
   },
   chipContainer: {
     flexDirection: 'row',

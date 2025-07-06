@@ -51,6 +51,43 @@ export const ToastConfig = {
     //   }}
     // />
   ),
+  newMessage: (props: JSX.IntrinsicAttributes & BaseToastProps) => (
+    <View
+      style={{
+        backgroundColor: '#388E3C',
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        margin: 10,
+        alignItems: 'center',
+        gap: 10,
+        shadowColor: '#000',
+        flexDirection: 'row',
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
+      }}>
+      <MaterialCommunityIcons name="message" size={20} color="#fff" />
+      <Text
+        style={{
+          color: '#fff',
+          fontSize: 16,
+          flex: 1,
+          fontFamily: Fonts.MEDIUM,
+        }}>
+        {props.text1}
+      </Text>
+    </View>
+    // <BaseToast
+    //   {...props}
+    //   style={{borderLeftColor: 'pink'}}
+    //   contentContainerStyle={{paddingHorizontal: 15}}
+    //   text1Style={{
+    //     fontSize: 15,
+    //     fontWeight: '400',
+    //   }}
+    // />
+  ),
   /*
     Overwrite 'error' type,
     by modifying the existing `ErrorToast` component

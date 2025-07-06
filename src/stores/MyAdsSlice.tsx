@@ -4,6 +4,7 @@ export interface MyAdsSlice {
   myAdsLoading: Boolean;
   myAds: [];
   fetchMyAds: () => void;
+  resetMyads: () => void;
 }
 
 export const createMyAdsSlice = (set: any, get: any): MyAdsSlice => ({
@@ -27,4 +28,5 @@ export const createMyAdsSlice = (set: any, get: any): MyAdsSlice => ({
       set({myAdsLoading: false});
     }
   },
+  resetMyads: () =>set({myAds:[]}),
 });

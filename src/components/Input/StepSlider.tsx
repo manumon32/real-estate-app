@@ -16,8 +16,8 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
   value,
   onChange,
   min = 0,
-  max = 10000000,
-  step = 100000,
+  max = 1000000000,
+  step = 1000,
   sliderLength = 300,
 }) => {
   return (

@@ -9,12 +9,11 @@ import {useTheme} from '@theme/ThemeProvider';
 import {
   StyleSheet,
   SafeAreaView,
-  // ScrollView,
   FlatList,
-  Text,
   RefreshControl,
 } from 'react-native';
 import {Fonts} from '@constants/font';
+import EmptyText from '@components/EmptyText';
 
 const FavAds = () => {
   const {favorites, fetchFavouriteAds} = useBoundStore();
@@ -58,7 +57,7 @@ const FavAds = () => {
         }
         ListFooterComponent={
           favorites.length <= 0 ? (
-            <Text style={styles.endText}>You havent liked anything yet</Text>
+           <EmptyText text="You havent liked anything yet." />
           ) : (
             <></>
           )

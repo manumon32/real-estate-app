@@ -27,7 +27,6 @@ const BankSelectModal = ({
   selectedBank,
 }: BankSelectModalProps) => {
   const {banks, bankVerification_loading} = useBoundStore();
-  console.log('banks', banks);
   const enrichedBanks = useMemo(() => {
     return banks?.map((bank: any) => {
       return {
@@ -39,7 +38,6 @@ const BankSelectModal = ({
       };
     });
   }, [banks]);
-  console.log('enrichedBanks', enrichedBanks);
   const [search, setSearch] = useState('');
   const theme = useTheme();
 

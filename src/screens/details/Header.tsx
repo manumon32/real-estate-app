@@ -18,14 +18,15 @@ import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
 import Carousel from 'react-native-reanimated-carousel';
-import ImageCarouselModal from './ImageCarouselModal';
 import FavoriteButton from '@components/FavoriteButton';
+import ImageViewerModal from '@components/Modal/ImageViewerModal';
 
 function Header(props: any): React.JSX.Element {
   const {details} = props;
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const [visible, setVisible] = useState(false);
   const {width} = Dimensions.get('window');
   const [modalVisible, setModalVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -33,10 +34,13 @@ function Header(props: any): React.JSX.Element {
     return details?.imageUrls ?? [];
   }, [details]);
 
+  const floorPlans = useMemo(() => {
+    return details?.floorPlanUrl ?? [];
+  }, [details]);
+
   const handleImagePress = useCallback(() => {
     setModalVisible(true);
   }, []);
-
 
   const shareProperty = (id: string) => {
     const link = `myapp://Details/${id}`;
@@ -81,9 +85,10 @@ function Header(props: any): React.JSX.Element {
             />
           </TouchableOpacity>
           <View style={styles.headerIconContainer}>
-            <TouchableOpacity onPress={()=>{
-              shareProperty(details._id);
-            }}>
+            <TouchableOpacity
+              onPress={() => {
+                shareProperty(details._id);
+              }}>
               <IconButton
                 style={[styles.heartRight]}
                 iconSize={24}
@@ -122,32 +127,34 @@ function Header(props: any): React.JSX.Element {
         />
 
         <View style={[styles.footerContainer]}>
-          <TouchableOpacity
-            onPress={async () => {
-              const url = details?.videoUrl; // replace with your video URL
+          {details?.videoUrl && (
+            <TouchableOpacity
+              onPress={async () => {
+                const url = details?.videoUrl; // replace with your video URL
 
-              console.log("Can't open URL:", url);
-              const supported = await Linking.canOpenURL(url);
-              if (supported) {
-                console.log('open URL:', url);
-                await Linking.openURL(url);
-              } else {
                 console.log("Can't open URL:", url);
-              }
-            }}>
-            <View style={[styles.heartBootom]}>
-              <View style={styles.iconConainer}>
-                <IconButton
-                  // style={}
-                  iconSize={24}
-                  //red , heart
-                  iconColor={'#2F8D79'}
-                  iconName={'video-outline'}
-                />
+                const supported = await Linking.canOpenURL(url);
+                if (supported) {
+                  console.log('open URL:', url);
+                  await Linking.openURL(url);
+                } else {
+                  console.log("Can't open URL:", url);
+                }
+              }}>
+              <View style={[styles.heartBootom]}>
+                <View style={styles.iconConainer}>
+                  <IconButton
+                    // style={}
+                    iconSize={24}
+                    //red , heart
+                    iconColor={'#2F8D79'}
+                    iconName={'video-outline'}
+                  />
+                </View>
+                <Text style={styles.icontextStyle}>Video</Text>
               </View>
-              <Text style={styles.icontextStyle}>Video</Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => {
               // @ts-ignore
@@ -166,20 +173,22 @@ function Header(props: any): React.JSX.Element {
               <Text style={styles.icontextStyle}>3D Tour</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity>
-            <View style={[styles.heartBootom]}>
-              <View style={styles.iconConainer}>
-                <IconButton
-                  // style={}
-                  iconSize={24}
-                  //red , heart
-                  iconColor={'#2F8D79'}
-                  iconName={'floor-plan'}
-                />
+          {floorPlans.length > 0 && (
+            <TouchableOpacity onPress={() => setVisible(true)}>
+              <View style={[styles.heartBootom]}>
+                <View style={styles.iconConainer}>
+                  <IconButton
+                    // style={}
+                    iconSize={24}
+                    //red , heart
+                    iconColor={'#2F8D79'}
+                    iconName={'floor-plan'}
+                  />
+                </View>
+                <Text style={styles.icontextStyle}>Floor Plan</Text>
               </View>
-              <Text style={styles.icontextStyle}>Floor Plan</Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          )}
         </View>
         <View style={styles.paginationContainer}>
           <Text style={{fontSize: 14, fontFamily: Fonts.MEDIUM}}>
@@ -187,11 +196,23 @@ function Header(props: any): React.JSX.Element {
           </Text>
         </View>
       </View>
-      <ImageCarouselModal
+      {/* <ImageCarouselModal
         visible={modalVisible}
         images={images}
         onClose={() => setModalVisible(false)}
         currentIndex={currentIndex}
+      /> */}
+      <ImageViewerModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        imageUrls={images}
+        startIndex={currentIndex}
+      />
+
+      <ImageViewerModal
+        visible={visible}
+        onClose={() => setVisible(false)}
+        imageUrls={floorPlans}
       />
     </>
   );
@@ -226,6 +247,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 20,
     padding: 5,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   iconConainer: {
     backgroundColor: '#E3FFF8',
@@ -255,6 +278,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 5,
     margin: 5,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   headerContainer: {
     position: 'absolute',

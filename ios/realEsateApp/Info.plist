@@ -67,6 +67,21 @@
 	<array>
 		<string>arm64</string>
 	</array>
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>fbAPP-ID</string>
+    </array>
+    </dict>
+  </array>
+  <key>FacebookAppID</key>
+  <string>1911577602952822</string>
+  <key>FacebookClientToken</key>
+  <string>9e987a715046c0ccbc57110cc1681144</string>
+  <key>FacebookDisplayName</key>
+  <string>Real Estate App</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

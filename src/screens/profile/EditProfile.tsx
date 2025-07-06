@@ -326,6 +326,7 @@ const EditProfile = () => {
           veryFyOTP={veryFyOTP}
           otpValue={otp}
           loginErrorMessage={loginErrorMessage}
+          otpLoading={otpLoading}
         />
       )}
     </SafeAreaView>

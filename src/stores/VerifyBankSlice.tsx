@@ -1,5 +1,4 @@
 import {
-  fetchBanksAPI,
   fetchBankVerificationDetailsAPI,
   fetchVerifiedBankAPI,
   startBankVerificationAPI,
@@ -25,12 +24,13 @@ export interface BankVerificationSlice {
   bankVerification_page: number;
   bankVerification_hasMore: boolean;
   bankVerification_totalpages: number;
-  fetchBanks: () => Promise<void>;
+  fetchBanks: (payload: any) => Promise<void>;
   startBankVerification: (payload: any) => Promise<void>;
   updateBankVerificationDetails: (msg?: any) => Promise<any>;
 
   fetchBankVerificationDetails: (filters?: any, page?: number) => Promise<void>;
   resetBankVerificationDetails: () => Promise<any>;
+  resetBankSlice: () => Promise<any>;
 }
 
 export const createBankVerificationSlice = (
@@ -45,17 +45,20 @@ export const createBankVerificationSlice = (
   bankVerification_hasMore: false,
   bankVerification_totalpages: 0,
 
-  fetchBanks: async () => {
+  fetchBanks: async (payload) => {
     set({bankVerification_loading: true, bankVerificationDetails: []});
     try {
-      const res = await fetchBanksAPI({
+      let newPayload = {
+        filter_propertyId: payload,
+        populate: 'bankId',
+      };
+
+      const res = await fetchVerifiedBankAPI(newPayload, {
         token: get().token,
         clientId: get().clientId,
         bearerToken: get().bearerToken,
       });
-      set(() => ({
-        banks: res.rows,
-      }));
+      set({bankVerification_loading: false, banks: res.rows});
     } catch (err: any) {
       set({
         bankVerificationError: err.message,
@@ -81,19 +84,6 @@ export const createBankVerificationSlice = (
       ).catch(error => {
         console.warn('startBankVerificationAPI failed:', error);
       });
-
-      let newPayload = {
-        filter_propertyId: payload,
-        populate: 'bankId',
-      };
-
-      const res = await fetchVerifiedBankAPI(newPayload, {
-        token: get().token,
-        clientId: get().clientId,
-        bearerToken: get().bearerToken,
-      });
-      console.log('bank-res', res);
-      set({bankVerification_loading: false, banks: res.rows});
     } catch (err: any) {
       // navigate('VerifyListing', {items: {id: '6853e34e05711055c493ff3b'}});
       set({
@@ -134,6 +124,16 @@ export const createBankVerificationSlice = (
   },
 
   resetBankVerificationDetails: () => {
+    return set(() => ({
+      banks:[],
+      bankVerificationDetails: [],
+      bankVerification_page: 0,
+      bankVerification_hasMore: false,
+      bankVerification_loading: false,
+    }));
+  },
+
+  resetBankSlice: () => {
     return set(() => ({
       bankVerificationDetails: [],
       bankVerification_page: 0,

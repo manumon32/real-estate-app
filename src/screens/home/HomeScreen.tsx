@@ -8,8 +8,7 @@ import {
   FlatList,
   Text,
   StyleSheet,
-  View,
-  ActivityIndicator,
+  // ActivityIndicator,
   RefreshControl,
   Image,
   Alert,
@@ -22,6 +21,7 @@ import PropertyCard from '@components/PropertyCard';
 import useBoundStore from '@stores/index';
 import {Fonts} from '@constants/font';
 import {connectSocket} from './../../soket';
+import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
 
 function App({navigation}: any): React.JSX.Element {
   const {
@@ -103,7 +103,7 @@ function App({navigation}: any): React.JSX.Element {
   return (
     <SafeAreaView>
       <StatusBar
-        barStyle={isDarkMode ? 'dark-content' : 'light-content'}
+        barStyle={isDarkMode ? 'dark-content' : 'dark-content'}
         backgroundColor={theme.colors.backgroundPalette[0]}
       />
       <FlatList
@@ -113,7 +113,7 @@ function App({navigation}: any): React.JSX.Element {
         refreshing={true}
         keyExtractor={item => item._id}
         numColumns={2}
-        ListHeaderComponent={<Header  navigation={navigation} />}
+        ListHeaderComponent={<Header navigation={navigation} />}
         centerContent={true}
         contentContainerStyle={{
           paddingBottom: 100,
@@ -134,17 +134,7 @@ function App({navigation}: any): React.JSX.Element {
         }
         ListFooterComponent={
           hasMore || loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator
-                size="large"
-                color={theme.colors.activityIndicatorColor}
-              />
-              {loading && listings?.length > 0 && (
-                <Text style={styles.loadingText}>
-                  Loading more properties...
-                </Text>
-              )}
-            </View>
+            <HomepageSkelton />
           ) : listings.length <= 0 ? (
             <>
               <Image

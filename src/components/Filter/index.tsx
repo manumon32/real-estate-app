@@ -21,6 +21,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   const {appConfigs, setFilters, resetFilters, filters} = useBoundStore();
   // const [price, setprice] = useState<number[]>([1000000, 5000000]);
   const [fields, setFields] = useState<{}>({});
+  const [filtersNew, setFilterNew] = useState<any>(filters);
 
   const PROPERTY_TYPES = appConfigs?.propertyTypes || [];
   const LISTING_TYPES = appConfigs?.listingTypes || [];
@@ -44,14 +45,11 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   const updateFilter = useCallback(
     (name: string, item: any) => {
       if (name) {
-        setFilters({
-          [name]: item,
-        });
+        setFilterNew({...filtersNew, [name]: item});
       }
     },
-    [setFilters],
+    [filtersNew],
   );
-
 
   const getMergedFields = useCallback((id: any, argFields: string[]) => {
     setFields(prev => {
@@ -68,8 +66,9 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   const toggleItem = useCallback(
     (name: string, item: any, setSelectedList?: any) => {
       if (name) {
-        let newFilter = filters?.[name] ? filters?.[name] : [];
-        setFilters({
+        let newFilter = filtersNew?.[name] ? filtersNew?.[name] : [];
+        setFilterNew({
+          ...filtersNew,
           [name]: newFilter?.includes(item)
             ? newFilter.filter((i: any) => i !== item)
             : [...newFilter, item],
@@ -85,7 +84,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
         });
       }
     },
-    [filters, setFilters],
+    [filtersNew, setFilterNew],
   );
 
   const renderChips = useCallback(
@@ -93,7 +92,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
       <View style={styles.chipContainer}>
         {items.map((item: any, index: any) => {
           const newselected = item.filterName
-            ? filters?.[item.filterName]
+            ? filtersNew?.[item.filterName]
             : selected;
           return (
             <TouchableOpacity
@@ -119,7 +118,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
         })}
       </View>
     ),
-    [filters, getMergedFields, toggleItem],
+    [filtersNew, getMergedFields, toggleItem],
   );
 
   const isStringInEitherArray = (value: string): boolean => {
@@ -133,8 +132,9 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   };
 
   const handleApply = useCallback(() => {
+    setFilters(filtersNew);
     onApply();
-  }, [onApply]);
+  }, [filtersNew, onApply, setFilters]);
 
   return (
     <Modal
@@ -154,7 +154,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             backgroundColor: '#fff',
             borderRadius: 20,
           }}>
-          <View style={{flexDirection: 'row', padding: 20, paddingBottom:0}}>
+          <View style={{flexDirection: 'row', padding: 20, paddingBottom: 0}}>
             <Text style={styles.title}>Filters & Sort</Text>
             <Pressable
               onPress={() => {
@@ -187,7 +187,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             contentContainerStyle={{
               backgroundColor: '#fff',
               padding: 20,
-              paddingTop:0
+              paddingTop: 0,
             }}>
             <Text style={[styles.label]}>Type</Text>
             {renderChips(PROPERTY_TYPES)}
@@ -203,9 +203,11 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             {renderChips(BATHROOMS)}
             <View style={{marginTop: 20, marginBottom: -20}}>
               <StepSlider
-                value={filters?.price ? filters?.price : [10000, 2000000]}
+                value={
+                  filtersNew?.price ? filtersNew?.price : [100, 100000000000]
+                }
                 onChange={updatePrice}
-                min={10000}
+                min={1000}
               />
             </View>
             {isStringInEitherArray('furnishedStatus') && (
@@ -224,9 +226,9 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
                 <Text style={styles.label}>RERA Approved</Text>
                 <CommonAmenityToggle
                   label="RERA Approved"
-                  selected={filters?.reraApproved}
+                  selected={filtersNew?.reraApproved}
                   onToggle={() =>
-                    updateFilter('reraApproved', !filters?.reraApproved)
+                    updateFilter('reraApproved', !filtersNew?.reraApproved)
                   }
                 />
               </>

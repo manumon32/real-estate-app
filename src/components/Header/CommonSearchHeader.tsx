@@ -5,9 +5,6 @@ import {
   StyleSheet,
   TextInputProps,
   TouchableOpacity,
-  SafeAreaView,
-  Platform,
-  StatusBar,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -34,7 +31,7 @@ const CommonSearchHeader: FC<CommonSearchHeaderProps> = ({
   const inputPlaceholder = useMemo(() => placeholder, [placeholder]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       <View style={styles.container}>
         <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="arrow-left" size={22} color="#333" />
@@ -56,7 +53,7 @@ const CommonSearchHeader: FC<CommonSearchHeaderProps> = ({
           />
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -65,7 +62,7 @@ export default React.memo(CommonSearchHeader);
 const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: '#F9F9F9',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
     flexDirection: 'row',

@@ -28,6 +28,7 @@ import AttachFileModal from './AttachFileModal';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {sendVerificationDetails, uploadImages} from '@api/services';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -123,6 +124,9 @@ const Verification = ({navigation}: any) => {
       },
     );
   }, []);
+
+  const pickDocument = async () => {
+  };
 
   const pickCamera = useCallback(() => {
     launchCamera(
@@ -363,7 +367,7 @@ const Verification = ({navigation}: any) => {
           setAttachModalVisible(false);
         }}
         onPickDocument={() => {
-          // pickDocument(); // your logic
+           pickDocument(); // your logic
           setAttachModalVisible(false);
         }}
       />

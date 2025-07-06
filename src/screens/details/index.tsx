@@ -1,17 +1,17 @@
 /* eslint-disable no-catch-shadow */
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
   Platform,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Image from 'react-native-fast-image';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
@@ -32,6 +32,7 @@ import {createRoomAPI, postAdAPI} from '@api/services';
 import {getSocket} from '@soket/index';
 import BankSelectModal from '@components/Modal/BankListModal';
 import {navigate} from '@navigation/RootNavigation';
+import CustomDummyLoader from '@components/SkeltonLoader/CustomDummyLoader';
 
 const AdStatusEnum: any = {
   pending: 'Pending',
@@ -66,6 +67,8 @@ const PropertyDetails = React.memo(() => {
     verification_loading,
     startVerification,
     startBankVerification,
+    fetchBanks,
+    banks,
   } = useBoundStore();
   const [property, setProperty] = useState<Detail | null>();
   const [isReportVisible, setIsReportVisible] = useState(false);
@@ -176,6 +179,14 @@ const PropertyDetails = React.memo(() => {
     }
   };
 
+  const formatINR = (value: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
   const createRoom = async (payload: any) => {
     let newpayload = {...payload, postOwnerId: payload.postOwnerId?._id};
     try {
@@ -215,14 +226,14 @@ const PropertyDetails = React.memo(() => {
       <View style={styles.footer}>
         {isOwner ? (
           <>
-            <TouchableOpacity
+            <Pressable
               // @ts-ignore
               onPress={() => navigation.navigate('PostAd', {items: details})}
               style={styles.chatButton}>
               <Icon name="pencil" size={20} color="#000" />
               <Text style={styles.chatText}>Edit</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               onPress={() => markasSold(details?._id)}
               style={styles.buyButton}>
               <Text style={styles.buyText}>
@@ -230,11 +241,11 @@ const PropertyDetails = React.memo(() => {
                   ? 'Mark as sold'
                   : AdStatusEnum[details?.adStatus]}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </>
         ) : (
           <>
-            <TouchableOpacity
+            <Pressable
               onPress={() => {
                 if (bearerToken) {
                   let payload = {
@@ -249,19 +260,19 @@ const PropertyDetails = React.memo(() => {
               style={styles.chatButton}>
               <Icon name="chat-outline" size={20} color="#000" />
               <Text style={styles.chatText}>Chat</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.buyButton}>
+            </Pressable>
+            <Pressable style={styles.buyButton}>
               <Text style={styles.buyText}>Buy Now</Text>
-            </TouchableOpacity>
+            </Pressable>
           </>
         )}
       </View>
     );
   };
 
-  // useEffect(() => {
-  //   items?._id && fetchDetails(items?._id);
-  // }, [fetchDetails, items]);
+  useEffect(() => {
+    fetchBanks(items?._id);
+  }, [fetchBanks, items]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -313,66 +324,16 @@ const PropertyDetails = React.memo(() => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {detailLoading && (
+      {/* {detailLoading && (
         <View style={styles.overlay}>
           <ActivityIndicator size="large" color="#fff" />
         </View>
-      )}
+      )} */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{paddingBottom: 120}}>
         <Header details={property ? property : items} />
 
-        {isOwner && (
-          <TouchableOpacity
-            onPress={() => {
-              verifyListing();
-            }}
-            style={{
-              // top: 15,
-              margin: 16,
-              padding: 16,
-              backgroundColor: '#2F8D79',
-              borderRadius: 10,
-              height: 56,
-              alignItems: 'center',
-              flexDirection: 'row',
-              borderWidth: 1,
-              borderColor: '#88E4CF',
-            }}>
-            <View
-              style={{
-                width: '95%',
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <Text
-                style={{
-                  color: '#fff',
-                  fontSize: 14,
-                  fontFamily: Fonts.MEDIUM,
-                  fontWeight: '500',
-                }}>
-                {details?.isVerified
-                  ? 'Your listing is verified'
-                  : 'Verify your listing to get more offers.'}
-              </Text>
-            </View>
-            <View style={{flexDirection: 'row'}}>
-              {!verification_loading && (
-                <IconButton
-                  iconSize={24}
-                  iconColor={'#fff'}
-                  iconName={'arrow-right'}
-                />
-              )}
-
-              {verification_loading && (
-                <ActivityIndicator size={'small'} color={'#fff'} />
-              )}
-            </View>
-          </TouchableOpacity>
-        )}
         <View style={styles.header}>
           <Text style={styles.title}>
             {property?.title ? property?.title : items?.title}
@@ -391,12 +352,14 @@ const PropertyDetails = React.memo(() => {
                 styles.price,
                 {color: theme.colors.text, marginRight: 5},
               ]}>
-              <IconButton
+              {/* <IconButton
                 iconSize={18}
                 iconColor={'#171717'}
                 iconName={'currency-inr'}
-              />
-              {property?.price ? property?.price : items?.price}
+              /> */}
+              {property?.price
+                ? formatINR(property?.price)
+                : formatINR(items?.price)}
             </Text>
             <Text style={styles.squrft}>({property?.areaSize}/ Sq.ft)</Text>
             <View style={styles.nogotiable}>
@@ -404,439 +367,512 @@ const PropertyDetails = React.memo(() => {
             </View>
           </View>
         </View>
+        {detailLoading && <CustomDummyLoader />}
+        {details?.isVerified && <View
+          style={styles.verifiedBadge}>
+          <Text style={styles.verifiedText}>✅ Verified</Text>
+        </View>}
+        {/* <Tooltip
+          isVisible={showTip}
+          content={
+            <Text>This bank is verified and ready to offer a home loan</Text>
+          }
+          placement="bottom"
+          onClose={() => setShowTip(false)}>
+        </Tooltip> */}
+        {!detailLoading && (
+          <>
+            {banks.filter((item: any) => item.status === 'verified').length >
+              0 && (
+              <>
+                <Text style={styles.section}>Loan available</Text>
+                <View
+                  style={{
+                    paddingHorizontal: 16,
+                  }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      marginTop: 8,
+                    }}>
+                    {banks.map(
+                      (item: any) =>
+                        item.status === 'verified' && (
+                          <View style={styles.bankBadge}>
+                            {item.bankId.name ? (
+                              <Image
+                                source={{
+                                  uri: item.bankId.logoUrl,
+                                  priority: Image.priority.normal,
+                                  cache: Image.cacheControl.immutable,
+                                }}
+                                resizeMode="contain"
+                                style={{height: 20, width: 20, margin: 2}}
+                              />
+                            ) : (
+                              '🏦'
+                            )}
+                            <Text style={styles.bankBadgeText}>
+                              {item.bankId.name}
+                            </Text>
+                          </View>
+                        ),
+                    )}
+                  </View>
+                </View>
+              </>
+            )}
+            {isOwner && (
+              <Pressable
+                onPress={() => {
+                  verifyListing();
+                }}
+                style={{
+                  // top: 15,
+                  margin: 16,
+                  padding: 16,
+                  backgroundColor: '#2F8D79',
+                  borderRadius: 10,
+                  height: 56,
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  borderWidth: 1,
+                  borderColor: '#88E4CF',
+                }}>
+                <View
+                  style={{
+                    width: '95%',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: 14,
+                      fontFamily: Fonts.MEDIUM,
+                      fontWeight: '500',
+                    }}>
+                    {details?.isVerified
+                      ? 'Your listing is verified'
+                      : 'Verify your listing to get more offers.'}
+                  </Text>
+                </View>
+                <View style={{flexDirection: 'row'}}>
+                  {!verification_loading && (
+                    <IconButton
+                      iconSize={24}
+                      iconColor={'#fff'}
+                      iconName={'arrow-right'}
+                    />
+                  )}
 
-        <View style={styles.row}>
-          {property?.numberOfBedrooms && (
-            <View style={styles.iconsContainer}>
-              <IconButton
-                iconSize={20}
-                iconColor={'#2F8D79'}
-                iconName={'car'}
-              />
-              <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
-                {property?.numberOfBedrooms}
-              </Text>
-              <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
-                Bedroom
-              </Text>
+                  {verification_loading && (
+                    <ActivityIndicator size={'small'} color={'#fff'} />
+                  )}
+                </View>
+              </Pressable>
+            )}
+
+            <View style={styles.row}>
+              {property?.numberOfBedrooms && (
+                <View style={styles.iconsContainer}>
+                  <IconButton
+                    iconSize={20}
+                    iconColor={'#2F8D79'}
+                    iconName={'bed'}
+                  />
+                  <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
+                    {property?.numberOfBedrooms}
+                  </Text>
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.iconsTextStle, {color: '#171717'}]}>
+                    Bedroom
+                  </Text>
+                </View>
+              )}
+              {property?.numberOfBathrooms && (
+                <View style={styles.iconsContainer}>
+                  <IconButton
+                    iconSize={20}
+                    iconColor={'#2F8D79'}
+                    iconName={'bathtub'}
+                  />
+                  <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
+                    {property?.numberOfBathrooms}
+                  </Text>
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.iconsTextStle, {color: '#171717'}]}>
+                    Bathroom
+                  </Text>
+                </View>
+              )}
+              <View style={styles.iconsContainer}>
+                <IconButton
+                  iconSize={20}
+                  iconColor={'#2F8D79'}
+                  iconName={'ruler-square'}
+                />
+                <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
+                  {property?.areaSize}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.iconsTextStle, {color: '#171717'}]}>
+                  {'Sq.ft'}
+                </Text>
+              </View>
+              {property?.loanEligible && (
+                <View style={styles.iconsContainer}>
+                  <IconButton
+                    iconSize={20}
+                    iconColor={'#2F8D79'}
+                    iconName={'bank'}
+                  />
+                  <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
+                    Loan Eligible
+                  </Text>
+                </View>
+              )}
             </View>
-          )}
-          {property?.numberOfBathrooms && (
-            <View style={styles.iconsContainer}>
-              <IconButton
-                iconSize={20}
-                iconColor={'#2F8D79'}
-                iconName={'bathtub'}
-              />
-              <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
-                {property?.numberOfBathrooms}
-              </Text>
-              <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
-                Bathroom
-              </Text>
+
+            <View style={styles.row}>
+              <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
+                {property?.furnishingStatusId?.name && (
+                  <Button
+                    style={{margin: 5}}
+                    label={property?.furnishingStatusId?.name}
+                    onPress={() => {}}
+                  />
+                )}
+                {property?.availabilityStatusId?.name && (
+                  <Button
+                    style={{margin: 5}}
+                    label={property?.availabilityStatusId?.name}
+                    onPress={() => {}}
+                  />
+                )}
+                {property?.ownershipTypeId?.name && (
+                  <Button
+                    style={{margin: 5}}
+                    label={property?.ownershipTypeId?.name}
+                    onPress={() => {}}
+                  />
+                )}
+                {property?.facingDirectionId?.name && (
+                  <Button
+                    style={{margin: 5}}
+                    label={
+                      'Facing Direction - ' + property?.facingDirectionId?.name
+                    }
+                    onPress={() => {}}
+                  />
+                )}
+              </View>
             </View>
-          )}
-          <View style={styles.iconsContainer}>
-            <IconButton
-              iconSize={20}
-              iconColor={'#2F8D79'}
-              iconName={'ruler-square'}
-            />
-            <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
-              {property?.areaSize}
-            </Text>
-            <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
-              {'Sq.ft'}
-            </Text>
-          </View>
-          {property?.loanEligible && (
-            <View style={styles.iconsContainer}>
-              <IconButton
-                iconSize={20}
-                iconColor={'#2F8D79'}
-                iconName={'bank'}
-              />
-              <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
-                Loan Eligible
-              </Text>
-            </View>
-          )}
-        </View>
 
-        <View style={styles.row}>
-          <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
-            {property?.furnishingStatusId?.name && (
-              <Button
-                style={{margin: 5}}
-                label={property?.furnishingStatusId?.name}
-                onPress={() => {}}
-              />
-            )}
-            {property?.availabilityStatusId?.name && (
-              <Button
-                style={{margin: 5}}
-                label={property?.availabilityStatusId?.name}
-                onPress={() => {}}
-              />
-            )}
-            {property?.ownershipTypeId?.name && (
-              <Button
-                style={{margin: 5}}
-                label={property?.ownershipTypeId?.name}
-                onPress={() => {}}
-              />
-            )}
-            {property?.facingDirectionId?.name && (
-              <Button
-                style={{margin: 5}}
-                label={
-                  'Facing Direction - ' + property?.facingDirectionId?.name
-                }
-                onPress={() => {}}
-              />
-            )}
-          </View>
-        </View>
-
-        <View
-          style={{
-            backgroundColor: '#EBEBEB',
-            borderWidth: 1,
-            borderColor: '#EBEBEB',
-            width: '100%',
-            top: 15,
-          }}
-        />
-
-        <View style={{padding: 16}}>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: 500,
-              color: theme.colors.text,
-              top: 10,
-            }}>
-            Details
-          </Text>
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: 400,
-              color: theme.colors.text,
-              margin: 0,
-              marginTop: 20,
-            }}>
-            {property?.description}
-          </Text>
-        </View>
-
-        <View
-          style={{
-            backgroundColor: '#EBEBEB',
-            borderWidth: 1,
-            borderColor: '#EBEBEB',
-            width: '100%',
-            top: 15,
-          }}
-        />
-        {isOwner && (
-          <TouchableOpacity
-            onPress={async () => {
-              (await items?._id) && startBankVerification(items?._id);
-              setBankModalVisible(true);
-            }}
-            style={{
-              top: 15,
-              margin: 16,
-              padding: 16,
-              backgroundColor: '#E3FFF8',
-              borderRadius: 10,
-              height: 56,
-              alignItems: 'center',
-              flexDirection: 'row',
-              borderWidth: 1,
-              borderColor: '#88E4CF',
-            }}>
             <View
               style={{
-                width: '95%',
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <IconButton
-                iconSize={24}
-                iconColor={'#2F8D79'}
-                iconName={'finance'}
-                style={{marginRight: 10}}
-              />
-              <Text
-                style={{
-                  color: '#2F8D79',
-                  fontSize: 14,
-                  fontFamily: Fonts.MEDIUM,
-                  fontWeight: '500',
-                }}>
-                Check your loan offers.
-              </Text>
-            </View>
-            <View style={{flexDirection: 'row'}}>
-              <IconButton
-                iconSize={24}
-                iconColor={'#2F8D79'}
-                iconName={'arrow-right'}
-              />
-            </View>
-          </TouchableOpacity>
-        )}
-
-        {/* <View
-          style={{
-            top: 15,
-            margin: 16,
-            padding: 16,
-            backgroundColor: '#E3FFF8',
-            borderRadius: 10,
-            height: 56,
-            alignItems: 'center',
-            flexDirection: 'row',
-            borderWidth: 1,
-            borderColor: '#88E4CF',
-          }}>
-          <View
-            style={{width: '95%', flexDirection: 'row', alignItems: 'center'}}>
-            <IconButton
-              iconSize={24}
-              iconColor={'#2F8D79'}
-              iconName={'calculator'}
-              style={{marginRight: 10}}
-            />
-            <Text
-              style={{
-                color: '#2F8D79',
-                fontSize: 14,
-                fontFamily: Fonts.MEDIUM,
-                fontWeight: '500',
-              }}>
-              Calculate your EMI
-            </Text>
-          </View>
-          <View style={{flexDirection: 'row'}}>
-            <IconButton
-              iconSize={24}
-              iconColor={'#2F8D79'}
-              iconName={'arrow-right'}
-            />
-          </View>
-        </View> */}
-
-        {
-          <>
-            <Text style={styles.section}>Additional Details</Text>
-            <View style={styles.additionalDetailsContainer}>
-              {property?.areaSize && (
-                <View style={styles.adittionalDetailsRow}>
-                  <Text style={styles.label}>{'Area Size'}</Text>
-                  <Text style={styles.value}>
-                    {property?.areaSize} /{'Sq.ft'}
-                  </Text>
-                </View>
-              )}
-              {property?.carpetArea && (
-                <View style={styles.adittionalDetailsRow}>
-                  <Text style={styles.label}>{'Carpet Area'}</Text>
-                  <Text style={styles.value}>
-                    {property?.carpetArea} /
-                    {property?.carpetAreaUnitId?.name
-                      ? property?.carpetAreaUnitId?.name
-                      : 'Sq.ft'}
-                  </Text>
-                </View>
-              )}
-              {property?.builtUpArea && (
-                <View style={styles.adittionalDetailsRow}>
-                  <Text style={styles.label}>{'BuiltUp Area'}</Text>
-                  <Text style={styles.value}>
-                    {property?.builtUpArea} /
-                    {property?.builtUpAreaUnitId?.name
-                      ? property?.builtUpAreaUnitId?.name
-                      : 'Sq.ft'}
-                  </Text>
-                </View>
-              )}
-              {property?.superBuiltUpArea && (
-                <View style={styles.adittionalDetailsRow}>
-                  <Text style={styles.label}>{'Super BuiltUp Area'}</Text>
-                  <Text style={styles.value}>
-                    {property?.superBuiltUpArea} /
-                    {property?.superBuiltAreaUnitId?.name
-                      ? property?.superBuiltAreaUnitId?.name
-                      : 'Sq.ft'}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </>
-        }
-
-
-        {property?.amenityIds && property?.amenityIds?.length > 0 && (
-          <>
-            <Text style={styles.section}>Amenities</Text>
-            <View style={styles.amenities}>
-              {property?.amenityIds?.map(renderAmenity)}
-            </View>
-          </>
-        )}
-
-        <View
-          style={{
-            backgroundColor: '#EBEBEB',
-            borderWidth: 1,
-            borderColor: '#EBEBEB',
-            width: '100%',
-            top: 15,
-          }}
-        />
-
-        <View
-          style={{
-            backgroundColor: '#EBEBEB',
-            borderWidth: 1,
-            borderColor: '#EBEBEB',
-            width: '100%',
-            top: 15,
-          }}
-        />
-        {/* @ts-ignore */}
-        {property?.nearbyLandmarks?.length > 0 && (
-          <>
-            <Text style={styles.section}>Nearby</Text>
-            <View style={styles.nearby}>
-              {property?.nearbyLandmarks?.map(renderNearby)}
-            </View>
-          </>
-        )}
-
-        {!isOwner && (
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={styles.section}>Location</Text>
-            <TouchableOpacity onPress={() => setIsReportVisible(true)}>
-              <Text
-                style={[
-                  styles.section,
-                  {
-                    right: 10,
-                    color: 'blue',
-                    textDecorationLine: 'underline',
-                    textDecorationStyle: 'solid',
-                    margin: 5,
-                    fontFamily: Fonts.BOLD,
-                  },
-                ]}>
-                Report this Ad
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {Platform.OS === 'android' &&
-          isValidLatLng(
-            property?.location?.coordinates[0],
-            property?.location?.coordinates[1],
-          ) && (
-            <MapView
-              provider={PROVIDER_GOOGLE}
-              style={styles.map}
-              region={{
-                latitude: Number(property?.location?.coordinates[1]),
-                longitude: Number(property?.location?.coordinates[0]),
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}>
-              <Marker
-                coordinate={{
-                  latitude: Number(property?.location?.coordinates[1]),
-                  longitude: Number(property?.location?.coordinates[0]),
-                }}
-              />
-            </MapView>
-          )}
-
-        {Platform.OS !== 'android' && (
-          <MapView
-            style={styles.map}
-            region={{
-              latitude: Number(property?.location?.coordinates[1]),
-              longitude: Number(property?.location?.coordinates[0]),
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}>
-            <Marker
-              coordinate={{
-                latitude: Number(property?.location?.coordinates[1]),
-                longitude: Number(property?.location?.coordinates[0]),
+                backgroundColor: '#EBEBEB',
+                borderWidth: 1,
+                borderColor: '#EBEBEB',
+                width: '100%',
+                top: 15,
               }}
             />
-          </MapView>
-        )}
 
-        <View
-          style={{
-            backgroundColor: '#EBEBEB',
-            borderWidth: 1,
-            borderColor: '#EBEBEB',
-            width: '100%',
-            top: 15,
-          }}
-        />
-        <View
-          style={{
-            top: 10,
-            flexDirection: 'row',
-            padding: 16,
-            paddingLeft: 22,
-            height: 100,
-            justifyContent: 'flex-start',
-          }}>
-          <View style={{width: '20%'}}>
-            <Image
-              source={
-                error || !property?.customerId?.profilePicture
-                  ? require('@assets/images/images.jpeg')
-                  : {
-                      uri: property?.customerId?.profilePicture,
-                      cache: Image.cacheControl.immutable,
-                    }
-              }
-              onError={() => setError(true)}
-              resizeMode="cover"
-              style={{height: 52, width: 52, borderRadius: 50}}
-            />
-          </View>
-          <View>
-            <Text
+            <Text style={styles.section}>Details</Text>
+            <View style={{paddingHorizontal: 16}}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: 400,
+                  color: theme.colors.text,
+                  margin: 0,
+                  marginTop: 20,
+                }}>
+                {property?.description}
+              </Text>
+            </View>
+
+            <View
               style={{
-                color: theme.colors.text,
-                fontSize: 18,
-                fontWeight: 500,
-                marginTop: 10,
-                letterSpacing: 1,
+                backgroundColor: '#EBEBEB',
+                borderWidth: 1,
+                borderColor: '#EBEBEB',
+                width: '100%',
+                top: 15,
+              }}
+            />
+            {isOwner && (
+              <Pressable
+                onPress={async () => {
+                  (await items?._id) && startBankVerification(items?._id);
+                  setBankModalVisible(true);
+                }}
+                style={{
+                  top: 15,
+                  margin: 16,
+                  padding: 16,
+                  backgroundColor: '#E3FFF8',
+                  borderRadius: 10,
+                  height: 56,
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  borderWidth: 1,
+                  borderColor: '#88E4CF',
+                }}>
+                <View
+                  style={{
+                    width: '95%',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <IconButton
+                    iconSize={24}
+                    iconColor={'#2F8D79'}
+                    iconName={'finance'}
+                    style={{marginRight: 10}}
+                  />
+                  <Text
+                    style={{
+                      color: '#2F8D79',
+                      fontSize: 14,
+                      fontFamily: Fonts.MEDIUM,
+                      fontWeight: '500',
+                    }}>
+                    Check your loan offers.
+                  </Text>
+                </View>
+                <View style={{flexDirection: 'row'}}>
+                  <IconButton
+                    iconSize={24}
+                    iconColor={'#2F8D79'}
+                    iconName={'arrow-right'}
+                  />
+                </View>
+              </Pressable>
+            )}
+
+            {
+              <>
+                <Text style={styles.section}>Additional Details</Text>
+                <View style={styles.additionalDetailsContainer}>
+                  {property?.areaSize ? (
+                    <View style={styles.adittionalDetailsRow}>
+                      <Text style={styles.label}>{'Area Size'}</Text>
+                      <Text style={styles.value}>
+                        {property?.areaSize} /{'Sq.ft'}
+                      </Text>
+                    </View>
+                  ) : (
+                    <></>
+                  )}
+                  {property?.carpetArea ? (
+                    <View style={styles.adittionalDetailsRow}>
+                      <Text style={styles.label}>{'Carpet Area'}</Text>
+                      <Text style={styles.value}>
+                        {property?.carpetArea} /
+                        {property?.carpetAreaUnitId?.name
+                          ? property?.carpetAreaUnitId?.name
+                          : 'Sq.ft'}
+                      </Text>
+                    </View>
+                  ) : (
+                    <></>
+                  )}
+                  {property?.builtUpArea ? (
+                    <View style={styles.adittionalDetailsRow}>
+                      <Text style={styles.label}>{'BuiltUp Area'}</Text>
+                      <Text style={styles.value}>
+                        {property?.builtUpArea} /
+                        {property?.builtUpAreaUnitId?.name
+                          ? property?.builtUpAreaUnitId?.name
+                          : 'Sq.ft'}
+                      </Text>
+                    </View>
+                  ) : (
+                    <></>
+                  )}
+                  {property?.superBuiltUpArea ? (
+                    <View style={styles.adittionalDetailsRow}>
+                      <Text style={styles.label}>{'Super BuiltUp Area'}</Text>
+                      <Text style={styles.value}>
+                        {property?.superBuiltUpArea} /
+                        {property?.superBuiltAreaUnitId?.name
+                          ? property?.superBuiltAreaUnitId?.name
+                          : 'Sq.ft'}
+                      </Text>
+                    </View>
+                  ) : (
+                    <></>
+                  )}
+                </View>
+              </>
+            }
+
+            {property?.amenityIds && property?.amenityIds?.length > 0 && (
+              <>
+                <Text style={styles.section}>Amenities</Text>
+                <View style={styles.amenities}>
+                  {property?.amenityIds?.map(renderAmenity)}
+                </View>
+              </>
+            )}
+
+            <View
+              style={{
+                backgroundColor: '#EBEBEB',
+                borderWidth: 1,
+                borderColor: '#EBEBEB',
+                width: '100%',
+                top: 15,
+              }}
+            />
+
+            <View
+              style={{
+                backgroundColor: '#EBEBEB',
+                borderWidth: 1,
+                borderColor: '#EBEBEB',
+                width: '100%',
+                top: 15,
+              }}
+            />
+            {/* @ts-ignore */}
+            {property?.nearbyLandmarks?.length > 0 && (
+              <>
+                <Text style={styles.section}>Nearby</Text>
+                <View style={styles.nearby}>
+                  {property?.nearbyLandmarks?.map(renderNearby)}
+                </View>
+              </>
+            )}
+
+            {!isOwner && (
+              <View
+                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Text style={styles.section}>Location</Text>
+                <Pressable onPress={() => setIsReportVisible(true)}>
+                  <Text
+                    style={[
+                      styles.section,
+                      {
+                        right: 10,
+                        color: 'blue',
+                        textDecorationLine: 'underline',
+                        textDecorationStyle: 'solid',
+                        margin: 5,
+                        fontFamily: Fonts.BOLD,
+                      },
+                    ]}>
+                    Report this Ad
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+
+            {Platform.OS === 'android' &&
+              isValidLatLng(
+                property?.location?.coordinates[0],
+                property?.location?.coordinates[1],
+              ) && (
+                <MapView
+                  provider={PROVIDER_GOOGLE}
+                  style={styles.map}
+                  region={{
+                    latitude: Number(property?.location?.coordinates[1]),
+                    longitude: Number(property?.location?.coordinates[0]),
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }}>
+                  <Marker
+                    coordinate={{
+                      latitude: Number(property?.location?.coordinates[1]),
+                      longitude: Number(property?.location?.coordinates[0]),
+                    }}
+                  />
+                </MapView>
+              )}
+
+            {Platform.OS !== 'android' && (
+              <MapView
+                style={styles.map}
+                region={{
+                  latitude: Number(property?.location?.coordinates[1]),
+                  longitude: Number(property?.location?.coordinates[0]),
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}>
+                <Marker
+                  coordinate={{
+                    latitude: Number(property?.location?.coordinates[1]),
+                    longitude: Number(property?.location?.coordinates[0]),
+                  }}
+                />
+              </MapView>
+            )}
+
+            <View
+              style={{
+                backgroundColor: '#EBEBEB',
+                borderWidth: 1,
+                borderColor: '#EBEBEB',
+                width: '100%',
+                top: 15,
+              }}
+            />
+            <View
+              style={{
+                top: 10,
+                flexDirection: 'row',
+                padding: 16,
+                paddingLeft: 22,
+                height: 100,
+                justifyContent: 'flex-start',
               }}>
-              {property?.customerId?.name}
-            </Text>
-          </View>
-        </View>
+              <View style={{width: '20%'}}>
+                <Image
+                  source={
+                    error || !property?.customerId?.profilePicture
+                      ? require('@assets/images/images.jpeg')
+                      : {
+                          uri: property?.customerId?.profilePicture,
+                          cache: Image.cacheControl.immutable,
+                        }
+                  }
+                  onError={() => setError(true)}
+                  resizeMode="cover"
+                  style={{height: 52, width: 52, borderRadius: 50}}
+                />
+              </View>
+              <View>
+                <Text
+                  style={{
+                    color: theme.colors.text,
+                    fontSize: 18,
+                    fontWeight: 500,
+                    marginTop: 10,
+                    letterSpacing: 1,
+                  }}>
+                  {property?.customerId?.name}
+                </Text>
+              </View>
+            </View>
 
-        <View
-          style={{
-            backgroundColor: '#EBEBEB',
-            borderWidth: 1,
-            borderColor: '#EBEBEB',
-            width: '100%',
-            // top: 15,
-          }}
-        />
-
+            <View
+              style={{
+                backgroundColor: '#EBEBEB',
+                borderWidth: 1,
+                borderColor: '#EBEBEB',
+                width: '100%',
+                // top: 15,
+              }}
+            />
+          </>
+        )}
         {/* <View style={styles.additionalDetailsContainer}>
           <Text style={styles.heading}>Similar Products</Text>
           <FlatList
@@ -928,7 +964,7 @@ const styles = StyleSheet.create({
   amenities: {flexDirection: 'row', flexWrap: 'wrap', padding: 8},
   amenity: {flexDirection: 'row', alignItems: 'center', margin: 2},
   amenityText: {marginLeft: 6},
-  section: {fontSize: 16, fontWeight: '600', marginLeft: 16, marginTop: 20},
+  section: {fontSize: 16, fontWeight: '600', marginLeft: 12, marginTop: 20},
   nearby: {padding: 16, flexDirection: 'row', flexWrap: 'wrap'},
   map: {height: 150, margin: 16, borderRadius: 10},
   button: {
@@ -1007,6 +1043,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999, // ensure it's on top
+  },
+  bankBadge: {
+    backgroundColor: '#E6F0FA',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 8,
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  bankBadgeText: {
+    color: 'rgba(0, 136, 255, 0.78)', //'#0073E6',
+    fontWeight: '600',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  verifiedBadge: {
+    backgroundColor: '#E6F9EC', // light green background
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    marginHorizontal: 16,
+    alignSelf: 'flex-start',
+  },
+  verifiedText: {
+    color: '#2E7D32', // dark green text
+    fontWeight: '600',
+    fontSize: 12,
   },
 });
 

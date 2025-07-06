@@ -11,12 +11,11 @@ import {
   View,
   Image,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   KeyboardAvoidingView,
   Platform,
   Text,
-  ActivityIndicator,
+  // ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
 import ChatBubble from './ChatBubble';
@@ -26,6 +25,8 @@ import useBoundStore from '@stores/index';
 import AttachFileModal from './AttachFileModal';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {sendChat, uploadImages} from '@api/services';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import ChatDetailSkeleton from '@components/SkeltonLoader/ChatDetailSkeleton';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -37,7 +38,6 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
   return <ChatBubble items={props} />;
 };
 
-
 const ChatFooter = React.memo(({setAttachModalVisible, handleSend}: any) => {
   const [message, setMessage] = React.useState<any>('');
   // @ts-ignore
@@ -45,7 +45,7 @@ const ChatFooter = React.memo(({setAttachModalVisible, handleSend}: any) => {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      inputRef.current?.focus(); // 👈 Focus the input
+      // inputRef.current?.focus(); //
     }, 300); // Delay ensures UI is ready
 
     return () => clearTimeout(timeout);
@@ -100,23 +100,27 @@ const Chat = React.memo(({navigation}: any) => {
   const {
     fetchChatDetails,
     chatDetails,
-    chat_hasMore,
+    // chat_hasMore,
     chat_loading,
     updateChat,
     token,
     clientId,
     bearerToken,
-    loading,
     resetChatDetails,
   } = useBoundStore();
   const {items}: any = route.params;
-  console.log('items', items);
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
   const [selectedImage, setImage] = React.useState(null);
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     fetchChatDetails(items.propertyId);
   }, [items.propertyId]);
+
+  useEffect(() => {setTimeout(() => {
+    // flatListRef.current?.scrollToEnd({animated: true});
+  }, 1000);
+  }, [chatDetails, chat_loading]);
 
   const renderAdItem = useCallback(
     (items: any) => {
@@ -194,6 +198,7 @@ const Chat = React.memo(({navigation}: any) => {
         throw error;
       });
   };
+
   const sendImageUrlToApi = (imageUrl: string): Promise<any> => {
     let payload = {
       roomId: items.propertyId,
@@ -231,6 +236,7 @@ const Chat = React.memo(({navigation}: any) => {
       }
     }
   };
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
       <CommonHeader title={items.user?.name ?? 'Chats'} textColor="#171717" />
@@ -247,7 +253,9 @@ const Chat = React.memo(({navigation}: any) => {
             flexDirection: 'row',
             justifyContent: 'flex-start',
             alignItems: 'center',
-            borderWidth: 0.5,
+            borderTopWidth: 0.2,
+            borderBottomWidth: 0.8,
+            borderColor: '#ccc',
             padding: 10,
           }}>
           <Image
@@ -266,8 +274,10 @@ const Chat = React.memo(({navigation}: any) => {
             {items.property?.title}
           </Text>
         </TouchableOpacity>
-        <FlatList
+        {chat_loading && <ChatDetailSkeleton />}
+        {!chat_loading && <FlatList
           inverted
+          ref={flatListRef}
           data={[...chatDetails].reverse()}
           renderItem={renderAdItem}
           keyboardShouldPersistTaps="handled"
@@ -277,41 +287,31 @@ const Chat = React.memo(({navigation}: any) => {
             flexGrow: 1,
             minHeight: '90%',
           }}
-          ListHeaderComponent={
-            <>
-              {loading && (
-                <ActivityIndicator
-                  size="small"
-                  color={theme.colors.activityIndicatorColor}
-                />
-              )}
-            </>
-          }
           ListHeaderComponentStyle={{
             padding: 0,
             backgroundColor: '#fff',
           }}
           showsVerticalScrollIndicator={false}
-          ListFooterComponent={
-            chat_hasMore || chat_loading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator
-                  size="large"
-                  color={theme.colors.activityIndicatorColor}
-                />
-                {chat_loading && chatDetails?.length > 0 && (
-                  <Text style={styles.loadingText}>
-                    Loading more properties...
-                  </Text>
-                )}
-              </View>
-            ) : chatDetails.length <= 0 ? (
-              <></>
-            ) : (
-              <></>
-            )
-          }
-        />
+          // ListFooterComponent={
+          //   chat_hasMore || chat_loading ? (
+          //     <View style={styles.loadingContainer}>
+          //       <ActivityIndicator
+          //         size="large"
+          //         color={theme.colors.activityIndicatorColor}
+          //       />
+          //       {chat_loading && chatDetails?.length > 0 && (
+          //         <Text style={styles.loadingText}>
+          //           Loading more properties...
+          //         </Text>
+          //       )}
+          //     </View>
+          //   ) : chatDetails.length <= 0 ? (
+          //     <></>
+          //   ) : (
+          //     <></>
+          //   )
+          // }
+        />}
         {/* <SlideToRecordButton
           onSend={filePath => {
             console.log('📤 Sending audio file:', filePath);

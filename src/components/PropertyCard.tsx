@@ -8,6 +8,13 @@ import {Fonts} from '@constants/font';
 import FavoriteButton from './FavoriteButton';
 
 const PropertyCard = React.memo(({items, navigation, arg}: any) => {
+  const formatINR = (value: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
   return (
     <TouchableOpacity
       style={[
@@ -82,14 +89,7 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
           )}
         </View>
 
-        <Text style={styles.price}>
-          <IconButton
-            iconSize={14}
-            iconColor={'#171717'}
-            iconName={'currency-inr'}
-          />
-          {items.price}
-        </Text>
+        <Text style={styles.price}>{formatINR(items.price)}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 14,
     fontFamily: Fonts.MEDIUM,
-    fontWeight: '500',
+    fontWeight: 'bold',
     marginTop: 4,
     marginVertical: 6,
   },

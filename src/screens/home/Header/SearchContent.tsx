@@ -70,9 +70,9 @@ function SearchContent(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    padding: 16,
-    paddingLeft: 18,
-    width: '100%',
+    paddingLeft:16,
+    paddingRight:16,
+    padding: 10,
   },
   searchicon: {width: '70%', zIndex: 10, opacity: 10},
   favIcon: {

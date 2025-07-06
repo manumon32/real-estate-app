@@ -332,7 +332,10 @@ export const fetchBanksAPI = async (configArg: any): Promise<any> => {
     const apiConfig: any = {
       method: 'get',
       url: API.LISTINGS.BANK.GET,
-      params: {},
+      params: {
+        filter_isEnabled: true,
+        filter_isDeleted: false,
+      },
       headers,
     };
     const response = await apiRequest(apiConfig);
@@ -482,18 +485,13 @@ export const fetchMyAdsAPI = async (configArg: any): Promise<any> => {
 
 //Transactions
 
-export const fetchTransactionsAPI = async (configArg: any): Promise<any> => {
+export const fetchTransactionsAPI = async (filter:any,configArg: any): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const apiConfig: any = {
       method: 'get',
       url: API.SUBSCRIPTIONS.GET,
-      params: {
-        populate: 'subscriptionPlanId',
-        noPagination: true,
-        orderBy: 'createdAt',
-        orderByDir: 'desc',
-      },
+      params: filter,
       headers,
     };
     const response = await apiRequest(apiConfig);
@@ -503,18 +501,13 @@ export const fetchTransactionsAPI = async (configArg: any): Promise<any> => {
   }
 };
 
-export const fetchReportedAd = async (configArg: any): Promise<any> => {
+export const fetchReportedAd = async (filter:any,configArg: any): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const apiConfig: any = {
       method: 'get',
       url: API.REPORT.GET,
-      params: {
-        noPagination: true,
-        orderBy: 'createdAt',
-        orderByDir: 'desc',
-        populate: 'propertyId',
-      },
+      params: filter,
       headers,
     };
     const response = await apiRequest(apiConfig);

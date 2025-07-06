@@ -7,6 +7,7 @@ export interface ReportAdSlice {
   reportAdList: [];
   fetchReportedAd: () => void;
   reportAd: (payload: any) => void;
+  resetReportAd: () => void;
 }
 
 export const createReportAdSlice = (set: any, get: any): ReportAdSlice => ({
@@ -14,9 +15,16 @@ export const createReportAdSlice = (set: any, get: any): ReportAdSlice => ({
   reportAdLoading: false,
   reportAdListLoading: false,
   fetchReportedAd: async () => {
-    set({reportAdListLoading: true,});
+    set({reportAdListLoading: true});
     try {
-      const res = await fetchReportedAd({
+      let filter = {
+        filter_userId: get().user?._id,
+        noPagination: true,
+        orderBy: 'createdAt',
+        orderByDir: 'desc',
+        populate: 'propertyId',
+      };
+      const res = await fetchReportedAd(filter, {
         token: get().token,
         clientId: get().clientId,
         bearerToken: get().bearerToken,
@@ -42,7 +50,7 @@ export const createReportAdSlice = (set: any, get: any): ReportAdSlice => ({
       if (res) {
         Toast.show({
           type: 'success',
-          text1:'Repoted Successfully',
+          text1: 'Repoted Successfully',
           position: 'bottom',
         });
         set(() => ({
@@ -54,4 +62,5 @@ export const createReportAdSlice = (set: any, get: any): ReportAdSlice => ({
       set({reportAdLoading: false});
     }
   },
+  resetReportAd: () =>set({reportAdList:[]}),
 });

@@ -4,7 +4,6 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -13,7 +12,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -459,20 +457,20 @@ const PostAdContainer = (props: any) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         style={{height: Platform.OS === 'ios' ? '85%' : '80%', flex: 1}}> */}
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' :  'height'}
-        style={{flex: 1, }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{flex: 1}}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={{flex: 1}}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollContainer}
-              style={styles.scrollContainerStyle}
-              keyboardShouldPersistTaps="handled">
-              <View style={styles.container}>{renderStepContent()}</View>
-            </ScrollView>
-          </View>
-        </TouchableWithoutFeedback>
+        {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+        <View style={{flex: 1}}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContainer}
+            style={styles.scrollContainerStyle}
+            keyboardShouldPersistTaps="handled">
+            <View style={styles.container}>{renderStepContent()}</View>
+          </ScrollView>
+        </View>
+        {/* </TouchableWithoutFeedback> */}
         <Footer
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}

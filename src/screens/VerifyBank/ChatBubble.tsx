@@ -20,40 +20,18 @@ export default function ChatBubble(props: any) {
   const [visible, setVisible] = useState(false);
   const items = props?.items?.items?.item ?? {};
   let left = !items?.senderId || items?.senderId === user?._id;
+  console.log(items);
   return (
     <>
       <ImageViewerModal
         visible={visible}
         onClose={() => setVisible(false)}
-        imageUrls={[items?.body]}
+        imageUrls={[items.files?.[0]]}
       />
       {!left ? (
         <View style={styles.container}>
-          <Image
-            source={{uri: items?.avatarUrl}} // Replace with real image
-            style={styles.avatar}
-          />
           <View style={styles.messageWrapper}>
             {/* <Text style={styles.name}>Arnold Schurli</Text> */}
-
-            <View style={styles.bubble}>
-              {items.type == 'image' && (
-                <TouchableOpacity onPress={() => setVisible(true)}>
-                  <Image
-                    source={{
-                      uri:
-                        items.body ??
-                        'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_items_boosted&w=740',
-                    }}
-                    style={{
-                      width: 200,
-                      height: 200,
-                      borderRadius: 20,
-                    }}
-                  />
-                </TouchableOpacity>
-              )}
-            </View>
             <View style={styles.bubble}>
               <Text style={styles.messageText}>{items?.message}</Text>
             </View>

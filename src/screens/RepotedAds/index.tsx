@@ -14,8 +14,10 @@ import {
   SafeAreaView,
   FlatList,
   RefreshControl,
+  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import EmptyText from '@components/EmptyText';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -211,7 +213,11 @@ const ReportAd = () => {
               textColor="#171717"
               // onBackPress={onBackPress}
             />
-            <View style={{flexDirection: 'row', padding: 10}}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{padding: 10}}
+              style={{flexDirection: 'row'}}>
               <TouchableOpacity
                 style={[styles.chip, !filterBy && styles.chipSelected]}
                 onPress={() => {
@@ -294,7 +300,7 @@ const ReportAd = () => {
                   {'Blocked'}
                 </Text>
               </TouchableOpacity>
-            </View>
+            </ScrollView>
           </>
         }
         ListHeaderComponentStyle={{
@@ -314,12 +320,12 @@ const ReportAd = () => {
           filterBy ? (
             reportAdList.filter((items: any) => items.adStatus == filterBy)
               .length <= 0 ? (
-              <Text style={styles.endText}>You dont have anything listed.</Text>
+              <EmptyText text="You dont have anything listed here." />
             ) : (
               <></>
             )
           ) : reportAdList.length <= 0 ? (
-            <Text style={styles.endText}>You havent listed anything yet.</Text>
+            <EmptyText text="You dont have anything listed here." />
           ) : (
             <></>
           )

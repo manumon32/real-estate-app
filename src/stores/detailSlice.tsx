@@ -24,6 +24,7 @@ export interface Detail {
   chatEnabled: boolean;
   isNegotiable: boolean;
   isVerified: boolean;
+  isBankVerified: boolean;
   isVerifiedContact: boolean;
   isFeatured: boolean;
   isEnabled: boolean;

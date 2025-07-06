@@ -16,6 +16,8 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import EmptyText from '@components/EmptyText';
+import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -138,14 +140,18 @@ const ListingCard: React.FC<ListingCardProps> = ({
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <Icon name="clock-outline" size={16} color="#888" />
-            <Text style={styles.metaText}>{'Start date - '+FormattedDate(date)}</Text>
+            <Text style={styles.metaText}>
+              {'Start date - ' + FormattedDate(date)}
+            </Text>
           </View>
         </View>
 
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <Icon name="clock-outline" size={16} color="#888" />
-            <Text style={styles.metaText}>{'End date - ' + FormattedDate(date)}</Text>
+            <Text style={styles.metaText}>
+              {'End date - ' + FormattedDate(date)}
+            </Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -154,7 +160,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
 };
 
 const Transactions = () => {
-  const {transactions, fetchTransactions, } = useBoundStore();
+  const {transactions, fetchTransactions, transLoading} = useBoundStore();
   const navigation = useNavigation();
   const {theme} = useTheme();
   const [filterBy, setFilterBy] = useState<any>(null);
@@ -260,18 +266,22 @@ const Transactions = () => {
           />
         }
         ListFooterComponent={
-          filterBy ? (
-            transactions.filter((items: any) => items.status == filterBy).length <=
-            0 ? (
-              <Text style={styles.endText}>You dont have anything listed.</Text>
-            ) : (
-              <></>
-            )
-          ) : transactions.length <= 0 ? (
-            <Text style={styles.endText}>You havent listed anything yet.</Text>
-          ) : (
-            <></>
-          )
+          <>
+            {transLoading && <AdsListSkelton />}
+            {!transLoading &&
+              (filterBy ? (
+                transactions.filter((items: any) => items.status == filterBy)
+                  .length <= 0 ? (
+                  <EmptyText text="You dont have any transactions yet." />
+                ) : (
+                  <></>
+                )
+              ) : transactions.length <= 0 ? (
+                <EmptyText text="You dont have any transactions yet." />
+              ) : (
+                <></>
+              ))}
+          </>
         }
       />
     </SafeAreaView>

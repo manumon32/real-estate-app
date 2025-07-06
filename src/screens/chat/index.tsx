@@ -11,7 +11,6 @@ import {
   Text,
   Image,
   StyleSheet,
-  SafeAreaView,
   RefreshControl,
   FlatList,
   TouchableOpacity,
@@ -19,12 +18,17 @@ import {
 } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import {getTimeAgo} from './ChatBubble';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import ChatListSkeleton from '@components/SkeltonLoader/ChatListSkeleton';
+import NoChats from '@components/NoChatFound';
 
 interface MessageCardProps {
   name: string;
   message: string;
   time: any;
+  title: string;
   avatarUrl: string;
+  coverImage: string;
   unreadCount?: number;
   navigation: any;
   item: any;
@@ -33,9 +37,11 @@ interface MessageCardProps {
 
 const MessageCard: React.FC<MessageCardProps> = ({
   name,
+  title,
   message,
   time,
   avatarUrl,
+  coverImage,
   unreadCount = 0,
   navigation,
   item,
@@ -53,7 +59,18 @@ const MessageCard: React.FC<MessageCardProps> = ({
       }}
       style={styles.container}>
       <Image
-        style={{height: 56, width: 56, borderRadius: 50}}
+        style={{height: 56, width: 56, borderRadius: 5}}
+        source={{uri: coverImage}}
+      />
+      <Image
+        style={{
+          height: 30,
+          width: 30,
+          borderRadius: 50,
+          position: 'absolute',
+          left: 50,
+          bottom:10
+        }}
         source={{uri: avatarUrl}}
       />
       <View style={styles.textContainer}>
@@ -65,6 +82,12 @@ const MessageCard: React.FC<MessageCardProps> = ({
             </Text>
           )}
         </View>
+
+        {title && (
+          <Text numberOfLines={1} style={styles.title}>
+            {title}
+          </Text>
+        )}
         {type === 'text' && (
           <Text
             numberOfLines={2}
@@ -99,13 +122,13 @@ const MessageCard: React.FC<MessageCardProps> = ({
 };
 
 const Chat = React.memo(({navigation}: any) => {
-  const {fetchChatListings, chatList, resetChatDetails} = useBoundStore();
+  const {fetchChatListings, chatList, resetChatDetails, chatListloading} =
+    useBoundStore();
   const {theme} = useTheme();
 
   useFocusEffect(
     useCallback(() => {
       resetChatDetails([]);
-
       fetchChatListings();
       return () => {};
     }, []),
@@ -119,9 +142,14 @@ const Chat = React.memo(({navigation}: any) => {
           type={item?.item?.lastMessage?.type ?? 'message'}
           message={item?.item?.lastMessage?.body}
           navigation={navigation}
+          title={item?.item?.property.title}
           time={item?.item?.lastMessage?.createdAt}
           unreadCount={item?.item?.unreadCount ?? 0}
           item={item?.item}
+          coverImage={
+            item?.item?.property?.coverImage ??
+            'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_items_boosted&w=740'
+          }
           avatarUrl={
             item?.item?.user?.profilePicture ??
             'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_items_boosted&w=740'
@@ -155,7 +183,7 @@ const Chat = React.memo(({navigation}: any) => {
                 padding: 10,
                 backgroundColor: '#fff',
               }}>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={[
                   styles.chip,
                   // // !filterBy &&
@@ -211,7 +239,7 @@ const Chat = React.memo(({navigation}: any) => {
                   ]}>
                   {'Buy'}
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </ScrollView>
           </>
         }
@@ -229,11 +257,18 @@ const Chat = React.memo(({navigation}: any) => {
           />
         }
         ListFooterComponent={
-          chatList.length <= 0 ? (
-            <Text style={styles.endText}>No Conversations.</Text>
-          ) : (
-            <></>
-          )
+          <>
+            {chatListloading && chatList.length <= 0 && <ChatListSkeleton />}
+            {chatList.length <= 0 && !chatListloading ? (
+              <NoChats
+                onExplore={() => {
+                  navigation.navigate('filter');
+                }}
+              />
+            ) : (
+              <></>
+            )}
+          </>
         }
       />
     </SafeAreaView>
@@ -261,9 +296,16 @@ const styles = StyleSheet.create({
   },
   name: {
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 16,
     color: '#131313',
     fontFamily: Fonts.BOLD,
+  },
+  title: {
+    fontWeight: '600',
+    fontSize: 10,
+    width: '80%',
+    color: '#131313',
+    fontFamily: Fonts.MEDIUM,
   },
   time: {
     fontSize: 12,

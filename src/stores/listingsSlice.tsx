@@ -38,13 +38,13 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
     set({loading: true, triggerRefresh: false});
     let filters = {
       pageNum: get().page + 1,
-      pageSize: 12,
+      pageSize: 6,
     };
     if (get().location?.lat && get().location?.lng) {
       filters = {
         ...filters,
         ...{
-          filter_near: [get().location?.lat, get().location?.lng, 10].join(','),
+          filter_near: [get().location?.lat, get().location?.lng, 1000].join(','),
         },
       };
     }

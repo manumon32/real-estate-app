@@ -45,7 +45,7 @@ type Props = {
 };
 
 const LoginModal: React.FC<Props> = ({visible, onClose}) => {
-  const {login, otp, clearOTP, verifyOTP, loginError} = useBoundStore();
+  const {login, otp, clearOTP, verifyOTP, loginError, otpLoading} = useBoundStore();
   const [loginVar, setLoginVar] = useState('');
   const [message, setMessage] = useState('');
   const [userInfo, setUserInfo] = useState<any>(null);
@@ -281,6 +281,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
             handleSubmit={handleSubmit}
             veryFyOTP={veryFyOTP}
             otpValue={otp}
+            otpLoading={otpLoading}
           />
         )}
       </View>
