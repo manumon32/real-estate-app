@@ -673,6 +673,26 @@ export const uploadImages = async (
   }
 };
 
+// Upload Documents
+
+export const uploadDocuments = async (
+  data: object,
+  configArg: any,
+): Promise<Listing> => {
+  try {
+    const headers = await getMultiParHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.UPLOAD_DOCUMENTS,
+      data,
+      headers,
+    });
+    return response?.data?.rows;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to Do so');
+  }
+};
 // postAd
 
 export const postAdAPI = async (
@@ -686,6 +706,25 @@ export const postAdAPI = async (
       method,
       url:
         method === 'post' ? API.LISTINGS.CREATE : API.LISTINGS.UPDATE(data.id),
+      data,
+      headers,
+    });
+    return response?.data;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to Do so');
+  }
+};
+
+export const registerFCMToken = async (
+  data: any,
+  configArg: any,
+): Promise<Listing> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method:'post',
+      url:API.USER.REGISTER_TOKEN,
       data,
       headers,
     });

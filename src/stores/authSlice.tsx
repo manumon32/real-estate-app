@@ -26,7 +26,7 @@ export interface AuthSlice {
   clearOTP: () => Promise<void>;
   verifyOTP: (falg: any) => Promise<void>;
   updateuser: (falg: any) => Promise<void>;
-  fetchUserDetails: () => Promise<void>;
+  fetchUserDetails: (flag?: any) => Promise<void>;
   updateCOntact: (falg: any) => Promise<void>;
   submitRequest: (falg: any) => Promise<void>;
 }
@@ -93,8 +93,8 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       set({loginError: true, updateSuccess: false});
     }
   },
-  fetchUserDetails: async () => {
-    set({userProfileloading: true});
+  fetchUserDetails: async (flag = false) => {
+    flag && set({userProfileloading: true});
     try {
       const res = await fetchUserDetailsAPI({
         token: get().token,

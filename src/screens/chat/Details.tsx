@@ -5,7 +5,7 @@ import CommonHeader from '@components/Header/CommonHeader';
 import {Fonts} from '@constants/font';
 import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback, useEffect, useRef} from 'react';
-
+import uuid from 'react-native-uuid';
 import {TextInput, IconButton} from 'react-native-paper';
 import {
   View,
@@ -100,13 +100,12 @@ const Chat = React.memo(({navigation}: any) => {
   const {
     fetchChatDetails,
     chatDetails,
-    // chat_hasMore,
     chat_loading,
     updateChat,
     token,
     clientId,
     bearerToken,
-    resetChatDetails,
+    onlineUsers
   } = useBoundStore();
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
@@ -117,23 +116,12 @@ const Chat = React.memo(({navigation}: any) => {
     fetchChatDetails(items.propertyId);
   }, [items.propertyId]);
 
-  useEffect(() => {setTimeout(() => {
-    // flatListRef.current?.scrollToEnd({animated: true});
-  }, 1000);
-  }, [chatDetails, chat_loading]);
-
   const renderAdItem = useCallback(
     (items: any) => {
       return <MessageCard items={items} />;
     },
     [navigation],
   );
-
-  useEffect(() => {
-    return () => {
-      resetChatDetails([]);
-    };
-  }, []);
 
   const pickImageLibrary = useCallback(() => {
     launchImageLibrary(
@@ -202,9 +190,11 @@ const Chat = React.memo(({navigation}: any) => {
   const sendImageUrlToApi = (imageUrl: string): Promise<any> => {
     let payload = {
       roomId: items.propertyId,
+      status: 'sent',
       type: 'image',
       body: imageUrl,
       createdAt: new Date().toISOString(),
+      messageId: uuid.v4(),
     };
     updateChat(payload);
     return sendChat(payload, {
@@ -219,13 +209,14 @@ const Chat = React.memo(({navigation}: any) => {
       let payload = {
         roomId: items.propertyId,
         type: 'text',
+        status: 'sent',
         body: message,
         createdAt: new Date().toISOString(),
+        messageId: uuid.v4(),
       };
-      console.log('payload', payload);
       updateChat(payload);
       try {
-        const res = await sendChat(payload, {
+        const res = sendChat(payload, {
           token,
           clientId,
           bearerToken,
@@ -239,7 +230,11 @@ const Chat = React.memo(({navigation}: any) => {
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-      <CommonHeader title={items.user?.name ?? 'Chats'} textColor="#171717" />
+      <CommonHeader
+        onlineStatus={onlineUsers.includes(items.user?._id)}
+        title={items.user?.name ?? 'Chats'}
+        textColor="#171717"
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         style={{height: Platform.OS === 'ios' ? '85%' : '80%', flex: 1}}>
@@ -274,44 +269,55 @@ const Chat = React.memo(({navigation}: any) => {
             {items.property?.title}
           </Text>
         </TouchableOpacity>
-        {chat_loading && <ChatDetailSkeleton />}
-        {!chat_loading && <FlatList
-          inverted
-          ref={flatListRef}
-          data={[...chatDetails].reverse()}
-          renderItem={renderAdItem}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            backgroundColor: theme.colors.background,
-            paddingBottom: 24,
-            flexGrow: 1,
-            minHeight: '90%',
-          }}
-          ListHeaderComponentStyle={{
-            padding: 0,
-            backgroundColor: '#fff',
-          }}
-          showsVerticalScrollIndicator={false}
-          // ListFooterComponent={
-          //   chat_hasMore || chat_loading ? (
-          //     <View style={styles.loadingContainer}>
-          //       <ActivityIndicator
-          //         size="large"
-          //         color={theme.colors.activityIndicatorColor}
-          //       />
-          //       {chat_loading && chatDetails?.length > 0 && (
-          //         <Text style={styles.loadingText}>
-          //           Loading more properties...
-          //         </Text>
-          //       )}
-          //     </View>
-          //   ) : chatDetails.length <= 0 ? (
-          //     <></>
-          //   ) : (
-          //     <></>
-          //   )
-          // }
-        />}
+        {/* @ts-ignore */}
+        {chat_loading && !chatDetails?.[items.propertyId] && (
+          <ChatDetailSkeleton />
+        )}
+        {
+          <FlatList
+            inverted
+            ref={flatListRef}
+            data={
+              // @ts-ignore
+              chatDetails[items.propertyId]
+                ? // @ts-ignore
+                  [...chatDetails[items.propertyId]].reverse()
+                : []
+            }
+            renderItem={renderAdItem}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{
+              backgroundColor: theme.colors.background,
+              paddingBottom: 24,
+              flexGrow: 1,
+              minHeight: '90%',
+            }}
+            ListHeaderComponentStyle={{
+              padding: 0,
+              backgroundColor: '#fff',
+            }}
+            showsVerticalScrollIndicator={false}
+            // ListFooterComponent={
+            //   chat_hasMore || chat_loading ? (
+            //     <View style={styles.loadingContainer}>
+            //       <ActivityIndicator
+            //         size="large"
+            //         color={theme.colors.activityIndicatorColor}
+            //       />
+            //       {chat_loading && chatDetails?.length > 0 && (
+            //         <Text style={styles.loadingText}>
+            //           Loading more properties...
+            //         </Text>
+            //       )}
+            //     </View>
+            //   ) : chatDetails.length <= 0 ? (
+            //     <></>
+            //   ) : (
+            //     <></>
+            //   )
+            // }
+          />
+        }
         {/* <SlideToRecordButton
           onSend={filePath => {
             console.log('📤 Sending audio file:', filePath);

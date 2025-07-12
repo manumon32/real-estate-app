@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
@@ -45,10 +45,6 @@ const BottomTabBar = ({state, navigation}: any) => {
     'TermsConditions',
     'filter',
   ];
-
-  useEffect(() => {
-    console.log('bearerToken', bearerToken);
-  }, [bearerToken]);
 
   return (
     // eslint-disable-next-line react-native/no-inline-styles

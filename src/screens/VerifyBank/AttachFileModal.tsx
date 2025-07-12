@@ -22,7 +22,7 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
   onClose,
   onPickCamera,
   onPickGallery,
-//   onPickDocument,
+  onPickDocument,
 }) => {
   return (
     <Modal
@@ -47,10 +47,10 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
           <Text style={styles.optionText}>Gallery</Text>
         </TouchableOpacity>
 
-        {/* <TouchableOpacity style={styles.option} onPress={onPickDocument}>
+        <TouchableOpacity style={styles.option} onPress={onPickDocument}>
           <Icon name="file-document" size={24} color="#2F8D79" />
           <Text style={styles.optionText}>Document</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </View>
     </Modal>
   );

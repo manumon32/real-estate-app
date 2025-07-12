@@ -24,7 +24,6 @@ const BankSelectModal = ({
   visible,
   onDismiss,
   onSelect,
-  selectedBank,
 }: BankSelectModalProps) => {
   const {banks, bankVerification_loading} = useBoundStore();
   const enrichedBanks = useMemo(() => {
@@ -51,7 +50,7 @@ const BankSelectModal = ({
     <List.Item
       title={item.name}
       onPress={() => {
-        onSelect(item._id);
+        onSelect(item);
         // onDismiss();
       }}
       left={() => (
@@ -62,7 +61,7 @@ const BankSelectModal = ({
         />
       )}
       right={() =>
-        selectedBank === item.name ? (
+        item.status === 'verified' ? (
           <MaterialCommunityIcons
             name="check-circle-outline"
             size={20}

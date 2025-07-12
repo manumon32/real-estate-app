@@ -8,7 +8,6 @@ import {
   Text,
   TouchableOpacity,
   Linking,
-  Alert,
 } from 'react-native';
 import useBoundStore from '@stores/index';
 import DeviceInfo from 'react-native-device-info';
@@ -38,17 +37,21 @@ function Index({navigation}: any): React.JSX.Element {
   const fetchData = async () => {
     setError(false);
     const deviceId = await getDeviceId();
+    let version = DeviceInfo.getVersion();
+    const deviceModel = DeviceInfo.getModel();
+    const osVersion = DeviceInfo.getSystemVersion(); 
     const data = {
       deviceId: deviceId ? deviceId : '123456',
-      appVersion: '0.0.1',
-      deviceModel: 'Pixel 6',
-      osVersion: 'Android 13',
+      appVersion: version ?? '',
+      deviceModel: deviceModel,
+      osVersion: osVersion,
       fingerprintHash: 'hsde123231',
       rooted: false,
       emulator: false,
       debug: false,
       installer: 'com.android.vending',
     };
+    console.log('handshake payload',data);
     gethandShakeToken(data);
   };
 
@@ -61,7 +64,7 @@ function Index({navigation}: any): React.JSX.Element {
     const match = url.match(/property\/(\w+)/);
     if (match) {
       const propertyId = match[1];
-      navigation.navigate('Details', {_id: propertyId});
+      navigation.navigate('Details', {items: {_id: propertyId}});
     }
   };
 
@@ -72,7 +75,6 @@ function Index({navigation}: any): React.JSX.Element {
     // Also handle when app is opened from a killed state
     Linking.getInitialURL().then(url => {
       if (url) {
-        Alert.alert(url)
         setDeepLink({url});
       }
     });

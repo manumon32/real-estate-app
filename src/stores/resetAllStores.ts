@@ -83,7 +83,7 @@ export const resetAllZustandStores = () => {
   state.resetTransactions();
   state.resetBankSlice();
   state.resetverificationDetails();
-  state.resetverificationDetails();
+  state.resetChat();
   state.logout();
 
   // Optionally clear persisted storage too:

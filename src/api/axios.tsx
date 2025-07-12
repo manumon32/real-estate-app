@@ -23,12 +23,10 @@ api.interceptors.request.use(
         config.headers['Content-Type'] !== 'multipart/form-data'
           ? createBodyHash(config.data ?? '')
           : createBodyHash('');
-      console.log(bodyHash);
       const deviceId = config.headers['X-DEVICE-ID'];
       const nonce = uuid.v4();
       const url = config.url || '';
       const cleanPath = url.split('?')[0];
-      console.log(url);
       const stringToSign = [
         config.method.toUpperCase(),
         cleanPath,
@@ -36,18 +34,17 @@ api.interceptors.request.use(
         nonce,
         bodyHash,
       ].join('\n');
-      console.log('stringToSign', stringToSign);
       const signature = createHmacSignature(
         config.headers['X-TOKEN'],
         stringToSign,
       );
-      console.log('header only', {
-        ...(config.headers || {}),
-        'X-TIMESTAMP': timestamp,
-        'X-SIGNATURE': signature,
-        'X-NONCE': nonce,
-        'X-CLIENT-ID': deviceId,
-      });
+      // console.log('header only', {
+      //   ...(config.headers || {}),
+      //   'X-TIMESTAMP': timestamp,
+      //   'X-SIGNATURE': signature,
+      //   'X-NONCE': nonce,
+      //   'X-CLIENT-ID': deviceId,
+      // });
       config.headers = {
         ...(config.headers || {}),
         'X-TIMESTAMP': timestamp,

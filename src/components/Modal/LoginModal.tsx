@@ -20,6 +20,9 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import auth from '@react-native-firebase/auth';
+import appleAuth, {
+  AppleButton,
+} from '@invertase/react-native-apple-authentication';
 
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {
@@ -45,7 +48,8 @@ type Props = {
 };
 
 const LoginModal: React.FC<Props> = ({visible, onClose}) => {
-  const {login, otp, clearOTP, verifyOTP, loginError, otpLoading} = useBoundStore();
+  const {login, otp, clearOTP, verifyOTP, loginError, otpLoading} =
+    useBoundStore();
   const [loginVar, setLoginVar] = useState('');
   const [message, setMessage] = useState('');
   const [userInfo, setUserInfo] = useState<any>(null);
@@ -142,6 +146,39 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       }
     } catch (error: any) {
       Alert.alert('Login fail', error.message);
+    }
+  };
+
+  const signInWithApple = async () => {
+    if (Platform.OS !== 'ios') return;
+
+    try {
+      // Start the Apple sign-in request
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN, // ✅ correct usage
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME], // ✅ correct usage
+      });
+
+      const {identityToken, nonce} = appleAuthRequestResponse;
+
+      if (!identityToken) throw new Error('No identity token');
+
+      if (!identityToken) {
+        throw new Error('Apple Sign-In failed: No identity token returned');
+      }
+
+      // Create a Firebase credential with the token
+      const appleCredential = auth.AppleAuthProvider.credential(
+        identityToken,
+        nonce,
+      );
+
+      // Sign in with Firebase
+      const userCredential = await auth().signInWithCredential(appleCredential);
+
+      console.log('Firebase Sign-In successful:', userCredential.user);
+    } catch (err) {
+      console.log('Apple Sign-In error:', err);
     }
   };
 
@@ -252,7 +289,11 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
 
                 {/* Social Logins */}
                 <View style={styles.socialRow}>
-                  <Icon name="apple" size={36} onPress={() => {}} />
+                  <Icon
+                    name="apple"
+                    size={36}
+                    onPress={() => signInWithApple()}
+                  />
                   <Icon
                     name="google"
                     color="#000"

@@ -267,7 +267,7 @@ const Transactions = () => {
         }
         ListFooterComponent={
           <>
-            {transLoading && <AdsListSkelton />}
+            {transLoading && transactions.length <= 0 && <AdsListSkelton />}
             {!transLoading &&
               (filterBy ? (
                 transactions.filter((items: any) => items.status == filterBy)

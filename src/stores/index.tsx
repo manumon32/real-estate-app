@@ -79,6 +79,8 @@ const useBoundStore = create<StoreState>()(
           appConfigs: state.appConfigs,
           locationHistory: state.locationHistory,
           chatRoomId: state.chatRoomId,
+          chatList: state.chatList,
+          chatDetails: state.chatDetails,
         }),
         onRehydrateStorage: () => state => {
           console.log('🔄 Rehydrated Zustand state:', state);

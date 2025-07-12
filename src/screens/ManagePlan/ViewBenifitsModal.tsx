@@ -6,7 +6,6 @@ import {
   StyleSheet,
   FlatList,
   Pressable,
-  TouchableOpacity,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -31,7 +30,7 @@ const ViewBenifitsModal = ({visible, onClose, selectedItem}: any) => {
 
           {/* Radio Options */}
           <FlatList
-            data={selectedItem?.benifits ?? []}
+            data={selectedItem ?? []}
             keyExtractor={item => item}
             renderItem={({item}) => (
               <Pressable style={styles.optionRow}>
@@ -46,11 +45,11 @@ const ViewBenifitsModal = ({visible, onClose, selectedItem}: any) => {
             scrollEnabled={false}
           />
           {/* Send Button */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={[styles.sendBtn, {backgroundColor: '#2f8f72'}]}
        >
             <Text style={styles.sendBtnText}>Buy</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     </Modal>

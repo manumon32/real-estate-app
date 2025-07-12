@@ -26,8 +26,9 @@ import {useFocusEffect, useRoute} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 import AttachFileModal from './AttachFileModal';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import {sendBankDetails, uploadImages} from '@api/services';
+import {sendBankDetails, uploadDocuments, uploadImages} from '@api/services';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {pick} from '@react-native-documents/picker';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -89,7 +90,7 @@ const Verification = ({navigation}: any) => {
     clientId,
     bearerToken,
     bankVerification_loading,
-    detailsBackUp,
+    // detailsBackUp,
   } = useBoundStore();
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
@@ -154,15 +155,55 @@ const Verification = ({navigation}: any) => {
         clientId: clientId,
         bearerToken: bearerToken,
       });
-      sendImages(imageUrls);
+      sendFIles(imageUrls, true);
     } catch (error) {
       return [];
     }
   };
 
-  const sendImages = (imageUrls: any) => {
-    const uploadPromises = imageUrls.map((url: string) =>
-      sendImageUrlToApi(url),
+  const pickDocument = async () => {
+    try {
+      const results = await pick({
+        mode: 'import',
+        allowMultiSelection: true,
+        types: ['public.pdf'], // UTIs for iOS, MIME types valid for Android
+        keepLocalCopy: true,
+      });
+      upLoadDoc(results);
+      console.log('hi'); // Array of file metadata and URIs
+    } catch (err: any) {
+      if (err.isCancel) {
+        console.log('User canceled');
+      } else {
+        console.error(err);
+      }
+    }
+  };
+
+  const upLoadDoc = async (docs: any) => {
+    try {
+      let formData = new FormData();
+      docs.map((items: any) => {
+        formData.append('documents', {
+          uri: items.uri,
+          name: items.name,
+          type: items.type,
+        } as any);
+      });
+      const imageUrls: any = await uploadDocuments(formData, {
+        token: token,
+        clientId: clientId,
+        bearerToken: bearerToken,
+      });
+      sendFIles(imageUrls);
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const sendFIles = (imageUrls: any, image = false) => {
+    const uploadPromises = imageUrls.map((url: any) =>
+      sendImageUrlToApi(image ? url : url.location),
     );
 
     return Promise.all(uploadPromises)
@@ -238,10 +279,22 @@ const Verification = ({navigation}: any) => {
                 style={styles.icon}
               />
               <View style={styles.textWrapper}>
-                <Text style={[styles.text, {color: '#000000DE'}]}>
-                 You can still upload
-                  any documents you have for it.
-                </Text>
+                {items.status === 'verified' && (
+                  <Text style={[styles.text, {color: '#000000DE'}]}>
+                    This property is eligible for loan from {items.name}.
+                  </Text>
+                )}
+                {items.status === 'pending' && (
+                  <Text style={[styles.text, {color: '#000000DE'}]}>
+                    loan process is still in progress, You can still upload any
+                    documents you have for it.
+                  </Text>
+                )}
+                 {items.status === 'rejected' && (
+                  <Text style={[styles.text, {color: 'red'}]}>
+                    Loan process is Rejected
+                  </Text>
+                )}
               </View>
               <MaterialCommunityIcons
                 name="file-upload-outline"
@@ -316,26 +369,26 @@ const Verification = ({navigation}: any) => {
             </TouchableOpacity>
           </View>
         )}
-        <ChatFooter
+       {items.status !== 'verified' && <ChatFooter
           setAttachModalVisible={setAttachModalVisible}
           handleSend={handleSend}
           items={items}
-        />
+        />}
       </KeyboardAvoidingView>
 
       <AttachFileModal
         visible={attachModalVisible}
         onClose={() => setAttachModalVisible(false)}
         onPickCamera={() => {
-          pickCamera(); // your logic
+          pickCamera();
           setAttachModalVisible(false);
         }}
         onPickGallery={() => {
-          pickImageLibrary(); // your logic
+          pickImageLibrary();
           setAttachModalVisible(false);
         }}
         onPickDocument={() => {
-          // pickDocument(); // your logic
+          pickDocument();
           setAttachModalVisible(false);
         }}
       />
@@ -474,6 +527,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     lineHeight: 20,
+    fontFamily:Fonts.REGULAR
   },
   iconRight: {
     marginLeft: 8,

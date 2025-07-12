@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   Keyboard,
 } from 'react-native';
-// import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const getTimeAgo = (timestamp: number) => {
   const now = Date.now();
@@ -107,13 +107,12 @@ export default function ChatBubble(props: any) {
                 justifyContent: 'flex-end',
                 alignItems: 'center',
               }}>
-              {/* <MaterialCommunityIcons name="check" size={12} color="#000" />
               <MaterialCommunityIcons
-                name="check"
-                size={12}
-                color="#000"
+                name={items.status === 'sent' ? 'check' : 'check-all'}
+                size={16}
+                color={items.status === 'read' ? 'blue' : '#000'}
                 style={{marginRight: 5}}
-              /> */}
+              />
 
               <Text style={[styles.timestamp, {textAlign: 'right'}]}>
                 {getTimeAgo(new Date(items?.createdAt)?.getTime())}

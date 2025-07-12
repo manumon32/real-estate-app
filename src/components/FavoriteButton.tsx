@@ -17,7 +17,7 @@ const FavoriteButton = ({
   tuchableStyle,
 }: Props) => {
   const toggleFavorite = useBoundStore(s => s.toggleFavorite);
-  const isFavorite = useBoundStore(s => s.isFavorite(item._id));
+  const isFavorite = useBoundStore(s => s.isFavorite(item?._id));
   const {bearerToken, setVisible} = useBoundStore();
 
   const iconName = useMemo(

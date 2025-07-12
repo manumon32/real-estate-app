@@ -9,6 +9,7 @@ import Toast from 'react-native-toast-message';
 import {ToastConfig} from './src/config/ToastConfig';
 import NetworkStatus from '@components/NetworkStatus';
 import {navigationRef} from '@navigation/RootNavigation';
+import {onNavigationReady} from './src/firebase/notificationService';
 
 export default function App() {
   const {
@@ -28,15 +29,16 @@ export default function App() {
     config: {
       screens: {
         Home: 'HomeIndex',
-        Details: 'Details/:id',
-        AddPost: 'AddPost',
       },
     },
   };
 
   return (
     <ThemeProvider>
-      <NavigationContainer ref={navigationRef} linking={linking}>
+      <NavigationContainer
+        ref={navigationRef}
+        linking={linking}
+        onReady={onNavigationReady}>
         <RootNavigator />
 
         <CommonLocationModal

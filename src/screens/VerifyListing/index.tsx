@@ -6,7 +6,7 @@ import {Fonts} from '@constants/font';
 import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback} from 'react';
 import {TouchableRipple, Surface} from 'react-native-paper';
-
+import {pick} from '@react-native-documents/picker';
 import {TextInput, IconButton} from 'react-native-paper';
 import {
   View,
@@ -26,7 +26,11 @@ import {useFocusEffect, useRoute} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 import AttachFileModal from './AttachFileModal';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import {sendVerificationDetails, uploadImages} from '@api/services';
+import {
+  sendVerificationDetails,
+  uploadDocuments,
+  uploadImages,
+} from '@api/services';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // import SlideToRecordButton from './AudioRecord';
@@ -126,6 +130,22 @@ const Verification = ({navigation}: any) => {
   }, []);
 
   const pickDocument = async () => {
+    try {
+      const results = await pick({
+        mode: 'import',
+        allowMultiSelection: true,
+        types: ['public.pdf'], // UTIs for iOS, MIME types valid for Android
+        keepLocalCopy: true,
+      });
+      upLoadDoc(results);
+      console.log('hi'); // Array of file metadata and URIs
+    } catch (err: any) {
+      if (err.isCancel) {
+        console.log('User canceled');
+      } else {
+        console.error(err);
+      }
+    }
   };
 
   const pickCamera = useCallback(() => {
@@ -157,15 +177,35 @@ const Verification = ({navigation}: any) => {
         clientId: clientId,
         bearerToken: bearerToken,
       });
-      sendImages(imageUrls);
+      sendFIles(imageUrls, true);
     } catch (error) {
       return [];
     }
   };
 
-  const sendImages = (imageUrls: any) => {
-    const uploadPromises = imageUrls.map((url: string) =>
-      sendImageUrlToApi(url),
+  const upLoadDoc = async (docs: any) => {
+    try {
+      let formData = new FormData();
+      docs.map((items: any) => {
+        formData.append('documents', {
+          uri: items.uri,
+          name: items.name,
+          type: items.type,
+        } as any);
+      });
+      const imageUrls: any = await uploadDocuments(formData, {
+        token: token,
+        clientId: clientId,
+        bearerToken: bearerToken,
+      });
+      sendFIles(imageUrls);
+    } catch (error) {
+      return [];
+    }
+  };
+  const sendFIles = (imageUrls: any, image = false) => {
+    const uploadPromises = imageUrls.map((url: any) =>
+      sendImageUrlToApi(image ? url : url.location),
     );
 
     return Promise.all(uploadPromises)
@@ -367,7 +407,7 @@ const Verification = ({navigation}: any) => {
           setAttachModalVisible(false);
         }}
         onPickDocument={() => {
-           pickDocument(); // your logic
+          pickDocument(); // your logic
           setAttachModalVisible(false);
         }}
       />

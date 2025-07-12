@@ -12,10 +12,11 @@
 		1D28D32506574068B64B0F36 /* DMSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3677AA0115AC4A60BA2D5195 /* DMSans-Italic.ttf */; };
 		2CADB066EC5F00553CEF90CD /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		54718B656DAC4D57961DAAA0 /* DMSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6745359E479049759DD15AC7 /* DMSans-Bold.ttf */; };
-		7598140381726F83FC889B59 /* libPods-realEsateApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DBAEE28E19F5F373AF4DE37B /* libPods-realEsateApp.a */; };
+		6A16E04E39C3575328235500 /* Pods_realEsateApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C4752C3F706CA80ED1816D7 /* Pods_realEsateApp.framework */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		915F6B9774514E0995699DA0 /* DMSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 44E8DD1998604628BB279CCE /* DMSans-Medium.ttf */; };
+		AD995D3D2E1E42B600CB01A1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AD995D3C2E1E42B600CB01A1 /* GoogleService-Info.plist */; };
 		AF82FAE846E64009BC4F7E2E /* DMSans-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BA5A7D574506471FB07EFBEB /* DMSans-MediumItalic.ttf */; };
 		FF5AC2470943469C80B51552 /* DMSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3FBAD5EAE37647CEBD3E70AB /* DMSans-BoldItalic.ttf */; };
 /* End PBXBuildFile section */
@@ -42,16 +43,18 @@
 		65BDD03BC8F84000A94D535D /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
 		6745359E479049759DD15AC7 /* DMSans-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "DMSans-Bold.ttf"; path = "../src/assets/fonts/DMSans-Bold.ttf"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = realEsateApp/AppDelegate.swift; sourceTree = "<group>"; };
+		7C4752C3F706CA80ED1816D7 /* Pods_realEsateApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_realEsateApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = realEsateApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		839C814C6CAC4631B3B7DA72 /* OFL.txt */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = OFL.txt; path = ../src/assets/fonts/OFL.txt; sourceTree = "<group>"; };
 		A2F4A7F6D2671C0C7F67834A /* Pods-realEsateApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-realEsateApp.release.xcconfig"; path = "Target Support Files/Pods-realEsateApp/Pods-realEsateApp.release.xcconfig"; sourceTree = "<group>"; };
+		AD475FDC2E1D23F800CA5C9E /* realEsateApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = realEsateApp.entitlements; path = realEsateApp/realEsateApp.entitlements; sourceTree = "<group>"; };
+		AD995D3C2E1E42B600CB01A1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B05F64D0AB2448FEBAF7A5BB /* DMSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "DMSans-Regular.ttf"; path = "../src/assets/fonts/DMSans-Regular.ttf"; sourceTree = "<group>"; };
 		B55D4B95F0C5492480A2D4A0 /* FontAwesome6_Solid.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome6_Solid.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome6_Solid.ttf"; sourceTree = "<group>"; };
 		BA5A7D574506471FB07EFBEB /* DMSans-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "DMSans-MediumItalic.ttf"; path = "../src/assets/fonts/DMSans-MediumItalic.ttf"; sourceTree = "<group>"; };
 		BEDD7F7509EF482BBDDE49EA /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		DA93D77DA5D54C058E78CA37 /* AntDesign.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = AntDesign.ttf; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; };
 		DB7EC511C94546DDBD6DD63E /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SimpleLineIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; };
-		DBAEE28E19F5F373AF4DE37B /* libPods-realEsateApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-realEsateApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E0396F07321FDE04A7861C67 /* Pods-realEsateApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-realEsateApp.debug.xcconfig"; path = "Target Support Files/Pods-realEsateApp/Pods-realEsateApp.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F0A5C809F21B462A8732BE67 /* FontAwesome6_Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome6_Regular.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome6_Regular.ttf"; sourceTree = "<group>"; };
@@ -64,7 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7598140381726F83FC889B59 /* libPods-realEsateApp.a in Frameworks */,
+				6A16E04E39C3575328235500 /* Pods_realEsateApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +77,8 @@
 		13B07FAE1A68108700A75B9A /* realEsateApp */ = {
 			isa = PBXGroup;
 			children = (
+				AD995D3C2E1E42B600CB01A1 /* GoogleService-Info.plist */,
+				AD475FDC2E1D23F800CA5C9E /* realEsateApp.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
@@ -87,7 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				DBAEE28E19F5F373AF4DE37B /* libPods-realEsateApp.a */,
+				7C4752C3F706CA80ED1816D7 /* Pods_realEsateApp.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -232,6 +237,7 @@
 				FF5AC2470943469C80B51552 /* DMSans-BoldItalic.ttf in Resources */,
 				1D28D32506574068B64B0F36 /* DMSans-Italic.ttf in Resources */,
 				915F6B9774514E0995699DA0 /* DMSans-Medium.ttf in Resources */,
+				AD995D3D2E1E42B600CB01A1 /* GoogleService-Info.plist in Resources */,
 				AF82FAE846E64009BC4F7E2E /* DMSans-MediumItalic.ttf in Resources */,
 				16273E1F20944CB4AF1CD011 /* DMSans-Regular.ttf in Resources */,
 			);
@@ -345,13 +351,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = realEsateApp/realEsateApp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 824727UY26;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = realEsateApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Real Estate App";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -376,12 +383,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = realEsateApp/realEsateApp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 824727UY26;
 				INFOPLIST_FILE = realEsateApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Real Estate App";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -448,6 +456,17 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers/react/nativemodule/core",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
@@ -521,6 +540,17 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers/react/nativemodule/core",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,

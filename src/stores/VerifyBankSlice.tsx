@@ -45,7 +45,7 @@ export const createBankVerificationSlice = (
   bankVerification_hasMore: false,
   bankVerification_totalpages: 0,
 
-  fetchBanks: async (payload) => {
+  fetchBanks: async payload => {
     set({bankVerification_loading: true, bankVerificationDetails: []});
     try {
       let newPayload = {
@@ -71,7 +71,6 @@ export const createBankVerificationSlice = (
     set({
       bankVerification_loading: true,
       bankVerification_page: 0,
-      bankVerificationDetails: [],
     });
     try {
       await startBankVerificationAPI(
@@ -83,6 +82,9 @@ export const createBankVerificationSlice = (
         },
       ).catch(error => {
         console.warn('startBankVerificationAPI failed:', error);
+      });
+      set({
+        bankVerification_loading: false,
       });
     } catch (err: any) {
       // navigate('VerifyListing', {items: {id: '6853e34e05711055c493ff3b'}});
@@ -125,7 +127,6 @@ export const createBankVerificationSlice = (
 
   resetBankVerificationDetails: () => {
     return set(() => ({
-      banks:[],
       bankVerificationDetails: [],
       bankVerification_page: 0,
       bankVerification_hasMore: false,
@@ -135,6 +136,7 @@ export const createBankVerificationSlice = (
 
   resetBankSlice: () => {
     return set(() => ({
+      banks: [],
       bankVerificationDetails: [],
       bankVerification_page: 0,
       bankVerification_hasMore: false,

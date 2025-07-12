@@ -4,7 +4,7 @@ import CommonHeader from '@components/Header/CommonHeader';
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
-import React, {useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   View,
@@ -21,6 +21,7 @@ import {getTimeAgo} from './ChatBubble';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ChatListSkeleton from '@components/SkeltonLoader/ChatListSkeleton';
 import NoChats from '@components/NoChatFound';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface MessageCardProps {
   name: string;
@@ -33,6 +34,9 @@ interface MessageCardProps {
   navigation: any;
   item: any;
   type: string;
+  status: string;
+  isOwner: boolean;
+  onlineStatus: boolean;
 }
 
 const MessageCard: React.FC<MessageCardProps> = ({
@@ -43,9 +47,12 @@ const MessageCard: React.FC<MessageCardProps> = ({
   avatarUrl,
   coverImage,
   unreadCount = 0,
+  onlineStatus,
   navigation,
   item,
   type,
+  status,
+  isOwner,
 }) => {
   return (
     <TouchableOpacity
@@ -59,23 +66,44 @@ const MessageCard: React.FC<MessageCardProps> = ({
       }}
       style={styles.container}>
       <Image
-        style={{height: 56, width: 56, borderRadius: 5}}
+        style={{height: 60, width: 60, borderRadius: 5}}
         source={{uri: coverImage}}
       />
-      <Image
-        style={{
-          height: 30,
-          width: 30,
-          borderRadius: 50,
-          position: 'absolute',
-          left: 50,
-          bottom:10
-        }}
-        source={{uri: avatarUrl}}
-      />
+      {avatarUrl && (
+        <View
+          style={{
+            borderRadius: 100,
+            position: 'absolute',
+            left: 46,
+            bottom: 8,
+            borderWidth: 2,
+            borderColor: '#fff',
+          }}>
+          <Image
+            style={{
+              height: 32,
+              width: 32,
+              borderRadius: 50,
+            }}
+            source={{uri: avatarUrl}}
+          />
+          {onlineStatus && (
+            <MaterialCommunityIcons
+              name={'checkbox-blank-circle'}
+              style={{position: 'absolute', left: 18, bottom: -6}}
+              size={14}
+              color={'green'}
+            />
+          )}
+        </View>
+      )}
       <View style={styles.textContainer}>
         <View style={styles.headerRow}>
-          <Text style={styles.name}>{name}</Text>
+          <View style={{flexDirection: 'row', width: '80%'}}>
+            <Text numberOfLines={1} style={styles.name}>
+              {name}
+            </Text>
+          </View>
           {time && (
             <Text style={styles.time}>
               {getTimeAgo(new Date(time)?.getTime())}
@@ -88,29 +116,39 @@ const MessageCard: React.FC<MessageCardProps> = ({
             {title}
           </Text>
         )}
-        {type === 'text' && (
-          <Text
-            numberOfLines={2}
-            style={[
-              styles.message,
-              unreadCount <= 0 && {fontFamily: Fonts.REGULAR},
-            ]}>
-            {message}
-          </Text>
-        )}
-        {type === 'image' && (
-          <View style={{flexDirection: 'row', width: '100%'}}>
-            <Icon name="camera-outline" size={16} color="#000" />
+        <View style={{flexDirection: 'row'}}>
+          {isOwner && (
+            <MaterialCommunityIcons
+              name={status === 'sent' ? 'check' : 'check-all'}
+              size={16}
+              color={status === 'read' ? 'blue' : '#000'}
+              style={{marginRight: 5}}
+            />
+          )}
+          {type === 'text' && (
             <Text
               numberOfLines={2}
               style={[
                 styles.message,
                 unreadCount <= 0 && {fontFamily: Fonts.REGULAR},
               ]}>
-              {' Image'}
+              {message}
             </Text>
-          </View>
-        )}
+          )}
+          {type === 'image' && (
+            <View style={{flexDirection: 'row', width: '100%'}}>
+              <Icon name="camera-outline" size={16} color="#000" />
+              <Text
+                numberOfLines={2}
+                style={[
+                  styles.message,
+                  unreadCount <= 0 && {fontFamily: Fonts.REGULAR},
+                ]}>
+                {' Image'}
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
       {unreadCount > 0 && (
         <View style={styles.badge}>
@@ -122,13 +160,14 @@ const MessageCard: React.FC<MessageCardProps> = ({
 };
 
 const Chat = React.memo(({navigation}: any) => {
-  const {fetchChatListings, chatList, resetChatDetails, chatListloading} =
+  const {fetchChatListings, chatList, chatListloading, user, onlineUsers} =
     useBoundStore();
+  const [filterBy, setFilterBy] = useState<any>(null);
   const {theme} = useTheme();
 
   useFocusEffect(
     useCallback(() => {
-      resetChatDetails([]);
+      // resetChatDetails([]);
       fetchChatListings();
       return () => {};
     }, []),
@@ -143,9 +182,12 @@ const Chat = React.memo(({navigation}: any) => {
           message={item?.item?.lastMessage?.body}
           navigation={navigation}
           title={item?.item?.property.title}
+          isOwner={item?.item?.lastMessage?.senderId === user?._id}
           time={item?.item?.lastMessage?.createdAt}
           unreadCount={item?.item?.unreadCount ?? 0}
+          onlineStatus={onlineUsers.includes(item?.item?.user?._id)}
           item={item?.item}
+          status={item?.item?.lastMessage?.status}
           coverImage={
             item?.item?.property?.coverImage ??
             'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_items_boosted&w=740'
@@ -157,14 +199,22 @@ const Chat = React.memo(({navigation}: any) => {
         />
       );
     },
-    [navigation],
+    [navigation, onlineUsers],
   );
 
   return (
     <SafeAreaView>
       <CommonHeader title="Chats" />
       <FlatList
-        data={chatList}
+        data={
+          filterBy
+            ? chatList.filter((items: any) =>
+                filterBy === 'sell'
+                  ? items.property.customerId === user?._id
+                  : items.property.customerId !== user?._id,
+              )
+            : chatList
+        }
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -183,63 +233,49 @@ const Chat = React.memo(({navigation}: any) => {
                 padding: 10,
                 backgroundColor: '#fff',
               }}>
-              {/* <TouchableOpacity
-                style={[
-                  styles.chip,
-                  // // !filterBy &&
-                  styles.chipSelected,
-                ]}
+              <TouchableOpacity
+                style={[styles.chip, !filterBy && styles.chipSelected]}
                 onPress={() => {
-                  // setFilterBy(null);
+                  setFilterBy(null);
                 }}>
                 <Text
                   style={[
-                    // newselected?.includes(item._id)
                     styles.chipText,
-                    // !filterBy &&
-                    styles.chipTextSelected,
+                    !filterBy && styles.chipTextSelected,
                   ]}>
                   {'All'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                // key={index}
                 style={[
                   styles.chip,
-                  // filterBy === AdStatusEnum[items] && styles.chipSelected,
+                  filterBy === 'sell' && styles.chipSelected,
                 ]}
                 onPress={() => {
-                  // setFilterBy(AdStatusEnum[items]);
+                  setFilterBy('sell');
                 }}>
                 <Text
                   style={[
-                    // newselected?.includes(item._id)
                     styles.chipText,
-                    // filterBy === AdStatusEnum[items] &&
-                    // styles.chipTextSelected,
+                    filterBy === 'sell' && styles.chipTextSelected,
                   ]}>
                   {'Sell'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 // key={index}
-                style={[
-                  styles.chip,
-                  // filterBy === AdStatusEnum[items] && styles.chipSelected,
-                ]}
+                style={[styles.chip, filterBy === 'buy' && styles.chipSelected]}
                 onPress={() => {
-                  // setFilterBy(AdStatusEnum[items]);
+                  setFilterBy('buy');
                 }}>
                 <Text
                   style={[
-                    // newselected?.includes(item._id)
                     styles.chipText,
-                    // filterBy === AdStatusEnum[items] &&
-                    // styles.chipTextSelected,
+                    filterBy === 'buy' && styles.chipTextSelected,
                   ]}>
                   {'Buy'}
                 </Text>
-              </TouchableOpacity> */}
+              </TouchableOpacity>
             </ScrollView>
           </>
         }

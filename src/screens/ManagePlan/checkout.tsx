@@ -81,15 +81,15 @@ export function startCheckoutPromise(params: any): Promise<void> {
       })
       /* 5️⃣  Any error or cancellation */
       .catch(err => {
-        let message = 'Unexpected error';
+        let message = 'Payment could not be completed.';
         if (err?.description) {
-          message = `Unexpected error`;
+          message = message;
         } else if (axios.isAxiosError(err)) {
           message = 'Network error – please try again.';
         }
         Toast.show({
           type: 'error',
-          text1: 'Payment failed with ' + message,
+          text1: message,
           position: 'bottom',
         });
         PaymentStore().setError(message);

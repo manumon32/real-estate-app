@@ -13,7 +13,7 @@ import useBoundStore from '@stores/index';
 function Header({navigation}: any): React.JSX.Element {
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
-  const {setlocationModalVisible, location} = useBoundStore();
+  const {setlocationModalVisible, location, bearerToken, setVisible} = useBoundStore();
 
   const backgroundStyle = {
     backgroundColor: theme.colors.background,
@@ -58,7 +58,7 @@ function Header({navigation}: any): React.JSX.Element {
 
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('NotificationList');
+               bearerToken ? navigation.navigate('NotificationList') : setVisible();
               }}>
               <IconButton
                 iconSize={20}

@@ -1,6 +1,6 @@
 import IconButton from '@components/Buttons/IconButton';
 import React from 'react';
-import {View, StyleSheet, Pressable} from 'react-native';
+import {View, StyleSheet, Pressable, } from 'react-native';
 import {WebView} from 'react-native-webview';
 
 // const deviceWidth = Dimensions.get('window').width;

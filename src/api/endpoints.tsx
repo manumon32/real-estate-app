@@ -30,6 +30,7 @@ export const API = {
     GET: '/user',
     PROFILE: '/user/details',
     UPDATE_PROFILE: '/user/update',
+    REGISTER_TOKEN: '/user/fcmTokenRegister',
   },
   CHAT: {
     GET: '/chat-room',
@@ -54,5 +55,6 @@ export const API = {
   },
   FAVOURITES: '/favorites',
   UPLOAD_IMAGES: '/files/upload-images',
+  UPLOAD_DOCUMENTS: '/files/upload-documents',
   SUPPORT: '/support',
 };

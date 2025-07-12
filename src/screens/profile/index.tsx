@@ -41,7 +41,7 @@ const Profile = () => {
           <RefreshControl
             refreshing={userProfileloading}
             onRefresh={() => {
-              fetchUserDetails();
+              fetchUserDetails(true);
             }}
             colors={['#40DABE', '#40DABE', '#227465']}
           />

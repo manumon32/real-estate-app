@@ -20,6 +20,7 @@ import {Fonts} from '@constants/font';
 import IconButton from '@components/Buttons/IconButton';
 import ViewBenifitsModal from './ViewBenifitsModal';
 import {startCheckoutPromise} from './checkout';
+import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 
 export enum AdStatusEnum {
   PENDING = 'pending',
@@ -38,6 +39,7 @@ type PlanCardProps = {
   badge?: string;
   onPress?: () => void;
   loading: boolean;
+  active: boolean;
 };
 
 const PlanCard: React.FC<PlanCardProps> = ({
@@ -45,16 +47,18 @@ const PlanCard: React.FC<PlanCardProps> = ({
   price,
   features,
   badge,
+  active,
   onPress,
 }) => {
   return (
-    <View style={styles.card}>
+    <View
+      style={[styles.card, active && {borderWidth: 2, borderColor: '#88E4CF'}]}>
       {/* Title & Badge */}
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
-        {badge && (
+        {active && (
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{badge}</Text>
+            <Text style={styles.badgeText}>{'Active'}</Text>
           </View>
         )}
       </View>
@@ -81,16 +85,24 @@ const PlanCard: React.FC<PlanCardProps> = ({
       ))}
 
       {/* Button */}
-      <TouchableOpacity style={styles.button} onPress={onPress}>
+      {!active && <TouchableOpacity style={styles.button} onPress={onPress}>
         <Text style={styles.buttonText}>Buy Now</Text>
-      </TouchableOpacity>
+      </TouchableOpacity>}
     </View>
   );
 };
 
 const ManagePlans = () => {
-  const {managePlansList, fetchPlans, bearerToken, token, clientId, user} =
-    useBoundStore();
+  const {
+    managePlansList,
+    fetchPlans,
+    bearerToken,
+    token,
+    clientId,
+    user,
+    managePlanLoading,
+    fetchUserDetails,
+  } = useBoundStore();
   const navigation = useNavigation();
   const {theme} = useTheme();
 
@@ -115,6 +127,7 @@ const ManagePlans = () => {
         email: user.phone ?? null,
       };
       await startCheckoutPromise(payload);
+      fetchUserDetails();
       setLoading(false);
       // @ts-ignore
       navigation.goBack();
@@ -127,11 +140,14 @@ const ManagePlans = () => {
 
   const renderAdItem = useCallback(
     (items: any) => {
+      console.log(user.subscription.subscriptionPlanId?._id);
+      console.log(items?.item?._id);
       return (
         <PlanCard
           title={items?.item?.name}
           price={items?.item?.price}
           features={items?.item?.description ?? []}
+          active={user.subscription.subscriptionPlanId?._id === items?.item?._id}
           loading={loading}
           onPress={() => {
             // setIsViewBenefitsVisible(true);
@@ -195,11 +211,16 @@ const ManagePlans = () => {
           />
         }
         ListFooterComponent={
-          managePlansList.length <= 0 ? (
-            <Text style={styles.endText}>No Active Plans.</Text>
-          ) : (
-            <></>
-          )
+          <>
+            {managePlanLoading && managePlansList.length <= 0 && (
+              <AdsListSkelton />
+            )}
+            {managePlansList.length <= 0 ? (
+              <Text style={styles.endText}>No Active Plans.</Text>
+            ) : (
+              <></>
+            )}
+          </>
         }
       />
 
@@ -245,14 +266,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badge: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#2F8D79',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
   badgeText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#fff',
     fontWeight: '600',
   },
   title: {

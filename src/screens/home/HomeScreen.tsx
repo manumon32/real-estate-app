@@ -11,10 +11,14 @@ import {
   // ActivityIndicator,
   RefreshControl,
   Image,
-  Alert,
+  BackHandler,
+  ToastAndroid,
 } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
-import {requestUserPermission} from '../../firebase/notificationService';
+import {
+  navigateByNotification,
+  requestUserPermission,
+} from '../../firebase/notificationService';
 import {useTheme} from '@theme/ThemeProvider';
 import Header from './Header/Header';
 import PropertyCard from '@components/PropertyCard';
@@ -22,6 +26,19 @@ import useBoundStore from '@stores/index';
 import {Fonts} from '@constants/font';
 import {connectSocket} from './../../soket';
 import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
+import {useFocusEffect} from '@react-navigation/native';
+
+export interface INotification {
+  userId: string;
+  type: 'message' | 'system' | 'property' | 'alert' | 'reminder';
+  title: string;
+  message: string;
+  entityId?: string;
+  entityType?: 'chatRoom' | 'property' | 'user' | 'transaction';
+  read: boolean;
+  createdAt: Date;
+  metadata?: Record<string, any>;
+}
 
 function App({navigation}: any): React.JSX.Element {
   const {
@@ -44,6 +61,38 @@ function App({navigation}: any): React.JSX.Element {
     if (loading || !hasMore) return;
     fetchListings();
   };
+  const useDoubleBackExit = () => {
+    const backPressedOnce = useRef(false);
+
+    useFocusEffect(
+      useCallback(() => {
+        const onBackPress = () => {
+          if (backPressedOnce.current) {
+            BackHandler.exitApp(); // ✅ Exit the app
+            return true;
+          }
+
+          backPressedOnce.current = true;
+          ToastAndroid.show('Press back again to exit', ToastAndroid.SHORT);
+
+          setTimeout(() => {
+            backPressedOnce.current = false;
+          }, 2000);
+
+          return true; // Prevent default back behavior
+        };
+
+        const backHandler = BackHandler.addEventListener(
+          'hardwareBackPress',
+          onBackPress,
+        );
+
+        return () => backHandler.remove();
+      }, []),
+    );
+  };
+
+  useDoubleBackExit();
 
   const renderAdItem = useCallback(
     (items: any) => {
@@ -87,19 +136,37 @@ function App({navigation}: any): React.JSX.Element {
   useEffect(() => {
     requestUserPermission();
 
-    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
-      Alert.alert('New Notification', remoteMessage.notification?.title ?? '');
-    });
+    // const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+    //   const data = remoteMessage?.data;
+    //   // if (data?.type) {
+    //   navigateByNotification(data as any as INotification);
+    //   // }
+    // });
+
+    const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
+      remoteMessage => {
+        const data = remoteMessage?.data;
+        navigateByNotification(data as any as INotification);
+      },
+    );
 
     messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('Message handled in the background!', remoteMessage);
+      const data = remoteMessage?.data;
+      navigateByNotification(data as any as INotification);
     });
 
+    // messaging()
+    //   .getInitialNotification()
+    //   .then(remoteMessage => {
+    //     const data = remoteMessage?.data;
+    //     navigateByNotification(data as any as INotification);
+    //   });
+
     return () => {
-      unsubscribeForeground();
+      // unsubscribeForeground();
+      unsubscribeOpenedApp();
     };
   }, [bearerToken]);
-
   return (
     <SafeAreaView>
       <StatusBar

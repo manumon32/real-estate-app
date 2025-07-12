@@ -271,17 +271,27 @@ const PropertyDetails = React.memo(() => {
   };
 
   useEffect(() => {
-    fetchBanks(items?._id);
-  }, [fetchBanks, items]);
+    if (!items?._id) {
+      // @ts-ignore
+      navigation.navigate('Main');
+    } else {
+      fetchBanks(items?._id);
+    }
+  }, [fetchBanks, items, navigation]);
 
   useFocusEffect(
     React.useCallback(() => {
-      items?._id && fetchDetails(items?._id);
+      if (!items?._id) {
+        // @ts-ignore
+        navigation.navigate('Main');
+      } else {
+        fetchDetails(items?._id);
+      }
       return () => {
         setProperty(null);
         clearDetails();
       };
-    }, [clearDetails, fetchDetails, items?._id]),
+    }, [clearDetails, fetchDetails, items?._id, navigation]),
   );
 
   React.useEffect(() => {
@@ -324,54 +334,58 @@ const PropertyDetails = React.memo(() => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* {detailLoading && (
+      {detailLoading && !items?.title && (
         <View style={styles.overlay}>
           <ActivityIndicator size="large" color="#fff" />
         </View>
-      )} */}
+      )}
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{paddingBottom: 120}}>
         <Header details={property ? property : items} />
 
-        <View style={styles.header}>
-          <Text style={styles.title}>
-            {property?.title ? property?.title : items?.title}
-          </Text>
-          <Text style={styles.locationTitle}>
-            <IconButton
-              iconSize={16}
-              iconColor={theme.colors.text}
-              iconName={'map-marker'}
-            />
-            {property?.address ? property?.address : items?.address}
-          </Text>
-          <View style={{flexDirection: 'row', alignContent: 'center', top: 10}}>
-            <Text
-              style={[
-                styles.price,
-                {color: theme.colors.text, marginRight: 5},
-              ]}>
-              {/* <IconButton
+        {items?.title && (
+          <View style={styles.header}>
+            <Text style={styles.title}>
+              {property?.title ? property?.title : items?.title}
+            </Text>
+            <Text style={styles.locationTitle}>
+              <IconButton
+                iconSize={16}
+                iconColor={theme.colors.text}
+                iconName={'map-marker'}
+              />
+              {property?.address ? property?.address : items?.address}
+            </Text>
+            <View
+              style={{flexDirection: 'row', alignContent: 'center', top: 10}}>
+              <Text
+                style={[
+                  styles.price,
+                  {color: theme.colors.text, marginRight: 5},
+                ]}>
+                {/* <IconButton
                 iconSize={18}
                 iconColor={'#171717'}
                 iconName={'currency-inr'}
               /> */}
-              {property?.price
-                ? formatINR(property?.price)
-                : formatINR(items?.price)}
-            </Text>
-            <Text style={styles.squrft}>({property?.areaSize}/ Sq.ft)</Text>
-            <View style={styles.nogotiable}>
-              <Text style={styles.nogotiableText}>Negotiable</Text>
+                {property?.price
+                  ? formatINR(property?.price)
+                  : formatINR(items?.price)}
+              </Text>
+              <Text style={styles.squrft}>({property?.areaSize}/ Sq.ft)</Text>
+              <View style={styles.nogotiable}>
+                <Text style={styles.nogotiableText}>Negotiable</Text>
+              </View>
             </View>
           </View>
-        </View>
+        )}
         {detailLoading && <CustomDummyLoader />}
-        {details?.isVerified && <View
-          style={styles.verifiedBadge}>
-          <Text style={styles.verifiedText}>✅ Verified</Text>
-        </View>}
+        {details?.isVerified && (
+          <View style={styles.verifiedBadge}>
+            <Text style={styles.verifiedText}>✅ Verified</Text>
+          </View>
+        )}
         {/* <Tooltip
           isVisible={showTip}
           content={
@@ -397,9 +411,9 @@ const PropertyDetails = React.memo(() => {
                       marginTop: 8,
                     }}>
                     {banks.map(
-                      (item: any) =>
+                      (item: any, index: number) =>
                         item.status === 'verified' && (
-                          <View style={styles.bankBadge}>
+                          <View key={index} style={styles.bankBadge}>
                             {item.bankId.name ? (
                               <Image
                                 source={{
@@ -917,7 +931,7 @@ const PropertyDetails = React.memo(() => {
         onDismiss={() => setBankModalVisible(false)}
         onSelect={(data: any) => {
           setSelectedBank(data);
-          navigate('VerifyBankList', {items: {id: data}});
+          navigate('VerifyBankList', {items: {...data, id: data?._id}});
         }}
         selectedBank={selectedBank}
       />

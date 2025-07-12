@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Modal,
   ScrollView,
@@ -87,6 +87,10 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     [filtersNew, setFilterNew],
   );
 
+  useEffect(()=>{
+    setFilterNew(filters);
+  },[filters])
+
   const renderChips = useCallback(
     (items: any[], selected?: any, setSelected?: any) => (
       <View style={styles.chipContainer}>
@@ -127,7 +131,6 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   };
 
   const updatePrice = (items: any) => {
-    console.log(items);
     updateFilter('price', items);
   };
 
@@ -158,7 +161,6 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             <Text style={styles.title}>Filters & Sort</Text>
             <Pressable
               onPress={() => {
-                resetFilters();
                 onClose();
               }}
               style={styles.closeButton}>
@@ -234,10 +236,21 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
               </>
             )}
           </ScrollView>
-
-          <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-            <Text style={styles.applyText}>Apply</Text>
-          </TouchableOpacity>
+          <View style={{flexDirection: 'row'}}>
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={() => {
+                setFields([]);
+                setFilterNew({});
+                resetFilters();
+                onClose();
+              }}>
+              <Text style={[styles.applyText, {color:'#000'}]}>Clear</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
+              <Text style={styles.applyText}>Apply</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
@@ -296,11 +309,21 @@ const styles = StyleSheet.create({
   chipTextSelected: {
     color: '#fff',
   },
+  clearButton: {
+    backgroundColor: '#f4f4f4',
+    width:'45%',
+    padding: 15,
+    borderWidth:0.5,
+    marginRight: 5,
+    marginLeft: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: Platform.OS === 'android' ? 0 : 30,
+  },
   applyButton: {
+    width:'45%',
     backgroundColor: '#2A9D8F',
     padding: 15,
-    marginRight: 15,
-    marginLeft: 15,
     paddingRight: 15,
     borderRadius: 10,
     alignItems: 'center',

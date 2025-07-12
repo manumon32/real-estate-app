@@ -2,13 +2,12 @@ import {fetchChatDetailsAPI, fetchChatListingsAPI} from '@api/services';
 
 export interface Chatlist {
   _id: string;
-  participants: [string];
   type: string;
   propertyId: string;
   roomId: string;
   createdAt: string;
   updatedAt: string;
-  unreadCount: string;
+  unreadCount: number;
   __v: number;
   lastMessage: {
     _id: string;
@@ -26,7 +25,8 @@ export interface Chatlist {
 export interface ChatSlice {
   unreadCount: number;
   chatList: Chatlist[];
-  chatDetails: string[];
+  onlineUsers: string[];
+  chatDetails: Object;
   chatListloading: boolean;
   error: string | null;
   chat_page: number;
@@ -41,15 +41,18 @@ export interface ChatSlice {
   setChatList: (arg: any) => Promise<void>;
   fetchChatDetails: (filters?: any, page?: number) => Promise<void>;
   updateChat: (msg?: any) => Promise<any>;
-  resetChatDetails: (msg?: any) => Promise<any>;
+  updateOnlineUsers: (msg?: any) => Promise<any>;
+  resetChatDetails: (msg?: any) => Promise<void>;
+  resetChat: (msg?: any) => Promise<any>;
 }
 
 export const createChatSlice = (set: any, get: any): ChatSlice => ({
   chatList: [],
+  onlineUsers:[],
   error: null,
   chatListloading: false,
   unreadCount: 0,
-  chatDetails: [],
+  chatDetails: {},
   chat_page: 0,
   chat_hasMore: false,
   chat_loading: false,
@@ -79,6 +82,9 @@ export const createChatSlice = (set: any, get: any): ChatSlice => ({
       set({error: err.message, chatListloading: false});
     }
   },
+  updateOnlineUsers: (users) =>{
+    return set({onlineUsers: users});
+  },
   setChatList: (list: any) => set({chatList: list}),
   fetchChatDetails: async (id: any) => {
     set({chat_loading: true, filter_roomId: id});
@@ -93,21 +99,52 @@ export const createChatSlice = (set: any, get: any): ChatSlice => ({
         bearerToken: get().bearerToken,
       });
       set(() => ({
-        chatDetails:res.rows,
+        chatDetails: {...get().chatDetails, [id]: res.rows},
         chat_loading: false,
       }));
     } catch (err: any) {
       set({error: err.message, loading: false});
     }
   },
-  updateChat: (msg: any) =>
-    set((state: any) => ({
-      chatDetails: [...state.chatDetails, msg],
-    })),
+  updateChat: (msg: any) => {
+    const state = get();
+    const roomId = msg?.roomId;
 
+    if (!roomId && !msg?.messageId) return;
+
+    const existingMessages = state.chatDetails?.[roomId] ?? [];
+    const index = existingMessages.findIndex(
+      (item: any) => item.messageId === msg.messageId,
+    );
+
+    const updatedMessages =
+      index !== -1
+        ? [
+            ...existingMessages.slice(0, index),
+            msg,
+            ...existingMessages.slice(index + 1),
+          ]
+        : [...existingMessages, msg];
+
+    return set(() => ({
+      chatDetails: {
+        ...state.chatDetails,
+        [roomId]: updatedMessages,
+      },
+    }));
+  },
   resetChatDetails: (msg: any) =>
     set(() => ({
       chatDetails: msg,
+      chat_page: 0,
+      chat_hasMore: false,
+      filter_roomId: null,
+    })),
+
+  resetChat: () =>
+    set(() => ({
+      chatList: [],
+      chatDetails: {},
       chat_page: 0,
       chat_hasMore: false,
       filter_roomId: null,

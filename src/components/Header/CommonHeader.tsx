@@ -19,6 +19,7 @@ interface CommonHeaderProps {
   onBackPress?: () => void;
   onRightPress?: () => void;
   rightIcon?: string;
+  onlineStatus?: boolean;
   backgroundColor?: string;
   textColor?: string;
   containerStyle?: ViewStyle;
@@ -31,6 +32,7 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
   onRightPress,
   rightIcon,
   backgroundColor = '#fff',
+  onlineStatus = false,
   textColor = '#1C1C1E',
   containerStyle,
   rightText,
@@ -66,10 +68,38 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
           />
         </TouchableOpacity>
 
-        <Text style={[styles.title, {color: textColor}]} numberOfLines={1}>
-          {title}
-        </Text>
+        <View style={{flex: 1, alignItems: 'center'}}>
+          <Text style={[styles.title, {color: textColor}]} numberOfLines={1}>
+            {title}
+          </Text>
 
+          {onlineStatus && (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: -6,
+              }}>
+              <MaterialCommunityIcons
+                name="checkbox-blank-circle"
+                size={8}
+                color="green"
+              />
+              <Text
+                style={{
+                  color: 'green',
+                  fontSize: 12,
+                  marginLeft: 4,
+                  fontFamily: Fonts.MEDIUM,
+                }}>
+                Online
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* {onlineStatus && ( */}
+        {/* )} */}
         {rightIcon ? (
           <TouchableOpacity style={styles.rightButton} onPress={onRightPress}>
             <MaterialCommunityIcons
