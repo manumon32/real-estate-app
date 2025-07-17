@@ -7,6 +7,7 @@ import TextInput from '@components/Input/textInput';
 import CommonImageUploader from '@components/Input/ImageUploader';
 import ImagePickerModal from '@components/Modal/ImagePickerModal';
 import useBoundStore from '@stores/index';
+import CommonAmenityToggle from '@components/Input/amenityToggle';
 
 const Step5MediaUpload = (props: any) => {
   const {setImages, setFloorPlans, images, floorPlans} = useBoundStore();
@@ -159,6 +160,16 @@ const Step5MediaUpload = (props: any) => {
           {previewsFloorPlan}
         </View>
       )}
+
+
+
+      <View style={styles.inputContainer}>
+        <CommonAmenityToggle
+          label="Featured Property"
+          selected={values.featured}
+          onToggle={() => setFieldValue('featured', !values.featured)}
+        />
+      </View>
 
       <ImagePickerModal
         visible={modalVisible}

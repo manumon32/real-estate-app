@@ -145,6 +145,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
       transparent={true}
       animationType="fade"
       backdropColor={'red'}
+      statusBarTranslucent
       onRequestClose={onClose}
       style={{
         borderRadius: 20,
@@ -236,7 +237,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
               </>
             )}
           </ScrollView>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{flexDirection: 'row', bottom:10}}>
             <TouchableOpacity
               style={styles.clearButton}
               onPress={() => {

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 // MessageCard.tsx
-import CommonHeader from '@components/Header/CommonHeader';
+import CommonHeader from '@components/Header/CommonHeaderProfile';
 import {Fonts} from '@constants/font';
 import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback} from 'react';

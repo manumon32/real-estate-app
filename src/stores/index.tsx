@@ -79,6 +79,7 @@ const useBoundStore = create<StoreState>()(
           appConfigs: state.appConfigs,
           locationHistory: state.locationHistory,
           chatRoomId: state.chatRoomId,
+          managePlansList: state.managePlansList,
           chatList: state.chatList,
           chatDetails: state.chatDetails,
         }),

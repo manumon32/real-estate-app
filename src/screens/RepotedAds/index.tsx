@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
-import CommonHeader from '@components/Header/CommonHeader';
+import CommonHeader from '@components/Header/CommonHeaderProfile';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';

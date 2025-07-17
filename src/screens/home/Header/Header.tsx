@@ -1,7 +1,13 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {View, StyleSheet, Text, Platform, TouchableOpacity} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {
+  View,
+  StyleSheet,
+  Text,
+  Platform,
+  TouchableOpacity,
+  StatusBar,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
@@ -12,8 +18,8 @@ import useBoundStore from '@stores/index';
 
 function Header({navigation}: any): React.JSX.Element {
   const {theme} = useTheme();
-  const insets = useSafeAreaInsets();
-  const {setlocationModalVisible, location, bearerToken, setVisible} = useBoundStore();
+  const {setlocationModalVisible, location, bearerToken, setVisible} =
+    useBoundStore();
 
   const backgroundStyle = {
     backgroundColor: theme.colors.background,
@@ -22,6 +28,10 @@ function Header({navigation}: any): React.JSX.Element {
   return (
     <>
       <View style={[backgroundStyle]}>
+        <StatusBar
+          backgroundColor={theme.colors.background}
+          barStyle={Platform.OS === 'android' ? 'dark-content' : 'dark-content'}
+        />
         <LinearGradient
           colors={theme.colors.backgroundPalette}
           start={{x: 1, y: 2}}
@@ -29,7 +39,7 @@ function Header({navigation}: any): React.JSX.Element {
           style={[
             styles.container,
             {
-              paddingTop: Platform.OS === 'android' ? insets.top : 0,
+              paddingTop: Platform.OS === 'android' ? 0 : 0,
             },
           ]}>
           <View style={styles.headerContainer}>
@@ -58,7 +68,9 @@ function Header({navigation}: any): React.JSX.Element {
 
             <TouchableOpacity
               onPress={() => {
-               bearerToken ? navigation.navigate('NotificationList') : setVisible();
+                bearerToken
+                  ? navigation.navigate('NotificationList')
+                  : setVisible();
               }}>
               <IconButton
                 iconSize={20}

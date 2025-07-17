@@ -2,9 +2,10 @@ import React, {useCallback, useState} from 'react';
 import {View, StyleSheet, RefreshControl} from 'react-native';
 import {Text, Card, Divider, useTheme, IconButton} from 'react-native-paper';
 import {SwipeListView} from 'react-native-swipe-list-view';
+import {SafeAreaView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {formatDistanceToNow} from 'date-fns';
-import CommonHeader from '@components/Header/CommonHeader';
+import CommonHeader from '@components/Header/CommonHeaderProfile';
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
 import {useFocusEffect} from '@react-navigation/native';
@@ -120,7 +121,7 @@ export default function NotificationListSwipe() {
   );
 
   return (
-    <>
+    <SafeAreaView>
       <CommonHeader title="Notifications" textColor="#171717" />
       <SwipeListView
         data={notifications_List}
@@ -141,7 +142,7 @@ export default function NotificationListSwipe() {
           </View>
         }
       />
-    </>
+    </SafeAreaView>
   );
 }
 

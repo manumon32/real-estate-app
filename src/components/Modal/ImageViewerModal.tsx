@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, View, TouchableOpacity, StyleSheet } from 'react-native';
+import {Modal, View, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ImageViewer from 'react-native-image-zoom-viewer';
 
@@ -10,11 +10,20 @@ type Props = {
   startIndex?: number;
 };
 
-const ImageViewerModal: React.FC<Props> = ({ visible, onClose, imageUrls, startIndex = 0 }) => {
-  const images = imageUrls.map(url => ({ url }));
+const ImageViewerModal: React.FC<Props> = ({
+  visible,
+  onClose,
+  imageUrls,
+  startIndex = 0,
+}) => {
+  const images = imageUrls.map(url => ({url}));
 
   return (
-    <Modal visible={visible} transparent={true} onRequestClose={onClose}>
+    <Modal
+      statusBarTranslucent
+      visible={visible}
+      transparent={true}
+      onRequestClose={onClose}>
       <ImageViewer
         imageUrls={images}
         index={startIndex}

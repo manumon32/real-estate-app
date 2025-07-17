@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   Modal,
   View,
@@ -18,7 +18,11 @@ type Props = {
   onImagesSelected: (uris: string[]) => void;
 };
 
-const ImagePickerModal: React.FC<Props> = ({ visible, onClose, onImagesSelected }) => {
+const ImagePickerModal: React.FC<Props> = ({
+  visible,
+  onClose,
+  onImagesSelected,
+}) => {
   const [selected, setSelected] = useState<string[]>([]);
 
   const handleAssetsPicked = useCallback((assets: any[]) => {
@@ -43,7 +47,11 @@ const ImagePickerModal: React.FC<Props> = ({ visible, onClose, onImagesSelected 
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+    <Modal
+      statusBarTranslucent
+      visible={visible}
+      animationType="slide"
+      onRequestClose={onClose}>
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -58,7 +66,10 @@ const ImagePickerModal: React.FC<Props> = ({ visible, onClose, onImagesSelected 
 
         {/* Library Picker */}
         <View style={styles.pickerRow}>
-          <ImagePickerButton onPicked={handleAssetsPicked} title="Pick from Library" />
+          <ImagePickerButton
+            onPicked={handleAssetsPicked}
+            title="Pick from Library"
+          />
         </View>
 
         {/* Selected Images Preview */}
@@ -66,11 +77,13 @@ const ImagePickerModal: React.FC<Props> = ({ visible, onClose, onImagesSelected 
           data={selected}
           horizontal
           keyExtractor={uri => uri}
-          contentContainerStyle={{ paddingHorizontal: 10 }}
-          renderItem={({ item }) => (
+          contentContainerStyle={{paddingHorizontal: 10}}
+          renderItem={({item}) => (
             <View style={styles.previewImageWrap}>
-              <Image source={{ uri: item }} style={styles.previewImage} />
-              <TouchableOpacity style={styles.removeBtn} onPress={() => handleRemove(item)}>
+              <Image source={{uri: item}} style={styles.previewImage} />
+              <TouchableOpacity
+                style={styles.removeBtn}
+                onPress={() => handleRemove(item)}>
                 <Text style={styles.removeText}>×</Text>
               </TouchableOpacity>
             </View>

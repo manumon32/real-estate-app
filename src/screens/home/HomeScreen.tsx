@@ -4,7 +4,6 @@ import React, {useCallback, useEffect, useRef} from 'react';
 import {
   StatusBar,
   useColorScheme,
-  SafeAreaView,
   FlatList,
   Text,
   StyleSheet,
@@ -13,8 +12,11 @@ import {
   Image,
   BackHandler,
   ToastAndroid,
+  AppState,
 } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
+
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {
   navigateByNotification,
   requestUserPermission,
@@ -24,7 +26,7 @@ import Header from './Header/Header';
 import PropertyCard from '@components/PropertyCard';
 import useBoundStore from '@stores/index';
 import {Fonts} from '@constants/font';
-import {connectSocket} from './../../soket';
+import {connectSocket, disconnectSocket} from './../../soket';
 import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -51,6 +53,7 @@ function App({navigation}: any): React.JSX.Element {
     location,
     setTriggerRelaod,
     bearerToken,
+    fetchChatListings
   } = useBoundStore();
 
   const {theme} = useTheme();
@@ -103,6 +106,12 @@ function App({navigation}: any): React.JSX.Element {
     [navigation],
   );
 
+
+
+  useEffect(() => {
+    bearerToken && connectSocket();
+  }, [bearerToken]);
+
   useEffect(() => {
     triggerRefresh && fetchListings();
   }, [triggerRefresh]);
@@ -130,7 +139,26 @@ function App({navigation}: any): React.JSX.Element {
   }, [location]);
 
   useEffect(() => {
-    bearerToken && connectSocket();
+    const handleAppStateChange = (nextState: string) => {
+      if (nextState === 'background' || nextState === 'inactive') {
+        disconnectSocket();
+      }
+
+      if (nextState === 'active' && bearerToken) {
+        connectSocket();
+        fetchChatListings();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+
+    return () => {
+      subscription.remove();
+      disconnectSocket(); // Cleanup
+    };
   }, [bearerToken]);
 
   useEffect(() => {

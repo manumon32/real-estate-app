@@ -31,7 +31,11 @@ const ReportAdModal = ({visible, onClose, onSubmit}: any) => {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal
+      statusBarTranslucent
+      visible={visible}
+      animationType="slide"
+      transparent>
       <View style={styles.backdrop}>
         <View style={styles.modal}>
           {/* Header */}

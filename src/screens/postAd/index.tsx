@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 // import CommonHeader from '@components/Header/CommonHeader';
 import React, {useCallback, useEffect, useState} from 'react';
-import {SafeAreaView} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import PostAdContainer from './stepper';
 import {Formik} from 'formik';
 import {postAdValidationSchema} from './validationSchema';
@@ -20,6 +20,7 @@ const PostAd = () => {
     setPostAd,
     setImages,
     setFloorPlans,
+    fetchPlans,
   } = useBoundStore();
   const [loading, setLoading] = useState(false);
   const [fields, setFields] = useState<{}>({});
@@ -32,7 +33,7 @@ const PostAd = () => {
     listingTypeId: '',
     price: '',
     isNegotiable: true,
-    isFeatured: false,
+    featured: false,
     maintenanceCharge: 0,
     propertyTax: 0,
     loanEligible: false,
@@ -119,6 +120,7 @@ const PostAd = () => {
     if (items && items._id) {
       fetchDetails();
     }
+      fetchPlans();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

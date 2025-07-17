@@ -92,7 +92,7 @@ const ImageCarouselModal: React.FC<ImageCarouselModalProps> = ({
   }, [onClose]);
 
   return (
-    <Modal visible={visible} style={styles.modal}>
+    <Modal statusBarTranslucent visible={visible} style={styles.modal}>
       <View style={styles.container}>
         <Pressable onPress={handleClose} style={styles.closeButton}>
           <IconButton

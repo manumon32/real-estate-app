@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
@@ -24,7 +23,6 @@ import ImageViewerModal from '@components/Modal/ImageViewerModal';
 function Header(props: any): React.JSX.Element {
   const {details} = props;
   const {theme} = useTheme();
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [visible, setVisible] = useState(false);
   const {width} = Dimensions.get('window');
@@ -69,7 +67,7 @@ function Header(props: any): React.JSX.Element {
           style={[
             styles.headerContainer,
             {
-              paddingTop: Platform.OS === 'android' ? insets.top : 10, // adjust for status bar
+              paddingTop: Platform.OS === 'android' ? 10 : 10, // adjust for status bar
             },
           ]}>
           <TouchableOpacity

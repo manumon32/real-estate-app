@@ -96,7 +96,11 @@ export function CommonMultiSelect<V = string | number>({
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {/* Modal list */}
-      <Modal visible={open} animationType="slide" transparent>
+      <Modal
+        statusBarTranslucent
+        visible={open}
+        animationType="slide"
+        transparent>
         <View style={styles.overlay}>
           <View style={styles.card}>
             <View style={styles.header}>
@@ -168,7 +172,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end',
-    height:'80%'
+    height: '80%',
   },
   card: {
     backgroundColor: '#fff',

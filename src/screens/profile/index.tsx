@@ -10,13 +10,13 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   RefreshControl,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import PremiumCard from './PremiumCard';
+// import PremiumCard from './PremiumCard';
 // import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import useBoundStore from '@stores/index';
 
@@ -74,7 +74,7 @@ const Profile = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <PremiumCard navigation={navigation} />
+        {/* <PremiumCard navigation={navigation} /> */}
         <View
           style={{
             backgroundColor: '#fff',

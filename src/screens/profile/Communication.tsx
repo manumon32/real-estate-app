@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import CommonHeader from '@components/Header/CommonHeader';
+import CommonHeader from '@components/Header/CommonHeaderProfile';
 import MenuLink from '@components/MenuLink';
 import React, {useState} from 'react';
 import {View, SafeAreaView, ScrollView, RefreshControl} from 'react-native';

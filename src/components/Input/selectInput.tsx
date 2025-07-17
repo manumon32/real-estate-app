@@ -52,7 +52,11 @@ const CommonSelect: React.FC<CommonSelectProps> = ({
         />
       </TouchableOpacity>
 
-      <Modal visible={visible} transparent animationType="fade">
+      <Modal
+        statusBarTranslucent
+        visible={visible}
+        transparent
+        animationType="fade">
         <Pressable style={styles.backdrop} onPress={() => setVisible(false)}>
           <View style={styles.dropdown}>
             <FlatList

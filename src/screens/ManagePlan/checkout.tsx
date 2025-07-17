@@ -12,7 +12,15 @@ const PaymentStore = usePaymentStore.getState;
  * Everything is a Promise; every stage update hits Zustand.
  */
 export function startCheckoutPromise(params: any): Promise<void> {
-  const {bearerToken, token, clientId, phone, email} = params;
+  const {
+    bearerToken,
+    token,
+    clientId,
+    phone,
+    email,
+    purchaseType,
+    purchaseTypeId,
+  } = params;
   const amountPaise = params.amountInRupees * 100;
 
   /* 1️⃣  Create order */
@@ -22,6 +30,8 @@ export function startCheckoutPromise(params: any): Promise<void> {
     amount: amountPaise,
     currency: 'INR',
     purchasePlanId: params.purchasePlanId,
+    purchaseType,
+    purchaseTypeId,
   };
   let payloadConfig = {
     bearerToken,
@@ -81,6 +91,13 @@ export function startCheckoutPromise(params: any): Promise<void> {
       })
       /* 5️⃣  Any error or cancellation */
       .catch(err => {
+        updateOrder(
+          {
+            paymentStatus: 'failed',
+          },
+          payloadConfig,
+          PaymentStore().orderId,
+        );
         let message = 'Payment could not be completed.';
         if (err?.description) {
           message = message;

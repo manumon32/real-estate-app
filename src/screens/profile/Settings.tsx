@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import CommonHeader from '@components/Header/CommonHeader';
+import CommonHeader from '@components/Header/CommonHeaderProfile';
 import MenuLink from '@components/MenuLink';
 import React from 'react';
 import {View, SafeAreaView, ScrollView, RefreshControl, Alert} from 'react-native';

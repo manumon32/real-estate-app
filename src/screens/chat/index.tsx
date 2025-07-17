@@ -4,7 +4,7 @@ import CommonHeader from '@components/Header/CommonHeader';
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   View,
@@ -22,6 +22,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import ChatListSkeleton from '@components/SkeltonLoader/ChatListSkeleton';
 import NoChats from '@components/NoChatFound';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {connectSocket} from '@soket/index';
 
 interface MessageCardProps {
   name: string;
@@ -160,18 +161,27 @@ const MessageCard: React.FC<MessageCardProps> = ({
 };
 
 const Chat = React.memo(({navigation}: any) => {
-  const {fetchChatListings, chatList, chatListloading, user, onlineUsers} =
-    useBoundStore();
+  const {
+    fetchChatListings,
+    chatList,
+    chatListloading,
+    user,
+    onlineUsers,
+    bearerToken,
+  } = useBoundStore();
   const [filterBy, setFilterBy] = useState<any>(null);
   const {theme} = useTheme();
 
   useFocusEffect(
     useCallback(() => {
-      // resetChatDetails([]);
       fetchChatListings();
       return () => {};
     }, []),
   );
+
+  useEffect(() => {
+    bearerToken && connectSocket();
+  }, [bearerToken]);
 
   const renderAdItem = useCallback(
     (item: any) => {
@@ -203,7 +213,7 @@ const Chat = React.memo(({navigation}: any) => {
   );
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{backgroundColor: '#fff', height: '100%'}}>
       <CommonHeader title="Chats" />
       <FlatList
         data={

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import TextInput from '@components/Input/textInput';
 // import SelectInput, {SelectOption} from '@components/Input/selectInput';
@@ -17,16 +17,37 @@ const Step2BasicInfo = (props: any) => {
     errors,
     isStringInEitherArray,
   } = props;
+  const [priceInput, setPriceInput] = useState('');
+
+  const formatINR = (value: string | number) => {
+    const num =
+      typeof value === 'string'
+        ? parseInt(value.replace(/\D/g, ''), 10)
+        : value;
+    if (isNaN(num)) return '';
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(num);
+  };
+
+  useEffect(() => {
+    setPriceInput(values?.price?.toString() || '');
+  }, [values?.price]);
 
   return (
     <SlideInView direction={currentStep === 1 ? 'right' : 'left'}>
       <Text style={styles.headingText}>Price Details</Text>
       <View style={styles.inputContainer}>
         <TextInput
-          iconName="currency-inr"
-          iconColor="#696969"
-          onChangeText={text => setFieldValue('price', text)}
-          value={String(values?.price)}
+          onChangeText={text => {
+            // Allow only numbers
+            const numeric = text.replace(/\D/g, '');
+            setPriceInput(numeric);
+            setFieldValue('price', numeric);
+          }}
+          value={formatINR(priceInput)}
           placeholder="Price"
           placeholderTextColor={'#ccc'}
           onBlur={handleBlur('price')}
@@ -42,13 +63,6 @@ const Step2BasicInfo = (props: any) => {
           label="Price Negotiable"
           selected={values.isNegotiable}
           onToggle={() => setFieldValue('isNegotiable', !values.isNegotiable)}
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <CommonAmenityToggle
-          label="Featured Property"
-          selected={values.isFeatured}
-          onToggle={() => setFieldValue('isFeatured', !values.isFeatured)}
         />
       </View>
       {isStringInEitherArray('maintanceCharge') && (

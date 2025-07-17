@@ -1,19 +1,14 @@
 import React from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Pressable,
-} from 'react-native';
+import {Modal, View, Text, StyleSheet, FlatList, Pressable} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ViewBenifitsModal = ({visible, onClose, selectedItem}: any) => {
-
-
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal
+      statusBarTranslucent
+      visible={visible}
+      animationType="slide"
+      transparent>
       <View style={styles.backdrop}>
         <View style={styles.modal}>
           {/* Header */}

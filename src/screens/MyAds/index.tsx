@@ -1,9 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
 import CommonHeader from '@components/Header/CommonHeader';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {useTheme} from '@theme/ThemeProvider';
 import {
   View,
@@ -11,16 +11,19 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  SafeAreaView,
   FlatList,
   RefreshControl,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {postAdAPI} from '@api/services';
 import {Fonts} from '@constants/font';
 import EmptyText from '@components/EmptyText';
 import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
+import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
+import Toast from 'react-native-toast-message';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -34,6 +37,7 @@ interface ListingCardProps {
   navigation: any;
   items: any;
   markasSold?: any;
+  makePayment: any;
 }
 
 const FormattedDate = (arg: string | number | Date) => {
@@ -48,7 +52,7 @@ const FormattedDate = (arg: string | number | Date) => {
     hour12: true,
   };
 
-  const FormattedDate = `Post on ${date
+  const FormattedDate = `Posted on ${date
     .toLocaleString('en-US', options)
     .replace(':', '.')}`;
   return FormattedDate;
@@ -64,6 +68,14 @@ const AdStatusEnum: any = {
   Sold: 'sold',
 };
 
+const formatINR = (value: number) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
 const ListingCard: React.FC<ListingCardProps> = ({
   items,
   title = '',
@@ -75,6 +87,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   imageUrl = '',
   navigation,
   markasSold,
+  makePayment,
 }) => {
   const {label, backgroundColor, textColor} = useMemo(() => {
     switch (status) {
@@ -129,7 +142,6 @@ const ListingCard: React.FC<ListingCardProps> = ({
         };
     }
   }, [status]);
-
   return (
     <View style={styles.card}>
       <TouchableOpacity
@@ -149,7 +161,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
                 </Text>
               </View>
             </View>
-            {items.featured && (
+            {items.isFeatured && (
               <View style={[styles.badge]}>
                 <Text numberOfLines={2} style={[styles.badgeText]}>
                   {'featured'}
@@ -159,7 +171,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
             <Text style={styles.location} numberOfLines={1}>
               {location}
             </Text>
-            <Text style={styles.price}>₹{price}</Text>
+            <Text style={styles.price}>{formatINR(Number(price))}</Text>
           </View>
         </View>
 
@@ -187,21 +199,53 @@ const ListingCard: React.FC<ListingCardProps> = ({
             <Text style={styles.buttonText}>Mark as Sold</Text>
           </TouchableOpacity>
         )}
+        {label === 'Active' && !items.isFeatured && (
+          <TouchableOpacity
+            onPress={() => makePayment(items._id)}
+            style={styles.boostButton}>
+            <Text style={styles.boostButtonText}>Boost your Ad</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
 };
 
 const MyAds = () => {
-  const {myAds, fetchMyAds, token, clientId, bearerToken, myAdsLoading} =
-    useBoundStore();
+  const {
+    myAds,
+    fetchMyAds,
+    token,
+    clientId,
+    bearerToken,
+    myAdsLoading,
+    managePlansList,
+    user,
+    fetchPlans,
+  } = useBoundStore();
+
+  const uploadParams = {token, clientId, bearerToken};
   const navigation = useNavigation();
   const {theme} = useTheme();
   const [filterBy, setFilterBy] = useState<any>(null);
+  const [paymentLoading, setPaymentLoading] = useState<any>(false);
 
-  useEffect(() => {
-    fetchMyAds();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchPlans();
+      fetchMyAds();
+    }, []),
+  );
+
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     if (paymentLoading) {
+  //       navigation.getParent()?.setOptions({tabBarStyle: {display: 'none'}});
+  //     } else {
+  //       navigation.getParent()?.setOptions({tabBarStyle: {display: 'flex'}});
+  //     }
+  //   }, [paymentLoading]),
+  // );
 
   const markasSold = async (id: string) => {
     let payload = {
@@ -233,6 +277,7 @@ const MyAds = () => {
           views={items.item?.viewsCount}
           navigation={navigation}
           items={items.item}
+          makePayment={makePayment}
           imageUrl={
             items.item?.imageUrls[0]
               ? items.item?.imageUrls[0]
@@ -245,8 +290,58 @@ const MyAds = () => {
     [navigation],
   );
 
+  const makePayment = useCallback(
+    async (id: any) => {
+      setPaymentLoading(true);
+      try {
+        console.log('managePlansList', managePlansList);
+        // @ts-ignore
+        const featuredPlan: any = managePlansList?.[0] ?? null;
+        if (featuredPlan) {
+          const paymentPayload = {
+            amountInRupees: featuredPlan.price,
+            description: featuredPlan.description || '',
+            purchasePlanId: featuredPlan._id,
+            purchaseType: 'ads',
+            purchaseTypeId: id,
+            ...uploadParams,
+            phone: user.phone ?? '',
+            email: user.email ?? '',
+          };
+          await startCheckoutPromise(paymentPayload);
+          fetchMyAds();
+          fetchPlans();
+          setPaymentLoading(false);
+        }
+      } catch (err: any) {
+        if (err?.code === 0) {
+         Toast.show({
+            type: 'error',
+            text1: 'Payment Cancelled',
+            position:'bottom',
+          });
+        } else {
+          console.log('Payment failed', err);
+          Toast.show({
+            type: 'error',
+            text1: 'Payment failed',
+            text2: err?.description || 'Something went wrong',
+            position:'bottom',
+          });
+        }
+      }
+      setPaymentLoading(false);
+    },
+    [managePlansList, uploadParams, user, fetchMyAds, fetchPlans],
+  );
+
   return (
     <SafeAreaView style={{backgroundColor: '#fff', height: '100%'}}>
+      {paymentLoading && (
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
       <FlatList
         data={
           filterBy
@@ -322,13 +417,14 @@ const MyAds = () => {
             refreshing={false}
             onRefresh={() => {
               fetchMyAds();
+              fetchPlans();
             }}
             colors={['#40DABE', '#40DABE', '#227465']}
           />
         }
         ListFooterComponent={
           <>
-            {myAdsLoading && myAds.length <= 0 &&  <AdsListSkelton />}
+            {myAdsLoading && myAds.length <= 0 && <AdsListSkelton />}
             {!myAdsLoading &&
               (filterBy ? (
                 myAds.filter((items: any) => items.adStatus == filterBy)
@@ -350,6 +446,13 @@ const MyAds = () => {
 };
 
 const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // fills the screen
+    backgroundColor: 'rgba(0, 0, 0, 0.78)', // transparent dark overlay
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999, // ensure it's on top
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -432,6 +535,22 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginHorizontal: 4,
     alignItems: 'center',
+  },
+
+  boostButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: 'green',
+    backgroundColor: 'green',
+    borderRadius: 10,
+    paddingVertical: 10,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  boostButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#fff',
   },
   buttonText: {
     fontSize: 14,

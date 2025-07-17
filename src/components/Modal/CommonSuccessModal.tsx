@@ -44,6 +44,7 @@ const CommonSuccessModal: React.FC<Props> = ({
     <Modal
       visible={visible}
       transparent
+      statusBarTranslucent
       animationType="fade"
       onRequestClose={handleClose}
     >

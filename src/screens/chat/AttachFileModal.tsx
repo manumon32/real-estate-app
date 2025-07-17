@@ -22,13 +22,14 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
   onClose,
   onPickCamera,
   onPickGallery,
-//   onPickDocument,
+  //   onPickDocument,
 }) => {
   return (
     <Modal
       visible={visible}
       animationType="fade"
       transparent
+      statusBarTranslucent
       onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay} />

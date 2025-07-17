@@ -12,6 +12,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useNavigation} from '@react-navigation/native';
 import {Fonts} from '@constants/font';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 interface CommonHeaderProps {
   title: string;
@@ -37,6 +38,8 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
   rightText,
 }) => {
   const navigation = useNavigation();
+
+  const insets = useSafeAreaInsets();
   return (
     <View
       style={[
@@ -44,7 +47,8 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
         {backgroundColor},
         containerStyle,
         {
-          paddingTop: Platform.OS === 'android' ? 20 : 0,
+          paddingTop: Platform.OS === 'android' ? insets.top : 0,
+          height: Platform.OS === 'android' ? 100 : 50,
         },
       ]}>
       <StatusBar

@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
-import CommonHeader from '@components/Header/CommonHeader';
+import CommonHeader from '@components/Header/CommonHeaderProfile';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
@@ -125,13 +125,13 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <View style={styles.info}>
             <View style={styles.headerRow}>
               <Text style={styles.title}>{title}</Text>
-              <View style={[styles.badge, {backgroundColor}]}>
+              {/* <View style={[styles.badge, {backgroundColor}]}>
                 <Text
                   numberOfLines={2}
                   style={[styles.badgeText, {color: textColor}]}>
                   {label}
                 </Text>
-              </View>
+              </View> */}
             </View>
             <Text style={styles.price}>₹{price}</Text>
           </View>
@@ -141,16 +141,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <View style={styles.metaItem}>
             <Icon name="clock-outline" size={16} color="#888" />
             <Text style={styles.metaText}>
-              {'Start date - ' + FormattedDate(date)}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.metaRow}>
-          <View style={styles.metaItem}>
-            <Icon name="clock-outline" size={16} color="#888" />
-            <Text style={styles.metaText}>
-              {'End date - ' + FormattedDate(date)}
+              {'Purchased on - ' + FormattedDate(date)}
             </Text>
           </View>
         </View>
@@ -176,7 +167,7 @@ const Transactions = () => {
           title={items.item?.subscriptionPlanId?.name || ''}
           price={items.item?.subscriptionPlanId?.price}
           status={items.item?.status}
-          date={items.item?.startDate}
+          date={items.item?.createdAt}
           navigation={navigation}
           items={items.item}
         />
@@ -212,7 +203,7 @@ const Transactions = () => {
               horizontal
               showsHorizontalScrollIndicator={false}
               style={{flexDirection: 'row', padding: 10}}>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={[styles.chip, !filterBy && styles.chipSelected]}
                 onPress={() => {
                   setFilterBy(null);
@@ -248,7 +239,7 @@ const Transactions = () => {
                     </Text>
                   </TouchableOpacity>
                 );
-              })}
+              })} */}
             </ScrollView>
           </>
         }

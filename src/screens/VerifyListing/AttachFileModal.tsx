@@ -26,6 +26,7 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
 }) => {
   return (
     <Modal
+      statusBarTranslucent
       visible={visible}
       animationType="fade"
       transparent

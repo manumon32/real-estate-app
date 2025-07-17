@@ -46,7 +46,6 @@ const PlanCard: React.FC<PlanCardProps> = ({
   title,
   price,
   features,
-  badge,
   active,
   onPress,
 }) => {

@@ -26,6 +26,7 @@ import useBoundStore from '@stores/index';
 import Preview from './preview';
 import {postAdAPI, uploadImages} from '@api/services';
 import {RequestMethod} from '@api/request';
+import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
 
 interface FooterProps {
   currentStep: number;
@@ -118,6 +119,7 @@ const PostAdContainer = (props: any) => {
   const navigation = useNavigation();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [visible, setVisible] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState(true);
   const [preview, setPreview] = useState(false);
   const prevCountRef = useRef<number | null>(null);
   const {
@@ -131,6 +133,8 @@ const PostAdContainer = (props: any) => {
     location,
     locationForAdpost,
     floorPlans,
+    managePlansList,
+    user,
     setImages,
     setFloorPlans,
   } = useBoundStore();
@@ -335,90 +339,107 @@ const PostAdContainer = (props: any) => {
   };
 
   const submitPostAd = useCallback(async () => {
-    if (Object.keys(errors).length == 0 && images.length > 0) {
-      setLoading(true);
-      let formData = new FormData();
-      // @ts-ignore
-      let newImages = images.filter(items => items?.uri);
-      // @ts-ignore
-      let newImagesWithurl = images.filter(items => !items.uri);
-      newImages.map((items: any, index: any) => {
-        formData.append('images', {
-          uri: items.uri, // local path or blob URL
-          name: `photo_${index}.jpg`, // ⬅ server sees this
-          type: 'image/jpeg',
-        } as any);
-      });
-      let formDataFloor = new FormData();
-      // @ts-ignore
-      let newformDataFloor = floorPlans.filter(items => items?.uri);
-      // @ts-ignore
-      let formDataFloorWithurl = floorPlans.filter(items => !items.uri);
-      newformDataFloor.map((items: any, index: any) => {
-        formDataFloor.append('images', {
-          uri: items.uri, // local path or blob URL
-          name: `photo_${index}.jpg`, // ⬅ server sees this
-          type: 'image/jpeg',
-        } as any);
-      });
-      try {
-        /* 1. upload ------------------------------------------------------ */
-        const imageUrls: any =
-          newImages.length > 0
-            ? await uploadImages(formData, {
-                token: token,
-                clientId: clientId,
-                bearerToken: bearerToken,
-              })
-            : [];
-        const floorUrls: any =
-          newformDataFloor.length > 0
-            ? await uploadImages(formDataFloor, {
-                token: token,
-                clientId: clientId,
-                bearerToken: bearerToken,
-              })
-            : [];
-        const paylod = {
-          latitude: locationForAdpost.lat
-            ? locationForAdpost.lat
-            : location.lat,
-          longitude: locationForAdpost.lng
-            ? locationForAdpost.lng
-            : location.lng,
-          address: locationForAdpost.name
-            ? locationForAdpost.name
-            : location.name,
-          imageUrls: [...imageUrls, ...newImagesWithurl],
-          floorPlanUrl: [...floorUrls, ...formDataFloorWithurl],
-        };
-        let mergedPayload = {...values, ...paylod};
-        console.log('postAd payload', mergedPayload);
-        let method: RequestMethod = values.id ? 'put' : 'post';
-        console.log('method', method);
-        /* 2. post ad ----------------------------------------------------- */
-        await postAdAPI(
-          mergedPayload,
-          {
-            token: token,
-            clientId: clientId,
-            bearerToken: bearerToken,
-          },
-          method,
-        );
+    if (Object.keys(errors).length > 0 || images.length === 0) return;
+
+    setLoading(true);
+
+    try {
+      // Filter local vs uploaded images
+      const localImages = images.filter((img: any) => img?.uri);
+      const existingImageUrls = images.filter((img: any) => !img.uri);
+
+      const localFloorPlans = floorPlans.filter((fp: any) => fp?.uri);
+      const existingFloorPlanUrls = floorPlans.filter((fp: any) => !fp.uri);
+
+      // Create FormData
+      const createFormData = (items: any[], prefix = 'photo') => {
+        const formData = new FormData();
+        items.forEach((item, index) => {
+          formData.append('images', {
+            uri: item.uri,
+            name: `${prefix}_${index}.jpg`,
+            type: 'image/jpeg',
+          } as any);
+        });
+        return formData;
+      };
+
+      const imageFormData = createFormData(localImages, 'image');
+      const floorPlanFormData = createFormData(localFloorPlans, 'floor');
+
+      // Upload images
+      const uploadParams = {token, clientId, bearerToken};
+
+      const [imageUrls, floorPlanUrls]: any = await Promise.all([
+        localImages.length ? uploadImages(imageFormData, uploadParams) : [],
+        localFloorPlans.length
+          ? uploadImages(floorPlanFormData, uploadParams)
+          : [],
+      ]);
+
+      // Merge location data
+      const finalLocation = {
+        latitude: locationForAdpost.lat || location.lat,
+        longitude: locationForAdpost.lng || location.lng,
+        address: locationForAdpost.name || location.name,
+      };
+
+      // Prepare full payload
+      const payload = {
+        ...values,
+        ...finalLocation,
+        imageUrls: [...imageUrls, ...existingImageUrls],
+        floorPlanUrl: [...floorPlanUrls, ...existingFloorPlanUrls],
+      };
+
+      const method: RequestMethod = values.id ? 'put' : 'post';
+      console.log('Posting ad with payload:', payload);
+
+      // API: Post Ad
+      const postAdRes: any = await postAdAPI(payload, uploadParams, method);
+
+      // Optional: Handle featured ad payment
+      if (values.featured) {
+        try {
+          // @ts-ignore
+          const featuredPlan: any = managePlansList?.[0];
+
+          if (featuredPlan) {
+            const paymentPayload = {
+              amountInRupees: featuredPlan.price,
+              description: featuredPlan.description || '',
+              purchasePlanId: featuredPlan._id,
+              purchaseType: 'ads',
+              purchaseTypeId: postAdRes?.id,
+              ...uploadParams,
+              phone: user.phone ?? '',
+              email: user.email ?? '',
+            };
+            await startCheckoutPromise(paymentPayload);
+          }
+          setVisible(true);
+          setPaymentStatus(true);
+        } catch (error) {
+          setPaymentStatus(false);
+          setVisible(true);
+        }
+        // @ts-ignore
+      } else {
         setVisible(true);
-      } catch (err: any) {
-        Alert.alert(
-          'Something went wrong',
-          'Failed to post ad, please try again later',
-        );
-      } finally {
-        setImages([]);
-        setFloorPlans([]);
-        setLoading(false);
-        setFields([]);
-        setFloorPlans([]);
       }
+
+      // Reset state only on success or cleanup
+      setImages([]);
+      setFloorPlans([]);
+      setFields([]);
+    } catch (error) {
+      console.error('Post Ad Error:', error);
+      Alert.alert(
+        'Something went wrong',
+        'Failed to post ad, please try again later',
+      );
+    } finally {
+      setLoading(false);
     }
   }, [
     errors,
@@ -437,10 +458,14 @@ const PostAdContainer = (props: any) => {
     setImages,
     setFloorPlans,
     setFields,
+    managePlansList,
+    user.phone,
+    user.email,
   ]);
 
   useEffect(() => {
     setVisible(false);
+    setPaymentStatus(true);
   }, []);
 
   return (
@@ -483,20 +508,43 @@ const PostAdContainer = (props: any) => {
       </KeyboardAvoidingView>
       <CommonSuccessModal
         visible={visible}
+        iconName={
+          paymentStatus ? 'check-circle-outline' : 'alert-circle-outline'
+        }
+        iconColor={paymentStatus ? '#00C851' : 'orange'}
         message={
           values.id
             ? 'Your Udaptes are saved.'
-            : 'Your listing will go live after the review.'
+            : paymentStatus
+            ? 'Your listing will go live after the review.'
+            : 'Payment Failed but still Your listing will go live after the review, you can try payment again later.'
         }
         onClose={() => {
           setVisible(false);
           resetPostAd();
           setFields([]);
-          // @ts-ignore
-          navigation.reset({index: 0, routes: [{name: 'Main'}]});
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                // @ts-ignore
+                name: 'Main',
+                state: {
+                  index: 3, // 'MyAds' is the 4th tab (0-based index)
+                  routes: [
+                    {name: 'Home'},
+                    {name: 'Chat'},
+                    {name: 'AddPost'},
+                    {name: 'MyAds'},
+                  ],
+                },
+              },
+            ],
+          });
         }}
       />
       <Modal
+        statusBarTranslucent
         visible={preview}
         transparent
         animationType="fade"

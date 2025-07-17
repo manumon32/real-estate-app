@@ -76,6 +76,7 @@ const BankSelectModal = ({
   return (
     <Modal
       visible={visible}
+      statusBarTranslucent
       animationType="fade"
       transparent
       onRequestClose={onDismiss}>

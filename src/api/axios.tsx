@@ -34,6 +34,8 @@ api.interceptors.request.use(
         nonce,
         bodyHash,
       ].join('\n');
+      console.log('stringToSign', stringToSign);
+      console.log('body', config.data);
       const signature = createHmacSignature(
         config.headers['X-TOKEN'],
         stringToSign,
