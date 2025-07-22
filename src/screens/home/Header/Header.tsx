@@ -18,8 +18,13 @@ import useBoundStore from '@stores/index';
 
 function Header({navigation}: any): React.JSX.Element {
   const {theme} = useTheme();
-  const {setlocationModalVisible, location, bearerToken, setVisible} =
-    useBoundStore();
+  const {
+    setlocationModalVisible,
+    location,
+    bearerToken,
+    setVisible,
+    notificationsCount,
+  } = useBoundStore();
 
   const backgroundStyle = {
     backgroundColor: theme.colors.background,
@@ -78,6 +83,11 @@ function Header({navigation}: any): React.JSX.Element {
                 iconName={'bell'}
               />
             </TouchableOpacity>
+            {notificationsCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{notificationsCount}</Text>
+              </View>
+            )}
           </View>
           <SearchContent />
           <HeaderIconContent />
@@ -112,6 +122,24 @@ const styles = StyleSheet.create({
   locationContainer: {
     width: '90%',
     flexDirection: 'row',
+  },
+  badge: {
+    position: 'absolute',
+    top: 8,
+    right: 32,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 3,
+    borderRadius: 8,
+    backgroundColor: '#E53935',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   arrowDown: {
     top: 2,

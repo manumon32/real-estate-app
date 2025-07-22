@@ -320,6 +320,46 @@ export const fetchChatDetailsAPI = async (
   }
 };
 
+//delete notifications list
+export const deleteNotificationsAPI = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'delete',
+      url: API.NOTIFICATIONS.GET,
+      data,
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response?.data;
+  } catch (error: any) {
+    throw new Error('Failed to Delete Chat');
+  }
+};
+
+//mark all read notifications list
+export const markAllReadNotificationsAPI = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'post',
+      url: API.NOTIFICATIONS.MARK_AS_READ,
+      data,
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response?.data;
+  } catch (error: any) {
+    throw new Error('Failed to Delete Chat');
+  }
+};
+
 // verification list
 export const fetchverificationDetailsAPI = async (
   params: any,

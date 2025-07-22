@@ -1,14 +1,17 @@
-import React, {useCallback, useState} from 'react';
-import {View, StyleSheet, RefreshControl} from 'react-native';
+/* eslint-disable react-native/no-inline-styles */
+import React, {useCallback, useEffect, useState} from 'react';
+import {View, StyleSheet, RefreshControl, TouchableOpacity} from 'react-native';
 import {Text, Card, Divider, useTheme, IconButton} from 'react-native-paper';
 import {SwipeListView} from 'react-native-swipe-list-view';
-import {SafeAreaView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {formatDistanceToNow} from 'date-fns';
-import CommonHeader from '@components/Header/CommonHeaderProfile';
+import CommonHeader from '@components/Header/CommonHeader';
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
 import {useFocusEffect} from '@react-navigation/native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
+import { deleteNotificationsAPI, markAllReadNotificationsAPI } from '@api/services';
 
 type NotificationType = 'message' | 'offer' | 'listing' | 'system';
 
@@ -38,9 +41,18 @@ const getIconName = (type: NotificationType) => {
 
 export default function NotificationListSwipe() {
   const {colors} = useTheme();
-  const {notifications_List, fetchNotifications, updateNotifications} =
-    useBoundStore();
+  const {
+    notifications_List,
+    fetchNotifications,
+    updateNotifications,
+    token,
+    clientId,
+    bearerToken,
+  } = useBoundStore();
   const [refreshing, setRefreshing] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectAll, setSelectall] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<any>([]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -53,6 +65,18 @@ export default function NotificationListSwipe() {
     }, [fetchNotifications]),
   );
 
+  const toggleSelectChat = useCallback((id: string) => {
+    console.log('Toggling selection for chat ID:', id);
+    setSelectedNotification((prev: any) =>
+      prev.includes(id) ? prev.filter((cid: any) => cid !== id) : [...prev, id],
+    );
+  }, []);
+
+  const clearSelection = () => {
+    setIsSelectionMode(false);
+    setSelectedNotification([]);
+  };
+
   //   const markAllAsRead = () => {
   //     updateNotifications_List((prev) => prev.map((n) => ({ ...n, isRead: true })));
   //   };
@@ -64,8 +88,17 @@ export default function NotificationListSwipe() {
     updateNotifications(newData);
   };
 
+  useEffect(() => {
+    const total = notifications_List.length;
+    const selected = selectedNotification.length;
+
+    setIsSelectionMode(selected > 0);
+    setSelectall(selected === total && total > 0);
+  }, [notifications_List.length, selectedNotification.length]);
+
   const renderItem = (data: {item: Notification}) => {
-    const item = data.item;
+    const item: any = data.item;
+    const isSelected = selectedNotification.includes(item?._id);
     return (
       <Card
         mode="contained"
@@ -73,13 +106,30 @@ export default function NotificationListSwipe() {
           styles.card,
           !item.read && {backgroundColor: colors.elevation.level1},
         ]}
+        onLongPress={() => {
+          setIsSelectionMode(true);
+          toggleSelectChat(item._id);
+        }}
         onPress={() => {
-          const updated = notifications_List.map((n: any) =>
-            n._id === item._id ? {...n, read: true} : n,
-          );
-          updateNotifications(updated);
+          if (isSelectionMode) {
+            toggleSelectChat(item._id);
+          } else {
+            const updated = notifications_List.map((n: any) =>
+              n._id === item._id ? {...n, read: true} : n,
+            );
+            updateNotifications(updated);
+          }
         }}>
         <View style={styles.row}>
+          {(isSelected || isSelectionMode) && (
+            <View style={{marginRight: 10}}>
+              <Icon
+                name={isSelected ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                size={22}
+                color={isSelected ? '#2A9D8F' : '#999'}
+              />
+            </View>
+          )}
           <Icon
             name={getIconName(item.type)}
             size={24}
@@ -108,6 +158,69 @@ export default function NotificationListSwipe() {
     );
   };
 
+  const deleteNotifications = async () => {
+    const body = {
+      notifications:
+        selectedNotification.length === notifications_List.length
+          ? 'all'
+          : selectedNotification,
+    };
+    console.log('Deleting chats with IDs:', body);
+    try {
+      await deleteNotificationsAPI(body, {
+        token,
+        clientId,
+        bearerToken,
+      });
+      Toast.show({
+        type: 'success',
+        text1: 'Notifications deleted successfully',
+        position: 'bottom',
+      });
+      clearSelection();
+      fetchNotifications();
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to delete notifications',
+        position: 'bottom',
+      });
+      console.error('Error deleting notifications:', error);
+      return;
+    }
+  };
+
+    const markAllAsRead = async () => {
+    const body = {
+      notifications:
+        selectedNotification.length === notifications_List.length
+          ? 'all'
+          : selectedNotification,
+    };
+    try {
+      await markAllReadNotificationsAPI(body, {
+        token,
+        clientId,
+        bearerToken,
+      });
+      Toast.show({
+        type: 'success',
+        text1: 'Notifications marked as read successfully',
+        position: 'bottom',
+      });
+      clearSelection();
+      fetchNotifications();
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to mark notifications as read',
+        position: 'bottom',
+      });
+      console.error('Error marking notifications as read:', error);
+      return;
+    }
+  };
+
   const renderHiddenItem = (data: {item: Notification}) => (
     <View style={styles.rowBack}>
       <IconButton
@@ -121,15 +234,76 @@ export default function NotificationListSwipe() {
   );
 
   return (
-    <SafeAreaView>
-      <CommonHeader title="Notifications" textColor="#171717" />
+    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+      <CommonHeader
+        title="Notifications"
+        textColor="#171717"
+        rightIcon={
+          !selectAll ? 'checkbox-blank-outline' : 'checkbox-marked-outline'
+        }
+        onRightPress={() => {
+          setSelectall(!selectAll);
+          if (selectAll) {
+            setIsSelectionMode(false);
+            clearSelection();
+          } else {
+            setIsSelectionMode(true);
+            setSelectedNotification(notifications_List.map((n: any) => n._id));
+          }
+        }}
+      />
       <SwipeListView
         data={notifications_List}
         keyExtractor={item => item._id}
         renderItem={renderItem}
         renderHiddenItem={renderHiddenItem}
+        ListHeaderComponent={
+          isSelectionMode ? (
+            <View
+              style={{
+                padding: 8,
+                backgroundColor: '#fff',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}>
+              {notifications_List.filter((item: any) => !item.read).length >
+                0 && (
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                  }}
+                  onPress={() => {
+                    markAllAsRead();
+                  }}>
+                  <Icon name="information" style={{right: 1}} size={20} />
+                  <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16}}>
+                    Mark all as read
+                  </Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  deleteNotifications();
+                }}>
+                <Icon name="delete" size={20} />
+                <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16}}>
+                  {selectedNotification.length > 0
+                    ? `Delete (${selectedNotification.length})`
+                    : 'Delete All'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <></>
+          )
+        }
         rightOpenValue={-70}
         disableRightSwipe
+        disableLeftSwipe
         contentContainerStyle={styles.container}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

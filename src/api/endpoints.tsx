@@ -15,15 +15,15 @@ export const API = {
     DELETE: (id: string | number) => `/property/${id}`,
     GET_CONFIGS: '/all-filters',
     GET_MYADS: '/property/my-ads',
-    VERIFICATION:{
-      GET:'/property-verify',
-      GET_MESSAGES:'/property-verify-msg',
-      VERIFY_LISTING:'/property-verify-msg',
+    VERIFICATION: {
+      GET: '/property-verify',
+      GET_MESSAGES: '/property-verify-msg',
+      VERIFY_LISTING: '/property-verify-msg',
     },
-    BANK:{
-      GET:'/bank',
-      GET_MESSAGES:'/bank-verify-msg',
-      VERIFY_LISTING:'/bank-verify',
+    BANK: {
+      GET: '/bank',
+      GET_MESSAGES: '/bank-verify-msg',
+      VERIFY_LISTING: '/bank-verify',
     },
   },
   USER: {
@@ -35,13 +35,14 @@ export const API = {
   CHAT: {
     GET: '/chat-room',
     GET_CHAT: '/chat-message',
-    DELETE:'/chat-room/delete',
+    DELETE: '/chat-room/delete',
   },
   REPORT: {
     GET: '/ad-report',
   },
   NOTIFICATIONS: {
     GET: '/notification',
+    MARK_AS_READ: 'notification/read',
   },
   PLANS: {
     GET: '/purchase-plan',

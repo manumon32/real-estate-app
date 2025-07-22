@@ -110,6 +110,7 @@ export const connectSocket = () => {
   socket.on('initialAppData', items => {
     useBoundStore.getState().updateOnlineUsers(items.onlineUsers);
     useBoundStore.getState().setUnreadCount(items.chatListCount);
+    useBoundStore.getState().updateNotificationCount(items.notificationsCount);
     console.log('✅ initialAppData received', items);
   });
 
