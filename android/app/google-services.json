@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "417248412728",
+    "project_id": "real-estate-app-cae6d",
+    "storage_bucket": "real-estate-app-cae6d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:417248412728:android:7d267a8bca31ff02fcd2cd",
+        "android_client_info": {
+          "package_name": "com.realesateapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "417248412728-914vrl77ohfdcs40pi2s9t1g56nhk46a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.realesateapp",
+            "certificate_hash": "a59bd036150105b6885eda847be72313fcd9c32c"
+          }
+        },
+        {
+          "client_id": "417248412728-aftip128lscsudnpgvcnc8769blt8fp9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.realesateapp",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "417248412728-ongmik4n9av3qlngr7kmtfsjen5t7vf1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.realesateapp",
+            "certificate_hash": "670efe42bdcb2ab5064919cce44e5c6b26e232d3"
+          }
+        },
+        {
+          "client_id": "417248412728-viv8i4i9ah06ecgherok52lm389epujb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuibbIvo00mY0j4gq2h6jqCgVfrxMFZ-0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "417248412728-viv8i4i9ah06ecgherok52lm389epujb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
