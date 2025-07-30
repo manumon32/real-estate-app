@@ -1,9 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
-import CommonHeader from '@components/Header/CommonHeaderProfile';
+import CommonHeader from '@components/Header/CommonHeader';
 import MenuLink from '@components/MenuLink';
 import React, {useState} from 'react';
-import {View, SafeAreaView, ScrollView, RefreshControl} from 'react-native';
+import {View, ScrollView, RefreshControl} from 'react-native';
 import useBoundStore from '@stores/index';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Communication = () => {
   const {fetchUserDetails, userProfileloading} = useBoundStore();

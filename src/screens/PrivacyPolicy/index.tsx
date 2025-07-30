@@ -1,87 +1,78 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
-import CommonHeader from '@components/Header/CommonHeaderProfile';
+import CommonHeader from '@components/Header/CommonHeader';
 import React from 'react';
 import {
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Text,
+  View,
   //   FlatList,
   //   Text,
   //   RefreshControl,
 } from 'react-native';
 import {Fonts} from '@constants/font';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const PrivacyPolicy = () => {
   return (
     <SafeAreaView style={styles.container}>
       <CommonHeader title="Privacy Policy" textColor="#171717" />
       <ScrollView
-      showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
         style={{padding: 15}}
         contentContainerStyle={{
-          borderWidth: 1,
-          borderRadius: 20,
-          borderColor: '#EBEBEB',
-          backgroundColor: '#F5F6FA',
-          padding: 10,
-          paddingBottom:120,
+          paddingBottom: 120,
         }}>
-        <Text
+        <View
           style={{
-            fontSize: 14,
-            fontFamily: Fonts.MEDIUM,
-            letterSpacing: 0.1,
-            lineHeight: 32,
+            borderWidth: 1,
+            borderRadius: 20,
+            backgroundColor: '#F5F6FA',
+            padding: 10,
+            borderColor: '#EBEBEB',
+            height: '100%',
           }}>
-          Your privacy is important to us. It is Brainstorming's policy to
-          respect your privacy regarding any information we may collect from you
-          across our website, and other sites we own and operate.
-        </Text>
-        <Text
-          style={{
-            top:20,
-            fontSize: 14,
-            fontFamily: Fonts.MEDIUM,
-            letterSpacing: 0.1,
-            lineHeight: 32,
-          }}>
-          We only ask for personal information when we truly need it to provide
-          a service to you. We collect it by fair and lawful means, with your
-          knowledge and consent. We also let you know why we’re collecting it
-          and how it will be used.
-        </Text>
-        <Text
-          style={{
-            top:40,
-            fontSize: 14,
-            fontFamily: Fonts.MEDIUM,
-            letterSpacing: 0.1,
-            lineHeight: 32,
-          }}>
-          We only retain collected information for as long as necessary to
-          provide you with your requested service. What data we store, we’ll
-          protect within commercially acceptable means to prevent loss and
-          theft, as well as unauthorized access, disclosure, copying, use or
-          modification. We don’t share any personally identifying information
-          publicly or with third-parties, except when required to by law.
-        </Text>
-        <Text
-          style={{
-            top:40,
-            fontSize: 14,
-            fontFamily: Fonts.MEDIUM,
-            letterSpacing: 0.1,
-            lineHeight: 32,
-          }}>
-          We only retain collected information for as long as necessary to
-          provide you with your requested service. What data we store, we’ll
-          protect within commercially acceptable means to prevent loss and
-          theft, as well as unauthorized access, disclosure, copying, use or
-          modification. We don’t share any personally identifying information
-          publicly or with third-parties, except when required to by law.
-        </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontFamily: Fonts.MEDIUM,
+              letterSpacing: 0.1,
+              lineHeight: 32,
+            }}>
+            Your privacy is important to us. It is Brainstorming's policy to
+            respect your privacy regarding any information we may collect from
+            you across our website, and other sites we own and operate.
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontFamily: Fonts.MEDIUM,
+              letterSpacing: 0.1,
+              lineHeight: 32,
+              marginTop: 10,
+            }}>
+            We only ask for personal information when we truly need it to
+            provide a service to you. We collect it by fair and lawful means,
+            with your knowledge and consent. We also let you know why we’re
+            collecting it and how it will be used.
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontFamily: Fonts.MEDIUM,
+              letterSpacing: 0.1,
+              lineHeight: 32,
+              marginTop: 10,
+            }}>
+            We only retain collected information for as long as necessary to
+            provide you with your requested service. What data we store, we’ll
+            protect within commercially acceptable means to prevent loss and
+            theft, as well as unauthorized access, disclosure, copying, use or
+            modification. We don’t share any personally identifying information
+            publicly or with third-parties, except when required to by law.
+          </Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

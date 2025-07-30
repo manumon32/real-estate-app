@@ -85,14 +85,6 @@ const MessageCard: React.FC<MessageCardProps> = ({
         styles.container,
         {backgroundColor: isSelected ? '#f0f0f0' : '#fff'},
       ]}>
-      {!isActive && (
-        <BlurView
-          style={styles.blurView}
-          blurType="light" // 'light', 'dark', 'extraLight', 'extraDark', 'regular', 'prominent'
-          blurAmount={60}
-          reducedTransparencyFallbackColor="white"
-        />
-      )}
       {(isSelected || isSelectionMode) && (
         <View style={{marginRight: 10}}>
           <MaterialCommunityIcons
@@ -105,6 +97,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
       <Image
         style={{height: 60, width: 60, borderRadius: 5}}
         source={{uri: coverImage}}
+        blurRadius={isActive ? 0 : 10} // Blur the image if the ad is not active
       />
       {avatarUrl && (
         <View
@@ -206,6 +199,23 @@ const MessageCard: React.FC<MessageCardProps> = ({
         name="dots-vertical"
         size={20}
       />
+
+      {!isActive && (
+        <>
+          <BlurView
+            style={styles.blurView}
+            blurType="light"
+            blurAmount={-1}
+            // reducedTransparencyFallbackColor="white"
+          />
+          <View
+            style={{
+              ...StyleSheet.absoluteFillObject,
+              backgroundColor: 'rgba(255, 255, 255, 0)',
+            }}
+          />
+        </>
+      )}
     </TouchableOpacity>
   );
 };
@@ -368,6 +378,7 @@ const Chat = React.memo(({navigation}: any) => {
                   onPress={() => {
                     clearSelection();
                   }}>
+                    <MaterialCommunityIcons name="close" size={20} />
                   <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16}}>
                     Cancel
                   </Text>
@@ -514,7 +525,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    bottom: 0,
     right: 0,
   },
   name: {

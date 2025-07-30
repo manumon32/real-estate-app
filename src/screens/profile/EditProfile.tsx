@@ -1,11 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
-import CommonHeader from '@components/Header/CommonHeaderProfile';
+import CommonHeader from '@components/Header/CommonHeader';
 import useBoundStore from '@stores/index';
 import React, {useCallback, useState} from 'react';
 import {
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Text,
   ActivityIndicator,
@@ -24,6 +23,7 @@ import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
 import OtpVerificationScreen from '@components/Modal/OtpVerificationScreen';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {uploadImages} from '@api/services';
+import { SafeAreaView } from 'react-native-safe-area-context';
 const EditProfile = () => {
   const {
     user,

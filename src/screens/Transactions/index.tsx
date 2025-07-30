@@ -1,16 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
-import CommonHeader from '@components/Header/CommonHeaderProfile';
+import CommonHeader from '@components/Header/CommonHeader';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {useTheme} from '@theme/ThemeProvider';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   FlatList,
   RefreshControl,
   ScrollView,
@@ -18,6 +17,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import EmptyText from '@components/EmptyText';
 import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
+import {SafeAreaView} from 'react-native-safe-area-context';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -48,73 +48,13 @@ const FormattedDate = (arg: string | number | Date) => {
   return FormattedDate;
 };
 
-const AdStatusEnum: any = {
-  Active: 'active',
-  Pending: 'pending',
-};
-
 const ListingCard: React.FC<ListingCardProps> = ({
   items,
   title = '',
   price = 0,
-  status = 'Pending',
   date = '',
   navigation,
 }) => {
-  const {label, backgroundColor, textColor} = useMemo(() => {
-    switch (status) {
-      case 'pending':
-        return {
-          label: 'Pending Review',
-          backgroundColor: '#FFEAD5',
-          textColor: '#AA5A00',
-        };
-      case 'active':
-        return {
-          label: 'Active',
-          backgroundColor: '#D4F4DD',
-          textColor: '#147A31',
-        };
-      case 'rejected':
-        return {
-          label: 'Rejected',
-          backgroundColor: '#C14B43',
-          textColor: '#FCE3E0',
-        };
-      case 'sold':
-        return {
-          label: 'Sold',
-          backgroundColor: '#E8E8FF',
-          textColor: '#4B4B9B',
-        };
-      case 'expired':
-        return {
-          label: 'Expired',
-          backgroundColor: '#FCE3E0',
-          textColor: '#C14B43',
-        };
-      case 'blocked':
-        return {
-          label: 'Blocked',
-          backgroundColor: '#FCE3E0',
-          textColor: '#C14B43',
-        };
-      case 'deactivated':
-        return {
-          label: 'Deactivated',
-          backgroundColor: '#E0E0E0',
-          textColor: '#555555',
-        };
-      case 'DRAFT':
-      default:
-        return {
-          label: 'Draft',
-          backgroundColor: '#EEEEEE',
-          textColor: '#666666',
-        };
-    }
-  }, [status]);
-
   return (
     <View style={styles.card}>
       <TouchableOpacity
@@ -125,13 +65,6 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <View style={styles.info}>
             <View style={styles.headerRow}>
               <Text style={styles.title}>{title}</Text>
-              {/* <View style={[styles.badge, {backgroundColor}]}>
-                <Text
-                  numberOfLines={2}
-                  style={[styles.badgeText, {color: textColor}]}>
-                  {label}
-                </Text>
-              </View> */}
             </View>
             <Text style={styles.price}>₹{price}</Text>
           </View>
@@ -154,7 +87,6 @@ const Transactions = () => {
   const {transactions, fetchTransactions, transLoading} = useBoundStore();
   const navigation = useNavigation();
   const {theme} = useTheme();
-  const [filterBy, setFilterBy] = useState<any>(null);
 
   useEffect(() => {
     fetchTransactions();
@@ -184,11 +116,7 @@ const Transactions = () => {
         // onBackPress={onBackPress}
       />
       <FlatList
-        data={
-          filterBy
-            ? transactions.filter((items: any) => items.status == filterBy)
-            : transactions
-        }
+        data={transactions}
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -260,14 +188,7 @@ const Transactions = () => {
           <>
             {transLoading && transactions.length <= 0 && <AdsListSkelton />}
             {!transLoading &&
-              (filterBy ? (
-                transactions.filter((items: any) => items.status == filterBy)
-                  .length <= 0 ? (
-                  <EmptyText text="You dont have any transactions yet." />
-                ) : (
-                  <></>
-                )
-              ) : transactions.length <= 0 ? (
+              (transactions.length <= 0 ? (
                 <EmptyText text="You dont have any transactions yet." />
               ) : (
                 <></>

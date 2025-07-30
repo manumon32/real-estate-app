@@ -1,12 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import CommonHeader from '@components/Header/CommonHeaderProfile';
+import CommonHeader from '@components/Header/CommonHeader';
 import MenuLink from '@components/MenuLink';
 import React from 'react';
-import {View, SafeAreaView, ScrollView, RefreshControl, Alert} from 'react-native';
+import {View, ScrollView, RefreshControl, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 import { logoutAndRedirect } from '../../utils/logoutAndRedirect';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Settings = () => {
   const navigation = useNavigation();

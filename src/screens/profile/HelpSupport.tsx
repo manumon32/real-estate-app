@@ -1,11 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
-import CommonHeader from '@components/Header/CommonHeaderProfile';
+import CommonHeader from '@components/Header/CommonHeader';
 import useBoundStore from '@stores/index';
 import React, {useState} from 'react';
 import {
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Text,
   ActivityIndicator,
@@ -19,6 +18,7 @@ import {Fonts} from '@constants/font';
 import TextInput from '@components/Input/textInput';
 import {useNavigation} from '@react-navigation/native';
 import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
+import { SafeAreaView } from 'react-native-safe-area-context';
 const HelpSupport = () => {
   const {
     user,
