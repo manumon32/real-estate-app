@@ -153,7 +153,7 @@ function Header(props: any): React.JSX.Element {
               </View>
             </TouchableOpacity>
           )}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => {
               // @ts-ignore
               navigation.navigate('ThreeDModelViewer', {id: '123'});
@@ -170,7 +170,7 @@ function Header(props: any): React.JSX.Element {
               </View>
               <Text style={styles.icontextStyle}>3D Tour</Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           {floorPlans.length > 0 && (
             <TouchableOpacity onPress={() => setVisible(true)}>
               <View style={[styles.heartBootom]}>

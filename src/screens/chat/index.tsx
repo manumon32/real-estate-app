@@ -84,6 +84,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
       style={[
         styles.container,
         {backgroundColor: isSelected ? '#f0f0f0' : '#fff'},
+        !isActive && {opacity: 0.8}
       ]}>
       {(isSelected || isSelectionMode) && (
         <View style={{marginRight: 10}}>
@@ -130,7 +131,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
       <View style={styles.textContainer}>
         <View style={styles.headerRow}>
           <View style={{flexDirection: 'row', width: '80%'}}>
-            <Text numberOfLines={1} style={styles.name}>
+            <Text numberOfLines={1} style={[styles.name, !isActive && {opacity: 0.5}]}>
               {name}
             </Text>
           </View>
@@ -141,8 +142,8 @@ const MessageCard: React.FC<MessageCardProps> = ({
           )}
         </View>
 
-        {title && (
-          <Text numberOfLines={1} style={styles.title}>
+        {title  &&(
+          <Text numberOfLines={1} style={[styles.title, !isActive && {opacity: 0.5}]}>
             {title}
           </Text>
         )}
@@ -165,10 +166,11 @@ const MessageCard: React.FC<MessageCardProps> = ({
               {message}
             </Text>
           )}
+
           {!isActive && (
             <Text
               numberOfLines={2}
-              style={[styles.message, {fontFamily: Fonts.BOLD, color: 'red'}]}>
+              style={[styles.message, {fontFamily: Fonts.BOLD, color: 'red', opacity: 1}]}>
               {'This ad has been disabled by the owner.'}
             </Text>
           )}
@@ -378,24 +380,26 @@ const Chat = React.memo(({navigation}: any) => {
                   onPress={() => {
                     clearSelection();
                   }}>
-                    <MaterialCommunityIcons name="close" size={20} />
+                  <MaterialCommunityIcons name="close" size={20} />
                   <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16}}>
                     Cancel
                   </Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                  onPress={() => {
-                    deleteChats();
-                  }}>
-                  <MaterialCommunityIcons name="delete" size={20} />
-                  <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16}}>
-                    Delete All
-                  </Text>
-                </TouchableOpacity>
+                {selectedChats.length > 0 && (
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}
+                    onPress={() => {
+                      deleteChats();
+                    }}>
+                    <MaterialCommunityIcons name="delete" size={20} />
+                    <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16}}>
+                      Delete All
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             ) : (
               <ScrollView

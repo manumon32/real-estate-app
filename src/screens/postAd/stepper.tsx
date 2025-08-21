@@ -470,6 +470,11 @@ const PostAdContainer = (props: any) => {
 
   return (
     <React.Fragment>
+      {loading && (
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
       <CommonHeader
         title="Add Property"
         textColor="#171717"
@@ -645,6 +650,14 @@ const styles = StyleSheet.create({
   },
   chipTextSelected: {
     color: '#fff',
+  },
+
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // fills the screen
+    backgroundColor: 'rgba(0, 0, 0, 0.78)', // transparent dark overlay
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999, // ensure it's on top
   },
 });
 

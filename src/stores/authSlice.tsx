@@ -6,6 +6,7 @@ import {
   updateUser,
   verifyOTP,
 } from '@api/services';
+import Toast from 'react-native-toast-message';
 
 export interface AuthSlice {
   user: any | null;
@@ -80,6 +81,13 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           user: resp.userInfo,
           visible: false,
           otp: null,
+        });
+        Toast.show({
+          type: 'success',
+          text1: 'Login Successful',
+          text2: 'Welcome to the app!',
+          position: 'bottom',
+          visibilityTime: 1000,
         });
       } else {
         set({

@@ -271,13 +271,10 @@ const PropertyDetails = React.memo(() => {
   };
 
   useEffect(() => {
-    if (!items?._id) {
-      // @ts-ignore
-      navigation.navigate('Main');
-    } else {
-      fetchBanks(items?._id);
+    if (items?._id) {
+      bearerToken && fetchBanks(items?._id);
     }
-  }, [fetchBanks, items, navigation]);
+  }, [bearerToken, fetchBanks, items, navigation]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -790,8 +787,8 @@ const PropertyDetails = React.memo(() => {
 
             {Platform.OS === 'android' &&
               isValidLatLng(
-                property?.location?.coordinates[0],
                 property?.location?.coordinates[1],
+                property?.location?.coordinates[0],
               ) && (
                 <MapView
                   provider={PROVIDER_GOOGLE}

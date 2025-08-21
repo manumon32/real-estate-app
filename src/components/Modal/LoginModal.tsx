@@ -17,6 +17,7 @@ import {
   Pressable,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import auth from '@react-native-firebase/auth';
@@ -51,10 +52,13 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
   const {login, otp, clearOTP, verifyOTP, loginError, otpLoading} =
     useBoundStore();
   const [loginVar, setLoginVar] = useState('');
+  const [socialLoading, setSocialLoading] = useState(false);
+
   const [message, setMessage] = useState('');
   const [userInfo, setUserInfo] = useState<any>(null);
   const {theme} = useTheme();
   useEffect(() => {
+    setSocialLoading(false);
     Settings.initializeSDK();
   }, []);
   const isValidEmail = (email: string) => {
@@ -82,22 +86,24 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     }
   };
 
-  const veryFyOTP = (arg: any) => {
+  const veryFyOTP = (arg: any, userData: any) => {
     let payload: any = {};
-    if (userInfo) {
+    let userInfoData = userData || userInfo;
+    setSocialLoading(true);
+    if (userInfoData) {
       payload.isSocialLogin = true;
-      payload.socialProvider = userInfo?.socialProvider;
-      payload.email = userInfo?.email ?? null;
-      payload.socialProviderId = userInfo?.id ?? '';
-      if (userInfo?.socialProvider === 'facebook') {
-        payload.profilePicture = userInfo?.picture?.data?.url ?? '';
-        payload.name = userInfo?.name;
+      payload.socialProvider = userInfoData?.socialProvider;
+      payload.email = userInfoData?.email ?? null;
+      payload.socialProviderId = userInfoData?.id ?? '';
+      if (userInfoData?.socialProvider === 'facebook') {
+        payload.profilePicture = userInfoData?.picture?.data?.url ?? '';
+        payload.name = userInfoData?.name;
       }
-      if (userInfo?.socialProvider === 'google') {
-        payload.profilePicture = userInfo?.photo ?? '';
+      if (userInfoData?.socialProvider === 'google') {
+        payload.profilePicture = userInfoData?.photo ?? '';
         payload.name =
-          userInfo?.givenName || userInfo?.familyName
-            ? userInfo?.givenName + ' ' + userInfo?.familyName
+          userInfoData?.givenName || userInfoData?.familyName
+            ? userInfoData?.givenName + ' ' + userInfoData?.familyName
             : '';
       }
     } else {
@@ -105,16 +111,16 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
         phone: isValidPhone(loginVar) ? loginVar : null,
         email: isValidEmail(loginVar) ? loginVar : null,
       };
+      payload.otp = arg;
     }
-    payload.otp = arg;
-    console.log(payload);
+    console.log('payload:', payload);
     verifyOTP(payload);
   };
 
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
-        '417248412728-viv8i4i9ah06ecgherok52lm389epujb.apps.googleusercontent.com',
+        '417248412728-166ciae7fm9r8affqantsaoo49iirgcl.apps.googleusercontent.com',
       offlineAccess: true, // if using with Firebase or for getting refresh tokens
     });
   }, []);
@@ -125,7 +131,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       const userInfo = await GoogleSignin.signIn();
       setUserInfo({...userInfo?.data?.user, socialProvider: 'google'});
       setLoginVar(userInfo?.data?.user?.email ?? '');
-      handleSubmit(userInfo?.data?.user?.email ?? null);
+      veryFyOTP(false, {...userInfo?.data?.user, socialProvider: 'google'});
     } catch (error) {
       console.log(error);
     }
@@ -202,7 +208,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
           setUserInfo({...result, socialProvider: 'facebook'});
           // @ts-ignore
           setLoginVar(result?.email ?? '');
-          handleSubmit(result?.email ?? null);
+          veryFyOTP(false, {...result, socialProvider: 'facebook'});
         }
       },
     );
@@ -220,6 +226,11 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       animationType="fade"
       onRequestClose={handleClose}>
       <View style={styles.container}>
+        {otpLoading && (
+          <View style={styles.overlay}>
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+        )}
         {!otp && (
           <>
             <LinearGradient
@@ -336,6 +347,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#15937c',
     // alignItems: 'center',
     // justifyContent: 'center',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // fills the screen
+    backgroundColor: 'rgba(0, 0, 0, 0.78)', // transparent dark overlay
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999, // ensure it's on top
   },
   gradient: {
     height: '100%',

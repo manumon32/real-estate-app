@@ -11,7 +11,10 @@ import useBoundStore from '@stores/index';
 import {useFocusEffect} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { deleteNotificationsAPI, markAllReadNotificationsAPI } from '@api/services';
+import {
+  deleteNotificationsAPI,
+  markAllReadNotificationsAPI,
+} from '@api/services';
 
 type NotificationType = 'message' | 'offer' | 'listing' | 'system';
 
@@ -190,7 +193,7 @@ export default function NotificationListSwipe() {
     }
   };
 
-    const markAllAsRead = async () => {
+  const markAllAsRead = async () => {
     const body = {
       notifications:
         selectedNotification.length === notifications_List.length
@@ -242,13 +245,17 @@ export default function NotificationListSwipe() {
           !selectAll ? 'checkbox-blank-outline' : 'checkbox-marked-outline'
         }
         onRightPress={() => {
-          setSelectall(!selectAll);
-          if (selectAll) {
-            setIsSelectionMode(false);
-            clearSelection();
-          } else {
-            setIsSelectionMode(true);
-            setSelectedNotification(notifications_List.map((n: any) => n._id));
+          if (notifications_List.length > 0) {
+            setSelectall(!selectAll);
+            if (selectAll) {
+              setIsSelectionMode(false);
+              clearSelection();
+            } else {
+              setIsSelectionMode(true);
+              setSelectedNotification(
+                notifications_List.map((n: any) => n._id),
+              );
+            }
           }
         }}
       />
