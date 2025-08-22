@@ -9,7 +9,8 @@
     "start": "react-native start",
     "test": "jest",
     "build-debug": "cd android && ./gradlew generateCodegenArtifactsFromSchema && cd .. && npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res && cd android &&  ./gradlew assembleDebug",
-    "build-release": "cd android && ./gradlew generateCodegenArtifactsFromSchema && cd .. && npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ && cd android &&  ./gradlew assembleRelease"
+    "build-release": "cd android && ./gradlew generateCodegenArtifactsFromSchema && cd .. && npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ && cd android &&  ./gradlew assembleRelease",
+    "bundle-release": "cd android && ./gradlew generateCodegenArtifactsFromSchema && cd .. && npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ && cd android &&  ./gradlew bundleRelease"
   },
   "dependencies": {
     "@invertase/react-native-apple-authentication": "^2.4.1",
