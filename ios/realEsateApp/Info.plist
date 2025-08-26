@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>realEsateApp</string>
+	<string>Hotplotz</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -25,19 +25,10 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fb1911577602952822</string>
+				<string>com.googleusercontent.apps.417248412728-v5ohcebea8fqqjcip0tpvo3a39haqulc</string>
 			</array>
 		</dict>
 	</array>
-  <key>CFBundleURLTypes</key>
-  <array>
-    <dict>
-      <key>CFBundleURLSchemes</key>
-      <array>
-        <string>com.googleusercontent.apps.417248412728-v5ohcebea8fqqjcip0tpvo3a39haqulc</string>
-      </array>
-    </dict>
-  </array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>FacebookAppID</key>

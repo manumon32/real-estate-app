@@ -357,7 +357,7 @@
 				DEVELOPMENT_TEAM = 824727UY26;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = realEsateApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Real Estate App";
+				INFOPLIST_KEY_CFBundleDisplayName = Hotplotz;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -386,9 +386,9 @@
 				CODE_SIGN_ENTITLEMENTS = realEsateApp/realEsateApp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 824727UY26;
+				DEVELOPMENT_TEAM = 6SJ4958YJP;
 				INFOPLIST_FILE = realEsateApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Real Estate App";
+				INFOPLIST_KEY_CFBundleDisplayName = Hotplotz;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -400,7 +400,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.realEstate;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hotplotz;
 				PRODUCT_NAME = realEsateApp;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -487,10 +487,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -570,10 +567,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

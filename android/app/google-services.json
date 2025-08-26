@@ -1,45 +1,41 @@
 {
   "project_info": {
-    "project_number": "417248412728",
-    "project_id": "real-estate-app-cae6d",
-    "storage_bucket": "real-estate-app-cae6d.firebasestorage.app"
+    "project_number": "1069084103649",
+    "project_id": "hotplotz-b9688",
+    "storage_bucket": "hotplotz-b9688.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:417248412728:android:7d267a8bca31ff02fcd2cd",
+        "mobilesdk_app_id": "1:1069084103649:android:ed8fa0820bc69027ed78a0",
         "android_client_info": {
-          "package_name": "com.realesateapp"
+          "package_name": "com.hotplotz"
         }
       },
       "oauth_client": [
         {
-          "client_id": "417248412728-g5nsltocr5fpsokcaq1eabhsfshnfmgr.apps.googleusercontent.com",
+          "client_id": "1069084103649-75os1f9i45uv24e2bj4ev16vmeq8tes9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.realesateapp",
-            "certificate_hash": "f2a058e3ba5e4f7eb4feddabdea8604f9a0a1dd3"
+            "package_name": "com.hotplotz",
+            "certificate_hash": "d41111511c2f21234965bc2fc303fe5a7915f553"
           }
         },
         {
-          "client_id": "417248412728-pjfdqu60jvefrb03p15ktcnsdpqk9gsg.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.realesateapp",
-            "certificate_hash": "7a5f68eb8ce949cbfeb6b45b3a2ff26c83dd1033"
-          }
+          "client_id": "1069084103649-ehn40vvlrdqqdd2qg3n25558uneph9sp.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDdJco8ffnAX52_1xB9WuYyt0zpuq3EDIY"
+          "current_key": "AIzaSyCoeJOkCeb16QGemoHMFVwe7zxCarbUuGI"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "417248412728-166ciae7fm9r8affqantsaoo49iirgcl.apps.googleusercontent.com",
+              "client_id": "1069084103649-ehn40vvlrdqqdd2qg3n25558uneph9sp.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

@@ -78,9 +78,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.realesateapp"
+    namespace "com.hotplotz"
     defaultConfig {
-        applicationId "com.realesateapp"
+        applicationId "com.hotplotz"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -95,9 +95,9 @@ android {
         }
          release {
             storeFile file('release.keystore')
-            storePassword 'realestate'
-            keyAlias 'realestate'
-            keyPassword 'realestate'
+            storePassword 'hotplotz'
+            keyAlias 'hotplotz'
+            keyPassword 'hotplotz'
         }
     }
     buildTypes {

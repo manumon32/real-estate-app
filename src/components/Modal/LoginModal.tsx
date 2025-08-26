@@ -120,7 +120,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
-        '417248412728-166ciae7fm9r8affqantsaoo49iirgcl.apps.googleusercontent.com',
+        '1069084103649-ehn40vvlrdqqdd2qg3n25558uneph9sp.apps.googleusercontent.com',
       offlineAccess: true, // if using with Firebase or for getting refresh tokens
     });
   }, []);

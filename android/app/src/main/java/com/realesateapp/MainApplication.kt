@@ -1,4 +1,4 @@
-package com.realesateapp
+package com.hotplotz
 
 import android.app.Application
 import com.facebook.react.PackageList

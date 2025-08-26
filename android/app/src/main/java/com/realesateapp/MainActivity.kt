@@ -1,4 +1,4 @@
-package com.realesateapp
+package com.hotplotz
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
