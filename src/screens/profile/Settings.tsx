@@ -6,12 +6,15 @@ import React from 'react';
 import {View, ScrollView, RefreshControl, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
-import { logoutAndRedirect } from '../../utils/logoutAndRedirect';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {logoutAndRedirect} from '../../utils/logoutAndRedirect';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import DeviceInfo from 'react-native-device-info';
 
 const Settings = () => {
   const navigation = useNavigation();
   const {logout, fetchUserDetails, userProfileloading} = useBoundStore();
+  const version = DeviceInfo.getVersion(); // versionName (e.g. 1.0.3)
+  const buildNumber = DeviceInfo.getBuildNumber(); // versionCode (e.g. 12)
   return (
     <SafeAreaView style={{backgroundColor: '#F6FCFF', height: '100%'}}>
       <CommonHeader
@@ -72,9 +75,26 @@ const Settings = () => {
               alignSelf: 'center',
             }}
           />
+
+          <MenuLink
+            icon='information-outline'
+            label={'Version ' + version + ' (' + buildNumber + ')'}
+            showChevron={false}
+          />
+
+          <View
+            style={{
+              backgroundColor: '#EBEBEB',
+              borderWidth: 1,
+              borderColor: '#EBEBEB',
+              width: '90%',
+              alignSelf: 'center',
+            }}
+          />
           <MenuLink
             icon="logout"
             label="Logout"
+            showChevron={false}
             // @ts-ignore
             onPress={async () => {
               Alert.alert(
@@ -103,9 +123,12 @@ const Settings = () => {
               alignSelf: 'center',
             }}
           />
+          
+
           <MenuLink
             icon="logout"
             label="Logout from all devices"
+            showChevron={false}
             // @ts-ignore
             onPress={async () => {
               Alert.alert(
@@ -139,6 +162,7 @@ const Settings = () => {
           <MenuLink
             icon="delete"
             label="Delete account"
+            showChevron={false}
             // @ts-ignore
             onPress={async () => {
               Alert.alert(
@@ -167,6 +191,7 @@ const Settings = () => {
               alignSelf: 'center',
             }}
           />
+          
         </View>
       </ScrollView>
     </SafeAreaView>

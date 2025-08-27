@@ -26,9 +26,10 @@ export interface MenuLinkProps {
   containerStyle?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
   valueStyle?: StyleProp<TextStyle>;
-  showToggle?:boolean
-  selected?:boolean
-  onToggle?: any
+  showToggle?:boolean;
+  toggleDisabled?:boolean;
+  selected?:boolean;
+  onToggle?: any;
 }
 
 const MenuLink: React.FC<MenuLinkProps> = ({
@@ -41,6 +42,7 @@ const MenuLink: React.FC<MenuLinkProps> = ({
   labelStyle,
   valueStyle,
   selected,
+  toggleDisabled = false,
   showToggle,
   onToggle
 }) => {
@@ -72,7 +74,7 @@ const MenuLink: React.FC<MenuLinkProps> = ({
           style={styles.chevron}
         />
       )}
-      {showToggle && <Switch color='#2F8D79' value={selected} onValueChange={onToggle} />}
+      {showToggle && <Switch color='#2F8D79' value={selected} disabled={toggleDisabled} onValueChange={onToggle} />}
     </TouchableOpacity>
   );
 };
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 15,
     paddingHorizontal: 20,
   },
   icon: {

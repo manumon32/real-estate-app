@@ -1767,6 +1767,8 @@ PODS:
     - Yoga
   - react-native-splash-screen (3.3.0):
     - React-Core
+  - react-native-version-check (3.5.0):
+    - React-Core
   - react-native-webview (13.15.0):
     - DoubleConversion
     - glog
@@ -2571,6 +2573,7 @@ DEPENDENCIES:
   - react-native-razorpay (from `../node_modules/react-native-razorpay`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
+  - react-native-version-check (from `../node_modules/react-native-version-check`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
@@ -2761,6 +2764,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-splash-screen:
     :path: "../node_modules/react-native-splash-screen"
+  react-native-version-check:
+    :path: "../node_modules/react-native-version-check"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-NativeModulesApple:
@@ -2939,6 +2944,7 @@ SPEC CHECKSUMS:
   react-native-razorpay: ab51e7be3d906f49b26198d978fc6f163e846d30
   react-native-safe-area-context: cd92c82a585b20104dc8044bf9db588a53e35552
   react-native-splash-screen: 95994222cc95c236bd3cdc59fe45ed5f27969594
+  react-native-version-check: 842a3b0e7221798cbe8c6abaf24aab3ed0b485ce
   react-native-webview: 69c118d283fccfbc4fca0cd680e036ff3bf188fa
   React-NativeModulesApple: df8e5bc59e78ca3040ffbf41336889f3bd0fad68
   React-oscompat: ef5df1c734f19b8003e149317d041b8ce1f7d29c
@@ -2993,6 +2999,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 50518ade05048235d91a78b803336dbb5b159d5d
 
-PODFILE CHECKSUM: fb8ffb637431d6de80b93266aaed7c1b638d77b2
+PODFILE CHECKSUM: 220866914af11c4f162add0131b799d4f33284b2
 
 COCOAPODS: 1.16.2

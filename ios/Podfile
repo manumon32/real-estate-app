@@ -53,7 +53,7 @@ end
   use_frameworks! :linkage => :static
   $RNFirebaseAsStaticFramework = true
 
-target 'realEsateApp' do
+target 'Hotplotz' do
   config = use_native_modules!
 
   use_react_native!(

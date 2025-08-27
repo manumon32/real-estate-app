@@ -25,7 +25,7 @@ import {
 } from 'react-native-permissions';
 import useBoundStore from '@stores/index';
 
-const GOOGLE_API_KEY = 'AIzaSyD1PiJC7RtzJzVlKsZkNIB8meCqklPRgvQ'; // Replace this
+const GOOGLE_API_KEY = 'AIzaSyA83qLdbImZmSqqXEV7xeiYegOGcZhUq_o'; // Replace this
 
 interface Props {
   visible: boolean;

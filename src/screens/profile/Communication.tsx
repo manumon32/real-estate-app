@@ -44,8 +44,9 @@ const Communication = () => {
             label="Email"
             selected={updateToggle}
             showToggle
-            onToggle={() => setUpdatetoggle(!updateToggle)}
             showChevron={false}
+            toggleDisabled
+            onToggle={() => setUpdatetoggle(!updateToggle)}
             // @ts-ignore
             onPress={() => setUpdatetoggle(!updateToggle)}
           />
@@ -62,6 +63,7 @@ const Communication = () => {
             label="SMS"
             selected={recomandToggle}
             showToggle
+            toggleDisabled
             onToggle={() => setRecomandToggle(!recomandToggle)}
             showChevron={false}
             // @ts-ignore
@@ -81,6 +83,7 @@ const Communication = () => {
             label="Call"
             selected={call}
             showToggle
+            toggleDisabled
             onToggle={() => setCall(!call)}
             showChevron={false}
             // @ts-ignore

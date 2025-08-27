@@ -18,12 +18,11 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import auth from '@react-native-firebase/auth';
-import appleAuth, {
-  AppleButton,
-} from '@invertase/react-native-apple-authentication';
+import appleAuth from '@invertase/react-native-apple-authentication';
 
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {
@@ -35,7 +34,7 @@ import {
   GraphRequestManager,
 } from 'react-native-fbsdk-next';
 
-import LogoIcon from '@assets/svg/logo.svg';
+// import LogoIcon from '@assets/svg/logo.svg';
 import GroupIcon from '@assets/svg/group.svg';
 import IconButton from '@components/Buttons/IconButton';
 import {useTheme} from '@theme/ThemeProvider';
@@ -182,7 +181,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       // Sign in with Firebase
       const userCredential = await auth().signInWithCredential(appleCredential);
 
-      console.log('Firebase Sign-In successful:', userCredential.user);
+      Alert.alert('Firebase Sign-In successful:', JSON.stringify(userCredential.user));
     } catch (err) {
       console.log('Apple Sign-In error:', err);
     }
@@ -253,7 +252,12 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
               {/* Login Card */}
               <View style={styles.card}>
                 {/* Logo */}
-                <LogoIcon style={styles.logo} />
+                <Image
+                  source={require('@assets/images/logo.png')}
+                  style={styles.logo}
+                />
+                
+                {/* <LogoIcon style={styles.logo} /> */}
                 <Text style={styles.title}>Login</Text>
 
                 {/* Phone Input */}
@@ -300,11 +304,13 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
 
                 {/* Social Logins */}
                 <View style={styles.socialRow}>
-                  <Icon
-                    name="apple"
-                    size={36}
-                    onPress={() => signInWithApple()}
-                  />
+                  {Platform.OS === 'ios' && (
+                    <Icon
+                      name="apple"
+                      size={36}
+                      onPress={() => signInWithApple()}
+                    />
+                  )}
                   <Icon
                     name="google"
                     color="#000"
@@ -378,8 +384,8 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 200,
+    height: 50,
     alignSelf: 'center',
     marginBottom: 8,
   },

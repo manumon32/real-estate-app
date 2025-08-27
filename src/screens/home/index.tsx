@@ -13,6 +13,7 @@ import useBoundStore from '@stores/index';
 import DeviceInfo from 'react-native-device-info';
 import {Fonts} from '@constants/font';
 import {useFocusEffect} from '@react-navigation/native';
+import AppUpdateChecker from './AppUpdateChecker';
 
 function Index({navigation}: any): React.JSX.Element {
   const {
@@ -39,7 +40,7 @@ function Index({navigation}: any): React.JSX.Element {
     const deviceId = await getDeviceId();
     let version = DeviceInfo.getVersion();
     const deviceModel = DeviceInfo.getModel();
-    const osVersion = DeviceInfo.getSystemVersion(); 
+    const osVersion = DeviceInfo.getSystemVersion();
     const data = {
       deviceId: deviceId ? deviceId : '123456',
       appVersion: version ?? '',
@@ -51,7 +52,7 @@ function Index({navigation}: any): React.JSX.Element {
       debug: false,
       installer: 'com.android.vending',
     };
-    console.log('handshake payload',data);
+    console.log('handshake payload', data);
     gethandShakeToken(data);
   };
 
@@ -87,6 +88,7 @@ function Index({navigation}: any): React.JSX.Element {
       const initialize = async () => {
         setError(false);
         try {
+          console.log('Token & ClientId', token, clientId);
           if (!token || !clientId) {
             fetchData();
           } else {
@@ -117,13 +119,13 @@ function Index({navigation}: any): React.JSX.Element {
     const pulse = Animated.loop(
       Animated.sequence([
         Animated.timing(scaleAnim, {
-          toValue: 1.2,
-          duration: 500,
+          toValue: 1.1,
+          duration: 1000,
           useNativeDriver: true,
         }),
         Animated.timing(scaleAnim, {
           toValue: 1,
-          duration: 500,
+          duration: 1000,
           useNativeDriver: true,
         }),
       ]),
@@ -133,6 +135,7 @@ function Index({navigation}: any): React.JSX.Element {
 
   return (
     <View style={styles.container}>
+    <AppUpdateChecker />
       <Animated.Image
         source={require('@assets/images/logo.png')}
         style={[styles.image, {transform: [{scale: scaleAnim}]}]}
@@ -157,7 +160,10 @@ function Index({navigation}: any): React.JSX.Element {
 
 const styles = StyleSheet.create({
   container: {flex: 1, justifyContent: 'center', alignItems: 'center'},
-  image: {width: 100, height: 100},
+  image: {
+    width: 250,
+    height: 250,
+  },
   loginBtn: {
     backgroundColor: '#15937c',
     borderRadius: 10,

@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>417248412728-v5ohcebea8fqqjcip0tpvo3a39haqulc.apps.googleusercontent.com</string>
+	<string>1069084103649-n5ckronc2eq9hvb8kfofc8noru3ckn30.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.417248412728-v5ohcebea8fqqjcip0tpvo3a39haqulc</string>
+	<string>com.googleusercontent.apps.1069084103649-n5ckronc2eq9hvb8kfofc8noru3ckn30</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>417248412728-914vrl77ohfdcs40pi2s9t1g56nhk46a.apps.googleusercontent.com</string>
+	<string>1069084103649-75os1f9i45uv24e2bj4ev16vmeq8tes9.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBiR2E2G0-J04CQh42neZ2UZUGpmq8Lsx0</string>
+	<string>AIzaSyBLVPPH2iEuoB7DxSaswsuzwhglQqsp6PA</string>
 	<key>GCM_SENDER_ID</key>
-	<string>417248412728</string>
+	<string>1069084103649</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.realEstate</string>
+	<string>com.hotplotz</string>
 	<key>PROJECT_ID</key>
-	<string>real-estate-app-cae6d</string>
+	<string>hotplotz-b9688</string>
 	<key>STORAGE_BUCKET</key>
-	<string>real-estate-app-cae6d.firebasestorage.app</string>
+	<string>hotplotz-b9688.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:417248412728:ios:40af36e40151cbacfcd2cd</string>
+	<string>1:1069084103649:ios:51c23fde940b57c8ed78a0</string>
 </dict>
 </plist>

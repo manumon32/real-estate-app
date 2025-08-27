@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "1069084103649-jqdq6edof2qn3dt9d3v39h70c8e0p1e6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hotplotz",
+            "certificate_hash": "dd1d2a32a5a56b2c5178a68ae4f364d398407f24"
+          }
+        },
+        {
           "client_id": "1069084103649-ehn40vvlrdqqdd2qg3n25558uneph9sp.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -37,6 +45,13 @@
             {
               "client_id": "1069084103649-ehn40vvlrdqqdd2qg3n25558uneph9sp.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "1069084103649-n5ckronc2eq9hvb8kfofc8noru3ckn30.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hotplotz"
+              }
             }
           ]
         }

@@ -6,7 +6,7 @@ import {
 } from './handshake';
 import uuid from 'react-native-uuid';
 import {logoutAndRedirect} from '../utils/logoutAndRedirect';
-const API_BASE_URL = 'http://13.61.181.173:8081';
+const API_BASE_URL = 'https://api.hotplotz.com';
 // const SECRET_KEY =
 //   'c9b5123f5677aa23121b409de425e886448b81cf0e3d96f684b14f8d78382598';
 
@@ -40,13 +40,13 @@ api.interceptors.request.use(
         config.headers['X-TOKEN'],
         stringToSign,
       );
-      // console.log('header only', {
-      //   ...(config.headers || {}),
-      //   'X-TIMESTAMP': timestamp,
-      //   'X-SIGNATURE': signature,
-      //   'X-NONCE': nonce,
-      //   'X-CLIENT-ID': deviceId,
-      // });
+      console.log('header only', {
+        ...(config.headers || {}),
+        'X-TIMESTAMP': timestamp,
+        'X-SIGNATURE': signature,
+        'X-NONCE': nonce,
+        'X-CLIENT-ID': deviceId,
+      });
       config.headers = {
         ...(config.headers || {}),
         'X-TIMESTAMP': timestamp,

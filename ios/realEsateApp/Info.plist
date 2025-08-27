@@ -25,7 +25,13 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.417248412728-v5ohcebea8fqqjcip0tpvo3a39haqulc</string>
+				<string>com.googleusercontent.apps.1069084103649-n5ckronc2eq9hvb8kfofc8noru3ckn30</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb1911577602952822</string>
 			</array>
 		</dict>
 	</array>
@@ -36,7 +42,7 @@
 	<key>FacebookClientToken</key>
 	<string>9e987a715046c0ccbc57110cc1681144</string>
 	<key>FacebookDisplayName</key>
-	<string>Real Estate App</string>
+	<string>Hotplotz</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>fbapi</string>
