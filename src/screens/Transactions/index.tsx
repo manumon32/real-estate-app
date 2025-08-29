@@ -15,9 +15,9 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import EmptyText from '@components/EmptyText';
 import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import NoChats from '@components/NoChatFound';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -28,6 +28,7 @@ interface ListingCardProps {
   navigation: any;
   items: any;
   markasSold?: any;
+  theme?: any;
 }
 
 const FormattedDate = (arg: string | number | Date) => {
@@ -56,7 +57,10 @@ const ListingCard: React.FC<ListingCardProps> = ({
   navigation,
 }) => {
   return (
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+      ]}>
       <TouchableOpacity
         onPress={() => {
           navigation.navigate('Details', {items});
@@ -102,6 +106,7 @@ const Transactions = () => {
           date={items.item?.createdAt}
           navigation={navigation}
           items={items.item}
+          theme={theme}
         />
       );
     },
@@ -109,7 +114,7 @@ const Transactions = () => {
   );
 
   return (
-    <SafeAreaView style={{backgroundColor: '#fff', height: '100%'}}>
+    <SafeAreaView style={{backgroundColor: theme.colors.background, height: '100%'}}>
       <CommonHeader
         title="Orders"
         textColor="#171717"
@@ -189,7 +194,15 @@ const Transactions = () => {
             {transLoading && transactions.length <= 0 && <AdsListSkelton />}
             {!transLoading &&
               (transactions.length <= 0 ? (
-                <EmptyText text="You dont have any transactions yet." />
+                <NoChats
+                onExplore={() => {
+                  // @ts-ignore
+                  navigation.navigate('Main');
+                }}
+                icon="message-text-outline"
+                title="No Transactions Found"
+                buttonText={'Explore now'}
+              />
               ) : (
                 <></>
               ))}

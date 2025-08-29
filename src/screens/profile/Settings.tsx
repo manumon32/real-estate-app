@@ -9,18 +9,21 @@ import useBoundStore from '@stores/index';
 import {logoutAndRedirect} from '../../utils/logoutAndRedirect';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import DeviceInfo from 'react-native-device-info';
+import {useTheme} from '@theme/ThemeProvider';
 
 const Settings = () => {
   const navigation = useNavigation();
   const {logout, fetchUserDetails, userProfileloading} = useBoundStore();
   const version = DeviceInfo.getVersion(); // versionName (e.g. 1.0.3)
   const buildNumber = DeviceInfo.getBuildNumber(); // versionCode (e.g. 12)
+  const {theme} = useTheme();
   return (
-    <SafeAreaView style={{backgroundColor: '#F6FCFF', height: '100%'}}>
+    <SafeAreaView
+      style={{backgroundColor: theme.colors.background, height: '100%'}}>
       <CommonHeader
         title="Settings"
         textColor="#171717"
-        backgroundColor={'#F6FCFF'}
+        backgroundColor={theme.colors.background}
         // onBackPress={onBackPress}
       />
       <ScrollView
@@ -37,7 +40,7 @@ const Settings = () => {
         }>
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: theme.colors.background,
             borderRadius: 16,
             borderColor: '#EBEBEB',
             borderWidth: 1,
@@ -77,7 +80,7 @@ const Settings = () => {
           />
 
           <MenuLink
-            icon='information-outline'
+            icon="information-outline"
             label={'Version ' + version + ' (' + buildNumber + ')'}
             showChevron={false}
           />
@@ -123,7 +126,6 @@ const Settings = () => {
               alignSelf: 'center',
             }}
           />
-          
 
           <MenuLink
             icon="logout"
@@ -191,7 +193,6 @@ const Settings = () => {
               alignSelf: 'center',
             }}
           />
-          
         </View>
       </ScrollView>
     </SafeAreaView>

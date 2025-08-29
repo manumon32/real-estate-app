@@ -6,14 +6,10 @@ import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 import React, {useCallback, useEffect} from 'react';
 import {useTheme} from '@theme/ThemeProvider';
-import {
-  StyleSheet,
-  FlatList,
-  RefreshControl,
-} from 'react-native';
+import {StyleSheet, FlatList, RefreshControl} from 'react-native';
 import {Fonts} from '@constants/font';
-import EmptyText from '@components/EmptyText';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import NoChats from '@components/NoChatFound';
 
 const FavAds = () => {
   const {favorites, fetchFavouriteAds} = useBoundStore();
@@ -30,7 +26,8 @@ const FavAds = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <FlatList
         data={favorites}
         numColumns={2}
@@ -43,7 +40,7 @@ const FavAds = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 100,
-          backgroundColor: theme.colors.backgroundHome,
+          backgroundColor: theme.colors.background,
           minHeight: 900,
         }}
         refreshControl={
@@ -57,7 +54,16 @@ const FavAds = () => {
         }
         ListFooterComponent={
           favorites.length <= 0 ? (
-           <EmptyText text="You havent liked anything yet." />
+            <NoChats
+              onExplore={() => {
+                // @ts-ignore
+                navigation.navigate('Main');
+              }}
+              icon="alert-circle-outline"
+              title="You havent liked anything yet.."
+              // body="You havent liked anything yet.."
+              buttonText={'Explore now'}
+            />
           ) : (
             <></>
           )
@@ -71,7 +77,7 @@ const styles = StyleSheet.create({
   container: {
     height: '100%',
     flex: 1,
-    backgroundColor:'#fff'
+    backgroundColor: '#fff',
   },
   card: {
     backgroundColor: '#fff',

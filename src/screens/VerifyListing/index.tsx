@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 // MessageCard.tsx
-import CommonHeader from '@components/Header/CommonHeaderProfile';
+import CommonHeader from '@components/Header/CommonHeader';
 import {Fonts} from '@constants/font';
 import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback} from 'react';
@@ -48,14 +48,15 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
 
 const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
   const [message, setMessage] = React.useState<any>('');
+  const {theme} = useTheme();
 
   return (
-    <View style={styles.chatcontainer}>
+    <View style={[styles.chatcontainer, {backgroundColor: theme.colors.background}]}>
       <Icon
         name="plus"
         onPress={() => setAttachModalVisible(true)}
         size={20}
-        color="#000"
+        color={theme.colors.text}
       />
       <TextInput
         mode="outlined"
@@ -67,15 +68,15 @@ const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
         outlineColor="#F5F6FA"
         activeOutlineColor="#F5F6FA"
       />
-      <IconButton
-        icon="send"
-        size={18}
+      <Icon
+        name="send"
+        size={32}
         onPress={() => {
           setMessage(null);
           handleSend(message);
         }}
         disabled={!message?.trim()}
-        iconColor="#696969"
+        color={theme.colors.text}
       />
     </View>
   );
@@ -255,7 +256,7 @@ const Verification = ({navigation}: any) => {
     }
   };
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background }}>
       <CommonHeader
         title={items?.user?.name ?? 'Verify Listing'}
         textColor="#171717"
@@ -281,7 +282,7 @@ const Verification = ({navigation}: any) => {
                   style={styles.icon}
                 />
                 <View style={styles.textWrapper}>
-                  <Text style={[styles.text, {color: '#000000DE'}]}>
+                  <Text style={[styles.text, {color: theme.colors.text}]}>
                     Your listing is currently under review. You can still upload
                     any documents you have for it.
                   </Text>
@@ -314,7 +315,7 @@ const Verification = ({navigation}: any) => {
                   style={styles.icon}
                 />
                 <View style={styles.textWrapper}>
-                  <Text style={[styles.text, {color: '#000000DE'}]}>
+                  <Text style={[styles.text, {color: theme.colors.text}]}>
                     Your listing is Verified
                   </Text>
                 </View>
@@ -336,7 +337,7 @@ const Verification = ({navigation}: any) => {
             }}
             ListHeaderComponentStyle={{
               padding: 0,
-              backgroundColor: '#fff',
+              backgroundColor: theme.colors.background,
             }}
             showsVerticalScrollIndicator={false}
             ListFooterComponent={

@@ -8,10 +8,12 @@ import {
   StatusBar,
   Platform,
   ViewStyle,
+  useColorScheme,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useNavigation} from '@react-navigation/native';
 import {Fonts} from '@constants/font';
+import { useTheme } from '@theme/ThemeProvider';
 
 interface CommonHeaderProps {
   title: string;
@@ -37,6 +39,10 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
   rightText,
 }) => {
   const navigation = useNavigation();
+   const isDarkMode = useColorScheme() === 'dark';
+    const {theme} = useTheme();
+    backgroundColor = theme.colors.background;
+    textColor = theme.colors.text;
   return (
     <View
       style={[
@@ -49,18 +55,18 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
       ]}>
       <StatusBar
         backgroundColor={backgroundColor}
-        barStyle={Platform.OS === 'android' ? 'dark-content' : 'dark-content'}
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
       />
       <View style={styles.container}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={[styles.backButton, {backgroundColor: theme.colors.backButtom}]}
           onPress={() => {
             onBackPress ? onBackPress() : navigation.goBack();
           }}>
           <MaterialCommunityIcons
             name="chevron-left"
             size={24}
-            color={textColor}
+            // color={textColor}
           />
         </TouchableOpacity>
 
@@ -133,6 +139,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding:5,
     justifyContent: 'space-between',
   },
   backButton: {

@@ -1,3 +1,4 @@
+import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback, useMemo, useRef, useState} from 'react';
 import {
   View,
@@ -68,9 +69,12 @@ const OtpVerificationScreen = ({
     return () => clearInterval(interval);
   }, [timer]);
 
+  const {theme} = useTheme();
+
   return (
     <>
-      <View style={styles.container}>
+      <View
+        style={[styles.container, {backgroundColor: theme.colors.background}]}>
         <TouchableOpacity
           onPress={() => {
             clearOTP();
@@ -79,12 +83,12 @@ const OtpVerificationScreen = ({
           <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Verification Code</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, {color: theme.colors.text}]}>Verification Code</Text>
+        <Text style={[styles.subtitle, {color: theme.colors.text}]}>
           We have sent the verification code to{' '}
           <Text style={styles.phone}>{loginVar}</Text>
         </Text>
-        <Text style={styles.subtitle}>OTP- {otpValue}</Text>
+        <Text style={[styles.subtitle, {color: theme.colors.text}]}>OTP- {otpValue}</Text>
         {loginErrorMessage && (
           <Text style={[styles.subtitle, {color: 'red'}]}>
             {loginErrorMessage}
@@ -118,11 +122,11 @@ const OtpVerificationScreen = ({
         <View style={styles.footer}>
           <TouchableOpacity onPress={resendCode} disabled={timer > 0}>
             <Text
-              style={[styles.resendText, timer > 0 && styles.resendDisabled]}>
+              style={[styles.resendText, {color: theme.colors.text}, timer > 0 && styles.resendDisabled]}>
               Resend
             </Text>
           </TouchableOpacity>
-          <Text style={styles.timer}>{formattedTimer}</Text>
+          <Text style={[styles.timer, {color: theme.colors.text}]}>{formattedTimer}</Text>
         </View>
       </View>
       <TouchableOpacity

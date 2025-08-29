@@ -7,6 +7,8 @@ import {viewDocument} from '@react-native-documents/viewer';
 import RNFS from 'react-native-fs';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useTheme } from '@theme/ThemeProvider';
+
 
 export const getTimeAgo = (timestamp: number) => {
   const now = Date.now();
@@ -43,6 +45,7 @@ async function openRemoteFile(url: string) {
 export default function ChatBubble(props: any) {
   const {user} = useBoundStore();
   const [visible, setVisible] = useState(false);
+    const {theme} = useTheme();
   const items = props?.items?.items?.item ?? {};
   let left = !items?.senderId || items?.senderId === user?._id;
 
@@ -62,11 +65,11 @@ export default function ChatBubble(props: any) {
         <View style={styles.container}>
           <View style={styles.messageWrapper}>
             {/* <Text style={styles.name}>Arnold Schurli</Text> */}
-            <View style={styles.bubble}>
-              <Text style={styles.messageText}>{items?.message}</Text>
+            <View style={[styles.bubble, {backgroundColor: theme.colors.text}]}>
+              <Text style={[styles.messageText, {color: theme.colors.background}]}>{items?.message}</Text>
             </View>
 
-            <Text style={styles.timestamp}>
+            <Text style={[styles.timestamp, {color: theme.colors.text}]}>
               {getTimeAgo(new Date(items?.createdAt)?.getTime())}
             </Text>
           </View>
@@ -74,7 +77,7 @@ export default function ChatBubble(props: any) {
       ) : (
         <View style={styles.containerRight}>
           <View style={styles.messageWrapper}>
-            <View style={styles.bubble}>
+            <View style={[styles.bubble, {backgroundColor: theme.colors.text}]}>
               {items.files?.[0] && (
                 <TouchableOpacity
                   onPress={() => {
@@ -106,7 +109,7 @@ export default function ChatBubble(props: any) {
                 </TouchableOpacity>
               )}
               {items?.message && (
-                <Text style={styles.messageText}>{items?.message}</Text>
+                <Text style={[styles.messageText, {color: theme.colors.background}]}>{items?.message}</Text>
               )}
             </View>
             <View
@@ -115,7 +118,7 @@ export default function ChatBubble(props: any) {
                 justifyContent: 'flex-end',
                 alignItems: 'center',
               }}>
-              <Text style={[styles.timestamp, {textAlign: 'right'}]}>
+              <Text style={[styles.timestamp, {textAlign: 'right', color: theme.colors.text}]}>
                 {getTimeAgo(new Date(items?.createdAt)?.getTime())}
               </Text>
             </View>

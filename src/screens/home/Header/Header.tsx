@@ -7,6 +7,7 @@ import {
   Platform,
   TouchableOpacity,
   StatusBar,
+  useColorScheme,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {useTheme} from '@theme/ThemeProvider';
@@ -30,6 +31,8 @@ function Header({navigation}: any): React.JSX.Element {
     backgroundColor: theme.colors.background,
   };
 
+  const isDarkMode = useColorScheme() === 'dark';
+
   return (
     <>
       <View style={[backgroundStyle]}>
@@ -39,8 +42,8 @@ function Header({navigation}: any): React.JSX.Element {
         />
         <LinearGradient
           colors={theme.colors.backgroundPalette}
-          start={{x: 1, y: 2}}
-          end={{x: 0.5, y: 1}}
+          start={!isDarkMode ? {x: 1, y: 2} : {x: 1, y: 0}}
+          end={!isDarkMode ? {x: 0.5, y: 1} : {x: 1, y: 1}}
           style={[
             styles.container,
             {

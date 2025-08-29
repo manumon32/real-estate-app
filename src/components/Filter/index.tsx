@@ -15,6 +15,7 @@ import StepSlider from '@components/Input/StepSlider';
 import useBoundStore from '@stores/index';
 import {Fonts} from '@constants/font';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
+import { useTheme } from '@theme/ThemeProvider';
 
 const FilterModal = ({visible, onClose, onApply}: any) => {
   //
@@ -22,7 +23,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   // const [price, setprice] = useState<number[]>([1000000, 5000000]);
   const [fields, setFields] = useState<{}>({});
   const [filtersNew, setFilterNew] = useState<any>(filters);
-
+  const {theme} = useTheme();
   const PROPERTY_TYPES = appConfigs?.propertyTypes || [];
   const LISTING_TYPES = appConfigs?.listingTypes || [];
   const FURNISHING_STATS = appConfigs?.furnishingStatuses || [];
@@ -113,7 +114,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
                 style={
                   newselected?.includes(item._id)
                     ? styles.chipTextSelected
-                    : styles.chipText
+                    : [styles.chipText, {color: theme.colors.text}]
                 }>
                 {item.name}
               </Text>
@@ -122,7 +123,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
         })}
       </View>
     ),
-    [filtersNew, getMergedFields, toggleItem],
+    [filtersNew, getMergedFields, theme, toggleItem],
   );
 
   const isStringInEitherArray = (value: string): boolean => {
@@ -138,6 +139,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     setFilters(filtersNew);
     onApply();
   }, [filtersNew, onApply, setFilters]);
+  const labelColor = {color:theme.colors.text};
 
   return (
     <Modal
@@ -155,11 +157,11 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
           style={{
             marginTop: 'auto',
             height: '80%',
-            backgroundColor: '#fff',
+             backgroundColor: theme.colors.backgroundHome,
             borderRadius: 20,
           }}>
           <View style={{flexDirection: 'row', padding: 20, paddingBottom: 0}}>
-            <Text style={styles.title}>Filters & Sort</Text>
+            <Text style={[styles.title, {color: theme.colors.text}]}>Filters & Sort</Text>
             <Pressable
               onPress={() => {
                 onClose();
@@ -188,45 +190,46 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             }}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
-              backgroundColor: '#fff',
+              backgroundColor:theme.colors.backgroundHome,
               padding: 20,
               paddingTop: 0,
             }}>
-            <Text style={[styles.label]}>Type</Text>
+            <Text style={[styles.label, labelColor]}>Type</Text>
             {renderChips(PROPERTY_TYPES)}
 
-            <Text style={styles.label}>Listing Type</Text>
+            <Text style={[styles.label, labelColor]}>Listing Type</Text>
 
             {renderChips(LISTING_TYPES)}
 
-            <Text style={styles.label}>Bedrooms</Text>
+            <Text style={[styles.label, labelColor]}>Bedrooms</Text>
             {renderChips(BEDROOMS)}
 
-            <Text style={styles.label}>Bathrooms</Text>
+            <Text style={[styles.label, labelColor]}>Bathrooms</Text>
             {renderChips(BATHROOMS)}
             <View style={{marginTop: 20, marginBottom: -20}}>
               <StepSlider
                 value={
                   filtersNew?.price ? filtersNew?.price : [100, 100000000000]
                 }
+                theme={theme}
                 onChange={updatePrice}
                 min={1000}
               />
             </View>
             {isStringInEitherArray('furnishedStatus') && (
               <>
-                <Text style={styles.label}>Furnishing Status</Text>
+                <Text style={[styles.label, labelColor]}>Furnishing Status</Text>
 
                 {renderChips(FURNISHING_STATS)}
               </>
             )}
 
-            <Text style={styles.label}>Availability Status</Text>
+            <Text style={[styles.label, labelColor]}>Availability Status</Text>
 
             {renderChips(AVAILABILITY_STATS)}
             {isStringInEitherArray('reraApproved') && (
               <>
-                <Text style={styles.label}>RERA Approved</Text>
+                <Text style={[styles.label, labelColor]}>RERA Approved</Text>
                 <CommonAmenityToggle
                   label="RERA Approved"
                   selected={filtersNew?.reraApproved}

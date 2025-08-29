@@ -2,6 +2,7 @@
 import ImageViewerModal from '@components/Modal/ImageViewerModal';
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
+import {useTheme} from '@theme/ThemeProvider';
 import React, {useState} from 'react';
 import {
   View,
@@ -28,6 +29,7 @@ export default function ChatBubble(props: any) {
   const [visible, setVisible] = useState(false);
   const items = props?.items?.items?.item ?? {};
   let left = !items?.senderId || items?.senderId === user?._id;
+  const {theme} = useTheme();
   return (
     <>
       <ImageViewerModal
@@ -46,7 +48,8 @@ export default function ChatBubble(props: any) {
           <View style={styles.messageWrapper}>
             {/* <Text style={styles.name}>Arnold Schurli</Text> */}
 
-            <View style={styles.bubbleleft}>
+            <View
+              style={[styles.bubbleleft, {backgroundColor: theme.colors.chatBubbleLeft}]}>
               {items.type == 'image' && (
                 <TouchableOpacity onPress={() => setVisible(true)}>
                   <Image
@@ -68,7 +71,7 @@ export default function ChatBubble(props: any) {
               )}
             </View>
 
-            <Text style={styles.timestamp}>
+            <Text style={[styles.timestamp, {color: theme.colors.text}]}>
               {getTimeAgo(new Date(items?.createdAt)?.getTime())}
             </Text>
           </View>
@@ -98,7 +101,7 @@ export default function ChatBubble(props: any) {
             )}
             {items.type == 'text' && (
               <View style={[styles.bubble]}>
-                <Text style={styles.messageTextRight}>{items?.body}</Text>
+                <Text style={[styles.messageTextRight]}>{items?.body}</Text>
               </View>
             )}
             <View

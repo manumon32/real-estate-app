@@ -75,7 +75,7 @@ function Header(props: any): React.JSX.Element {
               navigation.goBack();
             }}>
             <IconButton
-              style={styles.heart}
+              style={[styles.heart, {backgroundColor: theme.colors.background}]}
               iconSize={24}
               //red , heart
               iconColor={theme.colors.text}
@@ -88,7 +88,7 @@ function Header(props: any): React.JSX.Element {
                 shareProperty(details._id);
               }}>
               <IconButton
-                style={[styles.heartRight]}
+                style={[styles.heartRight, {backgroundColor: theme.colors.background}]}
                 iconSize={24}
                 //red , heart
                 iconColor={theme.colors.text}

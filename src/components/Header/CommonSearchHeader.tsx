@@ -1,3 +1,4 @@
+import { useTheme } from '@theme/ThemeProvider';
 import React, {FC, useCallback, useMemo} from 'react';
 import {
   View,
@@ -23,6 +24,7 @@ const CommonSearchHeader: FC<CommonSearchHeaderProps> = ({
   placeholder = 'Search',
   inputProps,
 }) => {
+  const {theme} = useTheme();
   const handleTextChange = useCallback(
     (text: string) => onChangeSearch(text),
     [onChangeSearch],
@@ -32,7 +34,7 @@ const CommonSearchHeader: FC<CommonSearchHeaderProps> = ({
 
   return (
     <View style={styles.safeArea}>
-      <View style={styles.container}>
+      <View style={[styles.container, {backgroundColor: theme.colors.background}]}>
         <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="arrow-left" size={22} color="#333" />
         </TouchableOpacity>

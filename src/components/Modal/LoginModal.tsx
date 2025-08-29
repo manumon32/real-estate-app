@@ -19,6 +19,7 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  useColorScheme,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import auth from '@react-native-firebase/auth';
@@ -52,6 +53,8 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     useBoundStore();
   const [loginVar, setLoginVar] = useState('');
   const [socialLoading, setSocialLoading] = useState(false);
+
+  const isDarkMode = useColorScheme() === 'dark';
 
   const [message, setMessage] = useState('');
   const [userInfo, setUserInfo] = useState<any>(null);
@@ -248,7 +251,11 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
         {!otp && (
           <>
             <LinearGradient
-              colors={['#FFFFFF', '#FFFFFF', '#40DABE', '#40DABE', '#227465']}
+              colors={
+                !isDarkMode
+                  ? ['#FFFFFF', '#FFFFFF', '#40DABE', '#40DABE', '#227465']
+                  : ['#000000', '#40DABE', '#40DABE', '#40DABE', '#000000']
+              }
               start={{x: 0.5, y: 0}}
               end={{x: 0.5, y: 1}}
               style={styles.gradient}>
@@ -265,7 +272,11 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
               </View>
 
               {/* Login Card */}
-              <View style={styles.card}>
+              <View
+                style={[
+                  styles.card,
+                  {backgroundColor: theme.colors.background},
+                ]}>
                 {/* Logo */}
                 <Image
                   source={require('@assets/images/logo.png')}
@@ -273,10 +284,14 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
                 />
 
                 {/* <LogoIcon style={styles.logo} /> */}
-                <Text style={styles.title}>Login</Text>
+                <Text style={[styles.title, {color: theme.colors.text}]}>
+                  Login
+                </Text>
 
                 {/* Phone Input */}
-                <Text style={styles.label}>Phone number or Email</Text>
+                <Text style={[styles.label, {color: theme.colors.text}]}>
+                  Phone number or Email
+                </Text>
                 <TextInput
                   value={loginVar}
                   onChangeText={text => {
@@ -322,24 +337,30 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
                   {Platform.OS === 'ios' && (
                     <Icon
                       name="apple"
+                      color={theme.colors.text}
                       size={36}
                       onPress={() => signInWithApple()}
                     />
                   )}
                   <Icon
                     name="google"
-                    color="#000"
+                    color={'#4081ee'}
                     size={36}
                     onPress={signInWithGoogle}
                   />
                   <Icon
                     name="facebook"
-                    color="#3b5998"
+                    color={theme.colors.text}
                     size={36}
                     onPress={() => {
                       signInWithFacebook();
                     }}
-                    style={{justifyContent: 'center', alignItems: 'center'}}
+                    style={{
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: theme.colors.background,
+                      borderRadius: 6,
+                    }}
                   />
                 </View>
               </View>

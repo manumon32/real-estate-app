@@ -6,6 +6,7 @@ import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
 import CommonDistanceInput from '@components/Input/distanceInput';
+import { useTheme } from '@theme/ThemeProvider';
 
 const Step2BasicInfo = (props: any) => {
   const {
@@ -36,9 +37,10 @@ const Step2BasicInfo = (props: any) => {
     setPriceInput(values?.price?.toString() || '');
   }, [values?.price]);
 
+    const {theme} = useTheme();
   return (
     <SlideInView direction={currentStep === 1 ? 'right' : 'left'}>
-      <Text style={styles.headingText}>Price Details</Text>
+      <Text style={[styles.headingText, {color: theme.colors.text}]}>Price Details</Text>
       <View style={styles.inputContainer}>
         <TextInput
           onChangeText={text => {

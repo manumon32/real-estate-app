@@ -196,7 +196,7 @@ function App({navigation}: any): React.JSX.Element {
     };
   }, [bearerToken]);
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{backgroundColor: theme.colors.homepageSafeArea}}>
       <StatusBar
         barStyle={isDarkMode ? 'dark-content' : 'dark-content'}
         backgroundColor={theme.colors.backgroundPalette[0]}

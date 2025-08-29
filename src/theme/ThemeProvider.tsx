@@ -1,18 +1,18 @@
 // theme/ThemeProvider.tsx
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Appearance } from 'react-native';
-import { lightTheme, darkTheme } from './index';
+import React, {createContext, useContext, useEffect, useState} from 'react';
+import {Appearance} from 'react-native';
+import {lightTheme, darkTheme} from './index';
 
 const ThemeContext = createContext({
   theme: lightTheme,
   toggleTheme: () => {},
 });
 
-export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+export const ThemeProvider = ({children}: {children: React.ReactNode}) => {
   const [colorScheme, setColorScheme] = useState(Appearance.getColorScheme());
 
   useEffect(() => {
-    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+    const subscription = Appearance.addChangeListener(({colorScheme}) => {
       setColorScheme(colorScheme);
     });
 
@@ -20,13 +20,13 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const toggleTheme = () => {
-    setColorScheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setColorScheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  const theme = colorScheme === 'dark' ? lightTheme : darkTheme;
+  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{theme, toggleTheme}}>
       {children}
     </ThemeContext.Provider>
   );

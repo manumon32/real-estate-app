@@ -8,6 +8,7 @@ import {postAdValidationSchema} from './validationSchema';
 import useBoundStore from '@stores/index';
 import {useRoute} from '@react-navigation/native';
 import {fetchDetailsAPI} from '@api/services';
+import { useTheme } from '@theme/ThemeProvider';
 
 const PostAd = () => {
   const route = useRoute();
@@ -124,8 +125,9 @@ const PostAd = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const {theme} = useTheme();
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       {!loading && (
         <Formik
           initialValues={initialValues}

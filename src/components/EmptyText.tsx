@@ -1,6 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 // import { Fonts } from '@constants/font';
 import { Fonts } from '@constants/font';
+import { useTheme } from '@theme/ThemeProvider';
 import React from 'react';
 import {Image, Text} from 'react-native';
 
@@ -9,6 +10,8 @@ interface HeadingTextProps {
 }
 
 const EmptyText: React.FC<HeadingTextProps> = ({text}) => {
+
+    const {theme} = useTheme();
   return (
     <>
       <Image
@@ -24,7 +27,7 @@ const EmptyText: React.FC<HeadingTextProps> = ({text}) => {
       <Text
         style={{
           textAlign: 'center',
-          color: '#000',
+          color: theme.colors.text,
           padding: 12,
           fontWeight: 500,
           fontFamily: Fonts.BOLD,

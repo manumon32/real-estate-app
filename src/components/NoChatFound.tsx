@@ -1,25 +1,34 @@
-import { Fonts } from '@constants/font';
+import {Fonts} from '@constants/font';
+import {useTheme} from '@theme/ThemeProvider';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const NoChats = ({ onExplore }: { onExplore: () => void }) => {
+const NoChats = (props: any) => {
+  const {onExplore, title, body, icon, buttonText} = props;
+  const {theme} = useTheme();
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <MaterialCommunityIcons
-        name="message-text-outline"
+        name={icon}
         size={64}
         color="#B0B0B0"
         style={styles.icon}
       />
-      <Text style={styles.title}>No Chats Found</Text>
-      <Text style={styles.subtitle}>
-        Looks like you haven’t started any conversations yet.
-      </Text>
-
-      <TouchableOpacity style={styles.button} onPress={onExplore}>
-        <Text style={styles.buttonText}>Explore More</Text>
-      </TouchableOpacity>
+      {title && (
+        <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
+      )}
+      {body && (
+        <Text style={[styles.subtitle, {color: theme.colors.text}]}>
+          {body}
+        </Text>
+      )}
+      {buttonText && (
+        <TouchableOpacity style={styles.button} onPress={onExplore}>
+          <Text style={styles.buttonText}>{buttonText}</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -40,7 +49,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     marginBottom: 8,
-    fontFamily:Fonts.BOLD,
+    fontFamily: Fonts.BOLD,
   },
   subtitle: {
     fontSize: 14,
@@ -48,7 +57,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
     paddingHorizontal: 20,
-    fontFamily:Fonts.REGULAR,
+    fontFamily: Fonts.REGULAR,
   },
   button: {
     backgroundColor: '#00C897',
@@ -59,13 +68,13 @@ const styles = StyleSheet.create({
     shadowColor: '#000', // iOS shadow
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
   },
   buttonText: {
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
-    fontFamily:Fonts.BOLD,
+    fontFamily: Fonts.BOLD,
   },
 });
 

@@ -8,6 +8,7 @@ import CommonDistanceInput from '@components/Input/distanceInput';
 import {FieldArray} from 'formik';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import useBoundStore from '@stores/index';
+import {useTheme} from '@theme/ThemeProvider';
 
 const Step3LocationDetails = (props: any) => {
   const {
@@ -22,9 +23,12 @@ const Step3LocationDetails = (props: any) => {
     useBoundStore();
   //
 
+  const {theme} = useTheme();
   return (
     <SlideInView direction={currentStep === 2 ? 'right' : 'left'}>
-      <Text style={styles.headingText}>Location and Area Details</Text>
+      <Text style={[styles.headingText, {color: theme.colors.text}]}>
+        Location and Area Details
+      </Text>
       <TouchableOpacity
         onPress={() => {
           setadPostModal();
@@ -93,7 +97,9 @@ const Step3LocationDetails = (props: any) => {
         <TextInput onChangeText={() => {}} placeholder="Pin code" />
       </View> */}
 
-      <Text style={styles.headingText}>Area Details.</Text>
+      <Text style={[styles.headingText, {color: theme.colors.text}]}>
+        Area Details.
+      </Text>
       {isStringInEitherArray('area') && (
         <View style={styles.inputContainer}>
           <CommonDistanceInput
@@ -148,7 +154,9 @@ const Step3LocationDetails = (props: any) => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
-              <Text style={styles.headingText}>Location Benefits</Text>
+              <Text style={[styles.headingText, {color: theme.colors.text}]}>
+                Location Benefits
+              </Text>
 
               <TouchableOpacity
                 onPress={() =>

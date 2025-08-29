@@ -71,6 +71,8 @@ const MessageCard: React.FC<MessageCardProps> = ({
   setBottomModalVisible,
 }) => {
   const isActive = item.property?.adStatus === 'active';
+
+  const {theme} = useTheme();
   return (
     <TouchableOpacity
       onPress={() => {
@@ -83,8 +85,8 @@ const MessageCard: React.FC<MessageCardProps> = ({
       onLongPress={onLongPress}
       style={[
         styles.container,
-        {backgroundColor: isSelected ? '#f0f0f0' : '#fff'},
-        !isActive && {opacity: 0.8}
+        {backgroundColor: isSelected ? '#f0f0f0' : theme.colors.backgroundHome},
+        !isActive && {opacity: 0.8},
       ]}>
       {(isSelected || isSelectionMode) && (
         <View style={{marginRight: 10}}>
@@ -131,7 +133,13 @@ const MessageCard: React.FC<MessageCardProps> = ({
       <View style={styles.textContainer}>
         <View style={styles.headerRow}>
           <View style={{flexDirection: 'row', width: '80%'}}>
-            <Text numberOfLines={1} style={[styles.name, !isActive && {opacity: 0.5}]}>
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.name,
+                {color: theme.colors.text},
+                !isActive && {opacity: 0.5},
+              ]}>
               {name}
             </Text>
           </View>
@@ -142,8 +150,14 @@ const MessageCard: React.FC<MessageCardProps> = ({
           )}
         </View>
 
-        {title  &&(
-          <Text numberOfLines={1} style={[styles.title, !isActive && {opacity: 0.5}]}>
+        {title && (
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.title,
+              {color: theme.colors.text},
+              !isActive && {opacity: 0.5},
+            ]}>
             {title}
           </Text>
         )}
@@ -152,7 +166,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
             <MaterialCommunityIcons
               name={status === 'sent' ? 'check' : 'check-all'}
               size={16}
-              color={status === 'read' ? 'blue' : '#000'}
+              color={status === 'read' ? 'blue' : theme.colors.text}
               style={{marginRight: 5}}
             />
           )}
@@ -161,6 +175,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
               numberOfLines={2}
               style={[
                 styles.message,
+                {color: theme.colors.text},
                 unreadCount <= 0 && {fontFamily: Fonts.REGULAR},
               ]}>
               {message}
@@ -170,7 +185,11 @@ const MessageCard: React.FC<MessageCardProps> = ({
           {!isActive && (
             <Text
               numberOfLines={2}
-              style={[styles.message, {fontFamily: Fonts.BOLD, color: 'red', opacity: 1}]}>
+              style={[
+                styles.message,
+                {color: theme.colors.text},
+                {fontFamily: Fonts.BOLD, color: 'red', opacity: 1},
+              ]}>
               {'This ad has been disabled by the owner.'}
             </Text>
           )}
@@ -191,7 +210,9 @@ const MessageCard: React.FC<MessageCardProps> = ({
       </View>
       {unreadCount > 0 && (
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{unreadCount}</Text>
+          <Text style={[styles.badgeText, {color: theme.colors.text}]}>
+            {unreadCount}
+          </Text>
         </View>
       )}
       <MaterialCommunityIcons
@@ -341,7 +362,8 @@ const Chat = React.memo(({navigation}: any) => {
   );
 
   return (
-    <SafeAreaView style={{backgroundColor: '#fff', height: '100%'}}>
+    <SafeAreaView
+      style={{backgroundColor: theme.colors.background, height: '100%'}}>
       <CommonHeader title="Chats" />
       <FlatList
         data={
@@ -357,7 +379,7 @@ const Chat = React.memo(({navigation}: any) => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingBottom: 120,
-          backgroundColor: theme.colors.backgroundHome,
+          backgroundColor: theme.colors.background,
           minHeight: 900,
           //  padding: 14,
         }}
@@ -367,7 +389,7 @@ const Chat = React.memo(({navigation}: any) => {
               <View
                 style={{
                   zIndex: 99,
-                  backgroundColor: '#fff',
+                  backgroundColor: theme.colors.backgroundHome,
                   padding: 10,
                   borderRadius: 20,
                   flexDirection: 'row',
@@ -408,7 +430,7 @@ const Chat = React.memo(({navigation}: any) => {
                 style={{
                   flexDirection: 'row',
                   padding: 10,
-                  backgroundColor: '#fff',
+                  backgroundColor: theme.colors.backgroundHome,
                 }}>
                 <TouchableOpacity
                   style={[styles.chip, !filterBy && styles.chipSelected]}
@@ -418,6 +440,7 @@ const Chat = React.memo(({navigation}: any) => {
                   <Text
                     style={[
                       styles.chipText,
+                      {color: theme.colors.text},
                       !filterBy && styles.chipTextSelected,
                     ]}>
                     {'All'}
@@ -434,6 +457,7 @@ const Chat = React.memo(({navigation}: any) => {
                   <Text
                     style={[
                       styles.chipText,
+                      {color: theme.colors.text},
                       filterBy === 'sell' && styles.chipTextSelected,
                     ]}>
                     {'Sell'}
@@ -451,6 +475,7 @@ const Chat = React.memo(({navigation}: any) => {
                   <Text
                     style={[
                       styles.chipText,
+                      {color: theme.colors.text},
                       filterBy === 'buy' && styles.chipTextSelected,
                     ]}>
                     {'Buy'}
@@ -481,6 +506,10 @@ const Chat = React.memo(({navigation}: any) => {
                 onExplore={() => {
                   navigation.navigate('filter');
                 }}
+                icon="message-text-outline"
+                title="No Chat Found"
+                body="Looks like you haven’t started any conversations yet."
+                buttonText={'Explore now'}
               />
             ) : (
               <></>

@@ -9,6 +9,7 @@ interface PriceRangeSliderProps {
   min?: number;
   max?: number;
   step?: number;
+  theme?: any;
   sliderLength?: number;
 }
 
@@ -19,11 +20,12 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
   max = 1000000000,
   step = 1000,
   sliderLength = 300,
+  theme
 }) => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Price Range</Text>
-      <Text style={styles.rangeText}>
+    <View style={[styles.container, {backgroundColor: theme.colors.backgroundHome}]}>
+      <Text style={[styles.heading, {color: theme.colors.text} ]}>Price Range</Text>
+      <Text style={[styles.rangeText, {color: theme.colors.text}]}>
         ₹{value[0].toLocaleString()} - ₹{value[1].toLocaleString()}
       </Text>
 

@@ -1,4 +1,5 @@
 import {Fonts} from '@constants/font';
+import {useTheme} from '@theme/ThemeProvider';
 import React from 'react';
 import {
   Text,
@@ -8,7 +9,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { Switch } from 'react-native-paper';
+import {Switch} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export interface MenuLinkProps {
@@ -26,9 +27,9 @@ export interface MenuLinkProps {
   containerStyle?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
   valueStyle?: StyleProp<TextStyle>;
-  showToggle?:boolean;
-  toggleDisabled?:boolean;
-  selected?:boolean;
+  showToggle?: boolean;
+  toggleDisabled?: boolean;
+  selected?: boolean;
   onToggle?: any;
 }
 
@@ -44,26 +45,33 @@ const MenuLink: React.FC<MenuLinkProps> = ({
   selected,
   toggleDisabled = false,
   showToggle,
-  onToggle
+  onToggle,
 }) => {
+  const {theme} = useTheme();
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={onPress}
       style={[styles.row, containerStyle]}>
-      {icon && <MaterialCommunityIcons
-        name={icon}
-        size={20}
-        color="#9E9E9E"
-        style={styles.icon}
-      />}
+      {icon && (
+        <MaterialCommunityIcons
+          name={icon}
+          size={20}
+          color="#9E9E9E"
+          style={styles.icon}
+        />
+      )}
 
-      <Text numberOfLines={1} style={[styles.label, labelStyle]}>
+      <Text
+        numberOfLines={1}
+        style={[[styles.label, {color: theme.colors.text}], labelStyle]}>
         {label}
       </Text>
 
       {value !== undefined && (
-        <Text style={[styles.value, valueStyle]}>{value}</Text>
+        <Text style={[styles.value, {color: theme.colors.text}, valueStyle]}>
+          {value}
+        </Text>
       )}
 
       {showChevron && (
@@ -74,7 +82,14 @@ const MenuLink: React.FC<MenuLinkProps> = ({
           style={styles.chevron}
         />
       )}
-      {showToggle && <Switch color='#2F8D79' value={selected} disabled={toggleDisabled} onValueChange={onToggle} />}
+      {showToggle && (
+        <Switch
+          color="#2F8D79"
+          value={selected}
+          disabled={toggleDisabled}
+          onValueChange={onToggle}
+        />
+      )}
     </TouchableOpacity>
   );
 };

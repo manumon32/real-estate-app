@@ -24,6 +24,7 @@ import OtpVerificationScreen from '@components/Modal/OtpVerificationScreen';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {uploadImages} from '@api/services';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '@theme/ThemeProvider';
 const EditProfile = () => {
   const {
     user,
@@ -51,6 +52,7 @@ const EditProfile = () => {
   const [email, setEmail] = useState(user?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
   const [loginVar, setLoginVar] = useState('');
+    const {theme} = useTheme();
 
   const navigation = useNavigation();
 
@@ -105,7 +107,7 @@ const EditProfile = () => {
     );
   }, []);
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
       {!otp && (
         <>
           <CommonHeader
@@ -118,7 +120,7 @@ const EditProfile = () => {
             keyboardShouldPersistTaps={'handled'}
             contentContainerStyle={{
               paddingBottom: 120,
-              backgroundColor: '#fff',
+              backgroundColor: theme.colors.background,
               padding: 16,
               height: '100%',
             }}

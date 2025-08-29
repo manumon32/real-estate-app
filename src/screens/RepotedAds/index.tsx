@@ -3,7 +3,7 @@
 import CommonHeader from '@components/Header/CommonHeader';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useTheme} from '@theme/ThemeProvider';
 import {
   View,
@@ -16,8 +16,8 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import EmptyText from '@components/EmptyText';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import NoChats from '@components/NoChatFound';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -64,64 +64,10 @@ const ListingCard: React.FC<ListingCardProps> = ({
   items,
   title = '',
   location = '',
-  status = 'Pending',
   date = '',
   imageUrl = '',
   navigation,
 }) => {
-  const {label, backgroundColor, textColor} = useMemo(() => {
-    switch (status) {
-      case 'pending':
-        return {
-          label: 'Pending Review',
-          backgroundColor: '#FFEAD5',
-          textColor: '#AA5A00',
-        };
-      case 'active':
-        return {
-          label: 'Active',
-          backgroundColor: '#D4F4DD',
-          textColor: '#147A31',
-        };
-      case 'rejected':
-        return {
-          label: 'Rejected',
-          backgroundColor: '#C14B43',
-          textColor: '#FCE3E0',
-        };
-      case 'SOLD':
-        return {
-          label: 'Sold',
-          backgroundColor: '#E8E8FF',
-          textColor: '#4B4B9B',
-        };
-      case 'expired':
-        return {
-          label: 'Expired',
-          backgroundColor: '#FCE3E0',
-          textColor: '#C14B43',
-        };
-      case 'blocked':
-        return {
-          label: 'Blocked',
-          backgroundColor: '#FCE3E0',
-          textColor: '#C14B43',
-        };
-      case 'deactivated':
-        return {
-          label: 'Deactivated',
-          backgroundColor: '#E0E0E0',
-          textColor: '#555555',
-        };
-      case 'DRAFT':
-      default:
-        return {
-          label: 'Draft',
-          backgroundColor: '#EEEEEE',
-          textColor: '#666666',
-        };
-    }
-  }, [status]);
   return (
     <View style={styles.card}>
       <TouchableOpacity
@@ -133,13 +79,6 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <View style={styles.info}>
             <View style={styles.headerRow}>
               <Text style={styles.title}>{title}</Text>
-              <View style={[styles.badge, {backgroundColor}]}>
-                <Text
-                  numberOfLines={2}
-                  style={[styles.badgeText, {color: textColor}]}>
-                  {label}
-                </Text>
-              </View>
             </View>
             <Text style={styles.location} numberOfLines={1}>
               {location}
@@ -191,7 +130,7 @@ const ReportAd = () => {
   );
 
   return (
-    <SafeAreaView style={{backgroundColor: '#fff', height: '100%'}}>
+    <SafeAreaView style={{backgroundColor: theme.colors.background, height: '100%'}}>
       <FlatList
         data={
           filterBy
@@ -227,6 +166,7 @@ const ReportAd = () => {
                   style={[
                     // newselected?.includes(item._id)
                     styles.chipText,
+                    {color: theme.colors.text},
                     !filterBy && styles.chipTextSelected,
                   ]}>
                   {'All'}
@@ -244,7 +184,7 @@ const ReportAd = () => {
                   style={
                     filterBy === 'active'
                       ? styles.chipTextSelected
-                      : styles.chipText
+                      : [styles.chipText, {color: theme.colors.text}]
                   }>
                   {'Active'}
                 </Text>
@@ -261,7 +201,7 @@ const ReportAd = () => {
                   style={
                     filterBy === 'pending'
                       ? styles.chipTextSelected
-                      : styles.chipText
+                      : [styles.chipText, {color: theme.colors.text}]
                   }>
                   {'Pending'}
                 </Text>
@@ -278,7 +218,7 @@ const ReportAd = () => {
                   style={
                     filterBy === 'rejected'
                       ? styles.chipTextSelected
-                      : styles.chipText
+                      : [styles.chipText, {color: theme.colors.text}]
                   }>
                   {'Rejected'}
                 </Text>
@@ -295,7 +235,7 @@ const ReportAd = () => {
                   style={
                     filterBy === 'blocked'
                       ? styles.chipTextSelected
-                      : styles.chipText
+                      : [styles.chipText, {color: theme.colors.text}]
                   }>
                   {'Blocked'}
                 </Text>
@@ -320,12 +260,28 @@ const ReportAd = () => {
           filterBy ? (
             reportAdList.filter((items: any) => items.adStatus == filterBy)
               .length <= 0 ? (
-              <EmptyText text="You dont have anything listed here." />
+              <NoChats
+                onExplore={() => {
+                  // @ts-ignore
+                  navigation.navigate('Main');
+                }}
+                icon="message-text-outline"
+                title="No Ads Found"
+                // buttonText={'Explore now'}
+              />
             ) : (
               <></>
             )
           ) : reportAdList.length <= 0 ? (
-            <EmptyText text="You dont have anything listed here." />
+            <NoChats
+                onExplore={() => {
+                  // @ts-ignore
+                  navigation.navigate('Main');
+                }}
+                icon="message-text-outline"
+                title="No Ads Found"
+                // buttonText={'Explore now'}
+              />
           ) : (
             <></>
           )

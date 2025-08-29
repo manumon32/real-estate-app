@@ -5,6 +5,7 @@ import SlideInView from '../../components/AnimatedView';
 import CommonStepperInput from '@components/Input/stepperInput';
 import useBoundStore from '@stores/index';
 import {CommonMultiSelect} from '@components/Input/CommonMultiSelect';
+import { useTheme } from '@theme/ThemeProvider';
 
 const Step4PropertyDetails = (props: any) => {
   // const amenityOptions = [
@@ -25,13 +26,16 @@ const Step4PropertyDetails = (props: any) => {
     isStringInEitherArray,
   } = props;
 
+  const {theme} = useTheme();
   const AMENITIES = appConfigs?.amenities || [];
   return (
     <SlideInView direction={currentStep === 3 ? 'right' : 'left'}>
       {(isStringInEitherArray('kitchen') ||
         isStringInEitherArray('balcony') ||
         isStringInEitherArray('carParking')) && (
-        <Text style={styles.headingText}>Property Features</Text>
+        <Text style={[styles.headingText, {color: theme.colors.text}]}>
+          Property Features
+        </Text>
       )}
 
       {isStringInEitherArray('kitchen') && (
@@ -70,7 +74,9 @@ const Step4PropertyDetails = (props: any) => {
 
       {/* {isStringInEitherArray('amenities') && ( */}
         <>
-          <Text style={styles.headingText}>Amenities</Text>
+          <Text style={[styles.headingText, {color: theme.colors.text}]}>
+            Amenities
+          </Text>
           <CommonMultiSelect
             options={AMENITIES}
             value={values.amenityIds}

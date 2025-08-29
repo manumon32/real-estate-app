@@ -15,15 +15,16 @@ import {
   RefreshControl,
   ScrollView,
   ActivityIndicator,
+  useColorScheme,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {postAdAPI} from '@api/services';
 import {Fonts} from '@constants/font';
-import EmptyText from '@components/EmptyText';
 import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
 import Toast from 'react-native-toast-message';
+import NoChats from '@components/NoChatFound';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -38,6 +39,7 @@ interface ListingCardProps {
   items: any;
   markasSold?: any;
   makePayment: any;
+  theme: any;
 }
 
 const FormattedDate = (arg: string | number | Date) => {
@@ -88,7 +90,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
   navigation,
   markasSold,
   makePayment,
+  theme,
 }) => {
+  const isDarkMode = useColorScheme() === 'dark';
   const {label, backgroundColor, textColor} = useMemo(() => {
     switch (status) {
       case 'pending':
@@ -143,7 +147,15 @@ const ListingCard: React.FC<ListingCardProps> = ({
     }
   }, [status]);
   return (
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.colors.background,
+          borderColor: isDarkMode ? theme.colors.text : '',
+          borderWidth: isDarkMode ? 0.4 : 0,
+        },
+      ]}>
       <TouchableOpacity
         onPress={() => {
           navigation.navigate('Details', {items});
@@ -152,7 +164,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <Image source={{uri: imageUrl}} style={styles.image} />
           <View style={styles.info}>
             <View style={styles.headerRow}>
-              <Text style={styles.title}>{title}</Text>
+              <Text style={[styles.title, {color: theme.colors.text}]}>
+                {title}
+              </Text>
               <View style={[styles.badge, {backgroundColor}]}>
                 <Text
                   numberOfLines={2}
@@ -168,21 +182,29 @@ const ListingCard: React.FC<ListingCardProps> = ({
                 </Text>
               </View>
             )}
-            <Text style={styles.location} numberOfLines={1}>
+            <Text
+              style={[styles.location, {color: theme.colors.text}]}
+              numberOfLines={1}>
               {location}
             </Text>
-            <Text style={styles.price}>{formatINR(Number(price))}</Text>
+            <Text style={[styles.price, {color: theme.colors.text}]}>
+              {formatINR(Number(price))}
+            </Text>
           </View>
         </View>
 
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <Icon name="eye-outline" size={16} color="#888" />
-            <Text style={[styles.metaText]}>{views}</Text>
+            <Text style={[styles.metaText, {color: theme.colors.text}]}>
+              {views}
+            </Text>
           </View>
           <View style={styles.metaItem}>
             <Icon name="clock-outline" size={16} color="#888" />
-            <Text style={styles.metaText}>{FormattedDate(date)}</Text>
+            <Text style={[styles.metaText, {color: theme.colors.text}]}>
+              {FormattedDate(date)}
+            </Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -190,13 +212,17 @@ const ListingCard: React.FC<ListingCardProps> = ({
         <TouchableOpacity
           onPress={() => navigation.navigate('PostAd', {items})}
           style={styles.outlinedButton}>
-          <Text style={styles.buttonText}>Edit</Text>
+          <Text style={[styles.buttonText, {color: theme.colors.text}]}>
+            Edit
+          </Text>
         </TouchableOpacity>
         {label === 'Active' && (
           <TouchableOpacity
             onPress={() => markasSold(items._id)}
             style={styles.outlinedButton}>
-            <Text style={styles.buttonText}>Mark as Sold</Text>
+            <Text style={[styles.buttonText, {color: theme.colors.text}]}>
+              Mark as Sold
+            </Text>
           </TouchableOpacity>
         )}
         {label === 'Active' && !items.isFeatured && (
@@ -278,6 +304,7 @@ const MyAds = () => {
           navigation={navigation}
           items={items.item}
           makePayment={makePayment}
+          theme={theme}
           imageUrl={
             items.item?.imageUrls[0]
               ? items.item?.imageUrls[0]
@@ -315,10 +342,10 @@ const MyAds = () => {
         }
       } catch (err: any) {
         if (err?.code === 0) {
-         Toast.show({
+          Toast.show({
             type: 'error',
             text1: 'Payment Cancelled',
-            position:'bottom',
+            position: 'bottom',
           });
         } else {
           console.log('Payment failed', err);
@@ -326,7 +353,7 @@ const MyAds = () => {
             type: 'error',
             text1: 'Payment failed',
             text2: err?.description || 'Something went wrong',
-            position:'bottom',
+            position: 'bottom',
           });
         }
       }
@@ -336,7 +363,8 @@ const MyAds = () => {
   );
 
   return (
-    <SafeAreaView style={{backgroundColor: '#fff', height: '100%'}}>
+    <SafeAreaView
+      style={{backgroundColor: theme.colors.background, height: '100%'}}>
       {paymentLoading && (
         <View style={styles.overlay}>
           <ActivityIndicator size="large" color="#fff" />
@@ -352,7 +380,7 @@ const MyAds = () => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingBottom: 120,
-          backgroundColor: theme.colors.backgroundHome,
+          backgroundColor: theme.colors.background,
           minHeight: 900,
           //  padding: 14,
         }}
@@ -397,6 +425,7 @@ const MyAds = () => {
                       style={[
                         // newselected?.includes(item._id)
                         styles.chipText,
+                        {color: theme.colors.text},
                         filterBy === AdStatusEnum[items] &&
                           styles.chipTextSelected,
                       ]}>
@@ -429,12 +458,30 @@ const MyAds = () => {
               (filterBy ? (
                 myAds.filter((items: any) => items.adStatus == filterBy)
                   .length <= 0 ? (
-                  <EmptyText text="You havent listed anything here." />
+                  <NoChats
+                    onExplore={() => {
+                      // @ts-ignore
+                      navigation.navigate('PostAd');
+                    }}
+                    icon="alert-circle-outline"
+                    title="No Ads Found"
+                    body="Looks like you haven’t listed any ads yet."
+                  buttonText={'Post your Ad now'}
+                  />
                 ) : (
                   <></>
                 )
               ) : myAds.length <= 0 ? (
-                <EmptyText text="You havent listed anything here." />
+                <NoChats
+                  onExplore={() => {
+                    // @ts-ignore
+                    navigation.navigate('PostAd');
+                  }}
+                  icon="alert-circle-outline"
+                  title="No Ads Found"
+                  body="Looks like you haven’t listed any ads yet."
+                  buttonText={'Post your Ad now'}
+                />
               ) : (
                 <></>
               ))}

@@ -8,6 +8,7 @@ import CommonImageUploader from '@components/Input/ImageUploader';
 import ImagePickerModal from '@components/Modal/ImagePickerModal';
 import useBoundStore from '@stores/index';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
+import { useTheme } from '@theme/ThemeProvider';
 
 const Step5MediaUpload = (props: any) => {
   const {setImages, setFloorPlans, images, floorPlans} = useBoundStore();
@@ -126,10 +127,14 @@ const Step5MediaUpload = (props: any) => {
     ),
     [floorPlan, keyExtractor, renderItemFloor],
   );
+  
+    const {theme} = useTheme();
 
   return (
     <SlideInView direction={currentStep === 4 ? 'right' : 'left'}>
-      <Text style={styles.headingText}>Image Upload</Text>
+      <Text style={[styles.headingText, {color: theme.colors.text}]}>
+        Image Upload
+      </Text>
       <View style={styles.inputContainer}>
         <CommonImageUploader
           onUpload={uri => setAssets(prev => [...prev, ...(uri ?? [])])}

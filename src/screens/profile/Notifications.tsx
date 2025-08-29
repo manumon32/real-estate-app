@@ -5,17 +5,19 @@ import React, {useState} from 'react';
 import {View, ScrollView, RefreshControl} from 'react-native';
 import useBoundStore from '@stores/index';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '@theme/ThemeProvider';
 
 const Notifications = () => {
   const {fetchUserDetails, userProfileloading} = useBoundStore();
   const [updateToggle, setUpdatetoggle] = useState(false);
   const [recomandToggle, setRecomandToggle] = useState(false);
+    const {theme} = useTheme();
   return (
-    <SafeAreaView style={{backgroundColor: '#F6FCFF', height: '100%'}}>
+    <SafeAreaView style={{backgroundColor: theme.colors.background, height: '100%'}}>
       <CommonHeader
         title="Notifications"
         textColor="#171717"
-        backgroundColor={'#F6FCFF'}
+        backgroundColor={theme.colors.background}
         // onBackPress={onBackPress}
       />
       <ScrollView
@@ -32,7 +34,7 @@ const Notifications = () => {
         }>
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: theme.colors.background,
             borderRadius: 16,
             borderColor: '#EBEBEB',
             borderWidth: 1,
@@ -65,16 +67,6 @@ const Notifications = () => {
             showChevron={false}
             // @ts-ignore
             onPress={() => setRecomandToggle(!recomandToggle)}
-          />
-
-          <View
-            style={{
-              backgroundColor: '#EBEBEB',
-              borderWidth: 1,
-              borderColor: '#EBEBEB',
-              width: '90%',
-              alignSelf: 'center',
-            }}
           />
         </View>
       </ScrollView>

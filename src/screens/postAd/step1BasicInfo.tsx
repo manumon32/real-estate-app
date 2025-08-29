@@ -4,6 +4,7 @@ import TextInput from '@components/Input/textInput';
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
 import useBoundStore from '@stores/index';
+import { useTheme } from '@theme/ThemeProvider';
 // import {RenderChips, useChipScrollRefs} from '@components/RenderChips';
 
 const Step1BasicInfo = (props: any) => {
@@ -20,6 +21,7 @@ const Step1BasicInfo = (props: any) => {
   // const {refs: chipScrollRefs, scrollToChipIndex} = useChipScrollRefs();
 
   const {appConfigs} = useBoundStore();
+    const {theme} = useTheme();
 
   const PROPERTY_TYPES = appConfigs?.propertyTypes || [];
   const LISTING_TYPES = appConfigs?.listingTypes || [];
@@ -64,6 +66,7 @@ const Step1BasicInfo = (props: any) => {
           <Text
             style={[
               styles.label,
+              {color: theme.colors.text},
               touched?.propertyTypeId &&
                 errors?.propertyTypeId && {color: 'red'},
             ]}>
@@ -79,6 +82,7 @@ const Step1BasicInfo = (props: any) => {
           <Text
             style={[
               styles.label,
+               {color: theme.colors.text},
               touched?.listingTypeId && errors?.listingTypeId && {color: 'red'},
             ]}>
             Subtype*
@@ -93,21 +97,21 @@ const Step1BasicInfo = (props: any) => {
         <View style={styles.inputContainer}>
           {isStringInEitherArray('furnishedStatus') && (
             <>
-              <Text style={styles.label}>Furnishing Status</Text>
+              <Text style={[styles.label, {color: theme.colors.text}]}>Furnishing Status</Text>
               {renderChips(FURNISHING_STATS)}
             </>
           )}
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Availability Status</Text>
+          <Text style={[styles.label, {color: theme.colors.text}]}>Availability Status</Text>
 
           {renderChips(AVAILABILITY_STATS)}
         </View>
 
         {isStringInEitherArray('bedroom') && (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Bedrooms</Text>
+            <Text style={[styles.label, {color: theme.colors.text}]}>Bedrooms</Text>
             {renderChips(BEDROOMS)}
             {/* <RenderChips
           data={BEDROOMS}
@@ -121,13 +125,13 @@ const Step1BasicInfo = (props: any) => {
         )}
         {isStringInEitherArray('bathrooom') && (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Bathrooms</Text>
+            <Text style={[styles.label, {color: theme.colors.text}]}>Bathrooms</Text>
             {renderChips(BATHROOMS)}
           </View>
         )}
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Title*</Text>
+          <Text style={[styles.label, {color: theme.colors.text}]}>Title*</Text>
           {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
           <TextInput
             placeholder="Property Title"

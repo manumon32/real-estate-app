@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
   Pressable,
+  useColorScheme,
   // FlatList,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -137,38 +138,33 @@ const PropertyDetails = React.memo(() => {
     );
   };
 
-  const renderNearby = useCallback(
-    (item: any, index: number) => {
-      return (
-        <View
-          key={index}
+  const renderNearby = useCallback((item: any, index: number) => {
+    return (
+      <View
+        key={index}
+        style={{
+          flexDirection: 'row',
+          backgroundColor: '#F3F4F6',
+          borderRadius: 20,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 10,
+          margin: 5,
+        }}>
+        <Text style={{fontSize: 14, margin: 2}}>{item.name}:</Text>
+        <Text
           style={{
-            flexDirection: 'row',
-            backgroundColor: '#F3F4F6',
-            borderRadius: 20,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 10,
+            color: '#2F8D79',
+            fontSize: 14,
+            fontFamily: Fonts.MEDIUM,
+            fontWeight: '600',
             margin: 5,
           }}>
-          <Text style={{color: theme.colors.text, fontSize: 14, margin: 2}}>
-            {item.name}:
-          </Text>
-          <Text
-            style={{
-              color: '#2F8D79',
-              fontSize: 14,
-              fontFamily: Fonts.MEDIUM,
-              fontWeight: '600',
-              margin: 5,
-            }}>
-            {item.value + item.unit}
-          </Text>
-        </View>
-      );
-    },
-    [theme.colors.text],
-  );
+          {item.value + item.unit}
+        </Text>
+      </View>
+    );
+  }, []);
 
   const sendSocket = (payload: any) => {
     const socket = getSocket();
@@ -225,7 +221,8 @@ const PropertyDetails = React.memo(() => {
   const Footer = ({details, bearerToken, createRoom, setVisible}: any) => {
     return (
       !detailLoading && (
-        <View style={styles.footer}>
+        <View
+          style={[styles.footer, {backgroundColor: theme.colors.background}]}>
           {isOwner ? (
             <>
               <Pressable
@@ -259,9 +256,11 @@ const PropertyDetails = React.memo(() => {
                     setVisible();
                   }
                 }}
-                style={styles.chatButton}>
-                <Icon name="chat-outline" size={20} color="#000" />
-                <Text style={styles.chatText}>Chat</Text>
+                style={styles.chatButtonFull}>
+                <Icon name="chat-outline" size={20} color="#fff" />
+                <Text style={[styles.chatText, {textAlign: 'center', color:'#fff'}]}>
+                  Chat
+                </Text>
               </Pressable>
               {/* <Pressable style={styles.buyButton}>
               <Text style={styles.buyText}>Buy Now</Text>
@@ -315,6 +314,9 @@ const PropertyDetails = React.memo(() => {
     startVerification(payload);
   };
 
+  const isDarkMode = useColorScheme() === 'dark';
+  const sectionColor = {color: theme.colors.text};
+
   // const renderAdItem = useCallback(
   //   (items: any) => {
   //     return <PropertyCard items={items.item} navigation={navigation} />;
@@ -333,7 +335,8 @@ const PropertyDetails = React.memo(() => {
   // }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       {detailLoading && !items?.title && (
         <View style={styles.overlay}>
           <ActivityIndicator size="large" color="#fff" />
@@ -345,11 +348,21 @@ const PropertyDetails = React.memo(() => {
         <Header details={property ? property : items} />
 
         {items?.title && (
-          <View style={styles.header}>
-            <Text style={styles.title}>
+          <View
+            style={[
+              styles.header,
+              isDarkMode && {
+                backgroundColor: theme.colors.background,
+                borderTopWidth: 1,
+                borderColor: '#fff',
+                borderTopRightRadius: 0,
+                borderTopLeftRadius: 0,
+              },
+            ]}>
+            <Text style={[styles.title, {color: theme.colors.text}]}>
               {property?.title ? property?.title : items?.title}
             </Text>
-            <Text style={styles.locationTitle}>
+            <Text style={[styles.locationTitle, {color: theme.colors.text}]}>
               <IconButton
                 iconSize={16}
                 iconColor={theme.colors.text}
@@ -373,7 +386,9 @@ const PropertyDetails = React.memo(() => {
                   ? formatINR(property?.price)
                   : formatINR(items?.price)}
               </Text>
-              <Text style={styles.squrft}>({property?.areaSize}/ Sq.ft)</Text>
+              <Text style={[styles.squrft, {color: theme.colors.text}]}>
+                ({property?.areaSize}/ Sq.ft)
+              </Text>
               <View style={styles.nogotiable}>
                 <Text style={styles.nogotiableText}>Negotiable</Text>
               </View>
@@ -399,7 +414,9 @@ const PropertyDetails = React.memo(() => {
             {banks.filter((item: any) => item.status === 'verified').length >
               0 && (
               <>
-                <Text style={styles.section}>Loan available</Text>
+                <Text style={[styles.section, sectionColor]}>
+                  Loan available
+                </Text>
                 <View
                   style={{
                     paddingHorizontal: 16,
@@ -597,7 +614,7 @@ const PropertyDetails = React.memo(() => {
               }}
             />
 
-            <Text style={styles.section}>Details</Text>
+            <Text style={[styles.section, sectionColor]}>Details</Text>
             <View style={{paddingHorizontal: 16}}>
               <Text
                 style={{
@@ -672,8 +689,9 @@ const PropertyDetails = React.memo(() => {
             <Pressable
               onPress={async () => {
                 // @ts-ignore
-                navigation.navigate('LoanCalculator');
-
+                navigation.navigate('LoanCalculator', {
+                  price: property?.price ? property?.price : items?.price,
+                });
               }}
               style={{
                 top: 15,
@@ -720,12 +738,20 @@ const PropertyDetails = React.memo(() => {
 
             {
               <>
-                <Text style={styles.section}>Additional Details</Text>
-                <View style={styles.additionalDetailsContainer}>
+                <Text style={[styles.section, sectionColor]}>
+                  Additional Details
+                </Text>
+                <View
+                  style={[
+                    styles.additionalDetailsContainer,
+                    {backgroundColor: theme.colors.background},
+                  ]}>
                   {property?.areaSize ? (
                     <View style={styles.adittionalDetailsRow}>
-                      <Text style={styles.label}>{'Area Size'}</Text>
-                      <Text style={styles.value}>
+                      <Text style={[styles.label, sectionColor]}>
+                        {'Area Size'}
+                      </Text>
+                      <Text style={[styles.value, sectionColor]}>
                         {property?.areaSize} /{'Sq.ft'}
                       </Text>
                     </View>
@@ -734,8 +760,10 @@ const PropertyDetails = React.memo(() => {
                   )}
                   {property?.carpetArea ? (
                     <View style={styles.adittionalDetailsRow}>
-                      <Text style={styles.label}>{'Carpet Area'}</Text>
-                      <Text style={styles.value}>
+                      <Text style={[styles.label, sectionColor]}>
+                        {'Carpet Area'}
+                      </Text>
+                      <Text style={[styles.value, sectionColor]}>
                         {property?.carpetArea} /
                         {property?.carpetAreaUnitId?.name
                           ? property?.carpetAreaUnitId?.name
@@ -747,8 +775,10 @@ const PropertyDetails = React.memo(() => {
                   )}
                   {property?.builtUpArea ? (
                     <View style={styles.adittionalDetailsRow}>
-                      <Text style={styles.label}>{'BuiltUp Area'}</Text>
-                      <Text style={styles.value}>
+                      <Text style={[styles.label, sectionColor]}>
+                        {'BuiltUp Area'}
+                      </Text>
+                      <Text style={[styles.value, sectionColor]}>
                         {property?.builtUpArea} /
                         {property?.builtUpAreaUnitId?.name
                           ? property?.builtUpAreaUnitId?.name
@@ -760,8 +790,10 @@ const PropertyDetails = React.memo(() => {
                   )}
                   {property?.superBuiltUpArea ? (
                     <View style={styles.adittionalDetailsRow}>
-                      <Text style={styles.label}>{'Super BuiltUp Area'}</Text>
-                      <Text style={styles.value}>
+                      <Text style={[styles.label, sectionColor]}>
+                        {'Super BuiltUp Area'}
+                      </Text>
+                      <Text style={[styles.value, sectionColor]}>
                         {property?.superBuiltUpArea} /
                         {property?.superBuiltAreaUnitId?.name
                           ? property?.superBuiltAreaUnitId?.name
@@ -777,7 +809,7 @@ const PropertyDetails = React.memo(() => {
 
             {property?.amenityIds && property?.amenityIds?.length > 0 && (
               <>
-                <Text style={styles.section}>Amenities</Text>
+                <Text style={[styles.section, sectionColor]}>Amenities</Text>
                 <View style={styles.amenities}>
                   {property?.amenityIds?.map(renderAmenity)}
                 </View>
@@ -806,7 +838,7 @@ const PropertyDetails = React.memo(() => {
             {/* @ts-ignore */}
             {property?.nearbyLandmarks?.length > 0 && (
               <>
-                <Text style={styles.section}>Nearby</Text>
+                <Text style={[styles.section, sectionColor]}>Nearby</Text>
                 <View style={styles.nearby}>
                   {property?.nearbyLandmarks?.map(renderNearby)}
                 </View>
@@ -816,11 +848,11 @@ const PropertyDetails = React.memo(() => {
             {!isOwner && (
               <View
                 style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text style={styles.section}>Location</Text>
+                <Text style={[styles.section, sectionColor]}>Location</Text>
                 <Pressable onPress={() => setIsReportVisible(true)}>
                   <Text
                     style={[
-                      styles.section,
+                      [styles.section, sectionColor],
                       {
                         right: 10,
                         color: 'blue',
@@ -976,9 +1008,13 @@ const PropertyDetails = React.memo(() => {
 
       <BankSelectModal
         visible={bankModalVisible}
-        onDismiss={() => setBankModalVisible(false)}
+        onDismiss={() => {
+          setBankModalVisible(false);
+          setSelectedBank('');
+        }}
         onSelect={(data: any) => {
           setSelectedBank(data);
+          setBankModalVisible(false);
           navigate('VerifyBankList', {items: {...data, id: data?._id}});
         }}
         selectedBank={selectedBank}
@@ -1055,6 +1091,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: '40%',
     justifyContent: 'center',
+  },
+  chatButtonFull: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+    backgroundColor: '#2f8f72',
+    alignSelf: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    width: '90%',
   },
   chatText: {
     marginLeft: 8,

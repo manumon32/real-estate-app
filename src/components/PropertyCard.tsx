@@ -1,13 +1,16 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Platform} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Platform, useColorScheme} from 'react-native';
 import Image from 'react-native-fast-image';
 import IconButton from '@components/Buttons/IconButton';
 import FeaturedIcon from '@assets/svg/featured.svg';
 import {Fonts} from '@constants/font';
 import FavoriteButton from './FavoriteButton';
+import { useTheme } from '@theme/ThemeProvider';
 
 const PropertyCard = React.memo(({items, navigation, arg}: any) => {
+    const {theme} = useTheme();
+      const isDarkMode = useColorScheme() === 'dark';
   const formatINR = (value: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -22,6 +25,9 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
         {
           bottom: arg ? 30 : 0,
           top: arg ? -30 : 10,
+          backgroundColor: theme.colors.background,
+          borderColor: theme.colors.text,
+          borderWidth: isDarkMode ? 0.2 : 0,
         },
       ]}
       onPress={() => {
@@ -56,16 +62,16 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
         />
       </View>
       <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={[styles.title, { color: theme.colors.text }]} numberOfLines={2}>
           {items.title}
         </Text>
         <View style={{flexDirection: 'row'}}>
           <IconButton
             iconSize={16}
-            iconColor={'#171717'}
+            iconColor={theme.colors.text}
             iconName={'map-marker'}
           />
-          <Text numberOfLines={1} style={styles.subtitle}>
+          <Text numberOfLines={1} style={[styles.subtitle, { color: theme.colors.text }]}>
             {items.address}
           </Text>
         </View>
@@ -75,7 +81,7 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
             <View style={styles.infoItem}>
               <IconButton
                 iconSize={16}
-                iconColor={'#171717'}
+                iconColor={theme.colors.text}
                 iconName={'vector-line'}
               />
               <Text style={styles.infoText}>
@@ -89,7 +95,7 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
           )}
         </View>
 
-        <Text style={styles.price}>{formatINR(items.price)}</Text>
+        <Text style={[styles.price, { color: theme.colors.text }]}>{formatINR(items.price)}</Text>
       </View>
     </TouchableOpacity>
   );

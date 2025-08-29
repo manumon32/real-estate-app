@@ -24,6 +24,7 @@ import {
   RESULTS,
 } from 'react-native-permissions';
 import useBoundStore from '@stores/index';
+import {useTheme} from '@theme/ThemeProvider';
 
 const GOOGLE_API_KEY = 'AIzaSyA83qLdbImZmSqqXEV7xeiYegOGcZhUq_o'; // Replace this
 
@@ -50,6 +51,7 @@ const CommonLocationModal: React.FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
 
+  const {theme} = useTheme();
   const fetchPredictions = useCallback(async (text: string) => {
     setQuery(text);
     if (text.length < 2) {
@@ -168,7 +170,7 @@ const CommonLocationModal: React.FC<Props> = ({
         enableHighAccuracy: true,
         timeout: 12000,
         maximumAge: 30000,
-      // @ts-ignore
+        // @ts-ignore
         showLocationDialog: true,
       },
       // {enableHighAccuracy: true, timeout: 15_000, maximumAge: 0},
@@ -197,11 +199,17 @@ const CommonLocationModal: React.FC<Props> = ({
       statusBarTranslucent
       onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.container}>
+        <View
+          style={[
+            styles.container,
+            {
+              backgroundColor: theme.colors.backgroundHome,
+            },
+          ]}>
           <View style={styles.header}>
-            <Text style={styles.title}>Location</Text>
+            <Text style={[styles.title,{color: theme.colors.text}]}>Location</Text>
             <TouchableOpacity onPress={onClose}>
-              <MaterialCommunityIcons name="close" size={24} color="#333" />
+              <MaterialCommunityIcons name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
           <View style={styles.inputContainer}>
@@ -288,7 +296,8 @@ const CommonLocationModal: React.FC<Props> = ({
                   }
                   {locationHistory?.map(
                     (item: {lat: any; name: string; lng: any}, index: number) =>
-                      index <= 4 && (currentLocation?.lat !== item.lat)  &&(
+                      index <= 4 &&
+                      currentLocation?.lat !== item.lat && (
                         <TouchableOpacity
                           key={index}
                           style={styles.item}
@@ -322,7 +331,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   container: {
-    backgroundColor: '#F6FCFF',
     height: '90%',
     padding: 16,
     borderTopLeftRadius: 20,

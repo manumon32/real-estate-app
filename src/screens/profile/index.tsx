@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   ScrollView,
   RefreshControl,
+  useColorScheme,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
@@ -19,31 +20,43 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 // import PremiumCard from './PremiumCard';
 // import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import useBoundStore from '@stores/index';
+import {useTheme} from '@theme/ThemeProvider';
 
 const Profile = () => {
   const navigation = useNavigation();
   const {user, fetchUserDetails, userProfileloading} = useBoundStore();
+  const {theme} = useTheme();
+
+  const isDarkMode = useColorScheme() === 'dark';
   React.useEffect(() => {
     fetchUserDetails();
   }, []);
   return (
-    <SafeAreaView style={{backgroundColor: '#F6FCFF', height: '100%'}}>
+    <SafeAreaView style={{backgroundColor: theme.colors.background, height: '100%'}}>
       <CommonHeader
         title="My Profile"
-        textColor="#171717"
-        backgroundColor={'#F6FCFF'}
+        textColor={isDarkMode ? '#FFFFFF' : '#171717'}
+        backgroundColor={theme.colors.background}
         // onBackPress={onBackPress}
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 120, padding: 10}}
+        contentContainerStyle={{
+          paddingBottom: 120,
+          padding: 10,
+          backgroundColor: theme.colors.background,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={userProfileloading}
             onRefresh={() => {
               fetchUserDetails(true);
             }}
-            colors={['#40DABE', '#40DABE', '#227465']}
+            colors={
+              !isDarkMode
+                ? ['#40DABE', '#40DABE', '#227465']
+                : ['#000', '#000', '#000']
+            }
           />
         }>
         <View style={styles.container}>
@@ -56,9 +69,9 @@ const Profile = () => {
             }}
           />
           <View style={styles.info}>
-            <Text style={styles.name}>{user?.name || 'App User'}</Text>
+            <Text style={[styles.name, {color: theme.colors.text}]}>{user?.name || 'App User'}</Text>
             {user?.email && (
-              <Text style={styles.email}>{user?.email || ''}</Text>
+              <Text style={[styles.email, {color: theme.colors.text}]}>{user?.email || ''}</Text>
             )}
 
             <TouchableOpacity
@@ -67,8 +80,8 @@ const Profile = () => {
                 navigation.navigate('EditProfile');
               }}
               style={styles.editRow}>
-              <Icon name="pencil-outline" size={18} color={'#000'} />
-              <Text style={[styles.editTxt, {color: '#000'}]}>
+              <Icon name="pencil-outline" size={18} color={theme.colors.text} />
+              <Text style={[styles.editTxt, {color: theme.colors.text}]}>
                 Edit Profile
               </Text>
             </TouchableOpacity>
@@ -77,7 +90,7 @@ const Profile = () => {
         {/* <PremiumCard navigation={navigation} /> */}
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: theme.colors.background,
             borderRadius: 16,
             borderColor: '#EBEBEB',
             borderWidth: 1,

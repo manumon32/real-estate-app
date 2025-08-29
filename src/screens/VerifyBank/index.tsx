@@ -1,13 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 // MessageCard.tsx
-import CommonHeader from '@components/Header/CommonHeaderProfile';
+import CommonHeader from '@components/Header/CommonHeader';
 import {Fonts} from '@constants/font';
 import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback} from 'react';
 import {TouchableRipple, Surface} from 'react-native-paper';
 
-import {TextInput, IconButton} from 'react-native-paper';
+import {TextInput} from 'react-native-paper';
 import {
   View,
   Image,
@@ -44,14 +44,15 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
 
 const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
   const [message, setMessage] = React.useState<any>('');
+  const {theme} = useTheme();
 
   return (
-    <View style={styles.chatcontainer}>
+    <View style={[styles.chatcontainer, {backgroundColor: theme.colors.background}]}>
       <Icon
         name="plus"
         onPress={() => setAttachModalVisible(true)}
         size={20}
-        color="#000"
+        color={theme.colors.text}
       />
       <TextInput
         mode="outlined"
@@ -63,15 +64,15 @@ const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
         outlineColor="#F5F6FA"
         activeOutlineColor="#F5F6FA"
       />
-      <IconButton
-        icon="send"
-        size={18}
+      <Icon
+        name="send"
+        size={32}
         onPress={() => {
           setMessage(null);
           handleSend(message);
         }}
         disabled={!message?.trim()}
-        iconColor="#696969"
+        color={theme.colors.text}
       />
     </View>
   );
@@ -254,7 +255,7 @@ const Verification = ({navigation}: any) => {
     }
   };
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background }}>
       <CommonHeader
         title={items?.user?.name ?? 'Loan Offers'}
         textColor="#171717"
@@ -280,12 +281,12 @@ const Verification = ({navigation}: any) => {
               />
               <View style={styles.textWrapper}>
                 {items.status === 'verified' && (
-                  <Text style={[styles.text, {color: '#000000DE'}]}>
+                  <Text style={[styles.text, {color: theme.colors.text}]}>
                     This property is eligible for loan from {items.name}.
                   </Text>
                 )}
                 {items.status === 'pending' && (
-                  <Text style={[styles.text, {color: '#000000DE'}]}>
+                  <Text style={[styles.text, {color: theme.colors.text}]}>
                     loan process is still in progress, You can still upload any
                     documents you have for it.
                   </Text>

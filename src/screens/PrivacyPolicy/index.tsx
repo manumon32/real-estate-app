@@ -13,10 +13,13 @@ import {
 } from 'react-native';
 import {Fonts} from '@constants/font';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import { useTheme } from '@theme/ThemeProvider';
 
 const PrivacyPolicy = () => {
+  const {theme} = useTheme();
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}  ]}>
       <CommonHeader title="Privacy Policy" textColor="#171717" />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -28,7 +31,7 @@ const PrivacyPolicy = () => {
           style={{
             borderWidth: 1,
             borderRadius: 20,
-            backgroundColor: '#F5F6FA',
+            backgroundColor: theme.colors.background,
             padding: 10,
             borderColor: '#EBEBEB',
             height: '100%',
@@ -39,6 +42,7 @@ const PrivacyPolicy = () => {
               fontFamily: Fonts.MEDIUM,
               letterSpacing: 0.1,
               lineHeight: 32,
+              color: theme.colors.text,
             }}>
             Your privacy is important to us. It is Brainstorming's policy to
             respect your privacy regarding any information we may collect from
@@ -51,6 +55,7 @@ const PrivacyPolicy = () => {
               letterSpacing: 0.1,
               lineHeight: 32,
               marginTop: 10,
+              color: theme.colors.text,
             }}>
             We only ask for personal information when we truly need it to
             provide a service to you. We collect it by fair and lawful means,
@@ -64,6 +69,7 @@ const PrivacyPolicy = () => {
               letterSpacing: 0.1,
               lineHeight: 32,
               marginTop: 10,
+              color: theme.colors.text,
             }}>
             We only retain collected information for as long as necessary to
             provide you with your requested service. What data we store, we’ll

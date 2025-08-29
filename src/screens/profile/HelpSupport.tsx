@@ -18,7 +18,9 @@ import {Fonts} from '@constants/font';
 import TextInput from '@components/Input/textInput';
 import {useNavigation} from '@react-navigation/native';
 import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {useTheme} from '@theme/ThemeProvider';
+import ContactUsCard from './ContactUsCard';
 const HelpSupport = () => {
   const {
     user,
@@ -33,6 +35,7 @@ const HelpSupport = () => {
   const [email, setEmail] = useState(user?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
   const [description, setDescription] = useState('');
+  const {theme} = useTheme();
 
   const navigation = useNavigation();
 
@@ -41,8 +44,20 @@ const HelpSupport = () => {
       setVisible(true);
     }
   }, [updateSuccess]);
+
+  const isValidEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const isValidPhone = (phone: string) => {
+    const regex = /^\d{10}$/;
+    return regex.test(phone);
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       {!otp && (
         <>
           <CommonHeader
@@ -55,98 +70,124 @@ const HelpSupport = () => {
             keyboardShouldPersistTaps={'handled'}
             contentContainerStyle={{
               paddingBottom: 120,
-              backgroundColor: '#fff',
+              backgroundColor: theme.colors.background,
               padding: 16,
-              height: '100%',
+              // height: '100%',
             }}
             style={{
               height: '100%',
             }}>
-            <Text style={{fontFamily: Fonts.MEDIUM, fontSize: 18}}>
-              Submit a Request
-            </Text>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Full Name</Text>
-              {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-              <TextInput
-                placeholder="Name"
-                value={name}
-                onChangeText={text => {
-                  setName(text);
-                }}
-                // onBlur={handleBlur('title')}
-                // error={touched?.title && errors?.title ? true : false}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
-              {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-              <TextInput
-                placeholder="Email"
-                value={email}
-                editable={!user?.email}
-                onChangeText={text => {
-                  setEmail(text);
-                }}
-                // onBlur={handleBlur('title')}
-                // error={touched?.title && errors?.title ? true : false}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Phone Number</Text>
-              {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-              <TextInput
-                placeholder="Phone"
-                value={phoneNumber}
-                editable={!user?.phone}
-                onChangeText={text => {
-                 setPhoneNumber(text);
-                }}
-                // onBlur={handleBlur('title')}
-                // error={touched?.title && errors?.title ? true : false}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Description</Text>
-              {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-              <TextInput
-                placeholder="Description"
-                multiline
-                value={description}
-                onChangeText={text => {
-                  setDescription(text);
-                }}
-                style={{minHeight: 100, justifyContent: 'center'}}
-                // onBlur={handleBlur('title')}
-                // error={touched?.title && errors?.title ? true : false}
-              />
+            <ContactUsCard />
+            <View
+              style={{
+                backgroundColor: '#fff',
+                borderRadius: 16,
+                padding: 16,
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 4},
+                shadowOpacity: 0.1,
+                shadowRadius: 6,
+                elevation: 5,
+                top: 20,
+              }}>
+              <Text
+                style={{
+                  fontFamily: Fonts.MEDIUM,
+                  fontSize: 18,
+                  color: theme.colors.text,
+                }}>
+                Submit a Request
+              </Text>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Full Name</Text>
+                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                <TextInput
+                  placeholder="Name"
+                  value={name}
+                  onChangeText={text => {
+                    setName(text);
+                  }}
+                  // onBlur={handleBlur('title')}
+                  // error={touched?.title && errors?.title ? true : false}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Email</Text>
+                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                <TextInput
+                  placeholder="Email"
+                  value={email}
+                  editable={!user?.email}
+                  onChangeText={text => {
+                    setEmail(text);
+                  }}
+                  // onBlur={handleBlur('title')}
+                  // error={touched?.title && errors?.title ? true : false}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Phone Number</Text>
+                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                <TextInput
+                  placeholder="Phone"
+                  value={phoneNumber}
+                  editable={!user?.phone}
+                  onChangeText={text => {
+                    setPhoneNumber(text);
+                  }}
+                  // onBlur={handleBlur('title')}
+                  // error={touched?.title && errors?.title ? true : false}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Description</Text>
+                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                <TextInput
+                  placeholder="Description"
+                  multiline
+                  value={description}
+                  onChangeText={text => {
+                    setDescription(text);
+                  }}
+                  style={{minHeight: 100, justifyContent: 'center'}}
+                  // onBlur={handleBlur('title')}
+                  // error={touched?.title && errors?.title ? true : false}
+                />
+              </View>
+
+              <View style={{padding: 12, top: 10}}>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (name && email && phoneNumber && description) {
+                      if (isValidEmail(email) || isValidPhone(phoneNumber)) {
+                        let payload = {
+                          fullName: name,
+                          email: email,
+                          phone: phoneNumber,
+                          topic: 'Request',
+                          description: description,
+                        };
+                        submitRequest(payload);
+                      }
+                    }
+                  }}
+                  style={[
+                    styles.buyButton,
+                    (!name || !email || !phoneNumber || !description || !isValidEmail(email)) && {
+                      backgroundColor: '#ccc',
+                    },
+                  ]}
+                  accessibilityRole="button">
+                  {!updateLoading && (
+                    <Text style={styles.buyText}>{'Submit'}</Text>
+                  )}
+                  {updateLoading && (
+                    <ActivityIndicator color={'#fff'} size={'small'} />
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
           </ScrollView>
-          <View style={{padding: 12}}>
-            <TouchableOpacity
-              onPress={() => {
-                if (name && email && phoneNumber && description) {
-                  let payload = {
-                    fullName: name,
-                    email: email,
-                    phone: phoneNumber,
-                    topic: 'Request',
-                    description: description,
-                  };
-                  submitRequest(payload);
-                }
-              }}
-              style={[
-                styles.buyButton,
-                (!name || !email || !phoneNumber || !description) && { backgroundColor:'#ccc'},
-              ]}
-              accessibilityRole="button">
-              {!updateLoading && <Text style={styles.buyText}>{'Submit'}</Text>}
-              {updateLoading && (
-                <ActivityIndicator color={'#fff'} size={'small'} />
-              )}
-            </TouchableOpacity>
-          </View>
           <CommonSuccessModal
             visible={visible}
             title="Success."

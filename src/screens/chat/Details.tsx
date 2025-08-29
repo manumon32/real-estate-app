@@ -6,7 +6,7 @@ import {Fonts} from '@constants/font';
 import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback, useEffect, useRef} from 'react';
 import uuid from 'react-native-uuid';
-import {TextInput, IconButton} from 'react-native-paper';
+import {TextInput} from 'react-native-paper';
 import {
   View,
   Image,
@@ -39,7 +39,7 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
 };
 
 const ChatFooter = React.memo(
-  ({setAttachModalVisible, handleSend, items}: any) => {
+  ({theme,setAttachModalVisible, handleSend, items}: any) => {
     const [message, setMessage] = React.useState<any>('');
     // @ts-ignore
     const inputRef = useRef<TextInput>(null);
@@ -54,14 +54,14 @@ const ChatFooter = React.memo(
     const isActive = items.property?.adStatus === 'active';
 
     return (
-      <View style={styles.chatcontainer}>
+      <View style={[styles.chatcontainer, {backgroundColor: theme.colors.background}]}>
         {!isActive && (
           <Text
             style={{
               color: 'red',
               fontFamily: Fonts.BOLD,
               textAlign: 'center',
-              width:'100%'
+              width: '100%',
             }}>
             This ad is disabled by the owner.
           </Text>
@@ -72,7 +72,7 @@ const ChatFooter = React.memo(
               name="plus"
               onPress={() => setAttachModalVisible(true)}
               size={20}
-              color="#000"
+              color={theme.colors.text}
             />
             <TextInput
               ref={inputRef}
@@ -80,20 +80,21 @@ const ChatFooter = React.memo(
               placeholder="Say something..."
               value={message}
               onChangeText={setMessage}
-              style={styles.input}
+              style={[styles.input]}
               theme={{roundness: 50}}
               outlineColor="#F5F6FA"
               activeOutlineColor="#F5F6FA"
             />
-            <IconButton
-              icon="send"
-              size={18}
+            <Icon
+              name="send"
+              size={30}
               onPress={() => {
                 setMessage(null);
                 handleSend(message);
               }}
               disabled={!message?.trim()}
-              iconColor="#696969"
+              color={theme.colors.text}
+              // iconColor={theme.colors.text}
             />
           </>
         )}
@@ -282,7 +283,9 @@ const Chat = React.memo(({navigation}: any) => {
                 'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_items_boosted&w=740',
             }}
           />
-          <Text numberOfLines={1} style={styles.name}>
+          <Text
+            numberOfLines={1}
+            style={[styles.name, {color: theme.colors.text}]}>
             {items.property?.title}
           </Text>
         </TouchableOpacity>
@@ -363,6 +366,7 @@ const Chat = React.memo(({navigation}: any) => {
             setAttachModalVisible={setAttachModalVisible}
             handleSend={handleSend}
             items={items}
+            theme={theme}
           />
         }
       </KeyboardAvoidingView>

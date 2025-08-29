@@ -27,6 +27,7 @@ import Preview from './preview';
 import {postAdAPI, uploadImages} from '@api/services';
 import {RequestMethod} from '@api/request';
 import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
+import { useTheme } from '@theme/ThemeProvider';
 
 interface FooterProps {
   currentStep: number;
@@ -75,8 +76,9 @@ const Footer: React.FC<FooterProps> = ({
     }
   };
 
+    const {theme} = useTheme();
   return (
-    <View style={styles.footer}>
+    <View style={[styles.footer, {backgroundColor: theme.colors.background}]}>
       <TouchableOpacity
         onPress={handleCancel}
         style={styles.chatButton}
@@ -140,6 +142,7 @@ const PostAdContainer = (props: any) => {
   } = useBoundStore();
   console.log('values', values);
   const prevStep = prevCountRef.current;
+    const {theme} = useTheme();
 
   const getMergedFields = useCallback(
     (id: any, argFields: string[]) => {
@@ -215,7 +218,7 @@ const PostAdContainer = (props: any) => {
                   style={
                     newselected?.includes(item._id)
                       ? styles.chipTextSelected
-                      : styles.chipText
+                      : [styles.chipText, {color: theme.colors.text}]
                   }>
                   {item.name}
                 </Text>
@@ -225,7 +228,7 @@ const PostAdContainer = (props: any) => {
         </ScrollView>
       );
     },
-    [postAd, getMergedFields, toggleItem],
+    [postAd, theme, getMergedFields, toggleItem],
   );
 
   const checkErrors = async () => {
@@ -480,7 +483,7 @@ const PostAdContainer = (props: any) => {
         textColor="#171717"
         onBackPress={onBackPress}
       />
-      <View style={styles.stepperContainer}>
+      <View style={[styles.stepperContainer, {backgroundColor: theme.colors.background}]}>
         <Stepper totalSteps={5} currentStep={currentStep} />
       </View>
       {/* <KeyboardAvoidingView
@@ -497,7 +500,7 @@ const PostAdContainer = (props: any) => {
             contentContainerStyle={styles.scrollContainer}
             style={styles.scrollContainerStyle}
             keyboardShouldPersistTaps="handled">
-            <View style={styles.container}>{renderStepContent()}</View>
+            <View style={[styles.container, {backgroundColor: theme.colors.background}]}>{renderStepContent()}</View>
           </ScrollView>
         </View>
         {/* </TouchableWithoutFeedback> */}

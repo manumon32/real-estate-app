@@ -161,7 +161,7 @@ function App(): React.JSX.Element {
       <>
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: theme.colors.background,
             paddingRight: 17,
             padding: 12,
             paddingBottom: 2,
@@ -226,7 +226,7 @@ function App(): React.JSX.Element {
           />
         )}
         <>
-          <Text style={styles.resusltText}>
+          <Text style={[styles.resusltText, {color: theme.colors.text}]}>
             {'Showing ' + filter_listings.length + ' of ' + filter_totalpages}
           </Text>
         </>
@@ -297,7 +297,7 @@ function App(): React.JSX.Element {
   }, [debouncedFetch]);
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <FlatList
         data={filter_listings}
         renderItem={renderAdItem}
@@ -308,7 +308,7 @@ function App(): React.JSX.Element {
         ListHeaderComponent={
           <View
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: theme.colors.backgroundHome,
               paddingTop:
                 Platform.OS === 'android' ? 5: 5,
             }}>

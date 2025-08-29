@@ -1,6 +1,8 @@
 /* eslint-disable react-native/no-inline-styles */
 import CommonHeader from '@components/Header/CommonHeader';
 import TextInputs from '@components/Input/textInput';
+import { useRoute } from '@react-navigation/native';
+import {useTheme} from '@theme/ThemeProvider';
 import React, {useState, useMemo} from 'react';
 import {
   View,
@@ -13,11 +15,15 @@ import PieChart from 'react-native-pie-chart';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 export default function LoanCalculator() {
-  const [price, setPrice] = useState('1000000'); // example ₹10 lakh
+  const route = useRoute();
+  const items: any = route.params;
+  console.log('items', items);
+  const [price, setPrice] = useState(items.price ? items.price : '1000000'); // example ₹10 lakh
   const downPayment = '0'; // example ₹2 lakh
   const [rate, setRate] = useState('8.5'); // example 8.5%
   const [tenureInput, setTenureInput] = useState('20'); // default 20 years
   const [tenureUnit, setTenureUnit] = useState<'years' | 'months'>('years');
+  const {theme} = useTheme();
 
   // Inside useMemo:
   const {loanAmount, emi, totalInterest, totalPayment} = useMemo(() => {
@@ -82,14 +88,17 @@ export default function LoanCalculator() {
   }, [loanAmount, totalInterest]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <CommonHeader title="EMI Calculator" textColor="#171717" />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainerStyle}>
+        contentContainerStyle={[styles.contentContainerStyle, { 
+          backgroundColor: theme.colors.background
+        }]}>
         {/* Loan Amount */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Loan Amount</Text>
+          <Text style={[styles.label, {color: theme.colors.text}]}>Loan Amount</Text>
           <TextInputs
             onChangeText={text => {
               // Allow only numbers
@@ -109,7 +118,7 @@ export default function LoanCalculator() {
         {/* Interest Rate */}
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Interest Rate (% p.a)</Text>
+          <Text style={[styles.label, {color: theme.colors.text}]}>Interest Rate (% p.a)</Text>
           <TextInputs
             onChangeText={text => {
               const numeric = text
@@ -134,25 +143,42 @@ export default function LoanCalculator() {
               marginTop: 12,
               width: '100%',
             }}>
-            <Text style={styles.label}>Loan Tenure</Text>
-
+            <Text style={[styles.label, {color: theme.colors.text}]}>Loan Tenure</Text>
+            <View style={{marginLeft: 'auto', flexDirection: 'row', alignItems: 'center'}}>
             {/* Toggle Button */}
             <TouchableOpacity
               onPress={() => {
-                setTenureUnit(tenureUnit === 'years' ? 'months' : 'years');
+                setTenureUnit('years');
               }}
               style={{
                 paddingVertical: 8,
                 paddingHorizontal: 14,
-                backgroundColor: '#6366f1',
-                borderRadius: 8,
-                marginLeft: 'auto',
-                marginBottom: 4,
+                backgroundColor: tenureUnit === 'years' ? '#6366f1' : '#ccc',
+                // borderRadius: 8,
+                // marginLeft: 'auto',
+                marginBottom: 8,
               }}>
               <Text style={{color: '#fff', fontWeight: '600'}}>
-                {tenureUnit === 'years' ? 'Years' : 'Months'}
+                {'Year'}
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setTenureUnit('months');
+              }}
+              style={{
+                paddingVertical: 8,
+                paddingHorizontal: 14,
+                backgroundColor: tenureUnit === 'months' ? '#6366f1' : '#ccc',
+                // borderRadius: 8,
+                // marginLeft: 'auto',
+                marginBottom: 8,
+              }}>
+              <Text style={{color: '#fff', fontWeight: '600'}}>
+                {'Months'}
+              </Text>
+            </TouchableOpacity>
+            </View>
           </View>
 
           <TextInputs
@@ -174,29 +200,28 @@ export default function LoanCalculator() {
           />
         </View>
         <View style={styles.emiCard}>
-          <Text style={styles.emiLabel}>Your Monthly EMI</Text>
+          <Text style={[styles.emiLabel]}>Your Monthly EMI</Text>
           <Text style={styles.emiValue}>₹{formatINR(emi)}</Text>
         </View>
 
         {/* Breakdown */}
         <View style={styles.breakdown}>
-          <Text style={styles.breakdownText}>
-            Principal Amount{' '}
-            <Text style={styles.value}>₹{formatINR(loanAmount)}</Text>
+          <Text style={[styles.breakdownText, {color: theme.colors.text}]}>
+            Principal Amount{': '}
+            <Text style={[styles.value, {color: theme.colors.text}]}>₹{formatINR(loanAmount)}</Text>
           </Text>
-          <Text style={styles.breakdownText}>
-            Total Interest{' '}
-            <Text style={styles.value}>₹{formatINR(totalInterest)}</Text>
+          <Text style={[styles.breakdownText, {color: theme.colors.text}]}>
+            Total Interest{': '}
+            <Text style={[styles.value, {color: theme.colors.text}]}>₹{formatINR(totalInterest)}</Text>
           </Text>
-          <Text style={styles.breakdownText}>
-            Total Amount{' '}
-            <Text style={styles.value}>₹{formatINR(totalPayment)}</Text>
+          <Text style={[styles.breakdownText, {color: theme.colors.text}]}>
+            Total Amount{': '}
+            <Text style={[styles.value, {color: theme.colors.text}]}>₹{formatINR(totalPayment)}</Text>
           </Text>
         </View>
 
         {/* Chart (placeholder for donut chart lib) */}
         <View style={styles.chartPlaceholder}>
-          <View style={styles.chartPlaceholder}>
             <PieChart widthAndHeight={190} series={series} />
             <View
               style={{
@@ -219,7 +244,7 @@ export default function LoanCalculator() {
                     marginRight: 6,
                   }}
                 />
-                <Text style={{fontSize: 14, color: '#374151'}}>
+                <Text style={{fontSize: 14, color: theme.colors.text}}>
                   {'Principal'}
                 </Text>
               </View>
@@ -239,7 +264,7 @@ export default function LoanCalculator() {
                     marginRight: 6,
                   }}
                 />
-                <Text style={{fontSize: 14, color: '#374151'}}>
+                <Text style={{fontSize: 14, color: theme.colors.text}}>
                   {'Interest'}
                 </Text>
               </View>
@@ -247,7 +272,6 @@ export default function LoanCalculator() {
             {/* <Text style={{marginTop: 10, fontSize: 14, color: '#374151'}}>
               Principal vs Interest
             </Text> */}
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -256,7 +280,7 @@ export default function LoanCalculator() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 5,
     backgroundColor: '#fff',
     flex: 1,
   },
@@ -309,10 +333,11 @@ const styles = StyleSheet.create({
   },
   value: {
     fontWeight: '700',
+    fontSize: 16,
     color: '#111827',
   },
   chartPlaceholder: {
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 10,
   },
 });

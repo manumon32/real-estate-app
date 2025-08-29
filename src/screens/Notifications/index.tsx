@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useCallback, useEffect, useState} from 'react';
-import {View, StyleSheet, RefreshControl, TouchableOpacity} from 'react-native';
-import {Text, Card, Divider, useTheme, IconButton} from 'react-native-paper';
+import {View, StyleSheet, RefreshControl, TouchableOpacity, Dimensions} from 'react-native';
+import {Text, Card, Divider, IconButton, useTheme} from 'react-native-paper';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {formatDistanceToNow} from 'date-fns';
@@ -15,6 +15,7 @@ import {
   deleteNotificationsAPI,
   markAllReadNotificationsAPI,
 } from '@api/services';
+import { useTheme as useThemes } from '@theme/ThemeProvider';
 
 type NotificationType = 'message' | 'offer' | 'listing' | 'system';
 
@@ -52,8 +53,10 @@ export default function NotificationListSwipe() {
     clientId,
     bearerToken,
   } = useBoundStore();
+    const {theme} = useThemes();
   const [refreshing, setRefreshing] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const windowHeight = Dimensions.get('window').height;
   const [selectAll, setSelectall] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<any>([]);
 
@@ -237,7 +240,7 @@ export default function NotificationListSwipe() {
   );
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <CommonHeader
         title="Notifications"
         textColor="#171717"
@@ -269,7 +272,7 @@ export default function NotificationListSwipe() {
             <View
               style={{
                 padding: 8,
-                backgroundColor: '#fff',
+                backgroundColor: theme.colors.text,
                 flexDirection: 'row',
                 justifyContent: 'space-between',
               }}>
@@ -311,15 +314,15 @@ export default function NotificationListSwipe() {
         rightOpenValue={-70}
         disableRightSwipe
         disableLeftSwipe
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.container, {minHeight: windowHeight, backgroundColor: theme.colors.background}]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ItemSeparatorComponent={() => <Divider />}
         ListEmptyComponent={
-          <View style={styles.empty}>
+          <View style={[styles.empty]}>
             <Icon name="bell-off-outline" size={48} color={colors.outline} />
-            <Text>No notifications yet</Text>
+            <Text style={{color: theme.colors.text}}>No notifications yet</Text>
           </View>
         }
       />
