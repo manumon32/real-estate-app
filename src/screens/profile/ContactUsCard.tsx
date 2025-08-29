@@ -1,9 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
+import { useTheme } from '@theme/ThemeProvider';
 import React from 'react';
 import {View, Text, TouchableOpacity, Linking, Alert} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ContactUsCard = () => {
+  const {theme} = useTheme();
   const handlePress = (type: string) => {
     switch (type) {
       case 'whatsapp':
@@ -15,7 +17,22 @@ const ContactUsCard = () => {
         Linking.openURL('tel:+8593987471');
         break;
       case 'email':
-        Linking.openURL('mailto:contact@hotplotz.com');
+        const email = 'contact@hotplotz.com';
+        const subject = 'HotPlotz Support';
+        const body = 'Hello HotPlotz team, I need help with...';
+        const mailUrl = `mailto:${email}?subject=${encodeURIComponent(
+          subject,
+        )}&body=${encodeURIComponent(body)}`;
+
+        Linking.canOpenURL(mailUrl)
+          .then(supported => {
+            if (!supported) {
+              Alert.alert('Error', 'No email app available');
+            } else {
+              Linking.openURL(mailUrl);
+            }
+          })
+          .catch((err) =>{ console.log(err); Alert.alert('Error', 'Something went wrong')});
         break;
       case 'chat':
         // navigation.navigate('ChatDetail'); // 👈 Your chat detail screen name
@@ -53,7 +70,7 @@ const ContactUsCard = () => {
   return (
     <View
       style={{
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
         borderRadius: 16,
         padding: 16,
         shadowColor: '#000',
@@ -62,7 +79,7 @@ const ContactUsCard = () => {
         shadowRadius: 6,
         elevation: 5,
       }}>
-      <Text style={{fontSize: 16, fontWeight: '600', marginBottom: 12}}>
+      <Text style={{fontSize: 16, fontWeight: '600', marginBottom: 12, color: theme.colors.text}}>
         Contact Us
       </Text>
 
