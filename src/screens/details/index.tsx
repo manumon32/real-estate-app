@@ -696,7 +696,7 @@ const PropertyDetails = React.memo(() => {
                 <IconButton
                   iconSize={24}
                   iconColor={'#2F8D79'}
-                  iconName={'finance'}
+                  iconName={'calculator'}
                   style={{marginRight: 10}}
                 />
                 <Text

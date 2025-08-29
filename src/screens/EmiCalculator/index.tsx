@@ -112,7 +112,10 @@ export default function LoanCalculator() {
           <Text style={styles.label}>Interest Rate (% p.a)</Text>
           <TextInputs
             onChangeText={text => {
-              setRate(text);
+              const numeric = text
+                .replace(/[^0-9.]/g, '') // allow digits + dot
+                .replace(/(\..*?)\./g, '$1'); // keep only the first dot
+              setRate(numeric);
             }}
             iconName={'percent'}
             value={rate}
@@ -162,7 +165,7 @@ export default function LoanCalculator() {
             iconName={'calendar'}
             value={
               tenureUnit === 'years'
-                ? String(Number(tenureInput).toFixed(2))
+                ? String(Number(tenureInput))
                 : String(Number(tenureInput) * 12)
             }
             placeholder="Enter Tenure"
