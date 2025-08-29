@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
   Pressable,
+  // FlatList,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Image from 'react-native-fast-image';
@@ -223,50 +224,52 @@ const PropertyDetails = React.memo(() => {
 
   const Footer = ({details, bearerToken, createRoom, setVisible}: any) => {
     return (
-      <View style={styles.footer}>
-        {isOwner ? (
-          <>
-            <Pressable
-              // @ts-ignore
-              onPress={() => navigation.navigate('PostAd', {items: details})}
-              style={styles.chatButton}>
-              <Icon name="pencil" size={20} color="#000" />
-              <Text style={styles.chatText}>Edit</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => markasSold(details?._id)}
-              style={styles.buyButton}>
-              <Text style={styles.buyText}>
-                {details?.adStatus !== 'sold'
-                  ? 'Mark as sold'
-                  : AdStatusEnum[details?.adStatus]}
-              </Text>
-            </Pressable>
-          </>
-        ) : (
-          <>
-            <Pressable
-              onPress={() => {
-                if (bearerToken) {
-                  let payload = {
-                    propertyId: details?._id,
-                    postOwnerId: details?.customerId,
-                  };
-                  createRoom(payload);
-                } else {
-                  setVisible();
-                }
-              }}
-              style={styles.chatButton}>
-              <Icon name="chat-outline" size={20} color="#000" />
-              <Text style={styles.chatText}>Chat</Text>
-            </Pressable>
-            <Pressable style={styles.buyButton}>
+      !detailLoading && (
+        <View style={styles.footer}>
+          {isOwner ? (
+            <>
+              <Pressable
+                // @ts-ignore
+                onPress={() => navigation.navigate('PostAd', {items: details})}
+                style={styles.chatButton}>
+                <Icon name="pencil" size={20} color="#000" />
+                <Text style={styles.chatText}>Edit</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => markasSold(details?._id)}
+                style={styles.buyButton}>
+                <Text style={styles.buyText}>
+                  {details?.adStatus !== 'sold'
+                    ? 'Mark as sold'
+                    : AdStatusEnum[details?.adStatus]}
+                </Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable
+                onPress={() => {
+                  if (bearerToken) {
+                    let payload = {
+                      propertyId: details?._id,
+                      postOwnerId: details?.customerId,
+                    };
+                    createRoom(payload);
+                  } else {
+                    setVisible();
+                  }
+                }}
+                style={styles.chatButton}>
+                <Icon name="chat-outline" size={20} color="#000" />
+                <Text style={styles.chatText}>Chat</Text>
+              </Pressable>
+              {/* <Pressable style={styles.buyButton}>
               <Text style={styles.buyText}>Buy Now</Text>
-            </Pressable>
-          </>
-        )}
-      </View>
+            </Pressable> */}
+            </>
+          )}
+        </View>
+      )
     );
   };
 
@@ -666,6 +669,54 @@ const PropertyDetails = React.memo(() => {
                 </View>
               </Pressable>
             )}
+            <Pressable
+              onPress={async () => {
+                // @ts-ignore
+                navigation.navigate('LoanCalculator');
+
+              }}
+              style={{
+                top: 15,
+                margin: 16,
+                padding: 16,
+                backgroundColor: '#E3FFF8',
+                borderRadius: 10,
+                height: 56,
+                alignItems: 'center',
+                flexDirection: 'row',
+                borderWidth: 1,
+                borderColor: '#88E4CF',
+              }}>
+              <View
+                style={{
+                  width: '95%',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <IconButton
+                  iconSize={24}
+                  iconColor={'#2F8D79'}
+                  iconName={'finance'}
+                  style={{marginRight: 10}}
+                />
+                <Text
+                  style={{
+                    color: '#2F8D79',
+                    fontSize: 14,
+                    fontFamily: Fonts.MEDIUM,
+                    fontWeight: '500',
+                  }}>
+                  Emi Calculator
+                </Text>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <IconButton
+                  iconSize={24}
+                  iconColor={'#2F8D79'}
+                  iconName={'arrow-right'}
+                />
+              </View>
+            </Pressable>
 
             {
               <>

@@ -20,6 +20,7 @@ import HelpSupport from '@screens/profile/HelpSupport';
 import VerifyListing from '@screens/VerifyListing';
 import NotificationList from '@screens/Notifications';
 import VerifyBank from '@screens/VerifyBank';
+import LoanCalculator from '@screens/EmiCalculator';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,7 @@ const RootNavigator = () => {
       <Stack.Screen name="HomeIndex" component={HomePage} />
       <Stack.Screen name="Main" component={MainTabNavigator} />
       <Stack.Screen name="Details" component={DetailsScreen} />
+      <Stack.Screen name="LoanCalculator" component={LoanCalculator} />
       <Stack.Screen name="ThreeDModelViewer" component={ThreeDModelViewer} />
       <Stack.Screen name="PostAd" component={PostAd} />
       <Stack.Screen name="FavAds" component={FavAds} />

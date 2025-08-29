@@ -93,7 +93,10 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       payload.isSocialLogin = true;
       payload.socialProvider = userInfoData?.socialProvider;
       payload.email = userInfoData?.email ?? null;
-      payload.socialProviderId = userInfoData?.id ?? '';
+      payload.socialProviderId =
+        userInfoData?.socialProvider === 'apple'
+          ? userInfoData?.uid
+          : userInfoData?.id ?? '';
       if (userInfoData?.socialProvider === 'facebook') {
         payload.profilePicture = userInfoData?.picture?.data?.url ?? '';
         payload.name = userInfoData?.name;
@@ -104,6 +107,12 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
           userInfoData?.givenName || userInfoData?.familyName
             ? userInfoData?.givenName + ' ' + userInfoData?.familyName
             : '';
+      }
+      if (userInfoData?.socialProvider === 'apple') {
+        payload.profilePicture = userInfoData?.photoURL ?? '';
+        payload.name = userInfoData?.displayName
+          ? userInfoData?.displayName
+          : '';
       }
     } else {
       payload = {
@@ -127,10 +136,10 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
   const signInWithGoogle = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      setUserInfo({...userInfo?.data?.user, socialProvider: 'google'});
-      setLoginVar(userInfo?.data?.user?.email ?? '');
-      veryFyOTP(false, {...userInfo?.data?.user, socialProvider: 'google'});
+      const userInfoData: any = await GoogleSignin.signIn();
+      setUserInfo({...userInfoData, socialProvider: 'google'});
+      setLoginVar(userInfoData?.email ?? '');
+      veryFyOTP(false, {...userInfoData, socialProvider: 'google'});
     } catch (error) {
       console.log(error);
     }
@@ -181,7 +190,13 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       // Sign in with Firebase
       const userCredential = await auth().signInWithCredential(appleCredential);
 
-      Alert.alert('Firebase Sign-In successful:', JSON.stringify(userCredential.user));
+      Alert.alert(
+        'Firebase Sign-In successful:',
+        JSON.stringify(userCredential.user),
+      );
+      setUserInfo({...userCredential.user, socialProvider: 'apple'});
+      setLoginVar(userCredential.user?.email ?? '');
+      veryFyOTP(false, {...userCredential.user, socialProvider: 'apple'});
     } catch (err) {
       console.log('Apple Sign-In error:', err);
     }
@@ -256,7 +271,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
                   source={require('@assets/images/logo.png')}
                   style={styles.logo}
                 />
-                
+
                 {/* <LogoIcon style={styles.logo} /> */}
                 <Text style={styles.title}>Login</Text>
 

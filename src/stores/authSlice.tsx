@@ -62,7 +62,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
         set({loginError: true, otpLoading: false});
       }
     } catch (error) {
-      set({loginError: true});
+      set({loginError: true, otpLoading: false});
     }
   },
   verifyOTP: async payload => {
@@ -81,6 +81,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           user: resp.userInfo,
           visible: false,
           otp: null,
+          otpLoading: false,
         });
         Toast.show({
           type: 'success',
@@ -92,13 +93,14 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       } else {
         set({
           loginError: true,
+          otpLoading: false,
           visible: false,
           updateSuccess: false,
           loginErrorMessage: resp.msg ? resp.msg : 'Something went wrong',
         });
       }
     } catch (error) {
-      set({loginError: true, updateSuccess: false});
+      set({loginError: true, updateSuccess: false, otpLoading: false});
     }
   },
   fetchUserDetails: async (flag = false) => {
