@@ -40,10 +40,15 @@ function Header(props: any): React.JSX.Element {
     setModalVisible(true);
   }, []);
 
-  const shareProperty = (id: string) => {
-    const link = `https:/myapp://Details/${id}`;
+  const shareProperty = (details: any) => {
+    const link = `https://hotplotz.com/details/${details._id}`;
+
+    const message =
+      `I have found this on Hotlplotz ${details.title} Check out this property on HotPlotz 👇${link}`.trim();
     Share.share({
-      message: `${link}`,
+      title: 'Hotplotz',
+      message,
+      url: link, // for iOS, some apps use this field
     });
   };
 
@@ -85,10 +90,13 @@ function Header(props: any): React.JSX.Element {
           <View style={styles.headerIconContainer}>
             <TouchableOpacity
               onPress={() => {
-                shareProperty(details._id);
+                shareProperty(details);
               }}>
               <IconButton
-                style={[styles.heartRight, {backgroundColor: theme.colors.background}]}
+                style={[
+                  styles.heartRight,
+                  {backgroundColor: theme.colors.background},
+                ]}
                 iconSize={24}
                 //red , heart
                 iconColor={theme.colors.text}

@@ -22,6 +22,7 @@ import { createTransactionsSlice, TransactionsSlice } from './TransactionsSlice'
 import { createVerificationSlice, VerificationSlice } from './VerifyListingSlice';
 import { createNotificationsSlice, NotificationsSlice } from './NotificationsSlice';
 import { BankVerificationSlice, createBankVerificationSlice } from './VerifyBankSlice';
+import { AppointmentsSlice, createAppointmentsSlice } from './AppointmentSlice';
 // import {zustandStorage} from './storage';
 
 type StoreState = HandShakeSlice &
@@ -34,6 +35,7 @@ type StoreState = HandShakeSlice &
   LocationSlice &
   PostAdSlice &
   MyAdsSlice &
+  AppointmentsSlice &
   ReportAdSlice &
   ManagePlanSlice &
   ChatSlice &
@@ -66,6 +68,7 @@ const useBoundStore = create<StoreState>()(
         ...createDetailSlice(set, get),
         ...createMyAdsSlice(set, get),
         ...createFavoritesSlice(set, get),
+        ...createAppointmentsSlice(set, get),
       }),
       {
         name: 'auth-storage',

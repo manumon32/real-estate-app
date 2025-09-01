@@ -8,7 +8,7 @@ import {postAdValidationSchema} from './validationSchema';
 import useBoundStore from '@stores/index';
 import {useRoute} from '@react-navigation/native';
 import {fetchDetailsAPI} from '@api/services';
-import { useTheme } from '@theme/ThemeProvider';
+import {useTheme} from '@theme/ThemeProvider';
 
 const PostAd = () => {
   const route = useRoute();
@@ -22,6 +22,8 @@ const PostAd = () => {
     setImages,
     setFloorPlans,
     fetchPlans,
+    setLocation,
+    setadPostModal,
   } = useBoundStore();
   const [loading, setLoading] = useState(false);
   const [fields, setFields] = useState<{}>({});
@@ -66,7 +68,7 @@ const PostAd = () => {
 
   const fetchDetails = useCallback(async () => {
     if (!items._id) return; // guard clause
-
+    await setadPostModal();
     setLoading(true);
     try {
       const res: any = await fetchDetailsAPI(items?._id, {
@@ -77,6 +79,13 @@ const PostAd = () => {
         ...initialValues,
         ...res,
       };
+      console.log('newInitialValues', newInitialValues);
+      const {coordinates} = newInitialValues.location;
+      setLocation({
+          name: newInitialValues.address,
+          lat: coordinates[1],
+          lng: coordinates[0],
+        });
       // @ts-ignore
       const listingTypeFields = newInitialValues.listingTypeId?.fields;
       // @ts-ignore
@@ -87,8 +96,8 @@ const PostAd = () => {
         listingTypeId: [newInitialValues.listingTypeId?._id],
         // @ts-ignore
         propertyTypeId: [newInitialValues.propertyTypeId?._id],
-        availabilityStatusId:[ newInitialValues.availabilityStatusId?._id],
-        furnishingStatusId:[ newInitialValues.furnishingStatusId?._id],
+        availabilityStatusId: [newInitialValues.availabilityStatusId?._id],
+        furnishingStatusId: [newInitialValues.furnishingStatusId?._id],
       };
       let amenityIds = newInitialValues.amenityIds.map((item: any) => item._id);
 
@@ -121,7 +130,7 @@ const PostAd = () => {
     if (items && items._id) {
       fetchDetails();
     }
-      fetchPlans();
+    fetchPlans();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

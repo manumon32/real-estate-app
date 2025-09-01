@@ -1,100 +1,106 @@
 /* eslint-disable react-native/no-inline-styles */
+import React from 'react';
+import {View, ScrollView, RefreshControl, StyleSheet} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+
 import CommonHeader from '@components/Header/CommonHeader';
 import MenuLink from '@components/MenuLink';
-import React, {useState} from 'react';
-import {View, ScrollView, RefreshControl} from 'react-native';
 import useBoundStore from '@stores/index';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '@theme/ThemeProvider';
+import {useTheme} from '@theme/ThemeProvider';
 
 const Communication = () => {
-  const {fetchUserDetails, userProfileloading} = useBoundStore();
-  const [updateToggle, setUpdatetoggle] = useState(false);
-  const [recomandToggle, setRecomandToggle] = useState(false);
-  const [call, setCall] = useState(false);
-      const {theme} = useTheme();
+  const {fetchUserDetails, userProfileloading, updateuser, user} =
+    useBoundStore();
+  const {theme} = useTheme();
+
+  const commPrefs = user?.communicationPreferences || {
+    email: true,
+    sms: true,
+    call: true,
+  };
+
+  const handleToggle = (key: keyof typeof commPrefs) => {
+    const payload = {
+      communicationPreferences: {
+        ...commPrefs,
+        [key]: !commPrefs[key],
+      },
+    };
+    updateuser(payload);
+  };
+
   return (
-    <SafeAreaView style={{backgroundColor: theme.colors.background, height: '100%'}}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <CommonHeader
-        title="Communication preferences"
-        textColor="#171717"
+        title="Communication Preferences"
+        textColor={theme.colors.text}
         backgroundColor={theme.colors.background}
-        // onBackPress={onBackPress}
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 120, padding: 10}}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={userProfileloading}
-            onRefresh={() => {
-              fetchUserDetails();
-            }}
+            onRefresh={fetchUserDetails}
             colors={['#40DABE', '#40DABE', '#227465']}
           />
         }>
-        <View
-          style={{
-            backgroundColor: theme.colors.background,
-            borderRadius: 16,
-            borderColor: '#EBEBEB',
-            borderWidth: 1,
-            marginTop: 10,
-            margin: 10,
-          }}>
+        <View style={[styles.card, {backgroundColor: theme.colors.background}]}>
           <MenuLink
             label="Email"
-            selected={updateToggle}
+            selected={commPrefs.email}
             showToggle
             showChevron={false}
-            toggleDisabled
-            onToggle={() => setUpdatetoggle(!updateToggle)}
-            // @ts-ignore
-            onPress={() => setUpdatetoggle(!updateToggle)}
+            onToggle={() => handleToggle('email')}
           />
-          <View
-            style={{
-              backgroundColor: '#EBEBEB',
-              borderWidth: 1,
-              borderColor: '#EBEBEB',
-              width: '90%',
-              alignSelf: 'center',
-            }}
-          />
+          <View style={styles.divider} />
+
           <MenuLink
             label="SMS"
-            selected={recomandToggle}
+            selected={commPrefs.sms}
             showToggle
-            toggleDisabled
-            onToggle={() => setRecomandToggle(!recomandToggle)}
             showChevron={false}
-            // @ts-ignore
-            onPress={() => setRecomandToggle(!recomandToggle)}
+            onToggle={() => handleToggle('sms')}
           />
+          <View style={styles.divider} />
 
-          <View
-            style={{
-              backgroundColor: '#EBEBEB',
-              borderWidth: 1,
-              borderColor: '#EBEBEB',
-              width: '90%',
-              alignSelf: 'center',
-            }}
-          />
           <MenuLink
             label="Call"
-            selected={call}
+            selected={commPrefs.call}
             showToggle
-            toggleDisabled
-            onToggle={() => setCall(!call)}
             showChevron={false}
-            // @ts-ignore
-            onPress={() => setCall(!call)}
+            onToggle={() => handleToggle('call')}
           />
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 120,
+    padding: 10,
+  },
+  card: {
+    borderRadius: 16,
+    borderColor: '#EBEBEB',
+    borderWidth: 1,
+    marginTop: 10,
+    margin: 10,
+  },
+  divider: {
+    backgroundColor: '#EBEBEB',
+    borderWidth: 1,
+    borderColor: '#EBEBEB',
+    width: '90%',
+    alignSelf: 'center',
+  },
+});
 
 export default Communication;

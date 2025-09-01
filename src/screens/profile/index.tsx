@@ -32,7 +32,8 @@ const Profile = () => {
     fetchUserDetails();
   }, []);
   return (
-    <SafeAreaView style={{backgroundColor: theme.colors.background, height: '100%'}}>
+    <SafeAreaView
+      style={{backgroundColor: theme.colors.background, height: '100%'}}>
       <CommonHeader
         title="My Profile"
         textColor={isDarkMode ? '#FFFFFF' : '#171717'}
@@ -69,9 +70,13 @@ const Profile = () => {
             }}
           />
           <View style={styles.info}>
-            <Text style={[styles.name, {color: theme.colors.text}]}>{user?.name || 'App User'}</Text>
+            <Text style={[styles.name, {color: theme.colors.text}]}>
+              {user?.name || 'App User'}
+            </Text>
             {user?.email && (
-              <Text style={[styles.email, {color: theme.colors.text}]}>{user?.email || ''}</Text>
+              <Text style={[styles.email, {color: theme.colors.text}]}>
+                {user?.email || ''}
+              </Text>
             )}
 
             <TouchableOpacity
@@ -129,7 +134,21 @@ const Profile = () => {
               alignSelf: 'center',
             }}
           />
-
+          <MenuLink
+            icon="clock"
+            label="Appointments"
+            // @ts-ignore
+            onPress={() => navigation.navigate('Appointments')}
+          />
+          <View
+            style={{
+              backgroundColor: '#EBEBEB',
+              borderWidth: 1,
+              borderColor: '#EBEBEB',
+              width: '90%',
+              alignSelf: 'center',
+            }}
+          />
           <MenuLink
             icon="file"
             label="My Orders"
@@ -146,7 +165,7 @@ const Profile = () => {
             }}
           />
           <MenuLink
-            icon="file"
+            icon="block-helper"
             label="Reported Ads"
             // @ts-ignore
             onPress={() => navigation.navigate('ReportAd')}

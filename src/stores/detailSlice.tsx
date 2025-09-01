@@ -24,6 +24,7 @@ export interface Detail {
   chatEnabled: boolean;
   isNegotiable: boolean;
   isVerified: boolean;
+  isVerificationStarted: boolean;
   isBankVerified: boolean;
   isVerifiedContact: boolean;
   isFeatured: boolean;
@@ -44,6 +45,7 @@ export interface Detail {
   reraId: string;
   price: number;
   address: string;
+  adStatus:String;
   pincode: string;
   landmark: string;
   carParking: number;

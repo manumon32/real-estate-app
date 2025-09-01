@@ -314,7 +314,6 @@ const Chat = React.memo(({navigation}: any) => {
 
   const renderAdItem = useCallback(
     (item: any) => {
-      console.log(selectedChats);
       return (
         <MessageCard
           name={item?.item?.user?.name ?? 'User'}

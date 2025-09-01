@@ -54,7 +54,15 @@ export const createFavoritesSlice = (set: any, get: any): FavoritesSlice => ({
   fetchFavouriteAds: async () => {
     set({favoritesLoading: true});
     try {
-      const res = await fetchFavoritessAPI({
+      let filters = {};
+      if (get().location?.lat && get().location?.lng) {
+        filters = {
+          filter_near: [get().location?.lat, get().location?.lng, 1000].join(
+            ',',
+          ),
+        };
+      }
+      const res = await fetchFavoritessAPI(filters, {
         token: get().token,
         clientId: get().clientId,
         bearerToken: get().bearerToken,
@@ -62,14 +70,14 @@ export const createFavoritesSlice = (set: any, get: any): FavoritesSlice => ({
       res?.rows &&
         set(() => ({
           favorites: res.rows,
-          favoritesLoading: false
+          favoritesLoading: false,
         }));
     } catch (err) {
       // Rollback if API fails
       // set({favorites});
     }
   },
-  resetFavourites: () =>set({favorites:[]}),
+  resetFavourites: () => set({favorites: []}),
   isFavorite: _id =>
     !!get().favorites.find((fav: {_id: string}) => fav._id === _id),
 });

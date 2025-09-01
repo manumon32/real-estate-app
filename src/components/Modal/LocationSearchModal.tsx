@@ -153,7 +153,7 @@ const CommonLocationModal: React.FC<Props> = ({
         const res = await fetch(url);
         const json = await res.json();
         const address =
-          json.results[0]?.formatted_address || 'Current Location';
+          json.results[0]?.formatted_address || 'Kerala';
         setLocation({
           name: address,
           lat: latitude,

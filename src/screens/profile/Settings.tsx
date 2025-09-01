@@ -139,7 +139,7 @@ const Settings = () => {
                 [
                   {text: 'Cancel', style: 'cancel'},
                   {
-                    text: 'Log out',
+                    text: 'Log out from all devices',
                     onPress: async () => {
                       await logout();
                       // @ts-ignore
@@ -173,7 +173,7 @@ const Settings = () => {
                 [
                   {text: 'Cancel', style: 'cancel'},
                   {
-                    text: 'Log out',
+                    text: 'Delete',
                     onPress: async () => {
                       await logout();
                       // @ts-ignore

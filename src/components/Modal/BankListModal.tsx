@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unstable-nested-components */
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {Text, TextInput, List, Button, useTheme} from 'react-native-paper';
 import {
   FlatList,
@@ -26,6 +26,9 @@ const BankSelectModal = ({
   onSelect,
 }: BankSelectModalProps) => {
   const {banks, bankVerification_loading} = useBoundStore();
+  useEffect(() => {
+    console.log('banks', banks);
+  }, [banks]);
   const enrichedBanks = useMemo(() => {
     return banks?.map((bank: any) => {
       return {

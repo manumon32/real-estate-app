@@ -34,6 +34,12 @@
 				<string>fb1911577602952822</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>myapp</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
@@ -47,11 +53,11 @@
 	<array>
 		<string>fbapi</string>
 		<string>fb-messenger-share-api</string>
-    <string>mailto</string>
-    <string>tel</string>
-    <string>telprompt</string>
-    <string>sms</string>
-    <string>whatsapp</string>
+		<string>mailto</string>
+		<string>tel</string>
+		<string>telprompt</string>
+		<string>sms</string>
+		<string>whatsapp</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
@@ -75,20 +81,16 @@
 			</dict>
 		</dict>
 	</dict>
-  <key>NSLocationWhenInUseUsageDescription</key>
-  <string>This app requires access to your location to help you find properties near you and set locations when creating listings.</string>
-  <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-  <string>This app requires access to your location even in the background to provide continuous location-based property search and services.</string>
-  <key>NSPhotoLibraryUsageDescription</key>
-  <string>This app requires access to your photo library so you can upload property photos and profile pictures when creating or managing listings.</string>
-
-  <key>NSCameraUsageDescription</key>
-  <string>This app requires access to your camera so you can take photos of properties and upload them to your listings.</string>
-
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires access to your camera so you can take photos of properties and upload them to your listings.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app requires access to your location even in the background to provide continuous location-based property search and services.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app requires your location to show nearby listings and services while in use.</string>
-  <key>NSMicrophoneUsageDescription</key>
-  <string>This app requires access to your microphone to record audio while chating with users.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires access to your microphone to record audio while chating with users.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library so you can upload property photos and profile pictures when creating or managing listings.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
@@ -111,6 +113,10 @@
 		<string>Zocial.ttf</string>
 		<string>Fontisto.ttf</string>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -125,5 +131,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:hotplotz.com</string>
+	</array>
 </dict>
 </plist>

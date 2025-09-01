@@ -119,7 +119,7 @@ const Step3LocationDetails = (props: any) => {
           <CommonDistanceInput
             label="Carpet Area"
             unit="/Sq.ft"
-            value={String(values.carpetArea)}
+            value={values.carpetArea?String(values.carpetArea): ''}
             onChange={text => setFieldValue('carpetArea', text)}
           />
         </View>
@@ -129,7 +129,7 @@ const Step3LocationDetails = (props: any) => {
           <CommonDistanceInput
             label="Build-up Area"
             unit="/Sq.ft"
-            value={String(values.builtUpArea)}
+            value={values.builtUpArea ? String(values.builtUpArea): ''}
             onChange={text => setFieldValue('builtUpArea', text)}
           />
         </View>
@@ -140,7 +140,7 @@ const Step3LocationDetails = (props: any) => {
           <CommonDistanceInput
             label="Super Build-up Area"
             unit="/Sq.ft"
-            value={String(values.superBuiltUpArea)}
+            value={values.superBuiltUpArea? String(values.superBuiltUpArea): ''}
             onChange={text => setFieldValue('superBuiltUpArea', text)}
           />
         </View>

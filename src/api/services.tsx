@@ -502,15 +502,16 @@ export const UpdateFavouritesAPI = async (
   }
 };
 
-export const fetchFavoritessAPI = async (configArg: any): Promise<any> => {
+export const fetchFavoritessAPI = async (
+  params: {},
+  configArg: any,
+): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const apiConfig: any = {
       method: 'get',
       url: API.FAVOURITES,
-      params: {
-        noPagination: true,
-      },
+      params,
       headers,
     };
     const response = await apiRequest(apiConfig);
@@ -539,6 +540,28 @@ export const fetchMyAdsAPI = async (configArg: any): Promise<any> => {
     throw new Error('Failed to fetch Details');
   }
 };
+
+export const fetchAppointMentsAPI = async (configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.LISTINGS.APPOINTMENT.CREATE,
+      params: {
+        noPagination: true,
+        orderBy: 'createdAt',
+        orderByDir: 'desc',
+      },
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch Details');
+  }
+};
+
+
 
 //Transactions
 
@@ -769,6 +792,29 @@ export const postAdAPI = async (
       method,
       url:
         method === 'post' ? API.LISTINGS.CREATE : API.LISTINGS.UPDATE(data.id),
+      data,
+      headers,
+    });
+    return response?.data;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error('Failed to Do so');
+  }
+};
+
+export const saveAppointMent = async (
+  data: any,
+  configArg: any,
+  method: RequestMethod,
+): Promise<Listing> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method,
+      url:
+        method === 'post'
+          ? API.LISTINGS.APPOINTMENT.CREATE
+          : API.LISTINGS.APPOINTMENT.UPDATE,
       data,
       headers,
     });

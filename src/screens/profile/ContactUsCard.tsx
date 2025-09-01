@@ -9,12 +9,12 @@ const ContactUsCard = () => {
   const handlePress = (type: string) => {
     switch (type) {
       case 'whatsapp':
-        Linking.openURL('https://wa.me/911234567890').catch(() =>
+        Linking.openURL('https://wa.me/918593987471').catch(() =>
           Alert.alert('Error', 'WhatsApp is not installed'),
         );
         break;
       case 'call':
-        Linking.openURL('tel:+8593987471');
+        Linking.openURL('tel:+918593987471');
         break;
       case 'email':
         const email = 'contact@hotplotz.com';

@@ -8,7 +8,13 @@ import {
   Pressable,
   TextInput,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const reportOptions = [
@@ -36,67 +42,77 @@ const ReportAdModal = ({visible, onClose, onSubmit}: any) => {
       visible={visible}
       animationType="slide"
       transparent>
-      <View style={styles.backdrop}>
-        <View style={styles.modal}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Pressable
-              onPress={() => {
-                setSelectedReason('');
-                setComment('');
-                onClose();
-              }}>
-              <MaterialCommunityIcons name="close" size={24} />
-            </Pressable>
-            <Text style={styles.title}>Report ad</Text>
-            <View style={{width: 24}} />
-          </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.backdrop}>
+         <KeyboardAvoidingView
+        style={{flex: 1, justifyContent: 'flex-end'}}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+            <View style={styles.modal}>
+              {/* Header */}
+              <View style={styles.header}>
+                <Pressable
+                  onPress={() => {
+                    setSelectedReason('');
+                    setComment('');
+                    onClose();
+                  }}>
+                  <MaterialCommunityIcons name="close" size={24} />
+                </Pressable>
+                <Text style={styles.title}>Report ad</Text>
+                <View style={{width: 24}} />
+              </View>
 
-          {/* Radio Options */}
-          <FlatList
-            data={reportOptions}
-            keyExtractor={item => item}
-            renderItem={({item}) => (
-              <Pressable
-                style={styles.optionRow}
-                onPress={() => setSelectedReason(item)}>
-                <MaterialCommunityIcons
-                  name={
-                    selectedReason === item
-                      ? 'radiobox-marked'
-                      : 'radiobox-blank'
-                  }
-                  size={22}
-                  color="#333"
-                />
-                <Text style={styles.optionText}>{item}</Text>
-              </Pressable>
-            )}
-            scrollEnabled={false}
-          />
+              {/* Radio Options */}
+              <FlatList
+                data={reportOptions}
+                keyExtractor={item => item}
+                renderItem={({item}) => (
+                  <Pressable
+                    style={styles.optionRow}
+                    onPress={() => setSelectedReason(item)}>
+                    <MaterialCommunityIcons
+                      name={
+                        selectedReason === item
+                          ? 'radiobox-marked'
+                          : 'radiobox-blank'
+                      }
+                      size={22}
+                      color="#333"
+                    />
+                    <Text style={styles.optionText}>{item}</Text>
+                  </Pressable>
+                )}
+                scrollEnabled={false}
+              />
 
-          {/* Comment Input */}
-          <Text style={styles.commentLabel}>Add a comment</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Comment"
-            value={comment}
-            onChangeText={setComment}
-            multiline
-          />
+              {/* Comment Input */}
+              <Text style={styles.commentLabel}>Add a comment</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Comment"
+                value={comment}
+                onChangeText={setComment}
+                multiline
+              />
 
-          {/* Send Button */}
-          <TouchableOpacity
-            style={[
-              styles.sendBtn,
-              {backgroundColor: selectedReason && comment ? '#2f8f72' : '#ccc'},
-            ]}
-            disabled={!(selectedReason && comment)}
-            onPress={handleSend}>
-            <Text style={styles.sendBtnText}>Send</Text>
-          </TouchableOpacity>
+              {/* Send Button */}
+              <TouchableOpacity
+                style={[
+                  styles.sendBtn,
+                  {
+                    backgroundColor:
+                      selectedReason && comment ? '#2f8f72' : '#ccc',
+                  },
+                ]}
+                disabled={!(selectedReason && comment)}
+                onPress={handleSend}>
+                <Text style={styles.sendBtnText}>Send</Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };

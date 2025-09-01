@@ -209,11 +209,11 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             <View style={{marginTop: 20, marginBottom: -20}}>
               <StepSlider
                 value={
-                  filtersNew?.price ? filtersNew?.price : [100, 100000000000]
+                  filtersNew?.price ? filtersNew?.price : [0, 0]
                 }
                 theme={theme}
                 onChange={updatePrice}
-                min={1000}
+                // min={1000}
               />
             </View>
             {isStringInEitherArray('furnishedStatus') && (
@@ -247,7 +247,6 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
                 setFields([]);
                 setFilterNew({});
                 resetFilters();
-                onClose();
               }}>
               <Text style={[styles.applyText, {color:'#000'}]}>Clear</Text>
             </TouchableOpacity>

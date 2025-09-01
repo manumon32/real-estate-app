@@ -9,37 +9,34 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
+  // Image,
   TouchableOpacity,
   FlatList,
   RefreshControl,
-  ScrollView,
-  ActivityIndicator,
   useColorScheme,
+  ScrollView,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {postAdAPI} from '@api/services';
 import {Fonts} from '@constants/font';
 import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
-import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
-import Toast from 'react-native-toast-message';
 import NoChats from '@components/NoChatFound';
+import Toast from 'react-native-toast-message';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
   title: string;
   location: string;
-  price: string;
   status: string;
   date: string;
   views: number;
-  imageUrl: string;
   navigation: any;
   items: any;
-  markasSold?: any;
-  makePayment: any;
+  name: any;
   theme: any;
+  filterBy: any;
+
+  updateStatus: any;
 }
 
 const FormattedDate = (arg: string | number | Date) => {
@@ -54,58 +51,32 @@ const FormattedDate = (arg: string | number | Date) => {
     hour12: true,
   };
 
-  const FormattedDate = `Posted on ${date
+  const FormattedDate = `Schduled on ${date
     .toLocaleString('en-US', options)
     .replace(':', '.')}`;
   return FormattedDate;
-};
-
-const AdStatusEnum: any = {
-  Pending: 'pending',
-  Active: 'active',
-  Rejected: 'rejected',
-  Expired: 'expired',
-  Blocked: 'blocked',
-  Deactivated: 'deactivated',
-  Sold: 'sold',
-};
-
-const formatINR = (value: number) => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(value);
 };
 
 const ListingCard: React.FC<ListingCardProps> = ({
   items,
   title = '',
   location = '',
-  price = 0,
   status = 'Pending',
   date = '',
-  views = 0,
-  imageUrl = '',
+  name,
   navigation,
-  markasSold,
-  makePayment,
   theme,
+  filterBy,
+  updateStatus,
 }) => {
   const isDarkMode = useColorScheme() === 'dark';
   const {label, backgroundColor, textColor} = useMemo(() => {
     switch (status) {
       case 'pending':
         return {
-          label: 'Pending Review',
+          label: 'Pending',
           backgroundColor: '#FFEAD5',
           textColor: '#AA5A00',
-        };
-      case 'active':
-        return {
-          label: 'Active',
-          backgroundColor: '#D4F4DD',
-          textColor: '#147A31',
         };
       case 'rejected':
         return {
@@ -113,34 +84,15 @@ const ListingCard: React.FC<ListingCardProps> = ({
           backgroundColor: '#C14B43',
           textColor: '#FCE3E0',
         };
-      case 'sold':
+      case 'scheduled':
         return {
-          label: 'Sold',
-          backgroundColor: '#E8E8FF',
-          textColor: '#4B4B9B',
-        };
-      case 'expired':
-        return {
-          label: 'Expired',
+          label: 'Scheduled',
           backgroundColor: '#FCE3E0',
           textColor: '#C14B43',
         };
-      case 'blocked':
-        return {
-          label: 'Blocked',
-          backgroundColor: '#FCE3E0',
-          textColor: '#C14B43',
-        };
-      case 'deactivated':
-        return {
-          label: 'Deactivated',
-          backgroundColor: '#E0E0E0',
-          textColor: '#555555',
-        };
-      case 'DRAFT':
       default:
         return {
-          label: 'Draft',
+          label: '',
           backgroundColor: '#EEEEEE',
           textColor: '#666666',
         };
@@ -158,10 +110,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
       ]}>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate('Details', {items});
+          navigation.navigate('Details', {items: {_id: items.propertyId._id}});
         }}>
         <View style={styles.row}>
-          <Image source={{uri: imageUrl}} style={styles.image} />
           <View style={styles.info}>
             <View style={styles.headerRow}>
               <Text style={[styles.title, {color: theme.colors.text}]}>
@@ -175,31 +126,19 @@ const ListingCard: React.FC<ListingCardProps> = ({
                 </Text>
               </View>
             </View>
-            {items.isFeatured && (
-              <View style={[styles.badge]}>
-                <Text numberOfLines={2} style={[styles.badgeText]}>
-                  {'featured'}
-                </Text>
-              </View>
-            )}
+
+            <Text style={[styles.location, {color: theme.colors.text}]}>
+              {name}
+            </Text>
             <Text
               style={[styles.location, {color: theme.colors.text}]}
               numberOfLines={1}>
               {location}
             </Text>
-            <Text style={[styles.price, {color: theme.colors.text}]}>
-              {formatINR(Number(price))}
-            </Text>
           </View>
         </View>
 
         <View style={styles.metaRow}>
-          <View style={styles.metaItem}>
-            <Icon name="eye-outline" size={16} color="#888" />
-            <Text style={[styles.metaText, {color: theme.colors.text}]}>
-              {views}
-            </Text>
-          </View>
           <View style={styles.metaItem}>
             <Icon name="clock-outline" size={16} color="#888" />
             <Text style={[styles.metaText, {color: theme.colors.text}]}>
@@ -208,176 +147,104 @@ const ListingCard: React.FC<ListingCardProps> = ({
           </View>
         </View>
       </TouchableOpacity>
-      <View style={styles.buttonRow}>
-        {label !== 'Sold' && <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('PostAd', {items});
-          }}
-          style={styles.outlinedButton}>
-          <Text style={[styles.buttonText, {color: theme.colors.text}]}>
-            Edit
-          </Text>
-        </TouchableOpacity>}
-        {label === 'Active' && (
+      {filterBy === 'myAppointments' && status === 'pending' && (
+        <View style={styles.buttonRow}>
           <TouchableOpacity
-            onPress={() => markasSold(items._id)}
+            onPress={() =>
+              updateStatus({
+                status: 'rejected',
+                propertyId: items.propertyId._id,
+                appointmentId: items._id,
+                note: '',
+              })
+            }
             style={styles.outlinedButton}>
             <Text style={[styles.buttonText, {color: theme.colors.text}]}>
-              Mark as Sold
+              Reject
             </Text>
           </TouchableOpacity>
-        )}
-        {label === 'Active' && !items.isFeatured && (
           <TouchableOpacity
-            onPress={() => makePayment(items._id)}
+            onPress={() =>
+              updateStatus({
+                status: 'scheduled',
+                  propertyId: items.propertyId._id,
+                appointmentId: items._id,
+                note: '',
+              })
+            }
             style={styles.boostButton}>
-            <Text style={styles.boostButtonText}>Boost your Ad</Text>
+            <Text style={[styles.boostButtonText]}>Accept</Text>
           </TouchableOpacity>
-        )}
-      </View>
+        </View>
+      )}
     </View>
   );
 };
 
-const MyAds = () => {
+const Appointments = () => {
   const {
-    myAds,
-    fetchMyAds,
-    token,
-    clientId,
-    bearerToken,
-    myAdsLoading,
-    managePlansList,
-    user,
-    fetchPlans,
+    appointments,
+    fetchAppointments,
+    appointmentsLoading,
+    updateAppointments,
   } = useBoundStore();
 
-  const uploadParams = {token, clientId, bearerToken};
+  const [filterBy, setFilterBy] = useState<string>('myAppointments');
+
   const navigation = useNavigation();
   const {theme} = useTheme();
-  const [filterBy, setFilterBy] = useState<any>(null);
-  const [paymentLoading, setPaymentLoading] = useState<any>(false);
 
   useFocusEffect(
     useCallback(() => {
-      fetchPlans();
-      fetchMyAds();
+      fetchAppointments();
     }, []),
   );
 
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     if (paymentLoading) {
-  //       navigation.getParent()?.setOptions({tabBarStyle: {display: 'none'}});
-  //     } else {
-  //       navigation.getParent()?.setOptions({tabBarStyle: {display: 'flex'}});
-  //     }
-  //   }, [paymentLoading]),
-  // );
-
-  const markasSold = async (id: string) => {
-    let payload = {
-      id: id,
-      adStatus: 'sold',
-    };
+  const updateStatus = async (payload: any) => {
     try {
-      await postAdAPI(
-        payload,
-        {
-          token: token,
-          clientId: clientId,
-          bearerToken: bearerToken,
-        },
-        'put',
-      );
-      fetchMyAds();
-    } catch (err) {}
+      await updateAppointments(payload);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        position: 'bottom',
+      });
+      fetchAppointments();
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong',
+        position: 'bottom',
+      });
+    }
   };
+
   const renderAdItem = useCallback(
     (items: any) => {
       return (
         <ListingCard
-          title={items.item?.title || ''}
+          title={items.item?.propertyId.title || ''}
           location={items.item?.address || ''}
-          price={items.item?.price}
-          status={items.item?.adStatus}
-          date={items.item?.createdAt}
+          status={items.item?.status}
+          date={items.item?.scheduledAt}
           views={items.item?.viewsCount}
           navigation={navigation}
           items={items.item}
-          makePayment={makePayment}
           theme={theme}
-          imageUrl={
-            items.item?.imageUrls[0]
-              ? items.item?.imageUrls[0]
-              : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM='
-          }
-          markasSold={markasSold}
+          name={items.item?.ownerId.name || ''}
+          filterBy={filterBy}
+          updateStatus={updateStatus}
         />
       );
     },
-    [navigation],
-  );
-
-  const makePayment = useCallback(
-    async (id: any) => {
-      setPaymentLoading(true);
-      try {
-        console.log('managePlansList', managePlansList);
-        // @ts-ignore
-        const featuredPlan: any = managePlansList?.[0] ?? null;
-        if (featuredPlan) {
-          const paymentPayload = {
-            amountInRupees: featuredPlan.price,
-            description: featuredPlan.description || '',
-            purchasePlanId: featuredPlan._id,
-            purchaseType: 'ads',
-            purchaseTypeId: id,
-            ...uploadParams,
-            phone: user.phone ?? '',
-            email: user.email ?? '',
-          };
-          await startCheckoutPromise(paymentPayload);
-          fetchMyAds();
-          fetchPlans();
-          setPaymentLoading(false);
-        }
-      } catch (err: any) {
-        if (err?.code === 0) {
-          Toast.show({
-            type: 'error',
-            text1: 'Payment Cancelled',
-            position: 'bottom',
-          });
-        } else {
-          console.log('Payment failed', err);
-          Toast.show({
-            type: 'error',
-            text1: 'Payment failed',
-            text2: err?.description || 'Something went wrong',
-            position: 'bottom',
-          });
-        }
-      }
-      setPaymentLoading(false);
-    },
-    [managePlansList, uploadParams, user, fetchMyAds, fetchPlans],
+    [navigation, filterBy, ],
   );
 
   return (
     <SafeAreaView
       style={{backgroundColor: theme.colors.background, height: '100%'}}>
-      {paymentLoading && (
-        <View style={styles.overlay}>
-          <ActivityIndicator size="large" color="#fff" />
-        </View>
-      )}
       <FlatList
-        data={
-          filterBy
-            ? myAds.filter((items: any) => items.adStatus == filterBy)
-            : myAds
-        }
+        // @ts-ignore
+        data={appointments[filterBy]}
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -389,7 +256,7 @@ const MyAds = () => {
         ListHeaderComponent={
           <>
             <CommonHeader
-              title="My Ads"
+              title="Appontments"
               textColor="#171717"
               // onBackPress={onBackPress}
             />
@@ -399,44 +266,42 @@ const MyAds = () => {
               contentContainerStyle={{padding: 10}}
               style={{flexDirection: 'row'}}>
               <TouchableOpacity
-                style={[styles.chip, !filterBy && styles.chipSelected]}
+                style={[
+                  styles.chip,
+                  filterBy === 'myAppointments' && styles.chipSelected,
+                ]}
                 onPress={() => {
-                  setFilterBy(null);
+                  setFilterBy('myAppointments');
                 }}>
                 <Text
                   style={[
                     // newselected?.includes(item._id)
                     styles.chipText,
                     {color: theme.colors.text},
-                    !filterBy && styles.chipTextSelected,
+                    filterBy === 'myAppointments' && styles.chipTextSelected,
                   ]}>
-                  {'All'}
+                  {'Requests'}
                 </Text>
               </TouchableOpacity>
-              {Object.keys(AdStatusEnum).map((items: any, index: number) => {
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.chip,
-                      filterBy === AdStatusEnum[items] && styles.chipSelected,
-                    ]}
-                    onPress={() => {
-                      setFilterBy(AdStatusEnum[items]);
-                    }}>
-                    <Text
-                      style={[
-                        // newselected?.includes(item._id)
-                        styles.chipText,
-                        {color: theme.colors.text},
-                        filterBy === AdStatusEnum[items] &&
-                          styles.chipTextSelected,
-                      ]}>
-                      {items}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  filterBy === 'requestedAppointments' && styles.chipSelected,
+                ]}
+                onPress={() => {
+                  setFilterBy('requestedAppointments');
+                }}>
+                <Text
+                  style={[
+                    // newselected?.includes(item._id)
+                    styles.chipText,
+                    {color: theme.colors.text},
+                    filterBy === 'requestedAppointments' &&
+                      styles.chipTextSelected,
+                  ]}>
+                  {'My Appointments'}
+                </Text>
+              </TouchableOpacity>
             </ScrollView>
           </>
         }
@@ -448,46 +313,28 @@ const MyAds = () => {
           <RefreshControl
             refreshing={false}
             onRefresh={() => {
-              fetchMyAds();
-              fetchPlans();
+              fetchAppointments();
             }}
             colors={['#40DABE', '#40DABE', '#227465']}
           />
         }
         ListFooterComponent={
           <>
-            {myAdsLoading && myAds.length <= 0 && <AdsListSkelton />}
-            {!myAdsLoading &&
-              (filterBy ? (
-                myAds.filter((items: any) => items.adStatus == filterBy)
-                  .length <= 0 ? (
-                  <NoChats
-                    onExplore={() => {
-                      // @ts-ignore
-                      navigation.navigate('PostAd');
-                    }}
-                    icon="alert-circle-outline"
-                    title="No Ads Found"
-                    body="Looks like you haven’t listed any ads yet."
-                    buttonText={'Post your Ad now'}
-                  />
-                ) : (
-                  <></>
-                )
-              ) : myAds.length <= 0 ? (
+            {appointmentsLoading && <AdsListSkelton />}
+            {!appointmentsLoading &&
+              // @ts-ignore
+              appointments?.[filterBy].length === 0 && (
                 <NoChats
                   onExplore={() => {
                     // @ts-ignore
-                    navigation.navigate('PostAd');
+                    navigation.navigate('Main');
                   }}
                   icon="alert-circle-outline"
-                  title="No Ads Found"
-                  body="Looks like you haven’t listed any ads yet."
-                  buttonText={'Post your Ad now'}
+                  title="You don’t have any appointments yet."
+                  // body="Looks like you haven’t listed any ads yet."
+                  buttonText={'Explore'}
                 />
-              ) : (
-                <></>
-              ))}
+              )}
           </>
         }
       />
@@ -643,4 +490,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyAds;
+export default Appointments;

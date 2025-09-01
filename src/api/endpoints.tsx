@@ -25,6 +25,10 @@ export const API = {
       GET_MESSAGES: '/bank-verify-msg',
       VERIFY_LISTING: '/bank-verify',
     },
+    APPOINTMENT:{
+      CREATE:'/appointment',
+      UPDATE:'/appointment/status',
+    },
   },
   USER: {
     GET: '/user',

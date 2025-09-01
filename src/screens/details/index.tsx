@@ -30,11 +30,12 @@ import Header from './Header';
 import useBoundStore from '@stores/index';
 import {Detail} from '@stores/detailSlice';
 import ReportAdModal from './ReportAdModal';
-import {createRoomAPI, postAdAPI} from '@api/services';
+import {createRoomAPI, postAdAPI, saveAppointMent} from '@api/services';
 import {getSocket} from '@soket/index';
 import BankSelectModal from '@components/Modal/BankListModal';
 import {navigate} from '@navigation/RootNavigation';
 import CustomDummyLoader from '@components/SkeltonLoader/CustomDummyLoader';
+import DateTimeModal from '@components/Modal/DateTimeModal';
 
 const AdStatusEnum: any = {
   pending: 'Pending',
@@ -53,6 +54,7 @@ const PropertyDetails = React.memo(() => {
   const [error, setError] = useState(false);
   const [bankModalVisible, setBankModalVisible] = useState(false);
   const [selectedBank, setSelectedBank] = useState('');
+  const [showModal, setShowModal] = useState(false);
   const {
     details,
     fetchDetails,
@@ -225,22 +227,37 @@ const PropertyDetails = React.memo(() => {
           style={[styles.footer, {backgroundColor: theme.colors.background}]}>
           {isOwner ? (
             <>
-              <Pressable
-                // @ts-ignore
-                onPress={() => navigation.navigate('PostAd', {items: details})}
-                style={styles.chatButton}>
-                <Icon name="pencil" size={20} color="#000" />
-                <Text style={styles.chatText}>Edit</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => markasSold(details?._id)}
-                style={styles.buyButton}>
-                <Text style={styles.buyText}>
-                  {details?.adStatus !== 'sold'
-                    ? 'Mark as sold'
-                    : AdStatusEnum[details?.adStatus]}
-                </Text>
-              </Pressable>
+              {details?.adStatus !== 'sold' && (
+                <Pressable
+                  onPress={() =>
+                    // @ts-ignore
+                    navigation.navigate('PostAd', {items: details})
+                  }
+                  style={styles.chatButton}>
+                  <Icon name="pencil" size={20} color="#000" />
+                  <Text style={styles.chatText}>Edit</Text>
+                </Pressable>
+              )}
+              {(details?.adStatus === 'active' ||
+                details?.adStatus === 'sold') && (
+                <Pressable
+                  onPress={() => markasSold(details?._id)}
+                  style={
+                    details?.adStatus === 'sold'
+                      ? styles.chatButtonFullSold
+                      : styles.buyButton
+                  }>
+                  <Text
+                    style={[
+                      styles.buyText,
+                      details?.adStatus === 'sold' && {color: '#4B4B9B'},
+                    ]}>
+                    {details?.adStatus !== 'sold'
+                      ? 'Mark as sold'
+                      : AdStatusEnum[details?.adStatus]}
+                  </Text>
+                </Pressable>
+              )}
             </>
           ) : (
             <>
@@ -258,7 +275,11 @@ const PropertyDetails = React.memo(() => {
                 }}
                 style={styles.chatButtonFull}>
                 <Icon name="chat-outline" size={20} color="#fff" />
-                <Text style={[styles.chatText, {textAlign: 'center', color:'#fff'}]}>
+                <Text
+                  style={[
+                    styles.chatText,
+                    {textAlign: 'center', color: '#fff'},
+                  ]}>
                   Chat
                 </Text>
               </Pressable>
@@ -334,6 +355,35 @@ const PropertyDetails = React.memo(() => {
   //   }));
   // }, []);
 
+  const saveAppointMentS = async (date: Date) => {
+    let payload = {
+      propertyId: details?._id,
+      scheduledAt: date,
+    };
+    try {
+      await saveAppointMent(
+        payload,
+        {
+          token,
+          clientId,
+          bearerToken,
+        },
+        'post',
+      );
+      Toast.show({
+        type: 'success',
+        text1: 'Appointment Sceduled',
+        position: 'bottom',
+      });
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong.',
+        position: 'bottom',
+      });
+    }
+  };
+
   return (
     <SafeAreaView
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
@@ -344,10 +394,11 @@ const PropertyDetails = React.memo(() => {
       )}
       <ScrollView
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         style={{paddingBottom: 120}}>
         <Header details={property ? property : items} />
 
-        {items?.title && (
+        {(items?.title ||property?.title) &&  (
           <View
             style={[
               styles.header,
@@ -362,16 +413,8 @@ const PropertyDetails = React.memo(() => {
             <Text style={[styles.title, {color: theme.colors.text}]}>
               {property?.title ? property?.title : items?.title}
             </Text>
-            <Text style={[styles.locationTitle, {color: theme.colors.text}]}>
-              <IconButton
-                iconSize={16}
-                iconColor={theme.colors.text}
-                iconName={'map-marker'}
-              />
-              {property?.address ? property?.address : items?.address}
-            </Text>
-            <View
-              style={{flexDirection: 'row', alignContent: 'center', top: 10}}>
+
+            <View style={{flexDirection: 'row', alignContent: 'center'}}>
               <Text
                 style={[
                   styles.price,
@@ -392,6 +435,39 @@ const PropertyDetails = React.memo(() => {
               <View style={styles.nogotiable}>
                 <Text style={styles.nogotiableText}>Negotiable</Text>
               </View>
+            </View>
+            <Text
+              style={[
+                styles.locationTitle,
+                {color: theme.colors.text, left: -2, top: 8},
+              ]}>
+              <IconButton
+                iconSize={16}
+                iconColor={theme.colors.text}
+                iconName={'map-marker'}
+              />
+              {property?.address ? property?.address : items?.address}
+            </Text>
+
+            <View
+              style={{flexDirection: 'row', alignContent: 'center', top: 15}}>
+              <Text
+                style={[
+                  styles.locationTitle,
+                  {color: theme.colors.text, marginRight: 5},
+                ]}>
+                {/* <IconButton
+                iconSize={18}
+                iconColor={'#171717'}
+                iconName={'currency-inr'}
+              /> */}
+                Posted on{' '}
+                {new Date(items?.createdAt).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </Text>
             </View>
           </View>
         )}
@@ -454,7 +530,7 @@ const PropertyDetails = React.memo(() => {
                 </View>
               </>
             )}
-            {isOwner && (
+            {isOwner && details?.adStatus === 'active' && (
               <Pressable
                 onPress={() => {
                   verifyListing();
@@ -486,6 +562,8 @@ const PropertyDetails = React.memo(() => {
                     }}>
                     {details?.isVerified
                       ? 'Your listing is verified'
+                      : details?.isVerificationStarted
+                      ? 'Check your verification status'
                       : 'Verify your listing to get more offers.'}
                   </Text>
                 </View>
@@ -504,7 +582,60 @@ const PropertyDetails = React.memo(() => {
                 </View>
               </Pressable>
             )}
+            {!isOwner && details?.adStatus === 'active' && (
+              <Pressable
+                onPress={() => {
+                  setShowModal(true);
+                }}
+                style={{
+                  // top: 15,
+                  margin: 16,
+                  padding: 16,
+                  backgroundColor: '#2F8D79',
+                  borderRadius: 10,
+                  height: 56,
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  borderWidth: 1,
+                  borderColor: '#88E4CF',
+                }}>
+                <IconButton
+                  iconSize={24}
+                  iconColor={'#ffffffff'}
+                  iconName={'calendar'}
+                  style={{marginRight: 10}}
+                />
+                <View
+                  style={{
+                    width: '85%',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: 14,
+                      fontFamily: Fonts.MEDIUM,
+                      fontWeight: '500',
+                    }}>
+                    {'Plan a Site Visit'}
+                  </Text>
+                </View>
+                <View style={{flexDirection: 'row'}}>
+                  {!verification_loading && (
+                    <IconButton
+                      iconSize={24}
+                      iconColor={'#fff'}
+                      iconName={'arrow-right'}
+                    />
+                  )}
 
+                  {verification_loading && (
+                    <ActivityIndicator size={'small'} color={'#fff'} />
+                  )}
+                </View>
+              </Pressable>
+            )}
             <View style={styles.row}>
               {property?.numberOfBedrooms && (
                 <View style={styles.iconsContainer}>
@@ -637,7 +768,7 @@ const PropertyDetails = React.memo(() => {
                 top: 15,
               }}
             />
-            {isOwner && (
+            {isOwner && details?.adStatus === 'active' && (
               <Pressable
                 onPress={async () => {
                   (await items?._id) && startBankVerification(items?._id);
@@ -686,55 +817,57 @@ const PropertyDetails = React.memo(() => {
                 </View>
               </Pressable>
             )}
-            <Pressable
-              onPress={async () => {
-                // @ts-ignore
-                navigation.navigate('LoanCalculator', {
-                  price: property?.price ? property?.price : items?.price,
-                });
-              }}
-              style={{
-                top: 15,
-                margin: 16,
-                padding: 16,
-                backgroundColor: '#E3FFF8',
-                borderRadius: 10,
-                height: 56,
-                alignItems: 'center',
-                flexDirection: 'row',
-                borderWidth: 1,
-                borderColor: '#88E4CF',
-              }}>
-              <View
+            {!isOwner && details?.adStatus === 'active' && (
+              <Pressable
+                onPress={async () => {
+                  // @ts-ignore
+                  navigation.navigate('LoanCalculator', {
+                    price: property?.price ? property?.price : items?.price,
+                  });
+                }}
                 style={{
-                  width: '95%',
-                  flexDirection: 'row',
+                  top: 15,
+                  margin: 16,
+                  padding: 16,
+                  backgroundColor: '#E3FFF8',
+                  borderRadius: 10,
+                  height: 56,
                   alignItems: 'center',
+                  flexDirection: 'row',
+                  borderWidth: 1,
+                  borderColor: '#88E4CF',
                 }}>
-                <IconButton
-                  iconSize={24}
-                  iconColor={'#2F8D79'}
-                  iconName={'calculator'}
-                  style={{marginRight: 10}}
-                />
-                <Text
+                <View
                   style={{
-                    color: '#2F8D79',
-                    fontSize: 14,
-                    fontFamily: Fonts.MEDIUM,
-                    fontWeight: '500',
+                    width: '95%',
+                    flexDirection: 'row',
+                    alignItems: 'center',
                   }}>
-                  Emi Calculator
-                </Text>
-              </View>
-              <View style={{flexDirection: 'row'}}>
-                <IconButton
-                  iconSize={24}
-                  iconColor={'#2F8D79'}
-                  iconName={'arrow-right'}
-                />
-              </View>
-            </Pressable>
+                  <IconButton
+                    iconSize={24}
+                    iconColor={'#2F8D79'}
+                    iconName={'calculator'}
+                    style={{marginRight: 10}}
+                  />
+                  <Text
+                    style={{
+                      color: '#2F8D79',
+                      fontSize: 14,
+                      fontFamily: Fonts.MEDIUM,
+                      fontWeight: '500',
+                    }}>
+                    Emi Calculator
+                  </Text>
+                </View>
+                <View style={{flexDirection: 'row'}}>
+                  <IconButton
+                    iconSize={24}
+                    iconColor={'#2F8D79'}
+                    iconName={'arrow-right'}
+                  />
+                </View>
+              </Pressable>
+            )}
 
             {
               <>
@@ -983,6 +1116,27 @@ const PropertyDetails = React.memo(() => {
             showsVerticalScrollIndicator={false}
           />
         </View> */}
+        <ReportAdModal
+          visible={isReportVisible}
+          onClose={() => setIsReportVisible(false)}
+          onSubmit={(data: any) => {
+            let payload = {
+              propertyId: details?._id,
+              reason: data.reason,
+              comment: data.comment,
+            };
+            reportAd(payload);
+          }}
+        />
+
+        <DateTimeModal
+          visible={showModal}
+          onClose={() => setShowModal(false)}
+          onConfirm={date => {
+            console.log('Selected Visit Date:', date);
+            saveAppointMentS(date);
+          }}
+        />
       </ScrollView>
 
       <Footer
@@ -991,19 +1145,6 @@ const PropertyDetails = React.memo(() => {
         bearerToken={bearerToken}
         createRoom={createRoom}
         setVisible={setVisible}
-      />
-
-      <ReportAdModal
-        visible={isReportVisible}
-        onClose={() => setIsReportVisible(false)}
-        onSubmit={(data: any) => {
-          let payload = {
-            propertyId: details?._id,
-            reason: data.reason,
-            comment: data.comment,
-          };
-          reportAd(payload);
-        }}
       />
 
       <BankSelectModal
@@ -1028,7 +1169,7 @@ const styles = StyleSheet.create({
   header: {padding: 16, borderRadius: 20, backgroundColor: '#fff', bottom: 10},
   title: {fontSize: 20, fontFamily: 'DMSans-Medium', marginBottom: 5},
   locationTitle: {fontSize: 14, fontFamily: Fonts.MEDIUM},
-  price: {fontSize: 18, fontFamily: 'DMSans-Medium'},
+  price: {fontSize: 20, fontFamily: 'DMSans-Medium'},
   squrft: {fontSize: 14, top: 3, marginRight: 5, fontFamily: Fonts.MEDIUM},
   iconsTextStle: {
     textAlign: 'center',
@@ -1098,6 +1239,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignContent: 'center',
     backgroundColor: '#2f8f72',
+    alignSelf: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    width: '90%',
+  },
+  chatButtonFullSold: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+    backgroundColor: '#E8E8FF',
     alignSelf: 'center',
     paddingVertical: 10,
     paddingHorizontal: 20,

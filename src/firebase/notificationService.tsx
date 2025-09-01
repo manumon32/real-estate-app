@@ -3,12 +3,18 @@ import {navigationRef} from '@navigation/RootNavigation';
 import {INotification} from '@screens/home/HomeScreen';
 import useBoundStore from '@stores/index';
 import {registerFCMToken} from '@api/services';
+import {PermissionsAndroid, Platform} from 'react-native';
 
 var isReady = false;
 let pendingNotification: INotification | null = null;
 
 export const requestUserPermission = async () => {
   const {bearerToken} = useBoundStore.getState();
+  if (Platform.OS === 'android' && Platform.Version >= 33) {
+    await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    );
+  }
   const authStatus = await messaging().requestPermission();
   const enabled =
     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||

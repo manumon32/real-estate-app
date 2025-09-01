@@ -25,10 +25,14 @@ export default function App() {
   // });
 
   const linking = {
-    prefixes: ['myapp://', 'https://myapp.com'],
+    prefixes: [
+      'myapp://', // custom scheme
+      'https://hotplotz.com', // universal link
+    ],
     config: {
       screens: {
         Home: 'HomeIndex',
+        Details: 'details/:id',
       },
     },
   };

@@ -21,6 +21,7 @@ import VerifyListing from '@screens/VerifyListing';
 import NotificationList from '@screens/Notifications';
 import VerifyBank from '@screens/VerifyBank';
 import LoanCalculator from '@screens/EmiCalculator';
+import Appointments from '@screens/Appontments';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,6 +35,7 @@ const RootNavigator = () => {
       <Stack.Screen name="ThreeDModelViewer" component={ThreeDModelViewer} />
       <Stack.Screen name="PostAd" component={PostAd} />
       <Stack.Screen name="FavAds" component={FavAds} />
+      <Stack.Screen name="Appointments" component={Appointments} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
       <Stack.Screen name="Settings" component={Settings} />
       <Stack.Screen name="Notifications" component={Notifications} />
