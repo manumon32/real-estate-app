@@ -42,6 +42,7 @@ import {useTheme} from '@theme/ThemeProvider';
 import useBoundStore from '@stores/index';
 import OtpVerificationScreen from './OtpVerificationScreen';
 import LinearGradient from 'react-native-linear-gradient';
+import Toast from 'react-native-toast-message';
 
 type Props = {
   visible: boolean;
@@ -99,12 +100,13 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       payload.socialProviderId =
         userInfoData?.socialProvider === 'apple'
           ? userInfoData?.uid
-          : userInfoData?.id ?? '';
+          : userInfoData?.id;
       if (userInfoData?.socialProvider === 'facebook') {
         payload.profilePicture = userInfoData?.picture?.data?.url ?? '';
         payload.name = userInfoData?.name;
       }
       if (userInfoData?.socialProvider === 'google') {
+        payload.email = userInfoData?.email ?? null;
         payload.profilePicture = userInfoData?.photo ?? '';
         payload.name =
           userInfoData?.givenName || userInfoData?.familyName
@@ -112,6 +114,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
             : '';
       }
       if (userInfoData?.socialProvider === 'apple') {
+        payload.email = userInfoData?.email ?? null;
         payload.profilePicture = userInfoData?.photoURL ?? '';
         payload.name = userInfoData?.displayName
           ? userInfoData?.displayName
@@ -139,10 +142,21 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
   const signInWithGoogle = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-      const userInfoData: any = await GoogleSignin.signIn();
-      setUserInfo({...userInfoData, socialProvider: 'google'});
-      setLoginVar(userInfoData?.email ?? '');
-      veryFyOTP(false, {...userInfoData, socialProvider: 'google'});
+      const userData: any = await GoogleSignin.signIn();
+      if (userData.type === 'success') {
+        let userInfoData = userData?.data?.user;
+        setUserInfo({...userInfoData, socialProvider: 'google'});
+        setLoginVar(userInfoData?.email ?? '');
+        console.log('userInfoData', userInfoData);
+        veryFyOTP(false, {...userInfoData, socialProvider: 'google'});
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Gmail Sign-in failed',
+          position: 'bottom',
+          visibilityTime: 1000,
+        });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -193,13 +207,22 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       // Sign in with Firebase
       const userCredential = await auth().signInWithCredential(appleCredential);
 
-      Alert.alert(
-        'Firebase Sign-In successful:',
-        JSON.stringify(userCredential.user),
-      );
-      setUserInfo({...userCredential.user, socialProvider: 'apple'});
-      setLoginVar(userCredential.user?.email ?? '');
-      veryFyOTP(false, {...userCredential.user, socialProvider: 'apple'});
+      // Alert.alert(
+      //   'Firebase Sign-In successful:',
+      //   JSON.stringify(userCredential.user),
+      // );
+      if (userCredential.user?.email) {
+        setUserInfo({...userCredential.user, socialProvider: 'apple'});
+        setLoginVar(userCredential.user?.email ?? '');
+        veryFyOTP(false, {...userCredential.user, socialProvider: 'apple'});
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Apple Sign-in failed',
+          position: 'bottom',
+          visibilityTime: 1000,
+        });
+      }
     } catch (err) {
       console.log('Apple Sign-In error:', err);
     }

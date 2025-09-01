@@ -48,15 +48,19 @@ const OtpVerificationScreen = ({
       if (text && index < OTP_LENGTH - 1) {
         inputRefs.current[index + 1]?.focus();
       }
-       const otpMatch = /(\d{6})/g.exec(newOtp.join(''));
+      const otpMatch = /(\d{6})/g.exec(newOtp.join(''));
       if (otpMatch) {
-        console.log('Extracted OTP:', newOtp.join(''));
+        if (newOtp.join('') !== otpValue) {
+          setError(true);
+        } else {
+          console.log('Extracted OTP:', newOtp.join(''));
 
-        // Optionally auto-submit
-        veryFyOTP(newOtp.join(''));
+          // Optionally auto-submit
+          veryFyOTP(newOtp.join(''));
+        }
       }
     },
-    [otp, veryFyOTP],
+    [otp, otpValue, veryFyOTP],
   );
 
   const handleBackspace = useCallback(
@@ -146,7 +150,11 @@ const OtpVerificationScreen = ({
             clearOTP();
           }}
           style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={theme.colors.text} />
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={24}
+            color={theme.colors.text}
+          />
         </TouchableOpacity>
 
         <Text style={[styles.title, {color: theme.colors.text}]}>
