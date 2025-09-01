@@ -166,6 +166,7 @@ function App({navigation}: any): React.JSX.Element {
 
     const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
       const data = remoteMessage?.data;
+      console.log('remoteMessage', remoteMessage);
       // if (data?.type) {
       navigateByNotification(data as any as INotification);
       // }

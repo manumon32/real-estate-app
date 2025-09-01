@@ -13,7 +13,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useNavigation} from '@react-navigation/native';
 import {Fonts} from '@constants/font';
-import { useTheme } from '@theme/ThemeProvider';
+import {useTheme} from '@theme/ThemeProvider';
 
 interface CommonHeaderProps {
   title: string;
@@ -39,10 +39,10 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
   rightText,
 }) => {
   const navigation = useNavigation();
-   const isDarkMode = useColorScheme() === 'dark';
-    const {theme} = useTheme();
-    backgroundColor = theme.colors.background;
-    textColor = theme.colors.text;
+  const isDarkMode = useColorScheme() === 'dark';
+  const {theme} = useTheme();
+  backgroundColor = theme.colors.background;
+  textColor = theme.colors.text;
   return (
     <View
       style={[
@@ -59,7 +59,10 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
       />
       <View style={styles.container}>
         <TouchableOpacity
-          style={[styles.backButton, {backgroundColor: theme.colors.backButtom}]}
+          style={[
+            styles.backButton,
+            {backgroundColor: theme.colors.backButtom},
+          ]}
           onPress={() => {
             onBackPress ? onBackPress() : navigation.goBack();
           }}>
@@ -103,7 +106,14 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
         {/* {onlineStatus && ( */}
         {/* )} */}
         {rightIcon ? (
-          <TouchableOpacity style={styles.rightButton} onPress={onRightPress}>
+          <TouchableOpacity
+            style={[
+              styles.rightButton,
+              {
+                backgroundColor: theme.colors.background,
+              },
+            ]}
+            onPress={onRightPress}>
             <MaterialCommunityIcons
               name={rightIcon}
               size={22}

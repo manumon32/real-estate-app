@@ -113,11 +113,11 @@ export default function ChatBubble(props: any) {
               <MaterialCommunityIcons
                 name={items.status === 'sent' ? 'check' : 'check-all'}
                 size={16}
-                color={items.status === 'read' ? 'blue' : '#000'}
+                color={items.status === 'read' ? 'blue' : theme.colors.text}
                 style={{marginRight: 5}}
               />
 
-              <Text style={[styles.timestamp, {textAlign: 'right'}]}>
+              <Text style={[styles.timestamp, {textAlign: 'right', color:theme.colors.text}]}>
                 {getTimeAgo(new Date(items?.createdAt)?.getTime())}
               </Text>
             </View>

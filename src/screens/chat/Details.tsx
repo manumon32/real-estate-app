@@ -126,6 +126,7 @@ const Chat = React.memo(({navigation}: any) => {
     onlineUsers,
   } = useBoundStore();
   const {items}: any = route.params;
+  console.log('items', items)
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
   const [selectedImage, setImage] = React.useState(null);
   const flatListRef = useRef<FlatList>(null);
@@ -247,7 +248,7 @@ const Chat = React.memo(({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <CommonHeader
         onlineStatus={onlineUsers.includes(items.user?._id)}
         title={items.user?.name ?? 'Chats'}

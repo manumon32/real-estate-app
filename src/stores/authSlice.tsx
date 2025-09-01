@@ -1,18 +1,21 @@
 import {
   fetchUserDetailsAPI,
   login,
+  logoutFromallDevicesAPI,
   submitRequestAPI,
   updateContact,
   updateUser,
   verifyOTP,
 } from '@api/services';
 import Toast from 'react-native-toast-message';
+import {logoutAndRedirect} from '../utils/logoutAndRedirect';
 
 export interface AuthSlice {
   user: any | null;
   bearerToken: string | null;
   otp: string | null;
   otpLoading: boolean;
+  logoutLoading: boolean;
   visible: boolean;
   loginError: boolean;
   updateError: boolean;
@@ -23,6 +26,7 @@ export interface AuthSlice {
   login: (falg: any) => Promise<void>;
   setVisible: () => Promise<void>;
   logout: () => Promise<void>;
+  logoutFromAllDevice: () => Promise<void>;
   setUpdateSuccess: () => Promise<void>;
   clearOTP: () => Promise<void>;
   verifyOTP: (falg: any) => Promise<void>;
@@ -44,6 +48,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   updateLoading: false,
   updateSuccess: false,
   userProfileloading: false,
+  logoutLoading: false,
   login: async payload => {
     try {
       set({
@@ -211,5 +216,32 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       updateSuccess: false,
       userProfileloading: false,
     });
+  },
+  logoutFromAllDevice: async () => {
+    try {
+      set({logoutLoading: true});
+      const resp = await logoutFromallDevicesAPI(
+        {},
+        {
+          token: get().token,
+          clientId: get().clientId,
+          bearerToken: get().bearerToken,
+        },
+      );
+      set({logoutLoading: false});
+      if (resp) {
+        logoutAndRedirect();
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Something went wrong',
+          position: 'bottom',
+          visibilityTime: 1000,
+        });
+      }
+    } catch (error) {
+      set({logoutLoading: false});
+      // set({updateError: false, updateLoading: false, updateSuccess: false});
+    }
   },
 });

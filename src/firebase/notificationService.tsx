@@ -84,7 +84,11 @@ export const navigateByNotification = (notification: INotification) => {
       ...metadata,
     },
   };
-
-  // @ts-ignore
-  navigationRef.navigate(screenName, entityId ? params : {});
+  try {
+    // @ts-ignore
+    navigationRef.navigate(screenName, entityId ? params : {});
+  } catch (err) {
+    // @ts-ignore
+    navigationRef.navigate('Main');
+  }
 };

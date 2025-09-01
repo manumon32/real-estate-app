@@ -2,7 +2,7 @@ import {io, Socket} from 'socket.io-client';
 import useBoundStore from '@stores/index';
 import {getCurrentRouteName} from '@navigation/RootNavigation';
 import {Vibration} from 'react-native';
-import Toast from 'react-native-toast-message';
+// import Toast from 'react-native-toast-message';
 
 var socket: Socket | null = null;
 
@@ -67,11 +67,11 @@ const updateChatList = (msg: any) => {
       msg.lastMessage.roomId !== filter_roomId &&
       msg.lastMessage.senderId !== useBoundStore.getState().user?._id
     ) {
-      Toast.show({
-        type: 'newMessage',
-        text1: 'You have messages in other chats',
-        position: 'top',
-      });
+      // Toast.show({
+      //   type: 'newMessage',
+      //   text1: 'You have messages in other chats',
+      //   position: 'top',
+      // });
     } else {
       currentScreen !== 'ChatDetails' &&
         currentScreen !== 'Chat' &&

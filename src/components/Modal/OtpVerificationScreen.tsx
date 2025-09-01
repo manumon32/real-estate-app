@@ -1,5 +1,5 @@
 import {useTheme} from '@theme/ThemeProvider';
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import RNOtpVerify from 'react-native-otp-verify';
+import {
+  getHash,
+  startOtpListener,
+  removeListener,
+} from 'react-native-otp-verify';
+
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const OTP_LENGTH = 6;
@@ -41,8 +48,15 @@ const OtpVerificationScreen = ({
       if (text && index < OTP_LENGTH - 1) {
         inputRefs.current[index + 1]?.focus();
       }
+       const otpMatch = /(\d{6})/g.exec(newOtp.join(''));
+      if (otpMatch) {
+        console.log('Extracted OTP:', newOtp.join(''));
+
+        // Optionally auto-submit
+        veryFyOTP(newOtp.join(''));
+      }
     },
-    [otp],
+    [otp, veryFyOTP],
   );
 
   const handleBackspace = useCallback(
@@ -69,6 +83,58 @@ const OtpVerificationScreen = ({
     return () => clearInterval(interval);
   }, [timer]);
 
+  // React.useEffect(() => {
+  //   // Start OTP listener (Android)
+  //   RNOtpVerify.getOtp()
+  //     .then((message: any) =>
+  //       RNOtpVerify.addListener(() => {
+  //         const otpMatch = message.match(/\d{6}/);
+  //         if (otpMatch) {
+  //           const otpArr = otpMatch[0].split('');
+  //           setOtp(otpArr);
+
+  //           // Auto verify when full OTP received
+  //           veryFyOTP(otpMatch[0]);
+  //         }
+  //       }),
+  //     )
+  //     .catch(console.log);
+
+  //   return () => RNOtpVerify.removeListener();
+  // }, [veryFyOTP]);
+
+  useEffect(() => {
+    // Step 1: Get app hash (used in your SMS message)
+    getHash()
+      .then(hashArray => {
+        console.log('App hash:', hashArray[0]);
+        // 👉 include this hash at the end of the OTP SMS sent from your backend
+        // Example SMS: "Your OTP is 1234. <#> AppName: 1234 code is valid for 5 min. ABC123xyz=="
+      })
+      .catch(console.log);
+
+    // Step 2: Start listener to capture OTP SMS
+    startOtpListener(message => {
+      console.log('OTP message:', message);
+
+      // Extract OTP (4-digit example, update to 6 if needed)
+      const otpMatch = /(\d{6})/g.exec(message);
+      if (otpMatch) {
+        const otp = otpMatch[1];
+        console.log('Extracted OTP:', otp);
+
+        // Update state with autofilled OTP
+        setOtp(otp.split(''));
+
+        // Optionally auto-submit
+        veryFyOTP(otp);
+      }
+    });
+
+    // Step 3: Cleanup on unmount
+    return () => removeListener();
+  }, [veryFyOTP]);
+
   const {theme} = useTheme();
 
   return (
@@ -80,15 +146,17 @@ const OtpVerificationScreen = ({
             clearOTP();
           }}
           style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
+          <MaterialCommunityIcons name="arrow-left" size={24} color={theme.colors.text} />
         </TouchableOpacity>
 
-        <Text style={[styles.title, {color: theme.colors.text}]}>Verification Code</Text>
+        <Text style={[styles.title, {color: theme.colors.text}]}>
+          Verification Code
+        </Text>
         <Text style={[styles.subtitle, {color: theme.colors.text}]}>
           We have sent the verification code to{' '}
           <Text style={styles.phone}>{loginVar}</Text>
         </Text>
-        <Text style={[styles.subtitle, {color: theme.colors.text}]}>OTP- {otpValue}</Text>
+        {/* <Text style={[styles.subtitle, {color: theme.colors.text}]}>OTP- {otpValue}</Text> */}
         {loginErrorMessage && (
           <Text style={[styles.subtitle, {color: 'red'}]}>
             {loginErrorMessage}
@@ -116,17 +184,24 @@ const OtpVerificationScreen = ({
               maxLength={1}
               returnKeyType="done"
               autoFocus={index === 0}
+              textContentType="oneTimeCode"
             />
           ))}
         </View>
         <View style={styles.footer}>
           <TouchableOpacity onPress={resendCode} disabled={timer > 0}>
             <Text
-              style={[styles.resendText, {color: theme.colors.text}, timer > 0 && styles.resendDisabled]}>
+              style={[
+                styles.resendText,
+                {color: theme.colors.text},
+                timer > 0 && styles.resendDisabled,
+              ]}>
               Resend
             </Text>
           </TouchableOpacity>
-          <Text style={[styles.timer, {color: theme.colors.text}]}>{formattedTimer}</Text>
+          <Text style={[styles.timer, {color: theme.colors.text}]}>
+            {formattedTimer}
+          </Text>
         </View>
       </View>
       <TouchableOpacity

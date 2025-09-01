@@ -53,6 +53,7 @@
     "react-native-maps": "^1.23.8",
     "react-native-mmkv": "^3.2.0",
     "react-native-modal": "^14.0.0-rc.1",
+    "react-native-otp-verify": "^1.1.8",
     "react-native-paper": "^5.14.5",
     "react-native-permissions": "^5.4.1",
     "react-native-pie-chart": "^4.0.1",

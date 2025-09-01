@@ -210,7 +210,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
       </View>
       {unreadCount > 0 && (
         <View style={styles.badge}>
-          <Text style={[styles.badgeText, {color: theme.colors.text}]}>
+          <Text style={[styles.badgeText]}>
             {unreadCount}
           </Text>
         </View>

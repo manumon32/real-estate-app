@@ -3,7 +3,14 @@
 import CommonHeader from '@components/Header/CommonHeader';
 import MenuLink from '@components/MenuLink';
 import React from 'react';
-import {View, ScrollView, RefreshControl, Alert} from 'react-native';
+import {
+  View,
+  ScrollView,
+  RefreshControl,
+  Alert,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 import {logoutAndRedirect} from '../../utils/logoutAndRedirect';
@@ -13,10 +20,12 @@ import {useTheme} from '@theme/ThemeProvider';
 
 const Settings = () => {
   const navigation = useNavigation();
-  const {logout, fetchUserDetails, userProfileloading} = useBoundStore();
+  const {logoutLoading, fetchUserDetails, userProfileloading, logoutFromAllDevice} =
+    useBoundStore();
   const version = DeviceInfo.getVersion(); // versionName (e.g. 1.0.3)
   const buildNumber = DeviceInfo.getBuildNumber(); // versionCode (e.g. 12)
   const {theme} = useTheme();
+
   return (
     <SafeAreaView
       style={{backgroundColor: theme.colors.background, height: '100%'}}>
@@ -26,6 +35,18 @@ const Settings = () => {
         backgroundColor={theme.colors.background}
         // onBackPress={onBackPress}
       />
+      {logoutLoading && (
+        <View
+          style={{
+            ...StyleSheet.absoluteFillObject, // fills the screen
+            backgroundColor: 'rgba(0, 0, 0, 0.78)', // transparent dark overlay
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 999, // ensure it's on top
+          }}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingBottom: 120, padding: 10}}
@@ -141,9 +162,7 @@ const Settings = () => {
                   {
                     text: 'Log out from all devices',
                     onPress: async () => {
-                      await logout();
-                      // @ts-ignore
-                      navigation.reset({index: 0, routes: [{name: 'Main'}]});
+                      await logoutFromAllDevice();
                     },
                   },
                 ],
@@ -175,7 +194,7 @@ const Settings = () => {
                   {
                     text: 'Delete',
                     onPress: async () => {
-                      await logout();
+                      await logoutFromAllDevice();
                       // @ts-ignore
                       navigation.reset({index: 0, routes: [{name: 'Main'}]});
                     },

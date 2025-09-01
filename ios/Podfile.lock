@@ -1687,6 +1687,8 @@ PODS:
     - Yoga
   - react-native-netinfo (11.4.1):
     - React-Core
+  - react-native-otp-verify (1.1.8):
+    - React-Core
   - react-native-razorpay (2.3.0):
     - razorpay-pod
     - React
@@ -2594,6 +2596,7 @@ DEPENDENCIES:
   - react-native-maps (from `../node_modules/react-native-maps`)
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
+  - react-native-otp-verify (from `../node_modules/react-native-otp-verify`)
   - react-native-razorpay (from `../node_modules/react-native-razorpay`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
@@ -2783,6 +2786,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-mmkv"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
+  react-native-otp-verify:
+    :path: "../node_modules/react-native-otp-verify"
   react-native-razorpay:
     :path: "../node_modules/react-native-razorpay"
   react-native-safe-area-context:
@@ -2968,6 +2973,7 @@ SPEC CHECKSUMS:
   react-native-maps: da2d8edfbebb0e885fed568df785ef27a8d07f96
   react-native-mmkv: 69af18f435f8978ed3e7b8c1b23bba35350ddcd8
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
+  react-native-otp-verify: 6d153f8a8e8392c6a51f9d94c090dc16d7c756b2
   react-native-razorpay: ab51e7be3d906f49b26198d978fc6f163e846d30
   react-native-safe-area-context: cd92c82a585b20104dc8044bf9db588a53e35552
   react-native-splash-screen: 95994222cc95c236bd3cdc59fe45ed5f27969594

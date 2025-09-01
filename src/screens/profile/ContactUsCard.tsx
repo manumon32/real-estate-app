@@ -1,10 +1,13 @@
 /* eslint-disable react-native/no-inline-styles */
-import { useTheme } from '@theme/ThemeProvider';
+import {useTheme} from '@theme/ThemeProvider';
 import React from 'react';
 import {View, Text, TouchableOpacity, Linking, Alert} from 'react-native';
+
+import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ContactUsCard = () => {
+  const navigation = useNavigation();
   const {theme} = useTheme();
   const handlePress = (type: string) => {
     switch (type) {
@@ -32,10 +35,14 @@ const ContactUsCard = () => {
               Linking.openURL(mailUrl);
             }
           })
-          .catch((err) =>{ console.log(err); Alert.alert('Error', 'Something went wrong')});
+          .catch(err => {
+            console.log(err);
+            Alert.alert('Error', 'Something went wrong');
+          });
         break;
       case 'chat':
-        // navigation.navigate('ChatDetail'); // 👈 Your chat detail screen name
+        // @ts-ignore
+        navigation.navigate('ChatSupport'); // 👈 Your chat detail screen name
         break;
       default:
         break;
@@ -79,7 +86,13 @@ const ContactUsCard = () => {
         shadowRadius: 6,
         elevation: 5,
       }}>
-      <Text style={{fontSize: 16, fontWeight: '600', marginBottom: 12, color: theme.colors.text}}>
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: '600',
+          marginBottom: 12,
+          color: theme.colors.text,
+        }}>
         Contact Us
       </Text>
 

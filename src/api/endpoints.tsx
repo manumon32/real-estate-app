@@ -5,6 +5,7 @@ export const API = {
     REFRESH: '/auth/refresh',
     UPDATE_CONTACT: '/auth/update-contact',
     HAND_SHAKE: '/handshake/client-secret',
+    LOGOUT:'/auth/logout-all',
   },
   LISTINGS: {
     GET_ALL: '/property',

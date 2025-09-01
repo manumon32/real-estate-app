@@ -207,7 +207,7 @@ const PropertyDetails = React.memo(() => {
           items: {
             ...payload,
             propertyId: res?._id,
-            property: {...items, coverImage: items.imageUrls[0] ?? null},
+            property: {...property, coverImage: items.imageUrls[0] ?? null},
           },
         });
       }

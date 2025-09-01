@@ -1,6 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useCallback, useEffect, useState} from 'react';
-import {View, StyleSheet, RefreshControl, TouchableOpacity, Dimensions} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  RefreshControl,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import {Text, Card, Divider, IconButton, useTheme} from 'react-native-paper';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -15,7 +21,9 @@ import {
   deleteNotificationsAPI,
   markAllReadNotificationsAPI,
 } from '@api/services';
-import { useTheme as useThemes } from '@theme/ThemeProvider';
+import {useTheme as useThemes} from '@theme/ThemeProvider';
+import {INotification} from '@screens/home/HomeScreen';
+import {navigateByNotification} from '../../firebase/notificationService';
 
 type NotificationType = 'message' | 'offer' | 'listing' | 'system';
 
@@ -53,7 +61,7 @@ export default function NotificationListSwipe() {
     clientId,
     bearerToken,
   } = useBoundStore();
-    const {theme} = useThemes();
+  const {theme} = useThemes();
   const [refreshing, setRefreshing] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const windowHeight = Dimensions.get('window').height;
@@ -124,6 +132,7 @@ export default function NotificationListSwipe() {
               n._id === item._id ? {...n, read: true} : n,
             );
             updateNotifications(updated);
+            navigateByNotification(item as any as INotification);
           }
         }}>
         <View style={styles.row}>
@@ -243,7 +252,7 @@ export default function NotificationListSwipe() {
     <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <CommonHeader
         title="Notifications"
-        textColor="#171717"
+        textColor={theme.colors.text}
         rightIcon={
           !selectAll ? 'checkbox-blank-outline' : 'checkbox-marked-outline'
         }
@@ -275,6 +284,7 @@ export default function NotificationListSwipe() {
                 backgroundColor: theme.colors.text,
                 flexDirection: 'row',
                 justifyContent: 'space-between',
+                borderRadius: 10,
               }}>
               {notifications_List.filter((item: any) => !item.read).length >
                 0 && (
@@ -314,7 +324,10 @@ export default function NotificationListSwipe() {
         rightOpenValue={-70}
         disableRightSwipe
         disableLeftSwipe
-        contentContainerStyle={[styles.container, {minHeight: windowHeight, backgroundColor: theme.colors.background}]}
+        contentContainerStyle={[
+          styles.container,
+          {minHeight: windowHeight, backgroundColor: theme.colors.background},
+        ]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -338,6 +351,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
     padding: 12,
+    margin: 5,
     backgroundColor: '#fff',
   },
   row: {
@@ -347,7 +361,7 @@ const styles = StyleSheet.create({
   },
   rowBack: {
     alignItems: 'center',
-    backgroundColor: '#d32f2f',
+    // backgroundColor: '#d32f2f',
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-end',
