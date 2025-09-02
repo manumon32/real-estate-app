@@ -164,13 +164,13 @@ function App({navigation}: any): React.JSX.Element {
   useEffect(() => {
     requestUserPermission();
 
-    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
-      const data = remoteMessage?.data;
-      console.log('remoteMessage', remoteMessage);
-      // if (data?.type) {
-      navigateByNotification(data as any as INotification);
-      // }
-    });
+    // const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+    //   const data = remoteMessage?.data;
+    //   console.log('remoteMessage', remoteMessage);
+    //   // if (data?.type) {
+    //   navigateByNotification(data as any as INotification);
+    //   // }
+    // });
 
     const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
       remoteMessage => {
@@ -194,7 +194,7 @@ function App({navigation}: any): React.JSX.Element {
     //   });
 
     return () => {
-      unsubscribeForeground();
+      // unsubscribeForeground();
       unsubscribeOpenedApp();
     };
   }, [bearerToken]);

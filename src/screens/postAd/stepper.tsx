@@ -207,7 +207,7 @@ const PostAdContainer = (props: any) => {
                 key={index}
                 style={[
                   styles.chip,
-                  newselected?.includes(item._id) && styles.chipSelected,
+                  newselected?.includes(String(item._id)) && styles.chipSelected,
                 ]}
                 onPress={() => {
                   console.log(item.fields);

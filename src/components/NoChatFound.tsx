@@ -40,16 +40,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
     backgroundColor: '#fff',
+    width:'100%'
   },
   icon: {
     marginBottom: 16,
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '600',
     color: '#333',
     marginBottom: 8,
     fontFamily: Fonts.BOLD,
+    textAlign:'center',
   },
   subtitle: {
     fontSize: 14,
@@ -75,6 +77,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
     fontFamily: Fonts.BOLD,
+    textAlign:'center',
   },
 });
 

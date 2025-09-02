@@ -3,7 +3,7 @@
 import CommonHeader from '@components/Header/CommonHeader';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {useTheme} from '@theme/ThemeProvider';
 import {
   View,
@@ -13,7 +13,6 @@ import {
   TouchableOpacity,
   FlatList,
   RefreshControl,
-  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -101,7 +100,6 @@ const ReportAd = () => {
   const {reportAdList, fetchReportedAd} = useBoundStore();
   const navigation = useNavigation();
   const {theme} = useTheme();
-  const [filterBy, setFilterBy] = useState<any>(null);
 
   useEffect(() => {
     fetchReportedAd();
@@ -130,13 +128,10 @@ const ReportAd = () => {
   );
 
   return (
-    <SafeAreaView style={{backgroundColor: theme.colors.background, height: '100%'}}>
+    <SafeAreaView
+      style={{backgroundColor: theme.colors.background, height: '100%'}}>
       <FlatList
-        data={
-          filterBy
-            ? reportAdList.filter((items: any) => items.adStatus == filterBy)
-            : reportAdList
-        }
+        data={reportAdList}
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -152,95 +147,6 @@ const ReportAd = () => {
               textColor="#171717"
               // onBackPress={onBackPress}
             />
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{padding: 10}}
-              style={{flexDirection: 'row'}}>
-              <TouchableOpacity
-                style={[styles.chip, !filterBy && styles.chipSelected]}
-                onPress={() => {
-                  setFilterBy(null);
-                }}>
-                <Text
-                  style={[
-                    // newselected?.includes(item._id)
-                    styles.chipText,
-                    {color: theme.colors.text},
-                    !filterBy && styles.chipTextSelected,
-                  ]}>
-                  {'All'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  filterBy === 'active' && styles.chipSelected,
-                ]}
-                onPress={() => {
-                  setFilterBy('active');
-                }}>
-                <Text
-                  style={
-                    filterBy === 'active'
-                      ? styles.chipTextSelected
-                      : [styles.chipText, {color: theme.colors.text}]
-                  }>
-                  {'Active'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  filterBy === 'pending' && styles.chipSelected,
-                ]}
-                onPress={() => {
-                  setFilterBy('pending');
-                }}>
-                <Text
-                  style={
-                    filterBy === 'pending'
-                      ? styles.chipTextSelected
-                      : [styles.chipText, {color: theme.colors.text}]
-                  }>
-                  {'Pending'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  filterBy === 'rejected' && styles.chipSelected,
-                ]}
-                onPress={() => {
-                  setFilterBy('rejected');
-                }}>
-                <Text
-                  style={
-                    filterBy === 'rejected'
-                      ? styles.chipTextSelected
-                      : [styles.chipText, {color: theme.colors.text}]
-                  }>
-                  {'Rejected'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  filterBy === 'blocked' && styles.chipSelected,
-                ]}
-                onPress={() => {
-                  setFilterBy('blocked');
-                }}>
-                <Text
-                  style={
-                    filterBy === 'blocked'
-                      ? styles.chipTextSelected
-                      : [styles.chipText, {color: theme.colors.text}]
-                  }>
-                  {'Blocked'}
-                </Text>
-              </TouchableOpacity>
-            </ScrollView>
           </>
         }
         ListHeaderComponentStyle={{
@@ -257,31 +163,16 @@ const ReportAd = () => {
           />
         }
         ListFooterComponent={
-          filterBy ? (
-            reportAdList.filter((items: any) => items.adStatus == filterBy)
-              .length <= 0 ? (
-              <NoChats
-                onExplore={() => {
-                  // @ts-ignore
-                  navigation.navigate('Main');
-                }}
-                icon="message-text-outline"
-                title="No Ads Found"
-                // buttonText={'Explore now'}
-              />
-            ) : (
-              <></>
-            )
-          ) : reportAdList.length <= 0 ? (
+          reportAdList.length <= 0 ? (
             <NoChats
-                onExplore={() => {
-                  // @ts-ignore
-                  navigation.navigate('Main');
-                }}
-                icon="message-text-outline"
-                title="No Ads Found"
-                // buttonText={'Explore now'}
-              />
+              onExplore={() => {
+                // @ts-ignore
+                navigation.navigate('Main');
+              }}
+              icon="message-text-outline"
+              title="No Ads Found"
+              // buttonText={'Explore now'}
+            />
           ) : (
             <></>
           )

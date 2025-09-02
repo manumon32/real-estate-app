@@ -112,7 +112,7 @@ const HelpSupport = () => {
                 />
               </View>
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Email</Text>
+                <Text style={styles.label}>Email*</Text>
                 {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
                 <TextInput
                   placeholder="Email"
@@ -140,7 +140,7 @@ const HelpSupport = () => {
                 />
               </View>
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Description</Text>
+                <Text style={styles.label}>Description*</Text>
                 {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
                 <TextInput
                   placeholder="Description"

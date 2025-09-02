@@ -7,14 +7,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
-import RNOtpVerify from 'react-native-otp-verify';
 import {
   getHash,
   startOtpListener,
   removeListener,
 } from 'react-native-otp-verify';
-
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const OTP_LENGTH = 6;
@@ -29,9 +28,13 @@ const OtpVerificationScreen = ({
   otpLoading,
 }: any) => {
   const [otp, setOtp] = useState<string[]>(new Array(OTP_LENGTH).fill(''));
-  const [timer, setTimer] = useState(72); // 1:12
+  const [timer, setTimer] = useState(72);
   const [error, setError] = useState(false);
+
   const inputRefs = useRef<Array<TextInput | null>>([]);
+  const hiddenInputRef = useRef<TextInput>(null);
+
+  const {theme} = useTheme();
 
   // Format timer as MM:SS
   const formattedTimer = useMemo(() => {
@@ -45,22 +48,12 @@ const OtpVerificationScreen = ({
       const newOtp = [...otp];
       newOtp[index] = text;
       setOtp(newOtp);
+
       if (text && index < OTP_LENGTH - 1) {
         inputRefs.current[index + 1]?.focus();
       }
-      const otpMatch = /(\d{6})/g.exec(newOtp.join(''));
-      if (otpMatch) {
-        if (newOtp.join('') !== otpValue) {
-          setError(true);
-        } else {
-          console.log('Extracted OTP:', newOtp.join(''));
-
-          // Optionally auto-submit
-          veryFyOTP(newOtp.join(''));
-        }
-      }
     },
-    [otp, otpValue, veryFyOTP],
+    [otp],
   );
 
   const handleBackspace = useCallback(
@@ -80,66 +73,53 @@ const OtpVerificationScreen = ({
     }
   }, [handleSubmit, timer]);
 
-  // Timer countdown (optional)
-  React.useEffect(() => {
+  // Timer countdown
+  useEffect(() => {
     if (timer === 0) return;
     const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
     return () => clearInterval(interval);
   }, [timer]);
 
-  // React.useEffect(() => {
-  //   // Start OTP listener (Android)
-  //   RNOtpVerify.getOtp()
-  //     .then((message: any) =>
-  //       RNOtpVerify.addListener(() => {
-  //         const otpMatch = message.match(/\d{6}/);
-  //         if (otpMatch) {
-  //           const otpArr = otpMatch[0].split('');
-  //           setOtp(otpArr);
-
-  //           // Auto verify when full OTP received
-  //           veryFyOTP(otpMatch[0]);
-  //         }
-  //       }),
-  //     )
-  //     .catch(console.log);
-
-  //   return () => RNOtpVerify.removeListener();
-  // }, [veryFyOTP]);
-
+  // OTP listener (Android auto-read)
   useEffect(() => {
-    // Step 1: Get app hash (used in your SMS message)
     getHash()
       .then(hashArray => {
         console.log('App hash:', hashArray[0]);
-        // 👉 include this hash at the end of the OTP SMS sent from your backend
-        // Example SMS: "Your OTP is 1234. <#> AppName: 1234 code is valid for 5 min. ABC123xyz=="
       })
       .catch(console.log);
 
-    // Step 2: Start listener to capture OTP SMS
     startOtpListener(message => {
       console.log('OTP message:', message);
 
-      // Extract OTP (4-digit example, update to 6 if needed)
-      const otpMatch = /(\d{6})/g.exec(message);
-      if (otpMatch) {
-        const otp = otpMatch[1];
-        console.log('Extracted OTP:', otp);
-
-        // Update state with autofilled OTP
-        setOtp(otp.split(''));
-
-        // Optionally auto-submit
-        veryFyOTP(otp);
+      const otps = message.match(/\d{6}/g);
+      if (otps && otps.length > 0) {
+        const code = otps[otps.length - 1];
+        setOtp(code.split(''));
+        veryFyOTP(code);
       }
     });
 
-    // Step 3: Cleanup on unmount
     return () => removeListener();
   }, [veryFyOTP]);
 
-  const {theme} = useTheme();
+  // Handle OTP autofill from hidden input (iOS only)
+  const handleOtpChange = (code: string) => {
+    if (code.length === OTP_LENGTH) {
+      const otpArr = code.split('');
+      setOtp(otpArr);
+      veryFyOTP(code);
+    }
+  };
+
+  // Auto focus hidden input on iOS (shows suggestion bar)
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      setTimeout(() => {
+        hiddenInputRef.current?.focus();
+      }, 500);
+    } else {
+    }
+  }, []);
 
   return (
     <>
@@ -164,21 +144,33 @@ const OtpVerificationScreen = ({
           We have sent the verification code to{' '}
           <Text style={styles.phone}>{loginVar}</Text>
         </Text>
-        {/* <Text style={[styles.subtitle, {color: theme.colors.text}]}>OTP- {otpValue}</Text> */}
+
         {loginErrorMessage && (
           <Text style={[styles.subtitle, {color: 'red'}]}>
             {loginErrorMessage}
           </Text>
         )}
 
+        {/* 🔑 Hidden input (for iOS autofill full OTP, invisible to user) */}
+        <TextInput
+          ref={hiddenInputRef}
+          style={{position: 'absolute', opacity: 0, height: 0, width: 0}}
+          keyboardType="number-pad"
+          textContentType="oneTimeCode"
+          value={otp.join('')}
+          onChangeText={handleOtpChange}
+        />
+
+        {/* Visible OTP boxes */}
         <View style={styles.otpContainer}>
           {otp.map((digit, index) => (
             <TextInput
               key={index}
-              // @ts-ignore
               ref={ref => (inputRefs.current[index] = ref)}
               value={digit}
-              onChangeText={text => handleChange(text.slice(-1), index)}
+              onChangeText={text => {
+                handleChange(text.slice(-1), index);
+              }}
               onKeyPress={({nativeEvent}) => {
                 if (nativeEvent.key === 'Backspace') handleBackspace(index);
               }}
@@ -188,14 +180,15 @@ const OtpVerificationScreen = ({
                 index === otp.findIndex(d => d === '') && styles.otpActive,
                 error && {borderColor: 'red'},
               ]}
+              autoFocus={Platform.OS === 'android' && index === 0}
               keyboardType="number-pad"
               maxLength={1}
               returnKeyType="done"
-              autoFocus={index === 0}
-              textContentType="oneTimeCode"
             />
           ))}
         </View>
+
+        {/* Footer (resend + timer) */}
         <View style={styles.footer}>
           <TouchableOpacity onPress={resendCode} disabled={timer > 0}>
             <Text
@@ -212,10 +205,12 @@ const OtpVerificationScreen = ({
           </Text>
         </View>
       </View>
+
+      {/* Verify button */}
       <TouchableOpacity
         onPress={() => {
           setError(false);
-          if (otp.join('') !== otpValue) {
+          if (otp.length !== OTP_LENGTH) {
             setError(true);
           } else {
             setError(false);
@@ -247,14 +242,12 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   title: {
-    color: '#000',
     fontSize: 24,
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 12,
   },
   subtitle: {
-    color: '#444',
     textAlign: 'center',
     fontSize: 14,
     marginBottom: 32,
@@ -301,7 +294,6 @@ const styles = StyleSheet.create({
   timer: {
     color: '#333',
   },
-
   loginBtn: {
     backgroundColor: '#15937c',
     borderRadius: 30,

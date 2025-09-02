@@ -16,6 +16,7 @@ import {
   ScrollView,
   ActivityIndicator,
   useColorScheme,
+  Alert,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -209,18 +210,32 @@ const ListingCard: React.FC<ListingCardProps> = ({
         </View>
       </TouchableOpacity>
       <View style={styles.buttonRow}>
-        {label !== 'Sold' && <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('PostAd', {items});
-          }}
-          style={styles.outlinedButton}>
-          <Text style={[styles.buttonText, {color: theme.colors.text}]}>
-            Edit
-          </Text>
-        </TouchableOpacity>}
+        {label !== 'Sold' && (
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('PostAd', {items});
+            }}
+            style={styles.outlinedButton}>
+            <Text style={[styles.buttonText, {color: theme.colors.text}]}>
+              Edit
+            </Text>
+          </TouchableOpacity>
+        )}
         {label === 'Active' && (
           <TouchableOpacity
-            onPress={() => markasSold(items._id)}
+            onPress={() =>
+              Alert.alert(
+                'Mark as Sold?',
+                'Are you sure you want to mark this listing as sold? This action cannot be undone.',
+                [
+                  {text: 'Cancel', style: 'cancel'},
+                  {
+                    text: 'Mark as sold',
+                    onPress: () => markasSold(items?._id),
+                  },
+                ],
+              )
+            }
             style={styles.outlinedButton}>
             <Text style={[styles.buttonText, {color: theme.colors.text}]}>
               Mark as Sold

@@ -53,14 +53,13 @@ export const createFilterListingsSlice = (
       filters = {
         ...filters,
         ...{
-          filter_near: [get().location?.lat, get().location?.lng, 1000].join(
-            ',',
-          ),
+          filter_near: [get().location?.lat, get().location?.lng, 30].join(','),
         },
       };
     }
     let filterData = get().filters;
     Object.keys(filterData).map(filter => {
+      console.log('test', filterData[filter]);
       if (Array.isArray(filterData[filter])) {
         if (filterData[filter]?.length > 0) {
           if (filter === 'price') {
@@ -73,6 +72,9 @@ export const createFilterListingsSlice = (
             filters = {...filters, ...arrayFilterJson};
           }
         }
+      } else if (typeof filterData[filter] === 'boolean') {
+        let arrayFilterJson = {['filter_' + filter]: filterData[filter]};
+        filters = {...filters, ...arrayFilterJson};
       } else {
         filters = {...filters, ...{[filter]: filterData[filter]}};
       }
@@ -89,10 +91,7 @@ export const createFilterListingsSlice = (
             ? res.rows
             : [...state.filter_listings, ...res.rows].filter(
                 (item, index, self) =>
-                  index ===
-                  self.findIndex(
-                    t => JSON.stringify(t) === JSON.stringify(item),
-                  ),
+                  index === self.findIndex(t => t._id === item._id),
               ),
         filter_page: res.pageNum,
         filter_hasMore: res.pageNum < res.pages ? true : false,

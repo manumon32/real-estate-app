@@ -116,6 +116,8 @@ export const login = async (data: object, configArg: any): Promise<any> => {
   }
 };
 
+
+
 // 🔹 verifyOTP
 export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
   try {
@@ -137,6 +139,47 @@ export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
     throw new Error('Failed to fetch handshake token');
   }
 };
+
+
+// 🔹 Send Email OTP
+export const sendEmailOTP = async (data: object, configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.USER.SEND_EMAIL_OTP,
+      data, //: JSON.stringify(data),
+      headers,
+    });
+    return response;
+  } catch (error: any) {
+    throw new Error('Failed to fetch handshake token');
+  }
+};
+
+// 🔹 verify Email OTP
+export const verifyEmailOTP = async (data: object, configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.USER.VERIFY_EMAIL_OTP,
+      data, //: JSON.stringify(data),
+      headers,
+    });
+    console.log('response in service', response);
+    if (response.data) {
+      return response.data;
+    } else {
+      return response;
+    }
+  } catch (error: any) {
+    console.log('error response in service', error);
+    throw new Error('Failed to fetch handshake token');
+  }
+};
+
+
 
 // 🔹 Hand Shake token
 

@@ -6,6 +6,8 @@ export interface Location {
 
 export interface LocationSlice {
   locationModalvisible: boolean;
+  globalModalvisible: boolean;
+  setGlobalModalVisible: () => Promise<void>;
   adPostModal: boolean;
   setlocationModalVisible: () => Promise<void>;
   setadPostModal: () => Promise<void>;
@@ -35,6 +37,7 @@ export const createLocationSlice = (set: any, get: any): LocationSlice => ({
   location: defaultLocation,
   locationForAdpost: defaultLocation,
   locationModalvisible: false,
+  globalModalvisible: false,
   locationHistory: [],
   adPostModal: false,
   setLocation: updates => {
@@ -57,6 +60,10 @@ export const createLocationSlice = (set: any, get: any): LocationSlice => ({
   setlocationModalVisible: () =>
     set((state: any) => ({
       locationModalvisible: !state.locationModalvisible,
+    })),
+  setGlobalModalVisible: () =>
+    set((state: any) => ({
+      globalModalvisible: !state.globalModalvisible,
     })),
   resetLocation: () => set({location: defaultLocation}),
   setadPostModal: () => set({adPostModal: true}),

@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   Pressable,
   useColorScheme,
-  // FlatList,
+  Alert,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Image from 'react-native-fast-image';
@@ -207,11 +207,12 @@ const PropertyDetails = React.memo(() => {
           items: {
             ...payload,
             propertyId: res?._id,
-            property: {...property, coverImage: items.imageUrls[0] ?? null},
+            property: {...property, coverImage: property?.imageUrls[0] ?? null},
           },
         });
       }
     } catch (error) {
+      console.log('error', error);
       Toast.show({
         type: 'error',
         text1: 'Something went wrong',
@@ -241,7 +242,19 @@ const PropertyDetails = React.memo(() => {
               {(details?.adStatus === 'active' ||
                 details?.adStatus === 'sold') && (
                 <Pressable
-                  onPress={() => markasSold(details?._id)}
+                  onPress={() =>
+                    Alert.alert(
+                      'Mark as Sold?',
+                      'Are you sure you want to mark this listing as sold? This action cannot be undone.',
+                      [
+                        {text: 'Cancel', style: 'cancel'},
+                        {
+                          text: 'Mark as sold',
+                          onPress: () => markasSold(details?._id),
+                        },
+                      ],
+                    )
+                  }
                   style={
                     details?.adStatus === 'sold'
                       ? styles.chatButtonFullSold
@@ -398,7 +411,7 @@ const PropertyDetails = React.memo(() => {
         style={{paddingBottom: 120}}>
         <Header details={property ? property : items} />
 
-        {(items?.title ||property?.title) &&  (
+        {(items?.title || property?.title) && (
           <View
             style={[
               styles.header,
@@ -471,12 +484,21 @@ const PropertyDetails = React.memo(() => {
             </View>
           </View>
         )}
-        {detailLoading && <CustomDummyLoader />}
-        {details?.isVerified && (
-          <View style={styles.verifiedBadge}>
-            <Text style={styles.verifiedText}>✅ Verified</Text>
-          </View>
-        )}
+        <View style={{flexDirection: 'row'}}>
+          {detailLoading && <CustomDummyLoader />}
+          {details?.isVerified && (
+            <View style={styles.verifiedBadge}>
+              <Text style={styles.verifiedText}>✅ Verified</Text>
+            </View>
+          )}
+          {details?.reraApproved && (
+            <View style={[styles.verifiedBadge, {right: 15}]}>
+              <Text style={styles.verifiedText}>
+                ✅ Rera Approved {details?.reraId ? ': ' + details?.reraId : ''}
+              </Text>
+            </View>
+          )}
+        </View>
         {/* <Tooltip
           isVisible={showTip}
           content={
@@ -582,10 +604,13 @@ const PropertyDetails = React.memo(() => {
                 </View>
               </Pressable>
             )}
-            {!isOwner && details?.adStatus === 'active' && (
+            {!isOwner && details?.adStatus === 'active' && bearerToken && (
               <Pressable
                 onPress={() => {
-                  setShowModal(true);
+                  details?.appointmentStatus === 'active' && setShowModal(true);
+                  details?.appointmentStatus === 'scheduled' &&
+                    // @ts-ignore
+                    navigation.navigate('Appointments');
                 }}
                 style={{
                   // top: 15,
@@ -618,7 +643,13 @@ const PropertyDetails = React.memo(() => {
                       fontFamily: Fonts.MEDIUM,
                       fontWeight: '500',
                     }}>
-                    {'Plan a Site Visit'}
+                    {property?.appointmentStatus === 'active'
+                      ? 'Plan a Site Visit'
+                      : property?.appointmentStatus === 'pending'
+                      ? 'Your Visit rquest is pending'
+                      : property?.appointmentStatus === 'scheduled'
+                      ? 'Your Visit is Scheduled'
+                      : 'Plan a Site Visit'}
                   </Text>
                 </View>
                 <View style={{flexDirection: 'row'}}>
@@ -982,7 +1013,10 @@ const PropertyDetails = React.memo(() => {
               <View
                 style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                 <Text style={[styles.section, sectionColor]}>Location</Text>
-                <Pressable onPress={() => setIsReportVisible(true)}>
+                <Pressable
+                  onPress={() => {
+                    bearerToken ? setIsReportVisible(true) : setVisible();
+                  }}>
                   <Text
                     style={[
                       [styles.section, sectionColor],
@@ -1140,7 +1174,7 @@ const PropertyDetails = React.memo(() => {
       </ScrollView>
 
       <Footer
-        details={details}
+        details={property}
         user={user}
         bearerToken={bearerToken}
         createRoom={createRoom}

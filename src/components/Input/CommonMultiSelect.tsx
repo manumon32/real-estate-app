@@ -180,6 +180,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     maxHeight: '80%',
     paddingHorizontal: 16,
+    paddingVertical:25,
     paddingTop: 12,
   },
   header: {

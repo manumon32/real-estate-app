@@ -85,6 +85,9 @@ const ContactUsCard = () => {
         shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 5,
+        justifyContent: 'center',
+        alignContent: 'center',
+        // width:'100%'
       }}>
       <Text
         style={{
@@ -96,30 +99,39 @@ const ContactUsCard = () => {
         Contact Us
       </Text>
 
-      <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 12}}>
+      <View
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+        }}>
         {contacts.map(item => (
           <TouchableOpacity
             key={item.id}
+            activeOpacity={0.7}
+            accessibilityLabel={`Contact via ${item.title}`}
             style={{
-              flexBasis: '48%',
-              backgroundColor: '#d8faf2ff',
-              borderRadius: 12,
+              flexBasis: '45%',
+              backgroundColor: `${item.color}20`, // lighter tint of icon color
+              borderRadius: 14,
               paddingVertical: 20,
+              marginBottom: 12,
               alignItems: 'center',
               justifyContent: 'center',
             }}
             onPress={() => handlePress(item.type)}>
             <MaterialCommunityIcons
               name={item.icon}
-              size={28}
+              size={30}
               color={item.color}
             />
             <Text
               style={{
                 marginTop: 6,
-                fontSize: 14,
-                fontWeight: '500',
+                fontSize: 12,
+                fontWeight: '600',
                 color: '#333',
+                textAlign:'center'
               }}>
               {item.title}
             </Text>

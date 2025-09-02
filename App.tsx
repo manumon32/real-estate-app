@@ -10,13 +10,19 @@ import {ToastConfig} from './src/config/ToastConfig';
 import NetworkStatus from '@components/NetworkStatus';
 import {navigationRef} from '@navigation/RootNavigation';
 import {onNavigationReady} from './src/firebase/notificationService';
+import GlobalSearchModal from '@components/Modal/GlobalSearchModal';
+import LoginModal from '@components/Modal/LoginModal';
 
 export default function App() {
   const {
     locationModalvisible,
     setlocationModalVisible,
+    globalModalvisible,
+    setGlobalModalVisible, 
     setLocation,
     locationHistory,
+    visible,
+    setVisible
   } = useBoundStore();
 
   // // Handle background messages using setBackgroundMessageHandler
@@ -51,6 +57,15 @@ export default function App() {
           onSelectLocation={setLocation}
           locationHistory={locationHistory}
         />
+
+        <GlobalSearchModal
+          visible={globalModalvisible}
+          onClose={() => setGlobalModalVisible()}
+          onSelectLocation={setLocation}
+          locationHistory={locationHistory}
+        />
+
+        <LoginModal visible={visible} onClose={() => setVisible()} />
         <Toast config={ToastConfig} />
         <NetworkStatus />
       </NavigationContainer>

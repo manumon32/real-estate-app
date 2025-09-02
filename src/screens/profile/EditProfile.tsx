@@ -11,6 +11,8 @@ import {
   View,
   Image,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
   //   FlatList,
   //   Text,
   //   RefreshControl,
@@ -23,8 +25,9 @@ import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
 import OtpVerificationScreen from '@components/Modal/OtpVerificationScreen';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {uploadImages} from '@api/services';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '@theme/ThemeProvider';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {useTheme} from '@theme/ThemeProvider';
+import {Keyboard} from 'react-native';
 const EditProfile = () => {
   const {
     user,
@@ -42,6 +45,8 @@ const EditProfile = () => {
     token,
     clientId,
     bearerToken,
+    emailOTPLoading,
+    sentEmailOTP,
   } = useBoundStore();
   const [visible, setVisible] = useState(false);
   const [name, setName] = useState(user?.name || '');
@@ -52,7 +57,7 @@ const EditProfile = () => {
   const [email, setEmail] = useState(user?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
   const [loginVar, setLoginVar] = useState('');
-    const {theme} = useTheme();
+  const {theme} = useTheme();
 
   const navigation = useNavigation();
 
@@ -107,7 +112,8 @@ const EditProfile = () => {
     );
   }, []);
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       {!otp && (
         <>
           <CommonHeader
@@ -115,198 +121,218 @@ const EditProfile = () => {
             textColor="#171717"
             backgroundColor="#fff"
           />
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps={'handled'}
-            contentContainerStyle={{
-              paddingBottom: 120,
-              backgroundColor: theme.colors.background,
-              padding: 16,
-              height: '100%',
-            }}
-            style={{
-              height: '100%',
-            }}>
-            <Image
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{flex: 1}}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps={'always'}
+              contentContainerStyle={{
+                paddingBottom: 120,
+                backgroundColor: theme.colors.background,
+                padding: 16,
+                height: '100%',
+              }}
               style={{
-                height: 100,
-                width: 100,
-                borderRadius: 50,
-                justifyContent: 'center',
-                alignSelf: 'center',
-              }}
-              source={{
-                uri: image.uri ? image.uri : image,
-              }}
-            />
-
-            <View
-              style={[
-                styles.badge,
-                {
-                  borderRadius: 20,
-                  right: -25,
-                  bottom: 28,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  zIndex: 10,
-                },
-              ]}
-              // onPress={onPress}
-            >
-              <TouchableOpacity
-                onPress={pick}
-                style={{backgroundColor: '#000', padding: 8, borderRadius: 10}}>
-                <MaterialCommunityIcons name="camera" size={14} color="#fff" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Full Name</Text>
-              {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-              <TextInput
-                placeholder="Name"
-                value={name}
-                onChangeText={text => {
-                  setName(text);
-                }}
-                // onBlur={handleBlur('title')}
-                // error={touched?.title && errors?.title ? true : false}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
-              {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-              <TextInput
-                placeholder="Email"
-                value={email}
-                onChangeText={text => {
-                  setEmail(text);
-                }}
-                // onBlur={handleBlur('title')}
-                // error={touched?.title && errors?.title ? true : false}
-              />
-            </View>
-            {isValidEmail(email) &&
-            ((email && email !== user.email) || !user.isEmailVerified) ? (
-              <TouchableOpacity
-                onPress={() => {
-                  sendOTP(email, 'email');
-                }}
+                height: '100%',
+              }}>
+              <Image
                 style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-evenly',
+                  height: 100,
                   width: 100,
-                }}>
-                {/* <MaterialCommunityIcons name="timer" size={18} color="green" /> */}
-                {otpLoading && <ActivityIndicator size={'small'} />}
-                {!otpLoading && (
-                  <Text
-                    style={{
-                      color: 'green',
-                      fontSize: 12,
-                      textDecorationLine: 'underline',
-                      cursor: 'pointer',
-                    }}>
-                    Verify Email
-                  </Text>
-                )}
-              </TouchableOpacity>
-            ) : (
-             email && <Text
-                style={{
-                  color: 'green',
-                  fontSize: 12,
-                  textDecorationLine: 'underline',
-                  cursor: 'pointer',
-                  marginLeft: 15,
-                }}>
-                Verified
-              </Text>
-            )}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Phone Number</Text>
-              {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-              <TextInput
-                placeholder="Phone Number"
-                value={phoneNumber}
-                onChangeText={text => {
-                  setPhoneNumber(text);
+                  borderRadius: 50,
+                  justifyContent: 'center',
+                  alignSelf: 'center',
                 }}
-                // onBlur={handleBlur('title')}
-                // error={touched?.title && errors?.title ? true : false}
+                source={{
+                  uri: image.uri ? image.uri : image,
+                }}
               />
-            </View>
-            {isValidPhone(phoneNumber) &&
-            ((phoneNumber && phoneNumber !== user.phone) ||
-              !user.isPhoneVerified) ? (
-              <TouchableOpacity
-                onPress={() => {
-                  sendOTP(phoneNumber, 'phone');
-                }}
-                style={{
-                  width: 150,
-                  marginLeft: 15,
-                }}>
-                {/* <MaterialCommunityIcons name="timer" size={18} color="green" /> */}
-                {otpLoading && <ActivityIndicator size={'small'} />}
-                {!otpLoading && (
+
+              <View
+                style={[
+                  styles.badge,
+                  {
+                    borderRadius: 20,
+                    right: -25,
+                    bottom: 28,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 10,
+                  },
+                ]}
+                // onPress={onPress}
+              >
+                <TouchableOpacity
+                  onPress={pick}
+                  style={{
+                    backgroundColor: '#000',
+                    padding: 8,
+                    borderRadius: 10,
+                  }}>
+                  <MaterialCommunityIcons
+                    name="camera"
+                    size={14}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Full Name</Text>
+                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                <TextInput
+                  placeholder="Name"
+                  value={name}
+                  onChangeText={text => {
+                    setName(text);
+                  }}
+                  // onBlur={handleBlur('title')}
+                  // error={touched?.title && errors?.title ? true : false}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Email</Text>
+                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                <TextInput
+                  placeholder="Email"
+                  value={email}
+                  onChangeText={text => {
+                    setEmail(text);
+                  }}
+                  // onBlur={handleBlur('title')}
+                  // error={touched?.title && errors?.title ? true : false}
+                />
+              </View>
+              {isValidEmail(email) &&
+              ((email && email !== user?.email) || !user.isEmailVerified) ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    setLoginVar(email);
+                    sentEmailOTP({
+                      email: email,
+                    });
+                  }}
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-evenly',
+                    width: 100,
+                  }}>
+                  {/* <MaterialCommunityIcons name="timer" size={18} color="green" /> */}
+                  {emailOTPLoading && <ActivityIndicator size={'small'} />}
+                  {!emailOTPLoading && (
+                    <Text
+                      style={{
+                        color: 'green',
+                        fontSize: 12,
+                        textDecorationLine: 'underline',
+                        cursor: 'pointer',
+                      }}>
+                      Verify Email
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              ) : (
+                email && (
                   <Text
                     style={{
                       color: 'green',
                       fontSize: 12,
                       textDecorationLine: 'underline',
                       cursor: 'pointer',
+                      marginLeft: 15,
                     }}>
-                    Verify Phone
+                    Verified
                   </Text>
+                )
+              )}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Phone Number</Text>
+                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                <TextInput
+                  placeholder="Phone Number"
+                  value={phoneNumber}
+                  onChangeText={text => {
+                    setPhoneNumber(text);
+                  }}
+                  // onBlur={handleBlur('title')}
+                  // error={touched?.title && errors?.title ? true : false}
+                />
+              </View>
+              {isValidPhone(phoneNumber) &&
+              ((phoneNumber && phoneNumber !== user?.phone) ||
+                !user.isPhoneVerified) ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    sendOTP(phoneNumber, 'phone');
+                  }}
+                  style={{
+                    width: 150,
+                    marginLeft: 15,
+                  }}>
+                  {/* <MaterialCommunityIcons name="timer" size={18} color="green" /> */}
+                  {otpLoading && <ActivityIndicator size={'small'} />}
+                  {!otpLoading && (
+                    <Text
+                      style={{
+                        color: 'green',
+                        fontSize: 12,
+                        textDecorationLine: 'underline',
+                        cursor: 'pointer',
+                      }}>
+                      Verify Phone
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              ) : (
+                phoneNumber && (
+                  <Text
+                    style={{
+                      color: 'green',
+                      fontSize: 12,
+                      textDecorationLine: 'underline',
+                      cursor: 'pointer',
+                      marginLeft: 15,
+                    }}>
+                    Verified
+                  </Text>
+                )
+              )}
+            </ScrollView>
+            <View style={{padding: 12}}>
+              <TouchableOpacity
+                onPress={async () => {
+                  var imageUrls: any = '';
+                  if (image.uri) {
+                    let formData = new FormData();
+                    formData.append('images', {
+                      uri: image.uri, // local path or blob URL
+                      name: `photo_.jpg`, // ⬅ server sees this
+                      type: 'image/jpeg',
+                    } as any);
+                    imageUrls = await uploadImages(formData, {
+                      token: token,
+                      clientId: clientId,
+                      bearerToken: bearerToken,
+                    });
+                  }
+                  let payload: any = {
+                    name: name,
+                  };
+                  if (imageUrls?.length > 0) {
+                    payload.profilePicture = imageUrls[0];
+                  }
+                  updateuser(payload);
+                }}
+                style={styles.buyButton}
+                accessibilityRole="button">
+                {!updateLoading && <Text style={styles.buyText}>{'Save'}</Text>}
+                {updateLoading && (
+                  <ActivityIndicator color={'#fff'} size={'small'} />
                 )}
               </TouchableOpacity>
-            ) : (
-             phoneNumber && <Text
-                style={{
-                  color: 'green',
-                  fontSize: 12,
-                  textDecorationLine: 'underline',
-                  cursor: 'pointer',
-                  marginLeft: 15,
-                }}>
-                Verified
-              </Text>
-            )}
-          </ScrollView>
-          <View style={{padding: 12}}>
-            <TouchableOpacity
-              onPress={async () => {
-                var imageUrls: any = '';
-                if (image.uri) {
-                  let formData = new FormData();
-                  formData.append('images', {
-                    uri: image.uri, // local path or blob URL
-                    name: `photo_.jpg`, // ⬅ server sees this
-                    type: 'image/jpeg',
-                  } as any);
-                  imageUrls = await uploadImages(formData, {
-                    token: token,
-                    clientId: clientId,
-                    bearerToken: bearerToken,
-                  });
-                }
-                let payload: any = {
-                  name: name,
-                };
-                if (imageUrls?.length > 0) {
-                  payload.profilePicture = imageUrls[0];
-                }
-                updateuser(payload);
-              }}
-              style={styles.buyButton}
-              accessibilityRole="button">
-              {!updateLoading && <Text style={styles.buyText}>{'Save'}</Text>}
-              {updateLoading && (
-                <ActivityIndicator color={'#fff'} size={'small'} />
-              )}
-            </TouchableOpacity>
-          </View>
+            </View>
+          </KeyboardAvoidingView>
           <CommonSuccessModal
             visible={visible}
             title="Success."

@@ -13,7 +13,7 @@ import {
   Image,
   Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {useTheme} from '@theme/ThemeProvider';
 import debounce from 'lodash.debounce';
@@ -26,6 +26,7 @@ import {Fonts} from '@constants/font';
 import {useNavigation} from '@react-navigation/native';
 import FilterModal from '@components/Filter';
 import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
+import NoChats from '@components/NoChatFound';
 
 const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
   const {filters, filter_loading, clearFilterList} = useBoundStore();
@@ -135,10 +136,11 @@ function App(): React.JSX.Element {
     filters,
     setlocationModalVisible,
     location,
+    setGlobalModalVisible,
   } = useBoundStore();
   const {theme} = useTheme();
   const [visible, setVisible] = useState(false);
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState(filters?.['search'] ?? '');
   const [sort, setSort] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const prevFiltersRef = useRef<string[] | null>(location);
@@ -155,6 +157,10 @@ function App(): React.JSX.Element {
     [navigation],
   );
   // console.warn(renderAdItem);
+
+  useEffect(()=>{
+    setSearchText(filters?.['search']);
+  },[filters])
 
   const FilterView = useCallback(() => {
     return (
@@ -309,8 +315,7 @@ function App(): React.JSX.Element {
           <View
             style={{
               backgroundColor: theme.colors.backgroundHome,
-              paddingTop:
-                Platform.OS === 'android' ? 5: 5,
+              paddingTop: Platform.OS === 'android' ? 5 : 5,
             }}>
             <Pressable
               onPress={() => {
@@ -336,21 +341,10 @@ function App(): React.JSX.Element {
             </Pressable>
             <CommonSearchHeader
               searchValue={searchText}
-              onChangeSearch={text => {
-                setSearchText(text);
-                // debouncedFetch();
-                setTimeout(() => {
-                  if (text.length > 2) {
-                    clearFilterList();
-                    setFilters({
-                      search: text,
-                    });
-                  } else {
-                    let newFilter = {...filters};
-                    delete newFilter.search;
-                    updateFilter(newFilter);
-                  }
-                }, 2000);
+              onChangeSearch={() => {}}
+              touchable
+              onTouchablePress={() => {
+                setGlobalModalVisible();
               }}
               onBackPress={function (): void {
                 clearFilterList();
@@ -383,19 +377,12 @@ function App(): React.JSX.Element {
             <HomepageSkelton />
           ) : filter_listings.length <= 0 ? (
             <>
-              <Image
-                source={require('@assets/images/noads.png')}
-                style={{
-                  height: 200,
-                  width: 200,
-                  alignContent: 'center',
-                  justifyContent: 'center',
-                  alignSelf: 'center',
-                }}
+              <NoChats
+                icon="message-text-outline"
+                // title="No Chat Found"
+                body="we cannot find anything on this search try again with diffrent options."
+                // buttonText={'Explore now'}
               />
-              <Text style={styles.endText}>
-                Oops.. we cannot find anything for this search.
-              </Text>
             </>
           ) : (
             <></>
@@ -545,8 +532,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
     maxWidth: 250,
   },
-  iconStyle: {
-  },
+  iconStyle: {},
 });
 
 export default App;

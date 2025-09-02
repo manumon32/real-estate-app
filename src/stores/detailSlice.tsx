@@ -11,6 +11,7 @@ export interface Detail {
   areaUnitId: NamedEntity;
   carpetAreaUnitId: any;
   builtUpAreaUnitId: any;
+  appointmentStatus: string;
   superBuiltAreaUnitId: any | null;
   furnishingStatusId: any;
   facingDirectionId: NamedEntity;

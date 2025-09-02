@@ -4,7 +4,7 @@ import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
 import AdPostIcon from '@assets/svg/post.svg';
 import {Fonts} from '@constants/font';
-import LoginModal from './Modal/LoginModal';
+// import LoginModal from './Modal/LoginModal';
 import useBoundStore from '@stores/index';
 // import CommonLocationModal from './Modal/LocationSearchModal';
 
@@ -26,7 +26,7 @@ const renderTabIcon = (routeName: string) => {
 const BottomTabBar = ({state, navigation}: any) => {
   const {theme} = useTheme();
   const {
-    visible,
+    // visible,
     setVisible,
     bearerToken,
     unreadCount,
@@ -128,7 +128,7 @@ const BottomTabBar = ({state, navigation}: any) => {
               </React.Fragment>
             );
           })}
-        <LoginModal visible={visible} onClose={() => setVisible()} />
+        {/* <LoginModal visible={visible} onClose={() => setVisible()} /> */}
         {/* <CommonLocationModal
           visible={locationModalvisible}
           onClose={() => setlocationModalVisible()}

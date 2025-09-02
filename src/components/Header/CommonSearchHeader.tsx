@@ -1,4 +1,4 @@
-import { useTheme } from '@theme/ThemeProvider';
+import {useTheme} from '@theme/ThemeProvider';
 import React, {FC, useCallback, useMemo} from 'react';
 import {
   View,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TextInputProps,
   TouchableOpacity,
+  Text,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -15,6 +16,8 @@ interface CommonSearchHeaderProps {
   onBackPress: () => void;
   placeholder?: string;
   inputProps?: TextInputProps;
+  touchable?: boolean;
+  onTouchablePress?: () => void;
 }
 
 const CommonSearchHeader: FC<CommonSearchHeaderProps> = ({
@@ -23,6 +26,8 @@ const CommonSearchHeader: FC<CommonSearchHeaderProps> = ({
   onBackPress,
   placeholder = 'Search',
   inputProps,
+  touchable,
+  onTouchablePress,
 }) => {
   const {theme} = useTheme();
   const handleTextChange = useCallback(
@@ -34,26 +39,43 @@ const CommonSearchHeader: FC<CommonSearchHeaderProps> = ({
 
   return (
     <View style={styles.safeArea}>
-      <View style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      <View
+        style={[styles.container, {backgroundColor: theme.colors.background}]}>
         <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="arrow-left" size={22} color="#333" />
         </TouchableOpacity>
-        <View style={styles.searchContainer}>
-          <MaterialCommunityIcons
-            name="magnify"
-            size={20}
-            color="#888"
-            style={styles.searchIcon}
-          />
-          <TextInput
-            value={searchValue}
-            onChangeText={handleTextChange}
-            placeholder={inputPlaceholder}
-            style={styles.input}
-            placeholderTextColor="#888"
-            {...inputProps}
-          />
-        </View>
+        {touchable ? (
+          <TouchableOpacity
+            onPress={onTouchablePress}
+            style={styles.searchContainer}>
+            <MaterialCommunityIcons
+              name="magnify"
+              size={20}
+              color="#888"
+              style={styles.searchIcon}
+            />
+            <Text
+              style={styles.input}
+            >{searchValue}</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.searchContainer}>
+            <MaterialCommunityIcons
+              name="magnify"
+              size={20}
+              color="#888"
+              style={styles.searchIcon}
+            />
+            <TextInput
+              value={searchValue}
+              onChangeText={handleTextChange}
+              placeholder={inputPlaceholder}
+              style={styles.input}
+              placeholderTextColor="#888"
+              {...inputProps}
+            />
+          </View>
+        )}
       </View>
     </View>
   );

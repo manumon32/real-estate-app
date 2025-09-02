@@ -2,9 +2,11 @@ import {
   fetchUserDetailsAPI,
   login,
   logoutFromallDevicesAPI,
+  sendEmailOTP,
   submitRequestAPI,
   updateContact,
   updateUser,
+  verifyEmailOTP,
   verifyOTP,
 } from '@api/services';
 import Toast from 'react-native-toast-message';
@@ -24,6 +26,9 @@ export interface AuthSlice {
   userProfileloading: false;
   loginErrorMessage: any;
   login: (falg: any) => Promise<void>;
+  emailOTPLoading:boolean;
+  sentEmailOTP: (falg: any) => Promise<void>;
+  verifyEmailOTP: (falg: any) => Promise<void>;
   setVisible: () => Promise<void>;
   logout: () => Promise<void>;
   logoutFromAllDevice: () => Promise<void>;
@@ -49,6 +54,85 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   updateSuccess: false,
   userProfileloading: false,
   logoutLoading: false,
+  emailOTPLoading:false,
+  sentEmailOTP: async payload => {
+    try {
+      set({
+        emailOTPLoading: true,
+      });
+      const resp = await sendEmailOTP(payload, {
+        token: get().token,
+        clientId: get().clientId,
+        bearerToken:get().bearerToken
+      });
+      if (resp) {
+        set({
+          emailOTPLoading: false,
+          otp:true,
+        });
+         Toast.show({
+          type: 'success',
+          text1: 'OTP send Successfully',
+          text2: 'Welcome to the app!',
+          position: 'bottom',
+          visibilityTime: 1000,
+        });
+      } else {
+        set({ emailOTPLoading: false});
+         Toast.show({
+          type: 'error',
+          text1: 'Something went wrong',
+          position: 'bottom',
+          visibilityTime: 500,
+        });
+      }
+    } catch (error) {
+      set({ emailOTPLoading: false});
+         Toast.show({
+          type: 'error',
+          text1: 'Something went wrong',
+          position: 'bottom',
+          visibilityTime: 500,
+        });
+    }
+  },
+  verifyEmailOTP: async payload => {
+    set({
+      emailOTPLoading: true,
+    });
+    try {
+      const resp = await verifyEmailOTP(payload, {
+        token: get().token,
+        clientId: get().clientId,
+      });
+      if (resp?.token) {
+        set({
+          bearerToken: resp.token,
+          user: resp.userInfo,
+          visible: false,
+          otp: null,
+          otpLoading: false,
+        });
+        Toast.show({
+          type: 'success',
+          text1: 'Login Successful',
+          text2: 'Welcome to the app!',
+          position: 'bottom',
+          visibilityTime: 1000,
+        });
+      } else {
+        set({
+          loginError: true,
+          otpLoading: false,
+          visible: false,
+          updateSuccess: false,
+          loginErrorMessage: resp.msg ? resp.msg : 'Something went wrong',
+        });
+      }
+    } catch (error) {
+      set({loginError: true, updateSuccess: false, otpLoading: false});
+    }
+  },
   login: async payload => {
     try {
       set({
@@ -58,16 +142,18 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
         token: get().token,
         clientId: get().clientId,
       });
-      if (resp?.otp) {
+      if (resp) {
         set({
-          otp: resp.otp,
+          otp: true,
           otpLoading: false,
         });
       } else {
-        set({loginError: true, otpLoading: false});
+        set({loginError: true,
+          otp: false,otpLoading: false});
       }
     } catch (error) {
-      set({loginError: true, otpLoading: false});
+      set({loginError: true,
+          otp: false, otpLoading: false});
     }
   },
   verifyOTP: async payload => {

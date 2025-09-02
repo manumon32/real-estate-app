@@ -11,12 +11,12 @@ import useBoundStore from '@stores/index';
 function SearchContent(): React.JSX.Element {
   const [visible, setVisibles] = useState(false);
   const navigation = useNavigation();
-  const {clearFilterList, bearerToken, setVisible} = useBoundStore();
+  const {clearFilterList, bearerToken, setVisible, setGlobalModalVisible} = useBoundStore();
   return (
     <>
       <View style={styles.container}>
         <TouchableOpacity
-          onPress={() => setVisibles(true)}
+          onPress={() => setGlobalModalVisible()}
           style={styles.searchicon}>
           <SearchBar
             onChangeText={text => console.log(text)}

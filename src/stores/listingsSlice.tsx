@@ -44,7 +44,7 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
       filters = {
         ...filters,
         ...{
-          filter_near: [get().location?.lat, get().location?.lng, 1000].join(','),
+          filter_near: [get().location?.lat, get().location?.lng, 30].join(','),
         },
       };
     }

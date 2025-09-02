@@ -63,7 +63,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
       ]}>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate('Details', {items});
+          // navigation.navigate('Details', {items});
         }}>
         <View style={styles.row}>
           <View style={styles.info}>

@@ -62,6 +62,16 @@ export const onNavigationReady = () => {
   }
 };
 
+const SCREENS: any = {
+  chat: 'Chat',
+  detail: 'Details',
+  user: 'user',
+  transaction: 'transaction',
+  appointments: 'Appointments',
+  verifylisting: 'VerifyListing',
+  verifybanklist: 'VerifyBankList',
+};
+
 export const navigateByNotification = (notification: INotification) => {
   if (!navigationRef?.isReady() || !isReady) {
     pendingNotification = notification;
@@ -70,13 +80,13 @@ export const navigateByNotification = (notification: INotification) => {
 
   const {entityType, entityId, metadata} = notification;
 
-  if (!entityType) {
+  if (!entityType || !SCREENS[entityType]) {
     // @ts-ignore
     navigationRef.navigate('Main');
     return;
   }
 
-  const screenName = entityType; // assuming screen name is same as entityType
+  const screenName = SCREENS[entityType]; // assuming screen name is same as entityType
 
   const params = {
     items: {

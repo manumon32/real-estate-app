@@ -61,7 +61,7 @@ api.interceptors.request.use(
     const status = error?.response?.status;
 
     if ([401, 403].includes(status)) {
-      logoutAndRedirect();
+      // logoutAndRedirect();
     }
     return Promise.reject(error);
   },

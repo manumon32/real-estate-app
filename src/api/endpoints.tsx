@@ -36,6 +36,8 @@ export const API = {
     PROFILE: '/user/details',
     UPDATE_PROFILE: '/user/update',
     REGISTER_TOKEN: '/user/fcmTokenRegister',
+    SEND_EMAIL_OTP: '/user/send-email-otp',
+    VERIFY_EMAIL_OTP: '/user/verify-email-otp',
   },
   CHAT: {
     GET: '/chat-room',

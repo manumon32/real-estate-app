@@ -98,6 +98,8 @@ const PostAd = () => {
         propertyTypeId: [newInitialValues.propertyTypeId?._id],
         availabilityStatusId: [newInitialValues.availabilityStatusId?._id],
         furnishingStatusId: [newInitialValues.furnishingStatusId?._id],
+        numberOfBedrooms: [String(newInitialValues.numberOfBedrooms)],
+        numberOfBathrooms: [String(newInitialValues.numberOfBedrooms)],
       };
       let amenityIds = newInitialValues.amenityIds.map((item: any) => item._id);
 

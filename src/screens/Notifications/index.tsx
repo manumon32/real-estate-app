@@ -281,7 +281,7 @@ export default function NotificationListSwipe() {
             <View
               style={{
                 padding: 8,
-                backgroundColor: theme.colors.text,
+                backgroundColor: '#fff',
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 borderRadius: 10,
