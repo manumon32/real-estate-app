@@ -63,7 +63,7 @@ export const apiRequest = async ({
         text1: 'Please login.',
         position: 'bottom',
       });
-      // logoutAndRedirect();
+      logoutAndRedirect();
     } else {
       Toast.show({
         type: 'error',
