@@ -395,7 +395,7 @@ const GlobalSearchModal: React.FC<Props> = ({
     };
     if (arg) {
       payload = arg?.payload
-        ? {...arg.payload, searchText: arg.label}
+        ? {...arg.payload, searchText: arg?.label}
         : {search: menu ? arg.label : arg, searchText: menu ? arg.label : arg};
     }
     setFilters(payload);
@@ -406,7 +406,7 @@ const GlobalSearchModal: React.FC<Props> = ({
   const suggestionSearch = useMemo(() => {
     if (!filterBy) return searchSuggestions.slice(0, 6); // show first 6 if empty
 
-    const normalizedFilter = filterBy.toLowerCase().replace(/\s+/g, '');
+    const normalizedFilter = filterBy?.toLowerCase().replace(/\s+/g, '');
 
     return searchSuggestions
       .filter(item =>

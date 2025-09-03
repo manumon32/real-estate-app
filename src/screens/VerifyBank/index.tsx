@@ -17,7 +17,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Text,
-  ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
 import ChatBubble from './ChatBubble';
@@ -47,11 +46,15 @@ const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
   const {theme} = useTheme();
 
   return (
-    <View style={[styles.chatcontainer, {backgroundColor: theme.colors.background}]}>
+    <View
+      style={[
+        styles.chatcontainer,
+        {backgroundColor: theme.colors.background},
+      ]}>
       <Icon
         name="plus"
         onPress={() => setAttachModalVisible(true)}
-        size={20}
+        size={28}
         color={theme.colors.text}
       />
       <TextInput
@@ -59,10 +62,11 @@ const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
         placeholder="Type Here.."
         value={message}
         onChangeText={setMessage}
-        style={styles.input}
-        theme={{roundness: 50}}
-        outlineColor="#F5F6FA"
-        activeOutlineColor="#F5F6FA"
+        style={[styles.input,{borderWidth:0.1}]}
+        theme={{roundness: 50,}}
+        outlineColor="#ffffffff"
+        activeOutlineColor="#c1c1c1ff"
+        keyboardType="web-search"
       />
       <Icon
         name="send"
@@ -84,13 +88,11 @@ const Verification = ({navigation}: any) => {
   const {
     fetchBankVerificationDetails,
     bankVerificationDetails,
-    bankVerification_hasMore,
     resetBankVerificationDetails,
     updateBankVerificationDetails,
     token,
     clientId,
     bearerToken,
-    bankVerification_loading,
     // detailsBackUp,
   } = useBoundStore();
   const {items}: any = route.params;
@@ -244,7 +246,7 @@ const Verification = ({navigation}: any) => {
         bankVerificationId: items?.id,
         senderType: 'user',
         message: message,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       };
       updateBankVerificationDetails(payload);
       try {
@@ -253,14 +255,14 @@ const Verification = ({navigation}: any) => {
           clientId,
           bearerToken,
         });
-        fetchBankVerificationDetails(items?.id);
+        // fetchBankVerificationDetails(items?.id);
       } catch (error) {
         console.log(error);
       }
     }
   };
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <CommonHeader
         title={items?.user?.name ?? 'Loan Offers'}
         textColor="#171717"
@@ -296,7 +298,7 @@ const Verification = ({navigation}: any) => {
                     documents you have for it.
                   </Text>
                 )}
-                 {items.status === 'rejected' && (
+                {items.status === 'rejected' && (
                   <Text style={[styles.text, {color: 'red'}]}>
                     Loan process is Rejected
                   </Text>
@@ -328,28 +330,7 @@ const Verification = ({navigation}: any) => {
               backgroundColor: '#fff',
             }}
             showsVerticalScrollIndicator={false}
-            ListFooterComponent={
-              <>
-                {bankVerification_hasMore || bankVerification_loading ? (
-                  <View style={styles.loadingContainer}>
-                    <ActivityIndicator
-                      size="large"
-                      color={theme.colors.activityIndicatorColor}
-                    />
-                    {bankVerification_loading &&
-                      bankVerificationDetails?.length > 0 && (
-                        <Text style={styles.loadingText}>
-                          Loading more properties...
-                        </Text>
-                      )}
-                  </View>
-                ) : bankVerificationDetails.length <= 0 ? (
-                  <></>
-                ) : (
-                  <></>
-                )}
-              </>
-            }
+            ListFooterComponent={<></>}
           />
         }
         {/* <SlideToRecordButton
@@ -375,11 +356,13 @@ const Verification = ({navigation}: any) => {
             </TouchableOpacity>
           </View>
         )}
-       {items.status !== 'verified' && <ChatFooter
-          setAttachModalVisible={setAttachModalVisible}
-          handleSend={handleSend}
-          items={items}
-        />}
+        {items.status !== 'verified' && (
+          <ChatFooter
+            setAttachModalVisible={setAttachModalVisible}
+            handleSend={handleSend}
+            items={items}
+          />
+        )}
       </KeyboardAvoidingView>
 
       <AttachFileModal
@@ -533,7 +516,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     lineHeight: 20,
-    fontFamily:Fonts.REGULAR
+    fontFamily: Fonts.REGULAR,
   },
   iconRight: {
     marginLeft: 8,

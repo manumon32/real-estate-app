@@ -36,10 +36,10 @@ export const apiRequest = async ({
     console.log('Response Data:', error.response?.data);
     console.log('Request Config:', error.config.url); // Optional
     console.log('error Config:', error); // Optional
-    if (error.config.url === '/auth/login' || error.config.url === '/user/verify-email-otp') {
+    if (error.config.url === '/auth/login' || error.config.url === '/user/verify-email-otp' || error.config.url === '/auth/update-contact') {
       Toast.show({
         type: 'error',
-        text1: 'Invalid OTP.',
+        text1: error.response?.data?.msg ? error.response?.data?.msg:'Invalid OTP.',
         position: 'bottom',
       });
     } else if (

@@ -61,7 +61,7 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
           resizeMode="contain"
           style={styles.image}
         />
-        {user._id !== items.customerId && (
+        {(!user?._id || user?._id !== items.customerId) && (
           <FavoriteButton
             item={items}
             tuchableStyle={{

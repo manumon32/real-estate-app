@@ -17,6 +17,7 @@ import {
   Text,
   // ActivityIndicator,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import ChatBubble from './ChatBubble';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -72,12 +73,14 @@ const ChatFooter = React.memo(
         )}
         {isActive && (
           <>
-            <Icon
-              name="plus"
-              onPress={() => setAttachModalVisible(true)}
-              size={20}
-              color={theme.colors.text}
-            />
+            <TouchableOpacity onPress={() => setAttachModalVisible(true)}>
+              <Icon
+                name="plus"
+                onPress={() => setAttachModalVisible(true)}
+                size={28}
+                color={theme.colors.text}
+              />
+            </TouchableOpacity>
             <TextInput
               ref={inputRef}
               mode="outlined"
@@ -133,6 +136,8 @@ const Chat = React.memo(({navigation}: any) => {
   console.log('items', items);
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
   const [selectedImage, setImage] = React.useState(null);
+  const [imageUploading, setImageUploading] = React.useState(false);
+
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -182,6 +187,7 @@ const Chat = React.memo(({navigation}: any) => {
   const upLoadImage = async (Images: any) => {
     try {
       let formData = new FormData();
+      setImageUploading(true); // start loader
       Images.map((items: any, index: any) => {
         formData.append('images', {
           uri: items.uri, // local path or blob URL
@@ -197,6 +203,8 @@ const Chat = React.memo(({navigation}: any) => {
       sendImages(imageUrls);
     } catch (error) {
       return [];
+    } finally {
+      setImageUploading(false); // stop loader
     }
   };
 
@@ -369,6 +377,15 @@ const Chat = React.memo(({navigation}: any) => {
               }}>
               <Icon name="close-circle" size={20} color="#ff3333" />
             </TouchableOpacity>
+          </View>
+        )}
+        {imageUploading && (
+          <View style={{padding: 10, alignItems: 'center'}}>
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+            <Text
+              style={{fontSize: 12, color: theme.colors.text, marginTop: 4}}>
+              Uploading image...
+            </Text>
           </View>
         )}
         {

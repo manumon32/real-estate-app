@@ -17,7 +17,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Text,
-  ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
 import ChatBubble from './ChatBubble';
@@ -55,7 +54,7 @@ const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
       <Icon
         name="plus"
         onPress={() => setAttachModalVisible(true)}
-        size={20}
+        size={28}
         color={theme.colors.text}
       />
       <TextInput
@@ -66,7 +65,7 @@ const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
         style={styles.input}
         theme={{roundness: 50}}
         outlineColor="#F5F6FA"
-        activeOutlineColor="#F5F6FA"
+        activeOutlineColor="#c1c1c1ff"
       />
       <Icon
         name="send"
@@ -88,13 +87,11 @@ const Verification = ({navigation}: any) => {
   const {
     fetchverificationDetails,
     verificationDetails,
-    verification_hasMore,
     resetverificationDetails,
     updateVerificationDetails,
     token,
     clientId,
     bearerToken,
-    verification_loading,
     detailsBackUp,
   } = useBoundStore();
   const {items}: any = route.params;
@@ -245,6 +242,7 @@ const Verification = ({navigation}: any) => {
         verificationId: items?.id,
         senderType: 'user',
         message: message,
+        createdAt: new Date().toISOString(),
       };
       updateVerificationDetails(payload);
       try {
@@ -253,7 +251,7 @@ const Verification = ({navigation}: any) => {
           clientId,
           bearerToken,
         });
-        fetchverificationDetails(items?.id);
+        // fetchverificationDetails(items?.id);
       } catch (error) {
         console.log(error);
       }
@@ -327,7 +325,6 @@ const Verification = ({navigation}: any) => {
             </Surface>
           </TouchableRipple>
         )}
-        {
           <FlatList
             inverted
             data={[...verificationDetails].reverse()}
@@ -346,28 +343,9 @@ const Verification = ({navigation}: any) => {
             showsVerticalScrollIndicator={false}
             ListFooterComponent={
               <>
-                {verification_hasMore || verification_loading ? (
-                  <View style={styles.loadingContainer}>
-                    <ActivityIndicator
-                      size="large"
-                      color={theme.colors.activityIndicatorColor}
-                    />
-                    {verification_loading &&
-                      verificationDetails?.length > 0 && (
-                        <Text style={styles.loadingText}>
-                          Loading more properties...
-                        </Text>
-                      )}
-                  </View>
-                ) : verificationDetails.length <= 0 ? (
-                  <></>
-                ) : (
-                  <></>
-                )}
               </>
             }
           />
-        }
         {/* <SlideToRecordButton
           onSend={filePath => {
             console.log('📤 Sending audio file:', filePath);

@@ -13,17 +13,21 @@ import {
 } from 'react-native';
 import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
 import Carousel from 'react-native-reanimated-carousel';
 import FavoriteButton from '@components/FavoriteButton';
 import ImageViewerModal from '@components/Modal/ImageViewerModal';
+import useBoundStore from '@stores/index';
 
 function Header(props: any): React.JSX.Element {
   const {details} = props;
+    const route = useRoute();
+  const {items}: any = route.params;
   const {theme} = useTheme();
   const navigation = useNavigation();
+  const {user} = useBoundStore();
   const [visible, setVisible] = useState(false);
   const {width} = Dimensions.get('window');
   const [modalVisible, setModalVisible] = useState(false);
@@ -112,11 +116,14 @@ function Header(props: any): React.JSX.Element {
                 iconName={'heart-outline'}
               />
             </TouchableOpacity> */}
-            <FavoriteButton
-              IconButtonStyle={styles.heartRight}
-              iconSize={24}
-              item={details}
-            />
+            {
+              (!user?._id || user?._id !== items.customerId) && (
+                <FavoriteButton
+                  IconButtonStyle={styles.heartRight}
+                  iconSize={24}
+                  item={details}
+                />
+              )}
           </View>
         </View>
         <Carousel

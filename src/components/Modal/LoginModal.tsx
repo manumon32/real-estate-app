@@ -297,7 +297,12 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
           <View style={{flex: 1}}>
             <ScrollView
               keyboardShouldPersistTaps="handled"
-              contentContainerStyle={[styles.container]}>
+              contentContainerStyle={[
+                styles.container,
+                {
+                  flexGrow: 1,
+                },
+              ]}>
               {otpLoading && (
                 <View style={styles.overlay}>
                   <ActivityIndicator size="large" color="#fff" />

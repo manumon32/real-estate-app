@@ -6,7 +6,7 @@ export const lightColors = {
   backgroundHome: '#F6FCFF',
   activityIndicatorColor: '#007bff',
   chatBubbleLeft: 'rgba(229, 229, 229, 0.55)',
-  chatBubbleText: 'rgba(0, 0, 0, 0.55)',
+  chatBubbleText: '#171717',
   backButtom: '#F5F6FA',
   homepageSafeArea: '#CAF3EA',
 };
@@ -25,7 +25,7 @@ export const darkColors = {
   backgroundHome: '#2F2F2F',
   activityIndicatorColor: '#FFFFFF',
   chatBubbleLeft: '#FFFFFF',
-  chatBubbleText: 'rgba(0, 0, 0, 0.55)',
+  chatBubbleText: '#171717',
   backButtom: '#FFFFFF',
   homepageSafeArea: '#2F2F2F',
 };

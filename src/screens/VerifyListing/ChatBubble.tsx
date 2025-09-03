@@ -64,8 +64,8 @@ export default function ChatBubble(props: any) {
         <View style={styles.container}>
           <View style={styles.messageWrapper}>
             {/* <Text style={styles.name}>Arnold Schurli</Text> */}
-            <View style={[styles.bubble, {backgroundColor: theme.colors.background}]}>
-              <Text style={[styles.messageText, {color: theme.colors.text}]}>{items?.message}</Text>
+            <View style={[styles.bubble, {backgroundColor: theme.colors.text}]}>
+              <Text style={[styles.messageText, {color: theme.colors.background}]}>{items?.message}</Text>
             </View>
 
             <Text style={[styles.timestamp, {color: theme.colors.text}]}>
@@ -118,7 +118,7 @@ export default function ChatBubble(props: any) {
                 alignItems: 'center',
               }}>
               <Text style={[styles.timestamp, {textAlign: 'right', color: theme.colors.text}]}>
-                {getTimeAgo(new Date(items?.createdAt)?.getTime())}
+                {items?.createdAt && getTimeAgo(new Date(items?.createdAt)?.getTime())}
               </Text>
             </View>
           </View>
