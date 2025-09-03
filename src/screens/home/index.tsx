@@ -161,8 +161,8 @@ function Index({navigation}: any): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {flex: 1, justifyContent: 'center', alignItems: 'center'},
   image: {
-    width: 250,
-    height: 250,
+    width: 300,
+    height: 50,
   },
   loginBtn: {
     backgroundColor: '#15937c',

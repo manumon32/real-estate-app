@@ -47,7 +47,7 @@ const GlobalSearchModal: React.FC<Props> = ({
   onSelectLocation,
   locationHistory,
 }) => {
-  const {location, setFilters,filters, resetFilters, clearFilterList} =
+  const {location, setFilters, filters, resetFilters, clearFilterList} =
     useBoundStore();
   const [query, setQuery] = useState(location?.name ?? '');
   const navigation = useNavigation();
@@ -250,10 +250,9 @@ const GlobalSearchModal: React.FC<Props> = ({
     }
   }, []);
 
-
-    useEffect(() => {
-      setFilterBy(filters?.searchText ?? '');
-    }, [filters]);
+  useEffect(() => {
+    setFilterBy(filters?.searchText ?? '');
+  }, [filters]);
 
   const checkAndRequestPermission = async () => {
     const permission =
@@ -315,7 +314,7 @@ const GlobalSearchModal: React.FC<Props> = ({
 
   const useCurrentLocation = () => {
     if (currentLocation?.name) {
-      setQuery(currentLocation?.name ?? '')
+      setQuery(currentLocation?.name ?? '');
       onSelectLocation(currentLocation);
     } else {
       checkAndRequestPermission();
@@ -385,6 +384,9 @@ const GlobalSearchModal: React.FC<Props> = ({
     </TouchableOpacity>
   );
   const handleSearch = (arg: any, menu = false) => {
+    if (!arg && !menu && filterBy.trim().length === 0) {
+      return;
+    }
     resetFilters();
     clearFilterList();
     onClose();
@@ -465,7 +467,9 @@ const GlobalSearchModal: React.FC<Props> = ({
                 autoFocus
                 autoComplete="off" // disables autocomplete
                 autoCorrect={false} // disables autocorrect
-                onSubmitEditing={handleSearch}
+                onSubmitEditing={() => {
+                  handleSearch(false, false);
+                }}
               />
               <MaterialCommunityIcons
                 name="close"
@@ -617,64 +621,72 @@ const GlobalSearchModal: React.FC<Props> = ({
                 {loading ? (
                   <ActivityIndicator style={{marginTop: 20}} />
                 ) : (
-                  <FlatList
-                    data={predictions}
-                    keyExtractor={item => item.place_id}
-                    renderItem={renderItem}
-                    keyboardShouldPersistTaps="handled"
-                    contentContainerStyle={{
-                      backgroundColor: '#fff',
-                      borderRadius: 12,
-                      borderColor: '#EBEBEB',
-                      borderWidth: 1,
-                      marginTop: 10,
-                      padding: 8,
-                    }}
-                    ListFooterComponent={
-                      locationHistory.length > 0 ? (
-                        <View>
-                          {
-                            <Text
-                              style={{
-                                fontSize: 14,
-                                marginTop: 15,
-                                color: '#696969',
-                                margin: 5,
-                              }}>
-                              Recent Searches
-                            </Text>
-                          }
-                          {locationHistory?.map(
-                            (
-                              item: {lat: any; name: string; lng: any},
-                              index: number,
-                            ) =>
-                              index <= 4 &&
-                              currentLocation?.lat !== item.lat && (
-                                <TouchableOpacity
-                                  key={index}
-                                  style={styles.item}
-                                  onPress={() => {
-                                    onSelectLocation(item);
-                                  }}>
-                                  <MaterialCommunityIcons
-                                    name="clock"
-                                    size={20}
-                                    color="#696969"
-                                    style={{marginRight: 10}}
-                                  />
-                                  <Text style={styles.itemText}>
-                                    {item.name}
-                                  </Text>
-                                </TouchableOpacity>
-                              ),
-                          )}
-                        </View>
-                      ) : (
-                        <></>
-                      )
-                    }
-                  />
+                  (predictions.length > 0 ||
+                    locationHistory.filter(
+                      (item: {lat: any}) => currentLocation?.lat !== item.lat,
+                    ).length > 0) && (
+                    <FlatList
+                      data={predictions}
+                      keyExtractor={item => item.place_id}
+                      renderItem={renderItem}
+                      keyboardShouldPersistTaps="handled"
+                      contentContainerStyle={{
+                        backgroundColor: '#fff',
+                        borderRadius: 12,
+                        borderColor: '#EBEBEB',
+                        borderWidth: 1,
+                        marginTop: 10,
+                        padding: 8,
+                      }}
+                      ListFooterComponent={
+                        locationHistory.filter(
+                          (item: {lat: any}) =>
+                            currentLocation?.lat !== item.lat,
+                        ).length > 0 ? (
+                          <View>
+                            {
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  marginTop: 15,
+                                  color: '#696969',
+                                  margin: 5,
+                                }}>
+                                Recent Searches
+                              </Text>
+                            }
+                            {locationHistory?.map(
+                              (
+                                item: {lat: any; name: string; lng: any},
+                                index: number,
+                              ) =>
+                                index <= 4 &&
+                                currentLocation?.lat !== item.lat && (
+                                  <TouchableOpacity
+                                    key={index}
+                                    style={styles.item}
+                                    onPress={() => {
+                                      onSelectLocation(item);
+                                    }}>
+                                    <MaterialCommunityIcons
+                                      name="clock"
+                                      size={20}
+                                      color="#696969"
+                                      style={{marginRight: 10}}
+                                    />
+                                    <Text style={styles.itemText}>
+                                      {item.name}
+                                    </Text>
+                                  </TouchableOpacity>
+                                ),
+                            )}
+                          </View>
+                        ) : (
+                          <></>
+                        )
+                      }
+                    />
+                  )
                 )}
               </View>
             )}
