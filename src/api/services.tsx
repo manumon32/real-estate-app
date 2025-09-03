@@ -180,6 +180,43 @@ export const verifyEmailOTP = async (data: object, configArg: any): Promise<any>
 };
 
 
+// 🔹 Send Phone OTP
+export const sendPhoneOTP = async (data: object, configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.USER.SEND_PHONE_OTP,
+      data, //: JSON.stringify(data),
+      headers,
+    });
+    return response;
+  } catch (error: any) {
+    throw new Error('Failed to fetch handshake token');
+  }
+};
+
+// 🔹 verify Phone OTP
+export const verifyPhoneOTP = async (data: object, configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.USER.VERIFY_PHONE_OTP,
+      data, //: JSON.stringify(data),
+      headers,
+    });
+    console.log('response in service', response);
+    if (response.data) {
+      return response.data;
+    } else {
+      return response;
+    }
+  } catch (error: any) {
+    console.log('error response in service', error);
+    throw new Error('Failed to fetch handshake token');
+  }
+};
 
 // 🔹 Hand Shake token
 

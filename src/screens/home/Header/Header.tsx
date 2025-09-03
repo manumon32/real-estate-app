@@ -85,12 +85,12 @@ function Header({navigation}: any): React.JSX.Element {
                 iconColor={theme.colors.text}
                 iconName={'bell'}
               />
-            </TouchableOpacity>
             {notificationsCount > 0 && (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{notificationsCount}</Text>
               </View>
             )}
+            </TouchableOpacity>
           </View>
           <SearchContent />
           <HeaderIconContent />
@@ -128,8 +128,8 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    top: 8,
-    right: 32,
+    top: 0,
+    right: -6,
     minWidth: 16,
     height: 16,
     paddingHorizontal: 3,

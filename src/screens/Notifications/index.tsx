@@ -134,8 +134,8 @@ export default function NotificationListSwipe() {
               n._id === item._id ? {...n, read: true} : n,
             );
             updateNotifications(updated);
-            markAllAsRead(item._id);
-            // navigateByNotification(item as any as INotification);
+            // markAllAsRead(item._id);
+            navigateByNotification(item as any as INotification);
           }
         }}>
         <View style={styles.row}>

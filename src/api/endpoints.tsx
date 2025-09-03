@@ -38,6 +38,8 @@ export const API = {
     REGISTER_TOKEN: '/user/fcmTokenRegister',
     SEND_EMAIL_OTP: '/user/send-email-otp',
     VERIFY_EMAIL_OTP: '/user/verify-email-otp',
+    SEND_PHONE_OTP: '/user/send-mobile-otp',
+    VERIFY_PHONE_OTP: '/user/verify-mobile-otp',
   },
   CHAT: {
     GET: '/chat-room',

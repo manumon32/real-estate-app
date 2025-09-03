@@ -34,12 +34,23 @@ export const apiRequest = async ({
     console.log('Message:', error.message);
     console.log('Status:', error.response?.status);
     console.log('Response Data:', error.response?.data);
-    console.log('Request Config:', error.config.url); // Optional
-    console.log('error Config:', error); // Optional
-    if (error.config.url === '/auth/login' || error.config.url === '/user/verify-email-otp' || error.config.url === '/auth/update-contact') {
+    console.log('Request Config:', error.config?.url); // Optional
+    console.log('error Config URL:', error.config?.url); // Optional
+    if (
+      error.config.url === '/auth/login' ||
+      error.config.url === '/user/send-email-otp' ||
+      error.config.url === '/user/verify-email-otp' ||
+      error.config.url === '/user/send-mobile-otp' ||
+      error.config.url === '/user/verify-mobile-otp' ||
+      error.config.url === '/auth/update-contact' ||
+      error.config.url === '/auth/send-mobile-otp'
+    ) {
+    console.log('Response Data:', error.response?.data?.msg);
       Toast.show({
         type: 'error',
-        text1: error.response?.data?.msg ? error.response?.data?.msg:'Invalid OTP.',
+        text1: error.response?.data?.msg
+          ? error.response?.data?.msg
+          : 'Invalid OTP.',
         position: 'bottom',
       });
     } else if (

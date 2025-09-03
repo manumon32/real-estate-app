@@ -47,6 +47,9 @@ const EditProfile = () => {
     emailOTPLoading,
     verifyEmailOTP,
     sentEmailOTP,
+    sentPhoneOTP,
+    verifyPhoneOTP,
+    phoneOTPLoading,
   } = useBoundStore();
   const [visible, setVisible] = useState(false);
   const [name, setName] = useState(user?.name || '');
@@ -99,11 +102,16 @@ const EditProfile = () => {
         otp: arg,
       });
     } else {
-      let updateVar =
-        loginVar == 'email'
-          ? {name: 'newEmail', val: email}
-          : {name: 'newPhone', val: phoneNumber};
-      updateCOntact({[updateVar.name]: updateVar.val, otp: arg});
+      verifyPhoneOTP({
+        phone: phoneNumber,
+        otp: arg,
+      });
+
+      // let updateVar =
+      //   loginVar == 'email'
+      //     ? {name: 'newEmail', val: email}
+      //     : {name: 'newPhone', val: phoneNumber};
+      // updateCOntact({[updateVar.name]: updateVar.val, otp: arg});
     }
   };
   const pick = useCallback(() => {
@@ -274,17 +282,19 @@ const EditProfile = () => {
                   !user.isPhoneVerified) ? (
                   <TouchableOpacity
                     onPress={() => {
-                      sendOTP(phoneNumber, 'phone');
-
+                      setLoginVar('phone');
                       setLoginType(phoneNumber);
+                      sentPhoneOTP({
+                        phone: phoneNumber,
+                      });
                     }}
                     style={{
                       width: 150,
                       marginLeft: 15,
                     }}>
                     {/* <MaterialCommunityIcons name="timer" size={18} color="green" /> */}
-                    {otpLoading && <ActivityIndicator size={'small'} />}
-                    {!otpLoading && (
+                    {phoneOTPLoading && <ActivityIndicator size={'small'} />}
+                    {!phoneOTPLoading && (
                       <Text
                         style={{
                           color: 'green',

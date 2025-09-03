@@ -12,7 +12,6 @@ import {
   View,
   Image,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -29,6 +28,7 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {sendBankDetails, uploadDocuments, uploadImages} from '@api/services';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {pick} from '@react-native-documents/picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 

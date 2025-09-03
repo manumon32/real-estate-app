@@ -12,7 +12,6 @@ import {
   View,
   Image,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -32,6 +31,7 @@ import {
   uploadImages,
 } from '@api/services';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -277,9 +277,12 @@ const Verification = ({navigation}: any) => {
         title={items?.user?.name ?? 'Verify Listing'}
         textColor="#171717"
       />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-        style={{height: Platform.OS === 'ios' ? '85%' : '80%', flex: 1}}>
+     <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{flex: 1}}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
+            {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+            <View style={{flex: 1}}>
         {!detailsBackUp?.isVerified && (
           <TouchableRipple
             onPress={() => {}}
@@ -397,6 +400,7 @@ const Verification = ({navigation}: any) => {
             items={items}
           />
         )}
+        </View>
       </KeyboardAvoidingView>
 
       <AttachFileModal

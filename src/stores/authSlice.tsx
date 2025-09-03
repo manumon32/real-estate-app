@@ -3,11 +3,13 @@ import {
   login,
   logoutFromallDevicesAPI,
   sendEmailOTP,
+  sendPhoneOTP,
   submitRequestAPI,
   updateContact,
   updateUser,
   verifyEmailOTP,
   verifyOTP,
+  verifyPhoneOTP,
 } from '@api/services';
 import Toast from 'react-native-toast-message';
 import {logoutAndRedirect} from '../utils/logoutAndRedirect';
@@ -27,8 +29,11 @@ export interface AuthSlice {
   loginErrorMessage: any;
   login: (falg: any) => Promise<void>;
   emailOTPLoading: boolean;
+  phoneOTPLoading: boolean;
   sentEmailOTP: (falg: any) => Promise<void>;
   verifyEmailOTP: (falg: any) => Promise<void>;
+  sentPhoneOTP: (falg: any) => Promise<void>;
+  verifyPhoneOTP: (falg: any) => Promise<void>;
   setVisible: () => Promise<void>;
   logout: () => Promise<void>;
   logoutFromAllDevice: () => Promise<void>;
@@ -55,6 +60,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   userProfileloading: false,
   logoutLoading: false,
   emailOTPLoading: false,
+  phoneOTPLoading: false,
   sentEmailOTP: async payload => {
     try {
       set({
@@ -88,12 +94,12 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       }
     } catch (error) {
       set({emailOTPLoading: false});
-      Toast.show({
-        type: 'error',
-        text1: 'Something went wrong',
-        position: 'bottom',
-        visibilityTime: 500,
-      });
+      // Toast.show({
+      //   type: 'error',
+      //   text1: 'Something went wrong',
+      //   position: 'bottom',
+      //   visibilityTime: 500,
+      // });
     }
   },
   verifyEmailOTP: async payload => {
@@ -111,7 +117,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           visible: false,
           otp: null,
           otpLoading: false,
-          user: {...get().user, isEmailVerified: true},
+          user: {...get().user, email: payload.email, isEmailVerified: true},
           emailOTPLoading: false,
         });
         Toast.show({
@@ -135,6 +141,93 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       set({
         loginError: true,
         emailOTPLoading: false,
+        updateSuccess: false,
+        otpLoading: false,
+        loginErrorMessage: 'Invalid OTP',
+      });
+    }
+  },
+
+  sentPhoneOTP: async payload => {
+    try {
+      set({
+        phoneOTPLoading: true,
+      });
+      const resp = await sendPhoneOTP(payload, {
+        token: get().token,
+        clientId: get().clientId,
+        bearerToken: get().bearerToken,
+      });
+      if (resp) {
+        set({
+          phoneOTPLoading: false,
+          otp: true,
+        });
+        Toast.show({
+          type: 'success',
+          text1: 'OTP send Successfully',
+          text2: 'Welcome to the app!',
+          position: 'bottom',
+          visibilityTime: 1000,
+        });
+      } else {
+        set({phoneOTPLoading: false});
+        Toast.show({
+          type: 'error',
+          text1: 'Something went wrong',
+          position: 'bottom',
+          visibilityTime: 500,
+        });
+      }
+    } catch (error) {
+      set({phoneOTPLoading: false});
+      // Toast.show({
+      //   type: 'error',
+      //   text1: 'Something went wrong',
+      //   position: 'bottom',
+      //   visibilityTime: 500,
+      // });
+    }
+  },
+  verifyPhoneOTP: async payload => {
+    set({
+      phoneOTPLoading: true,
+    });
+    try {
+      const resp = await verifyPhoneOTP(payload, {
+        token: get().token,
+        clientId: get().clientId,
+        bearerToken: get().bearerToken,
+      });
+      if (resp) {
+        set({
+          visible: false,
+          otp: null,
+          otpLoading: false,
+          user: {...get().user, phone: payload.phone, isPhoneVerified: true},
+          phoneOTPLoading: false,
+        });
+        Toast.show({
+          type: 'success',
+          text1: 'Email Verified Successfully',
+          text2: 'Welcome to the app!',
+          position: 'bottom',
+          visibilityTime: 1000,
+        });
+      } else {
+        set({
+          loginError: true,
+          otpLoading: false,
+          visible: false,
+          updateSuccess: false,
+          loginErrorMessage: 'Invalid OTP',
+          phoneOTPLoading: false,
+        });
+      }
+    } catch (error) {
+      set({
+        loginError: true,
+        phoneOTPLoading: false,
         updateSuccess: false,
         otpLoading: false,
         loginErrorMessage: 'Invalid OTP',
