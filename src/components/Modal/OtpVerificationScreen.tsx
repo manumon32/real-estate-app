@@ -48,12 +48,15 @@ const OtpVerificationScreen = ({
       const newOtp = [...otp];
       newOtp[index] = text;
       setOtp(newOtp);
-
+      if (index === OTP_LENGTH - 1) {
+        Number(text) && veryFyOTP(newOtp.join(''));
+        return;
+      }
       if (text && index < OTP_LENGTH - 1) {
         inputRefs.current[index + 1]?.focus();
       }
     },
-    [otp],
+    [otp, veryFyOTP],
   );
 
   const handleBackspace = useCallback(

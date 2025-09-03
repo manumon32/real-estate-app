@@ -10,7 +10,6 @@ import {
   RefreshControl,
   TouchableOpacity,
   Pressable,
-  Image,
   Platform,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -140,7 +139,7 @@ function App(): React.JSX.Element {
   } = useBoundStore();
   const {theme} = useTheme();
   const [visible, setVisible] = useState(false);
-  const [searchText, setSearchText] = useState(filters?.['search'] ?? '');
+  const [searchText, setSearchText] = useState(filters?.['searchText'] ?? '');
   const [sort, setSort] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const prevFiltersRef = useRef<string[] | null>(location);
@@ -158,9 +157,9 @@ function App(): React.JSX.Element {
   );
   // console.warn(renderAdItem);
 
-  useEffect(()=>{
-    setSearchText(filters?.['search']);
-  },[filters])
+  useEffect(() => {
+    setSearchText(filters?.searchText ?? '');
+  }, [filters]);
 
   const FilterView = useCallback(() => {
     return (

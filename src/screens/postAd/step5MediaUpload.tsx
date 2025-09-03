@@ -8,10 +8,15 @@ import CommonImageUploader from '@components/Input/ImageUploader';
 import ImagePickerModal from '@components/Modal/ImagePickerModal';
 import useBoundStore from '@stores/index';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
-import { useTheme } from '@theme/ThemeProvider';
+import {useTheme} from '@theme/ThemeProvider';
+import { useRoute } from '@react-navigation/native';
 
 const Step5MediaUpload = (props: any) => {
-  const {setImages, setFloorPlans, images, floorPlans} = useBoundStore();
+  const route = useRoute();
+  // @ts-ignore
+  const items = route?.params?.items || null;
+  const {setImages, setFloorPlans, images, floorPlans, managePlansList} =
+    useBoundStore();
   const [assets, setAssets] = useState<any[]>(images || []);
   const [floorPlan, setFloorPlan] = useState<any[]>(floorPlans || []);
 
@@ -27,6 +32,9 @@ const Step5MediaUpload = (props: any) => {
     isStringInEitherArray,
   } = props;
 
+  const [price, setPrice] = useState(null);
+  console.log('managePlansList', managePlansList);
+
   const removeAsset = useCallback((uri: string | undefined) => {
     if (!uri) return;
     setAssets(prev =>
@@ -40,6 +48,14 @@ const Step5MediaUpload = (props: any) => {
       prev.filter(item => (item.uri ? item.uri !== uri : item !== uri)),
     );
   }, []);
+
+  useEffect(() => {
+    // @ts-ignore
+    if (managePlansList?.[0].price) {
+      // @ts-ignore
+      setPrice(managePlansList?.[0].price);
+    }
+  }, [managePlansList]);
 
   const renderItem = useCallback(
     ({item}: {item: any}) => (
@@ -127,8 +143,8 @@ const Step5MediaUpload = (props: any) => {
     ),
     [floorPlan, keyExtractor, renderItemFloor],
   );
-  
-    const {theme} = useTheme();
+
+  const {theme} = useTheme();
 
   return (
     <SlideInView direction={currentStep === 4 ? 'right' : 'left'}>
@@ -166,15 +182,19 @@ const Step5MediaUpload = (props: any) => {
         </View>
       )}
 
-
-
-      <View style={styles.inputContainer}>
+      {!items?._id && <View style={styles.inputContainer}>
         <CommonAmenityToggle
-          label="Featured Property"
+          label={
+            // @ts-ignore
+            String(price)
+              ? // @ts-ignore
+                'Featured Property (₹' + String(price) + ')'
+              : 'Featured Property '
+          }
           selected={values.featured}
           onToggle={() => setFieldValue('featured', !values.featured)}
         />
-      </View>
+      </View>}
 
       <ImagePickerModal
         visible={modalVisible}

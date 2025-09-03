@@ -35,6 +35,13 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
   const openCamera = async () => {
     const response = await ImagePicker.launchCamera({
       mediaType: 'photo',
+      includeBase64: false,
+      saveToPhotos: true,
+      quality: 1,
+      cameraType: 'back',
+      presentationStyle: 'fullScreen',
+      // ✅ Important
+      includeExtra: true, // provides exif info (orientation, etc.)
     });
     if (response.didCancel) {
       console.log('User cancelled');
@@ -57,7 +64,7 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
             size={40}
             color="#219E93"
             onPress={handleOnpress ? handleOnpress : handlePickImage}
-            style={{width:'100%', marginRight:20}}
+            style={{width: '100%', marginRight: 20}}
           />
         </TouchableOpacity>
         <MaterialCommunityIcons

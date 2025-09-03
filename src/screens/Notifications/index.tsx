@@ -6,6 +6,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import {Text, Card, Divider, IconButton, useTheme} from 'react-native-paper';
 import {SwipeListView} from 'react-native-swipe-list-view';
@@ -54,6 +55,7 @@ const getIconName = (type: NotificationType) => {
 export default function NotificationListSwipe() {
   const {colors} = useTheme();
   const {
+    notifications_Loading,
     notifications_List,
     fetchNotifications,
     updateNotifications,
@@ -254,7 +256,9 @@ export default function NotificationListSwipe() {
         title="Notifications"
         textColor={theme.colors.text}
         rightIcon={
-          !selectAll ? 'checkbox-blank-outline' : 'checkbox-marked-outline'
+          notifications_List.length > 0 ? !selectAll
+            ? 'checkbox-blank-outline'
+            : 'checkbox-marked-outline': false
         }
         onRightPress={() => {
           if (notifications_List.length > 0) {
@@ -333,10 +337,18 @@ export default function NotificationListSwipe() {
         }
         ItemSeparatorComponent={() => <Divider />}
         ListEmptyComponent={
-          <View style={[styles.empty]}>
-            <Icon name="bell-off-outline" size={48} color={colors.outline} />
-            <Text style={{color: theme.colors.text}}>No notifications yet</Text>
-          </View>
+          !notifications_Loading ? (
+            <View style={[styles.empty]}>
+              <Icon name="bell-off-outline" size={48} color={colors.outline} />
+              <Text style={{color: theme.colors.text}}>
+                No notifications yet
+              </Text>
+            </View>
+          ) : notifications_Loading ? (
+            <ActivityIndicator color={theme.colors.text} />
+          ) : (
+            <></>
+          )
         }
       />
     </SafeAreaView>

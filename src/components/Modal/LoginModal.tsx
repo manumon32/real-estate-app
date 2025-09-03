@@ -53,8 +53,15 @@ type Props = {
 };
 
 const LoginModal: React.FC<Props> = ({visible, onClose}) => {
-  const {login, otp, clearOTP, verifyOTP, loginError, otpLoading} =
-    useBoundStore();
+  const {
+    login,
+    otp,
+    clearOTP,
+    verifyOTP,
+    loginError,
+    otpLoading,
+    loginErrorMessage,
+  } = useBoundStore();
   const [loginVar, setLoginVar] = useState('');
   const [socialLoading, setSocialLoading] = useState(false);
 
@@ -220,11 +227,9 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
         let payload: any = {};
         payload.email = userCredential.user?.email ?? null;
         payload.profilePicture = userCredential.user?.photoURL ?? '';
-        payload.name = userCredential.user?.displayName;
-        payload.socialProvider = userCredential.user?.displayName
-          ? userCredential.user?.displayName
-          : '';
-        Alert.alert(JSON.stringify(payload));
+        payload.name = userCredential.user?.displayName ?? '';
+        payload.socialProvider = 'apple';
+        payload.socialProviderId = 'apple.com';
         verifyOTP(payload);
       } else {
         Toast.show({
@@ -235,7 +240,12 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
         });
       }
     } catch (err) {
-      console.log('Apple Sign-In error:', err);
+      Toast.show({
+        type: 'error',
+        text1: 'Apple Sign-in failed, Email is required',
+        position: 'bottom',
+        visibilityTime: 1000,
+      });
     }
   };
 
@@ -266,8 +276,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     new GraphRequestManager().addRequest(infoRequest).start();
   };
 
-  const { height, width } = Dimensions.get('window');
-
+  const {height, width} = Dimensions.get('window');
 
   return (
     <Modal
@@ -281,146 +290,163 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       onRequestClose={handleClose}>
       <>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'position' : 'padding'}
-          style={{height: Platform.OS === 'ios' ? height : height, }}>
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={[styles.container]}>
-            {otpLoading && (
-              <View style={styles.overlay}>
-                <ActivityIndicator size="large" color="#fff" />
-              </View>
-            )}
-            {!otp && (
-              <>
-                <LinearGradient
-                  colors={
-                    !isDarkMode
-                      ? ['#FFFFFF', '#FFFFFF', '#40DABE', '#40DABE', '#227465']
-                      : ['#000000', '#40DABE', '#40DABE', '#40DABE', '#000000']
-                  }
-                  start={{x: 0.5, y: 0}}
-                  end={{x: 0.5, y: 1}}
-                  style={styles.gradient}>
-                  {/* Illustration */}
-                  <Pressable onPress={handleClose} style={styles.closeButton}>
-                    <IconButton
-                      iconSize={24}
-                      iconColor={theme.colors.text}
-                      iconName={'close'}
-                    />
-                  </Pressable>
-                  <View style={styles.illustration}>
-                    <GroupIcon />
-                  </View>
-
-                  {/* Login Card */}
-                  <View
-                    style={[
-                      styles.card,
-                      {backgroundColor: theme.colors.background},
-                    ]}>
-                    {/* Logo */}
-                    <Image
-                      source={require('@assets/images/logo.png')}
-                      style={styles.logo}
-                    />
-
-                    {/* <LogoIcon style={styles.logo} /> */}
-                    <Text style={[styles.title, {color: theme.colors.text}]}>
-                      Login
-                    </Text>
-
-                    {/* Phone Input */}
-                    <Text style={[styles.label, {color: theme.colors.text}]}>
-                      Phone number or Email
-                    </Text>
-                    <TextInput
-                      value={loginVar}
-                      onChangeText={text => {
-                        setLoginVar(text);
-                        setMessage('');
-                      }}
-                      placeholder="Phone number or Email"
-                      placeholderTextColor={'#ccc'}
-                      style={styles.input}
-                    />
-                    {(message || loginError) && (
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          color: '#ff4d4f',
-                          margin: 5,
-                          marginTop: -5,
-                        }}>
-                        {'Please enter valid Phone number or Email'}
-                      </Text>
-                    )}
-
-                    {/* Login Button */}
-                    <TouchableOpacity
-                      onPress={() => {
-                        setUserInfo(null);
-                        handleSubmit();
-                      }}
-                      style={styles.loginBtn}>
-                      <Text style={styles.loginText}>Login</Text>
-                    </TouchableOpacity>
-
-                    {/* Divider */}
-                    <View style={styles.dividerContainer}>
-                      <View style={styles.divider} />
-                      <Text style={styles.orText}>Or</Text>
-                      <View style={styles.divider} />
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{flex: 1}}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+          {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+          <View style={{flex: 1}}>
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={[styles.container]}>
+              {otpLoading && (
+                <View style={styles.overlay}>
+                  <ActivityIndicator size="large" color="#fff" />
+                </View>
+              )}
+              {!otp && (
+                <>
+                  <LinearGradient
+                    colors={
+                      !isDarkMode
+                        ? [
+                            '#FFFFFF',
+                            '#FFFFFF',
+                            '#40DABE',
+                            '#40DABE',
+                            '#227465',
+                          ]
+                        : [
+                            '#000000',
+                            '#40DABE',
+                            '#40DABE',
+                            '#40DABE',
+                            '#000000',
+                          ]
+                    }
+                    start={{x: 0.5, y: 0}}
+                    end={{x: 0.5, y: 1}}
+                    style={styles.gradient}>
+                    {/* Illustration */}
+                    <Pressable onPress={handleClose} style={styles.closeButton}>
+                      <IconButton
+                        iconSize={24}
+                        iconColor={theme.colors.text}
+                        iconName={'close'}
+                      />
+                    </Pressable>
+                    <View style={styles.illustration}>
+                      <GroupIcon />
                     </View>
 
-                    {/* Social Logins */}
-                    <View style={styles.socialRow}>
-                      {Platform.OS === 'ios' && (
+                    {/* Login Card */}
+                    <View
+                      style={[
+                        styles.card,
+                        {backgroundColor: theme.colors.background},
+                      ]}>
+                      {/* Logo */}
+                      <Image
+                        source={require('@assets/images/logo.png')}
+                        style={styles.logo}
+                      />
+
+                      {/* <LogoIcon style={styles.logo} /> */}
+                      <Text style={[styles.title, {color: theme.colors.text}]}>
+                        Login
+                      </Text>
+
+                      {/* Phone Input */}
+                      <Text style={[styles.label, {color: theme.colors.text}]}>
+                        Phone number or Email
+                      </Text>
+                      <TextInput
+                        value={loginVar}
+                        onChangeText={text => {
+                          setLoginVar(text);
+                          setMessage('');
+                        }}
+                        placeholder="Phone number or Email"
+                        placeholderTextColor={'#ccc'}
+                        style={styles.input}
+                      />
+                      {(message || loginError) && (
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: '#ff4d4f',
+                            margin: 5,
+                            marginTop: -5,
+                          }}>
+                          {'Please enter valid Phone number or Email'}
+                        </Text>
+                      )}
+
+                      {/* Login Button */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          setUserInfo(null);
+                          handleSubmit();
+                        }}
+                        style={styles.loginBtn}>
+                        <Text style={styles.loginText}>Login</Text>
+                      </TouchableOpacity>
+
+                      {/* Divider */}
+                      <View style={styles.dividerContainer}>
+                        <View style={styles.divider} />
+                        <Text style={styles.orText}>Or</Text>
+                        <View style={styles.divider} />
+                      </View>
+
+                      {/* Social Logins */}
+                      <View style={styles.socialRow}>
+                        {Platform.OS === 'ios' && (
+                          <Icon
+                            name="apple"
+                            color={theme.colors.text}
+                            size={36}
+                            onPress={() => signInWithApple()}
+                          />
+                        )}
                         <Icon
-                          name="apple"
+                          name="google"
+                          color={'#4081ee'}
+                          size={36}
+                          onPress={signInWithGoogle}
+                        />
+                        <Icon
+                          name="facebook"
                           color={theme.colors.text}
                           size={36}
-                          onPress={() => signInWithApple()}
+                          onPress={() => {
+                            signInWithFacebook();
+                          }}
+                          style={{
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: theme.colors.background,
+                            borderRadius: 6,
+                          }}
                         />
-                      )}
-                      <Icon
-                        name="google"
-                        color={'#4081ee'}
-                        size={36}
-                        onPress={signInWithGoogle}
-                      />
-                      <Icon
-                        name="facebook"
-                        color={theme.colors.text}
-                        size={36}
-                        onPress={() => {
-                          signInWithFacebook();
-                        }}
-                        style={{
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          backgroundColor: theme.colors.background,
-                          borderRadius: 6,
-                        }}
-                      />
+                      </View>
                     </View>
-                  </View>
-                </LinearGradient>
-              </>
-            )}
+                  </LinearGradient>
+                </>
+              )}
 
-            {otp && (
-              <OtpVerificationScreen
-                clearOTP={clearOTP}
-                loginVar={loginVar}
-                handleSubmit={handleSubmit}
-                veryFyOTP={veryFyOTP}
-                otpValue={otp}
-                otpLoading={otpLoading}
-              />
-            )}
-          </ScrollView>
+              {otp && (
+                <OtpVerificationScreen
+                  clearOTP={clearOTP}
+                  loginVar={loginVar}
+                  handleSubmit={handleSubmit}
+                  veryFyOTP={veryFyOTP}
+                  otpValue={otp}
+                  otpLoading={otpLoading}
+                  loginErrorMessage={loginErrorMessage}
+                />
+              )}
+            </ScrollView>
+          </View>
         </KeyboardAvoidingView>
       </>
     </Modal>
@@ -429,7 +455,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
 
 const styles = StyleSheet.create({
   container: {
-    height:'100%',
+    height: '100%',
     backgroundColor: '#15937c',
     // alignItems: 'center',
     // justifyContent: 'center',

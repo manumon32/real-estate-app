@@ -136,6 +136,7 @@ const PostAdContainer = (props: any) => {
     locationForAdpost,
     floorPlans,
     managePlansList,
+    fetchPlans,
     user,
     setImages,
     setFloorPlans,
@@ -207,7 +208,8 @@ const PostAdContainer = (props: any) => {
                 key={index}
                 style={[
                   styles.chip,
-                  newselected?.includes(String(item._id)) && styles.chipSelected,
+                  newselected?.includes(String(item._id)) &&
+                    styles.chipSelected,
                 ]}
                 onPress={() => {
                   console.log(item.fields);
@@ -467,9 +469,10 @@ const PostAdContainer = (props: any) => {
   ]);
 
   useEffect(() => {
+    fetchPlans();
     setVisible(false);
     setPaymentStatus(true);
-  }, []);
+  }, [fetchPlans]);
 
   return (
     <React.Fragment>

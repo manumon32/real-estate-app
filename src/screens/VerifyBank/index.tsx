@@ -132,6 +132,11 @@ const Verification = ({navigation}: any) => {
       {
         mediaType: 'photo',
         quality: 0.8,
+        saveToPhotos: true,
+        cameraType: 'back',
+        presentationStyle: 'fullScreen',
+        // ✅ Important
+        includeExtra: true, // provides exif info (orientation, etc.)
       },
       (response: any) => {
         if (response.didCancel || response.errorCode) return;

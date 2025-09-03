@@ -39,7 +39,7 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
 };
 
 const ChatFooter = React.memo(
-  ({theme,setAttachModalVisible, handleSend, items}: any) => {
+  ({theme, setAttachModalVisible, handleSend, items}: any) => {
     const [message, setMessage] = React.useState<any>('');
     // @ts-ignore
     const inputRef = useRef<TextInput>(null);
@@ -54,7 +54,11 @@ const ChatFooter = React.memo(
     const isActive = items.property?.adStatus === 'active';
 
     return (
-      <View style={[styles.chatcontainer, {backgroundColor: theme.colors.background}]}>
+      <View
+        style={[
+          styles.chatcontainer,
+          {backgroundColor: theme.colors.background},
+        ]}>
         {!isActive && (
           <Text
             style={{
@@ -126,7 +130,7 @@ const Chat = React.memo(({navigation}: any) => {
     onlineUsers,
   } = useBoundStore();
   const {items}: any = route.params;
-  console.log('items', items)
+  console.log('items', items);
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
   const [selectedImage, setImage] = React.useState(null);
   const flatListRef = useRef<FlatList>(null);
@@ -161,6 +165,11 @@ const Chat = React.memo(({navigation}: any) => {
       {
         mediaType: 'photo',
         quality: 0.8,
+        saveToPhotos: true,
+        cameraType: 'back',
+        presentationStyle: 'fullScreen',
+        // ✅ Important
+        includeExtra: true, // provides exif info (orientation, etc.)
       },
       (response: any) => {
         if (response.didCancel || response.errorCode) return;

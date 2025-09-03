@@ -19,7 +19,7 @@ interface CommonHeaderProps {
   title: string;
   onBackPress?: () => void;
   onRightPress?: () => void;
-  rightIcon?: string;
+  rightIcon?: string | boolean ;
   onlineStatus?: boolean;
   backgroundColor?: string;
   textColor?: string;
@@ -115,6 +115,7 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
             ]}
             onPress={onRightPress}>
             <MaterialCommunityIcons
+            // @ts-ignore
               name={rightIcon}
               size={22}
               color={textColor}

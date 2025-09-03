@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect, useMemo} from 'react';
 import {
   View,
   Text,
@@ -47,11 +47,13 @@ const GlobalSearchModal: React.FC<Props> = ({
   onSelectLocation,
   locationHistory,
 }) => {
-  const {location, setFilters, resetFilters, clearFilterList} = useBoundStore();
-  const [query, setQuery] = useState('');
+  const {location, setFilters,filters, resetFilters, clearFilterList} =
+    useBoundStore();
+  const [query, setQuery] = useState(location?.name ?? '');
   const navigation = useNavigation();
   const [predictions, setPredictions] = useState<any[]>([]);
   const [filterBy, setFilterBy] = useState<any>('');
+  const [searchHistory, setSearchHistory] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
@@ -72,9 +74,9 @@ const GlobalSearchModal: React.FC<Props> = ({
   ];
 
   const TRANSACTION_TYPES = [
-    {key: 'sell', label: 'for Sale'},
-    {key: 'rent', label: 'for Rent'},
-    {key: 'lease', label: 'for Lease'},
+    {key: 'Sale', label: 'for Sale'},
+    {key: 'Rent', label: 'for Rent'},
+    {key: 'Lease', label: 'for Lease'},
   ];
 
   // 🔥 Generate dynamic search suggestions
@@ -91,48 +93,144 @@ const GlobalSearchModal: React.FC<Props> = ({
       })),
     ),
   );
+
+  // const LISTING_TYPES = appConfigs?.listingTypes || [];
+  // console.log('LISTING_TYPES', appConfigs);
   const searchSuggestions = [
     // Sell
-    {id: 1, label: 'House for Sale', type: 'sell'},
-    {id: 2, label: 'Apartment for Sale', type: 'sell'},
-    {id: 3, label: 'Villa for Sale', type: 'sell'},
-    {id: 4, label: 'Plot / Land for Sale', type: 'sell'},
-    {id: 5, label: 'Farmhouse for Sale', type: 'sell'},
-    {id: 6, label: 'Agricultural Land for Sale', type: 'sell'},
-    {id: 7, label: 'Commercial Space for Sale', type: 'sell'},
-    {id: 8, label: 'Office Space for Sale', type: 'sell'},
-    {id: 9, label: 'Shop / Showroom for Sale', type: 'sell'},
-    {id: 11, label: 'House for Sale near me', type: 'sell'},
-    {id: 10, label: 'House and Apartments Sale', type: 'sell'},
+    {
+      id: 1,
+      label: 'House for Sale',
+      type: 'Sale',
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 2,
+      label: 'Apartment for Sale',
+      type: 'Sale',
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 3,
+      label: 'Villa for Sale',
+      type: 'Sale',
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 4,
+      label: 'Plot / Land for Sale',
+      type: 'Sale',
+
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '6841753e4a95cf182c60a307',
+      },
+    },
+    {
+      id: 5,
+      label: 'Farmhouse for Sale',
+      type: 'Sale',
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 6,
+      label: 'Agricultural Land for Sale',
+      type: 'Sale',
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '6841753e4a95cf182c60a307',
+      },
+    },
+    {
+      id: 7,
+      label: 'Commercial Space for Sale',
+      type: 'Sale',
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '684175aa4eb67a1a216b94ed',
+      },
+    },
+    {
+      id: 8,
+      label: 'Office Space for Sale',
+      type: 'Sale',
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '684175aa4eb67a1a216b94ed',
+      },
+    },
+    {
+      id: 9,
+      label: 'Shop / Showroom for Sale',
+      type: 'Sale',
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '684175aa4eb67a1a216b94ed',
+      },
+    },
+    {
+      id: 11,
+      label: 'House for Sale near me',
+      type: 'Sale',
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 30,
+      label: 'House and Apartments Sale',
+      type: 'Sale',
+      payload: {
+        listingTypeId: '684176d84eb67a1a216b94fd',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
 
     // Rent
-    {id: 10, label: 'House for Rent', type: 'rent'},
-    {id: 10, label: 'House for Rent near me', type: 'rent'},
-    {id: 11, label: 'Apartment near me', type: 'rent'},
-    {id: 12, label: 'PG for Rent', type: 'rent'},
-    {id: 13, label: 'Guest House for Rent', type: 'rent'},
-    {id: 14, label: 'Studio Apartment for Rent', type: 'rent'},
-    {id: 15, label: 'Villa for Rent', type: 'rent'},
-    {id: 17, label: 'Agricultural Land for Rent', type: 'rent'},
-    {id: 18, label: 'Office Space for Rent', type: 'rent'},
-    {id: 19, label: 'Shop / Showroom for Rent', type: 'rent'},
-    {id: 20, label: 'Warehouse for Rent', type: 'rent'},
+    {id: 31, label: 'House for Rent', type: 'Rent'},
+    {id: 32, label: 'House for Rent near me', type: 'Rent'},
+    {id: 11, label: 'Apartment near me', type: 'Rent'},
+    {id: 12, label: 'PG for Rent', type: 'Rent'},
+    {id: 13, label: 'Guest House for Rent', type: 'Rent'},
+    {id: 14, label: 'Studio Apartment for Rent', type: 'Rent'},
+    {id: 15, label: 'Villa for Rent', type: 'Rent'},
+    {id: 17, label: 'Agricultural Land for Rent', type: 'Rent'},
+    {id: 18, label: 'Office Space for Rent', type: 'Rent'},
+    {id: 19, label: 'Shop / Showroom for Rent', type: 'Rent'},
+    {id: 20, label: 'Warehouse for Rent', type: 'Rent'},
 
     // Lease
-    {id: 21, label: 'House for Lease', type: 'lease'},
-    {id: 4, label: 'Plot / Land for Lease', type: 'lease'},
-    {id: 22, label: 'Apartment for Lease', type: 'lease'},
-    {id: 23, label: 'Villa for Lease', type: 'lease'},
-    {id: 24, label: 'Farmhouse for Lease', type: 'lease'},
-    {id: 25, label: 'Agricultural Land for Lease', type: 'lease'},
-    {id: 26, label: 'Commercial Space for Lease', type: 'lease'},
-    {id: 27, label: 'Office Space for Lease', type: 'lease'},
-    {id: 28, label: 'Shop for Lease', type: 'lease'},
-    {id: 29, label: 'Industrial Shed for Lease', type: 'lease'},
+    {id: 21, label: 'House for Lease', type: 'Lease'},
+    {id: 4, label: 'Plot / Land for Lease', type: 'Lease'},
+    {id: 22, label: 'Apartment for Lease', type: 'Lease'},
+    {id: 23, label: 'Villa for Lease', type: 'Lease'},
+    {id: 24, label: 'Farmhouse for Lease', type: 'Lease'},
+    {id: 25, label: 'Agricultural Land for Lease', type: 'Lease'},
+    {id: 26, label: 'Commercial Space for Lease', type: 'Lease'},
+    {id: 27, label: 'Office Space for Lease', type: 'Lease'},
+    {id: 28, label: 'Shop for Lease', type: 'Lease'},
+    {id: 29, label: 'Industrial Shed for Lease', type: 'Lease'},
 
     // Bedrooms
     ...bedroomPropertySuggestions,
   ];
+
+  useEffect(() => {
+    setQuery(location?.name ?? '');
+  }, [location]);
 
   const {theme} = useTheme();
   const fetchPredictions = useCallback(async (text: string) => {
@@ -151,6 +249,11 @@ const GlobalSearchModal: React.FC<Props> = ({
       console.error('Prediction fetch failed', err);
     }
   }, []);
+
+
+    useEffect(() => {
+      setFilterBy(filters?.searchText ?? '');
+    }, [filters]);
 
   const checkAndRequestPermission = async () => {
     const permission =
@@ -198,7 +301,7 @@ const GlobalSearchModal: React.FC<Props> = ({
       });
       setQuery('');
       setPredictions([]);
-      onClose();
+      // onClose();
     } catch (err) {
       console.error('Details fetch failed', err);
     } finally {
@@ -212,8 +315,8 @@ const GlobalSearchModal: React.FC<Props> = ({
 
   const useCurrentLocation = () => {
     if (currentLocation?.name) {
+      setQuery(currentLocation?.name ?? '')
       onSelectLocation(currentLocation);
-      onClose();
     } else {
       checkAndRequestPermission();
     }
@@ -241,7 +344,6 @@ const GlobalSearchModal: React.FC<Props> = ({
           lat: latitude,
           lng: longitude,
         });
-        visible && onClose();
         setLoading(false);
       },
       () => {
@@ -276,20 +378,42 @@ const GlobalSearchModal: React.FC<Props> = ({
   const renderItemSearch = ({item}: {item: any}) => (
     <TouchableOpacity
       style={styles.item}
-      onPress={() => fetchPlaceDetails(item.id)}>
+      onPress={() => {
+        handleSearch(item, true);
+      }}>
       <Text style={styles.itemText}>{item.label}</Text>
     </TouchableOpacity>
   );
-  const handleSearch = () => {
+  const handleSearch = (arg: any, menu = false) => {
     resetFilters();
     clearFilterList();
     onClose();
-    setFilters({
+    !menu && setSearchHistory([...searchHistory, arg ? arg : filterBy]);
+    let payload = {
       search: filterBy,
-    });
+      searchText: filterBy,
+    };
+    if (arg) {
+      payload = arg?.payload
+        ? {...arg.payload, searchText: arg.label}
+        : {search: menu ? arg.label : arg, searchText: menu ? arg.label : arg};
+    }
+    setFilters(payload);
     // @ts-ignore
     navigation.navigate('filter');
   };
+
+  const suggestionSearch = useMemo(() => {
+    if (!filterBy) return searchSuggestions.slice(0, 6); // show first 6 if empty
+
+    const normalizedFilter = filterBy.toLowerCase().replace(/\s+/g, '');
+
+    return searchSuggestions
+      .filter(item =>
+        item.label.toLowerCase().replace(/\s+/g, '').includes(normalizedFilter),
+      )
+      .slice(0, 6); // limit to 6 suggestions
+  }, [searchSuggestions, filterBy]);
 
   return (
     <SafeAreaView style={{backgroundColor: theme.colors.background}}>
@@ -339,83 +463,43 @@ const GlobalSearchModal: React.FC<Props> = ({
                 onFocus={() => setFocusedIndex(0)} // 👈 "Search" box focused
                 onBlur={() => setFocusedIndex(null)}
                 autoFocus
+                autoComplete="off" // disables autocomplete
+                autoCorrect={false} // disables autocorrect
                 onSubmitEditing={handleSearch}
+              />
+              <MaterialCommunityIcons
+                name="close"
+                size={20}
+                color="#696969"
+                onPress={() => {
+                  setFilterBy('');
+                }}
               />
             </View>
 
-            {focusedIndex === 0 && (
-              <View style={{top: -10}}>
-                <FlatList
-                  data={
-                    filterBy.length > 2
-                      ? searchSuggestions
-                          .filter(item =>
-                            item.label
-                              .toLowerCase()
-                              .replace(/\s+/g, '')
-                              .includes(
-                                filterBy.toLowerCase().replace(/\s+/g, ''),
-                              ),
-                          )
-                          .slice(0, 5)
-                      : []
-                  }
-                  keyExtractor={item => item.id.toString()}
-                  renderItem={renderItemSearch}
-                  keyboardShouldPersistTaps="handled"
-                  contentContainerStyle={{
-                    backgroundColor: '#fff',
-                    borderRadius: 12,
-                    borderColor: '#EBEBEB',
-                    borderWidth: 1,
-                    marginTop: 10,
-                    padding: 8,
-                  }}
-                  ListFooterComponent={
-                    <View>
-                      {
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            marginTop: 15,
-                            color: '#696969',
-                            margin: 5,
-                          }}>
-                          Recent Searches
-                        </Text>
-                      }
-                      {locationHistory?.map(
-                        (
-                          item: {lat: any; name: string; lng: any},
-                          index: number,
-                        ) =>
-                          index <= 4 &&
-                          currentLocation?.lat !== item.lat && (
-                            <TouchableOpacity
-                              key={index}
-                              style={styles.item}
-                              onPress={() => {
-                                onSelectLocation(item);
-                                onClose();
-                              }}>
-                              <MaterialCommunityIcons
-                                name="clock"
-                                size={20}
-                                color="#696969"
-                                style={{marginRight: 10}}
-                              />
-                              <Text style={styles.itemText}>{item.name}</Text>
-                            </TouchableOpacity>
-                          ),
-                      )}
-                    </View>
-                  }
-                />
-              </View>
-            )}
+            {focusedIndex === 0 &&
+              filterBy.length > 2 &&
+              suggestionSearch.length > 0 && (
+                <View style={{top: -10}}>
+                  <FlatList
+                    data={filterBy.length > 2 ? suggestionSearch : []}
+                    keyExtractor={item => item.id.toString()}
+                    renderItem={renderItemSearch}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={{
+                      backgroundColor: '#fff',
+                      borderRadius: 12,
+                      borderColor: '#EBEBEB',
+                      borderWidth: 1,
+                      marginTop: 10,
+                      padding: 8,
+                    }}
+                  />
+                </View>
+              )}
             <View style={styles.inputContainer}>
               <MaterialCommunityIcons
-                name="magnify"
+                name="map-marker"
                 size={20}
                 color="#696969"
               />
@@ -427,8 +511,62 @@ const GlobalSearchModal: React.FC<Props> = ({
                 style={[styles.input]}
                 onFocus={() => setFocusedIndex(1)} // 👈 "Search" box focused
                 onBlur={() => setFocusedIndex(null)}
+                autoComplete="off" // disables autocomplete
+                autoCorrect={false} // disables autocorrect
+              />
+
+              <MaterialCommunityIcons
+                name="close"
+                size={20}
+                color="#696969"
+                onPress={() => {
+                  setQuery('');
+                }}
               />
             </View>
+
+            {focusedIndex === 0 && searchHistory.length > 0 && (
+              <View
+                style={{
+                  backgroundColor: '#fff',
+                  borderRadius: 12,
+                  borderColor: '#EBEBEB',
+                  borderWidth: 1,
+                  marginTop: 10,
+                  padding: 8,
+                }}>
+                {
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      marginTop: 15,
+                      color: '#696969',
+                      margin: 5,
+                    }}>
+                    Recent Searches
+                  </Text>
+                }
+                {searchHistory?.map(
+                  (item: string, index: number) =>
+                    index <= 4 && (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.item}
+                        onPress={() => {
+                          handleSearch(item, true);
+                        }}>
+                        <MaterialCommunityIcons
+                          name="clock"
+                          size={20}
+                          color="#696969"
+                          style={{marginRight: 10}}
+                        />
+                        <Text style={styles.itemText}>{item}</Text>
+                      </TouchableOpacity>
+                    ),
+                )}
+              </View>
+            )}
 
             {focusedIndex == 1 && (
               <View>
@@ -493,43 +631,48 @@ const GlobalSearchModal: React.FC<Props> = ({
                       padding: 8,
                     }}
                     ListFooterComponent={
-                      <View>
-                        {
-                          <Text
-                            style={{
-                              fontSize: 14,
-                              marginTop: 15,
-                              color: '#696969',
-                              margin: 5,
-                            }}>
-                            Recent Searches
-                          </Text>
-                        }
-                        {locationHistory?.map(
-                          (
-                            item: {lat: any; name: string; lng: any},
-                            index: number,
-                          ) =>
-                            index <= 4 &&
-                            currentLocation?.lat !== item.lat && (
-                              <TouchableOpacity
-                                key={index}
-                                style={styles.item}
-                                onPress={() => {
-                                  onSelectLocation(item);
-                                  onClose();
-                                }}>
-                                <MaterialCommunityIcons
-                                  name="clock"
-                                  size={20}
-                                  color="#696969"
-                                  style={{marginRight: 10}}
-                                />
-                                <Text style={styles.itemText}>{item.name}</Text>
-                              </TouchableOpacity>
-                            ),
-                        )}
-                      </View>
+                      locationHistory.length > 0 ? (
+                        <View>
+                          {
+                            <Text
+                              style={{
+                                fontSize: 14,
+                                marginTop: 15,
+                                color: '#696969',
+                                margin: 5,
+                              }}>
+                              Recent Searches
+                            </Text>
+                          }
+                          {locationHistory?.map(
+                            (
+                              item: {lat: any; name: string; lng: any},
+                              index: number,
+                            ) =>
+                              index <= 4 &&
+                              currentLocation?.lat !== item.lat && (
+                                <TouchableOpacity
+                                  key={index}
+                                  style={styles.item}
+                                  onPress={() => {
+                                    onSelectLocation(item);
+                                  }}>
+                                  <MaterialCommunityIcons
+                                    name="clock"
+                                    size={20}
+                                    color="#696969"
+                                    style={{marginRight: 10}}
+                                  />
+                                  <Text style={styles.itemText}>
+                                    {item.name}
+                                  </Text>
+                                </TouchableOpacity>
+                              ),
+                          )}
+                        </View>
+                      ) : (
+                        <></>
+                      )
                     }
                   />
                 )}

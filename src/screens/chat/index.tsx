@@ -253,6 +253,7 @@ const Chat = React.memo(({navigation}: any) => {
     bearerToken,
     token,
     clientId,
+    setUnreadCount
   } = useBoundStore();
   const [filterBy, setFilterBy] = useState<any>(null);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -310,6 +311,7 @@ const Chat = React.memo(({navigation}: any) => {
 
   useEffect(() => {
     bearerToken && connectSocket();
+    setUnreadCount(0);
   }, [bearerToken]);
 
   const renderAdItem = useCallback(

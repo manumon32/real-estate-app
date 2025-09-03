@@ -15,7 +15,7 @@ export const createNotificationsSlice = (
   get: any,
 ): NotificationsSlice => ({
   notifications_List: [],
-  notifications_Loading: false,
+  notifications_Loading: true,
   notificationsCount: 0,
   fetchNotifications: async () => {
     set({notifications_ListLoading: true});

@@ -1,6 +1,6 @@
 import Toast from 'react-native-toast-message';
 import api from './axios';
-import { logoutAndRedirect } from '../utils/logoutAndRedirect';
+import {logoutAndRedirect} from '../utils/logoutAndRedirect';
 
 export type RequestMethod = 'get' | 'post' | 'put' | 'delete';
 
@@ -34,8 +34,18 @@ export const apiRequest = async ({
     console.log('Message:', error.message);
     console.log('Status:', error.response?.status);
     console.log('Response Data:', error.response?.data);
-    console.log('Request Config:', error.config); // Optional
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    console.log('Request Config:', error.config.url); // Optional
+    console.log('error Config:', error); // Optional
+    if (error.config.url === '/auth/login' || error.config.url === '/user/verify-email-otp') {
+      Toast.show({
+        type: 'error',
+        text1: 'Invalid OTP.',
+        position: 'bottom',
+      });
+    } else if (
+      error.response?.status === 401 ||
+      error.response?.status === 403
+    ) {
       // Optional: clear auth tokens here
       Toast.show({
         type: 'error',

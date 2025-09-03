@@ -7,7 +7,7 @@ import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback} from 'react';
 import {TouchableRipple, Surface} from 'react-native-paper';
 import {pick} from '@react-native-documents/picker';
-import {TextInput, IconButton} from 'react-native-paper';
+import {TextInput} from 'react-native-paper';
 import {
   View,
   Image,
@@ -153,7 +153,11 @@ const Verification = ({navigation}: any) => {
     launchCamera(
       {
         mediaType: 'photo',
-        quality: 0.8,
+        quality: 0.8,saveToPhotos: true,
+        cameraType: 'back',
+        presentationStyle: 'fullScreen',
+        // ✅ Important
+        includeExtra: true, // provides exif info (orientation, etc.)
       },
       (response: any) => {
         if (response.didCancel || response.errorCode) return;

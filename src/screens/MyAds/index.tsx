@@ -305,8 +305,19 @@ const MyAds = () => {
         },
         'put',
       );
+      Toast.show({
+        type: 'success',
+        text1: 'Your lising is successfully marked as sold .',
+        position: 'bottom',
+      });
       fetchMyAds();
-    } catch (err) {}
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong, please try again later.',
+        position: 'bottom',
+      });
+    }
   };
   const renderAdItem = useCallback(
     (items: any) => {

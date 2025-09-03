@@ -94,8 +94,20 @@ const PropertyDetails = React.memo(() => {
         },
         'put',
       );
+
+      Toast.show({
+        type: 'success',
+        text1: 'Your lising is successfully marked as sold .',
+        position: 'bottom',
+      });
       items?._id && fetchDetails(items?._id);
-    } catch (err) {}
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong, please try again later.',
+        position: 'bottom',
+      });
+    }
   };
 
   const renderAmenity = useCallback((item: any, index: number) => {
@@ -243,6 +255,7 @@ const PropertyDetails = React.memo(() => {
                 details?.adStatus === 'sold') && (
                 <Pressable
                   onPress={() =>
+                    details?.adStatus !== 'sold' &&
                     Alert.alert(
                       'Mark as Sold?',
                       'Are you sure you want to mark this listing as sold? This action cannot be undone.',
@@ -340,8 +353,8 @@ const PropertyDetails = React.memo(() => {
       propertyLocation: {
         type: 'Point',
         coordinates: [
-          property?.location?.coordinates[1],
           property?.location?.coordinates[0],
+          property?.location?.coordinates[1],
         ],
       },
     };
@@ -848,57 +861,59 @@ const PropertyDetails = React.memo(() => {
                 </View>
               </Pressable>
             )}
-            {!isOwner && details?.adStatus === 'active' && (
-              <Pressable
-                onPress={async () => {
-                  // @ts-ignore
-                  navigation.navigate('LoanCalculator', {
-                    price: property?.price ? property?.price : items?.price,
-                  });
-                }}
-                style={{
-                  top: 15,
-                  margin: 16,
-                  padding: 16,
-                  backgroundColor: '#E3FFF8',
-                  borderRadius: 10,
-                  height: 56,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  borderWidth: 1,
-                  borderColor: '#88E4CF',
-                }}>
-                <View
+            {!isOwner &&
+              details?.adStatus === 'active' &&
+              details?.listingTypeId?._id === '684176d84eb67a1a216b94fd' && (
+                <Pressable
+                  onPress={async () => {
+                    // @ts-ignore
+                    navigation.navigate('LoanCalculator', {
+                      price: property?.price ? property?.price : items?.price,
+                    });
+                  }}
                   style={{
-                    width: '95%',
-                    flexDirection: 'row',
+                    top: 15,
+                    margin: 16,
+                    padding: 16,
+                    backgroundColor: '#E3FFF8',
+                    borderRadius: 10,
+                    height: 56,
                     alignItems: 'center',
+                    flexDirection: 'row',
+                    borderWidth: 1,
+                    borderColor: '#88E4CF',
                   }}>
-                  <IconButton
-                    iconSize={24}
-                    iconColor={'#2F8D79'}
-                    iconName={'calculator'}
-                    style={{marginRight: 10}}
-                  />
-                  <Text
+                  <View
                     style={{
-                      color: '#2F8D79',
-                      fontSize: 14,
-                      fontFamily: Fonts.MEDIUM,
-                      fontWeight: '500',
+                      width: '95%',
+                      flexDirection: 'row',
+                      alignItems: 'center',
                     }}>
-                    Emi Calculator
-                  </Text>
-                </View>
-                <View style={{flexDirection: 'row'}}>
-                  <IconButton
-                    iconSize={24}
-                    iconColor={'#2F8D79'}
-                    iconName={'arrow-right'}
-                  />
-                </View>
-              </Pressable>
-            )}
+                    <IconButton
+                      iconSize={24}
+                      iconColor={'#2F8D79'}
+                      iconName={'calculator'}
+                      style={{marginRight: 10}}
+                    />
+                    <Text
+                      style={{
+                        color: '#2F8D79',
+                        fontSize: 14,
+                        fontFamily: Fonts.MEDIUM,
+                        fontWeight: '500',
+                      }}>
+                      Emi Calculator
+                    </Text>
+                  </View>
+                  <View style={{flexDirection: 'row'}}>
+                    <IconButton
+                      iconSize={24}
+                      iconColor={'#2F8D79'}
+                      iconName={'arrow-right'}
+                    />
+                  </View>
+                </Pressable>
+              )}
 
             {
               <>

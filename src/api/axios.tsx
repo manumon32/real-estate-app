@@ -59,8 +59,9 @@ api.interceptors.request.use(
   },
   error => {
     const status = error?.response?.status;
-
+    console.log('error?.response', error?.response)
     if ([401, 403].includes(status)) {
+      
       // logoutAndRedirect();
     }
     return Promise.reject(error);

@@ -26,7 +26,7 @@ export interface AuthSlice {
   userProfileloading: false;
   loginErrorMessage: any;
   login: (falg: any) => Promise<void>;
-  emailOTPLoading:boolean;
+  emailOTPLoading: boolean;
   sentEmailOTP: (falg: any) => Promise<void>;
   verifyEmailOTP: (falg: any) => Promise<void>;
   setVisible: () => Promise<void>;
@@ -54,7 +54,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   updateSuccess: false,
   userProfileloading: false,
   logoutLoading: false,
-  emailOTPLoading:false,
+  emailOTPLoading: false,
   sentEmailOTP: async payload => {
     try {
       set({
@@ -63,14 +63,14 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       const resp = await sendEmailOTP(payload, {
         token: get().token,
         clientId: get().clientId,
-        bearerToken:get().bearerToken
+        bearerToken: get().bearerToken,
       });
       if (resp) {
         set({
           emailOTPLoading: false,
-          otp:true,
+          otp: true,
         });
-         Toast.show({
+        Toast.show({
           type: 'success',
           text1: 'OTP send Successfully',
           text2: 'Welcome to the app!',
@@ -78,8 +78,8 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           visibilityTime: 1000,
         });
       } else {
-        set({ emailOTPLoading: false});
-         Toast.show({
+        set({emailOTPLoading: false});
+        Toast.show({
           type: 'error',
           text1: 'Something went wrong',
           position: 'bottom',
@@ -87,13 +87,13 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
         });
       }
     } catch (error) {
-      set({ emailOTPLoading: false});
-         Toast.show({
-          type: 'error',
-          text1: 'Something went wrong',
-          position: 'bottom',
-          visibilityTime: 500,
-        });
+      set({emailOTPLoading: false});
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong',
+        position: 'bottom',
+        visibilityTime: 500,
+      });
     }
   },
   verifyEmailOTP: async payload => {
@@ -104,18 +104,19 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       const resp = await verifyEmailOTP(payload, {
         token: get().token,
         clientId: get().clientId,
+        bearerToken: get().bearerToken,
       });
-      if (resp?.token) {
+      if (resp) {
         set({
-          bearerToken: resp.token,
-          user: resp.userInfo,
           visible: false,
           otp: null,
           otpLoading: false,
+          user: {...get().user, isEmailVerified: true},
+          emailOTPLoading: false,
         });
         Toast.show({
           type: 'success',
-          text1: 'Login Successful',
+          text1: 'Email Verified Successfully',
           text2: 'Welcome to the app!',
           position: 'bottom',
           visibilityTime: 1000,
@@ -126,11 +127,18 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           otpLoading: false,
           visible: false,
           updateSuccess: false,
-          loginErrorMessage: resp.msg ? resp.msg : 'Something went wrong',
+          loginErrorMessage: 'Invalid OTP',
+          emailOTPLoading: false,
         });
       }
     } catch (error) {
-      set({loginError: true, updateSuccess: false, otpLoading: false});
+      set({
+        loginError: true,
+        emailOTPLoading: false,
+        updateSuccess: false,
+        otpLoading: false,
+        loginErrorMessage: 'Invalid OTP',
+      });
     }
   },
   login: async payload => {
@@ -148,12 +156,10 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           otpLoading: false,
         });
       } else {
-        set({loginError: true,
-          otp: false,otpLoading: false});
+        set({loginError: true, otp: false, otpLoading: false});
       }
     } catch (error) {
-      set({loginError: true,
-          otp: false, otpLoading: false});
+      set({loginError: true, otp: false, otpLoading: false});
     }
   },
   verifyOTP: async payload => {
@@ -187,11 +193,25 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           otpLoading: false,
           visible: false,
           updateSuccess: false,
-          loginErrorMessage: resp.msg ? resp.msg : 'Something went wrong',
+          loginErrorMessage: payload.otp
+            ? 'Invalid OTP'
+            : 'Something went wrong',
         });
+
+        payload.otp &&
+          Toast.show({
+            type: 'error',
+            text1: 'Invalid OTP.',
+            position: 'bottom',
+          });
       }
     } catch (error) {
-      set({loginError: true, updateSuccess: false, otpLoading: false});
+      set({
+        loginError: true,
+        updateSuccess: false,
+        otpLoading: false,
+        loginErrorMessage: payload.otp ? 'Invalid OTP' : 'Something went wrong',
+      });
     }
   },
   fetchUserDetails: async (flag = false) => {

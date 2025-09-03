@@ -63,13 +63,19 @@ export const onNavigationReady = () => {
 };
 
 const SCREENS: any = {
-  chat: 'Chat',
   detail: 'Details',
-  user: 'user',
-  transaction: 'transaction',
+  transaction: 'Transactions',
   appointments: 'Appointments',
   verifylisting: 'VerifyListing',
   verifybanklist: 'VerifyBankList',
+};
+
+const TabSCREENS: any = {
+  chat: 'Chat',
+  myads: 'MyAds',
+  profile: 'Profile',
+  addpost: 'AddPost',
+  filter: 'filter',
 };
 
 export const navigateByNotification = (notification: INotification) => {
@@ -80,13 +86,15 @@ export const navigateByNotification = (notification: INotification) => {
 
   const {entityType, entityId, metadata} = notification;
 
-  if (!entityType || !SCREENS[entityType]) {
+  if (!entityType) {
     // @ts-ignore
     navigationRef.navigate('Main');
     return;
   }
 
-  const screenName = SCREENS[entityType]; // assuming screen name is same as entityType
+  const screenName = SCREENS?.[entityType]
+    ? SCREENS[entityType]
+    : TabSCREENS[entityType]; // assuming screen name is same as entityType
 
   const params = {
     items: {
@@ -95,8 +103,16 @@ export const navigateByNotification = (notification: INotification) => {
     },
   };
   try {
-    // @ts-ignore
-    navigationRef.navigate(screenName, entityId ? params : {});
+    if (SCREENS[entityType]) {
+      // @ts-ignore
+      navigationRef.navigate(screenName, entityId ? params : {});
+    } else {
+      // @ts-ignore
+      navigationRef.navigate('Main', {
+        screen: 'Chat',
+        params,
+      });
+    }
   } catch (err) {
     // @ts-ignore
     navigationRef.navigate('Main');

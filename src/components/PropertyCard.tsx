@@ -1,16 +1,25 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Platform, useColorScheme} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  useColorScheme,
+} from 'react-native';
 import Image from 'react-native-fast-image';
 import IconButton from '@components/Buttons/IconButton';
 import FeaturedIcon from '@assets/svg/featured.svg';
 import {Fonts} from '@constants/font';
 import FavoriteButton from './FavoriteButton';
-import { useTheme } from '@theme/ThemeProvider';
+import {useTheme} from '@theme/ThemeProvider';
+import useBoundStore from '@stores/index';
 
 const PropertyCard = React.memo(({items, navigation, arg}: any) => {
-    const {theme} = useTheme();
-      const isDarkMode = useColorScheme() === 'dark';
+  const {theme} = useTheme();
+  const isDarkMode = useColorScheme() === 'dark';
+  const {user} = useBoundStore();
   const formatINR = (value: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -52,17 +61,21 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
           resizeMode="contain"
           style={styles.image}
         />
-        <FavoriteButton
-          item={items}
-          tuchableStyle={{
-            position: 'absolute',
-            top: 4,
-            right: 4,
-          }}
-        />
+        {user._id !== items.customerId && (
+          <FavoriteButton
+            item={items}
+            tuchableStyle={{
+              position: 'absolute',
+              top: 4,
+              right: 4,
+            }}
+          />
+        )}
       </View>
       <View style={styles.content}>
-        <Text style={[styles.title, { color: theme.colors.text }]} numberOfLines={2}>
+        <Text
+          style={[styles.title, {color: theme.colors.text}]}
+          numberOfLines={2}>
           {items.title}
         </Text>
         <View style={{flexDirection: 'row'}}>
@@ -71,7 +84,9 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
             iconColor={theme.colors.text}
             iconName={'map-marker'}
           />
-          <Text numberOfLines={1} style={[styles.subtitle, { color: theme.colors.text }]}>
+          <Text
+            numberOfLines={1}
+            style={[styles.subtitle, {color: theme.colors.text}]}>
             {items.address}
           </Text>
         </View>
@@ -95,7 +110,9 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
           )}
         </View>
 
-        <Text style={[styles.price, { color: theme.colors.text }]}>{formatINR(items.price)}</Text>
+        <Text style={[styles.price, {color: theme.colors.text}]}>
+          {formatINR(items.price)}
+        </Text>
       </View>
     </TouchableOpacity>
   );
