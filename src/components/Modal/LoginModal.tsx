@@ -230,6 +230,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
         payload.name = userCredential.user?.displayName ?? '';
         payload.socialProvider = 'apple';
         payload.socialProviderId = 'apple.com';
+        payload.isSocialLogin = true;
         verifyOTP(payload);
       } else {
         Toast.show({

@@ -18,6 +18,7 @@ import {
   Platform,
   Text,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import ChatBubble from './ChatBubble';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -62,8 +63,8 @@ const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
         placeholder="Type Here.."
         value={message}
         onChangeText={setMessage}
-        style={[styles.input,{borderWidth:0.1}]}
-        theme={{roundness: 50,}}
+        style={[styles.input, {borderWidth: 0.1}]}
+        theme={{roundness: 50}}
         outlineColor="#ffffffff"
         activeOutlineColor="#c1c1c1ff"
         keyboardType="web-search"
@@ -98,6 +99,7 @@ const Verification = ({navigation}: any) => {
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
   const [selectedImage, setImage] = React.useState(null);
+  const [imageUploading, setImageUploading] = React.useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -150,6 +152,7 @@ const Verification = ({navigation}: any) => {
 
   const upLoadImage = async (Images: any) => {
     try {
+      setImageUploading(true); // start loader
       let formData = new FormData();
       Images.map((items: any, index: any) => {
         formData.append('images', {
@@ -166,6 +169,8 @@ const Verification = ({navigation}: any) => {
       sendFIles(imageUrls, true);
     } catch (error) {
       return [];
+    } finally {
+      setImageUploading(false); // start loader
     }
   };
 
@@ -237,7 +242,7 @@ const Verification = ({navigation}: any) => {
       bearerToken,
     });
 
-    return fetchBankVerificationDetails(items?.id);
+    // return fetchBankVerificationDetails(items?.id);
   };
 
   const handleSend = async (message: string) => {
@@ -356,6 +361,16 @@ const Verification = ({navigation}: any) => {
             </TouchableOpacity>
           </View>
         )}
+
+        {imageUploading && (
+          <View style={{padding: 10, alignItems: 'center'}}>
+            <ActivityIndicator size="small" color={theme.colors.text} />
+            <Text
+              style={{fontSize: 12, color: theme.colors.text, marginTop: 4}}>
+              Uploading ...
+            </Text>
+          </View>
+        )}
         {items.status !== 'verified' && (
           <ChatFooter
             setAttachModalVisible={setAttachModalVisible}
@@ -369,16 +384,22 @@ const Verification = ({navigation}: any) => {
         visible={attachModalVisible}
         onClose={() => setAttachModalVisible(false)}
         onPickCamera={() => {
-          pickCamera();
           setAttachModalVisible(false);
+          setTimeout(() => {
+            pickCamera(); // your logic
+          }, 100);
         }}
         onPickGallery={() => {
-          pickImageLibrary();
           setAttachModalVisible(false);
+          setTimeout(() => {
+            pickImageLibrary(); // your logic
+          }, 100);
         }}
         onPickDocument={() => {
-          pickDocument();
           setAttachModalVisible(false);
+          setTimeout(() => {
+            pickDocument(); // your logic
+          }, 100);
         }}
       />
     </SafeAreaView>

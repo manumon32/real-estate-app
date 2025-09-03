@@ -18,6 +18,7 @@ import {
   Platform,
   Text,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import ChatBubble from './ChatBubble';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -50,7 +51,11 @@ const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
   const {theme} = useTheme();
 
   return (
-    <View style={[styles.chatcontainer, {backgroundColor: theme.colors.background}]}>
+    <View
+      style={[
+        styles.chatcontainer,
+        {backgroundColor: theme.colors.background},
+      ]}>
       <Icon
         name="plus"
         onPress={() => setAttachModalVisible(true)}
@@ -97,6 +102,7 @@ const Verification = ({navigation}: any) => {
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
   const [selectedImage, setImage] = React.useState(null);
+  const [imageUploading, setImageUploading] = React.useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -141,7 +147,7 @@ const Verification = ({navigation}: any) => {
       if (err.isCancel) {
         console.log('User canceled');
       } else {
-        console.error(err);
+        console.log(err);
       }
     }
   };
@@ -150,7 +156,8 @@ const Verification = ({navigation}: any) => {
     launchCamera(
       {
         mediaType: 'photo',
-        quality: 0.8,saveToPhotos: true,
+        quality: 0.8,
+        saveToPhotos: true,
         cameraType: 'back',
         presentationStyle: 'fullScreen',
         // ✅ Important
@@ -166,6 +173,7 @@ const Verification = ({navigation}: any) => {
 
   const upLoadImage = async (Images: any) => {
     try {
+      setImageUploading(true); // start loader
       let formData = new FormData();
       Images.map((items: any, index: any) => {
         formData.append('images', {
@@ -182,11 +190,14 @@ const Verification = ({navigation}: any) => {
       sendFIles(imageUrls, true);
     } catch (error) {
       return [];
+    } finally {
+      setImageUploading(false); // start loader
     }
   };
 
   const upLoadDoc = async (docs: any) => {
     try {
+      setImageUploading(true); // start loader
       let formData = new FormData();
       docs.map((items: any) => {
         formData.append('documents', {
@@ -203,6 +214,9 @@ const Verification = ({navigation}: any) => {
       sendFIles(imageUrls);
     } catch (error) {
       return [];
+    }finally{
+
+      setImageUploading(false); // start loader
     }
   };
   const sendFIles = (imageUrls: any, image = false) => {
@@ -233,7 +247,7 @@ const Verification = ({navigation}: any) => {
       bearerToken,
     });
 
-    return fetchverificationDetails(items?.id);
+    // return fetchverificationDetails(items?.id);
   };
 
   const handleSend = async (message: string) => {
@@ -258,7 +272,7 @@ const Verification = ({navigation}: any) => {
     }
   };
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <CommonHeader
         title={items?.user?.name ?? 'Verify Listing'}
         textColor="#171717"
@@ -325,27 +339,24 @@ const Verification = ({navigation}: any) => {
             </Surface>
           </TouchableRipple>
         )}
-          <FlatList
-            inverted
-            data={[...verificationDetails].reverse()}
-            renderItem={renderAdItem}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{
-              backgroundColor: theme.colors.background,
-              paddingBottom: 24,
-              flexGrow: 1,
-              minHeight: '90%',
-            }}
-            ListHeaderComponentStyle={{
-              padding: 0,
-              backgroundColor: theme.colors.background,
-            }}
-            showsVerticalScrollIndicator={false}
-            ListFooterComponent={
-              <>
-              </>
-            }
-          />
+        <FlatList
+          inverted
+          data={[...verificationDetails].reverse()}
+          renderItem={renderAdItem}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            backgroundColor: theme.colors.background,
+            paddingBottom: 24,
+            flexGrow: 1,
+            minHeight: '90%',
+          }}
+          ListHeaderComponentStyle={{
+            padding: 0,
+            backgroundColor: theme.colors.background,
+          }}
+          showsVerticalScrollIndicator={false}
+          ListFooterComponent={<></>}
+        />
         {/* <SlideToRecordButton
           onSend={filePath => {
             console.log('📤 Sending audio file:', filePath);
@@ -369,6 +380,16 @@ const Verification = ({navigation}: any) => {
             </TouchableOpacity>
           </View>
         )}
+
+        {imageUploading && (
+          <View style={{padding: 10, alignItems: 'center'}}>
+            <ActivityIndicator size="small" color={theme.colors.text} />
+            <Text
+              style={{fontSize: 12, color: theme.colors.text, marginTop: 4}}>
+              Uploading ...
+            </Text>
+          </View>
+        )}
         {!detailsBackUp?.isVerified && (
           <ChatFooter
             setAttachModalVisible={setAttachModalVisible}
@@ -382,16 +403,22 @@ const Verification = ({navigation}: any) => {
         visible={attachModalVisible}
         onClose={() => setAttachModalVisible(false)}
         onPickCamera={() => {
-          pickCamera(); // your logic
           setAttachModalVisible(false);
+          setTimeout(() => {
+            pickCamera(); // your logic
+          }, 100);
         }}
         onPickGallery={() => {
-          pickImageLibrary(); // your logic
           setAttachModalVisible(false);
+          setTimeout(() => {
+            pickImageLibrary(); // your logic
+          }, 100);
         }}
         onPickDocument={() => {
-          pickDocument(); // your logic
           setAttachModalVisible(false);
+          setTimeout(() => {
+            pickDocument(); // your logic
+          }, 100);
         }}
       />
     </SafeAreaView>

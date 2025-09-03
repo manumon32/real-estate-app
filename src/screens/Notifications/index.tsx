@@ -134,7 +134,8 @@ export default function NotificationListSwipe() {
               n._id === item._id ? {...n, read: true} : n,
             );
             updateNotifications(updated);
-            navigateByNotification(item as any as INotification);
+            markAllAsRead(item._id);
+            // navigateByNotification(item as any as INotification);
           }
         }}>
         <View style={styles.row}>
@@ -207,12 +208,13 @@ export default function NotificationListSwipe() {
     }
   };
 
-  const markAllAsRead = async () => {
+  const markAllAsRead = async (notificationId = null) => {
     const body = {
-      notifications:
-        selectedNotification.length === notifications_List.length
-          ? 'all'
-          : selectedNotification,
+      notifications: notificationId
+        ? [notificationId]
+        : selectedNotification.length === notifications_List.length
+        ? 'all'
+        : selectedNotification,
     };
     try {
       await markAllReadNotificationsAPI(body, {
@@ -220,20 +222,24 @@ export default function NotificationListSwipe() {
         clientId,
         bearerToken,
       });
-      Toast.show({
-        type: 'success',
-        text1: 'Notifications marked as read successfully',
-        position: 'bottom',
-      });
-      clearSelection();
-      fetchNotifications();
+      if (!notificationId) {
+        Toast.show({
+          type: 'success',
+          text1: 'Notifications marked as read successfully',
+          position: 'bottom',
+        });
+        clearSelection();
+        fetchNotifications();
+      }
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Failed to mark notifications as read',
-        position: 'bottom',
-      });
-      console.error('Error marking notifications as read:', error);
+      if (!notificationId) {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to mark notifications as read',
+          position: 'bottom',
+        });
+        console.error('Error marking notifications as read:', error);
+      }
       return;
     }
   };
@@ -256,9 +262,11 @@ export default function NotificationListSwipe() {
         title="Notifications"
         textColor={theme.colors.text}
         rightIcon={
-          notifications_List.length > 0 ? !selectAll
-            ? 'checkbox-blank-outline'
-            : 'checkbox-marked-outline': false
+          notifications_List.length > 0
+            ? !selectAll
+              ? 'checkbox-blank-outline'
+              : 'checkbox-marked-outline'
+            : false
         }
         onRightPress={() => {
           if (notifications_List.length > 0) {

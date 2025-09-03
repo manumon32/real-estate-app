@@ -23,11 +23,9 @@ import useBoundStore from '@stores/index';
 
 function Header(props: any): React.JSX.Element {
   const {details} = props;
-    const route = useRoute();
-  const {items}: any = route.params;
   const {theme} = useTheme();
   const navigation = useNavigation();
-  const {user} = useBoundStore();
+  const {user, detailLoading} = useBoundStore();
   const [visible, setVisible] = useState(false);
   const {width} = Dimensions.get('window');
   const [modalVisible, setModalVisible] = useState(false);
@@ -116,14 +114,14 @@ function Header(props: any): React.JSX.Element {
                 iconName={'heart-outline'}
               />
             </TouchableOpacity> */}
-            {
-              (!user?._id || user?._id !== items.customerId) && (
-                <FavoriteButton
-                  IconButtonStyle={styles.heartRight}
-                  iconSize={24}
-                  item={details}
-                />
-              )}
+            {((!detailLoading && (!user?._id) ||
+              user?._id !== details?.customerId?._id)) && (
+              <FavoriteButton
+                IconButtonStyle={styles.heartRight}
+                iconSize={24}
+                item={details}
+              />
+            )}
           </View>
         </View>
         <Carousel

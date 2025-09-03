@@ -18,6 +18,7 @@ import {
   // ActivityIndicator,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import ChatBubble from './ChatBubble';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -381,7 +382,7 @@ const Chat = React.memo(({navigation}: any) => {
         )}
         {imageUploading && (
           <View style={{padding: 10, alignItems: 'center'}}>
-            <ActivityIndicator size="small" color={theme.colors.primary} />
+            <ActivityIndicator size="small" color={theme.colors.text} />
             <Text
               style={{fontSize: 12, color: theme.colors.text, marginTop: 4}}>
               Uploading image...
@@ -401,13 +402,13 @@ const Chat = React.memo(({navigation}: any) => {
       <AttachFileModal
         visible={attachModalVisible}
         onClose={() => setAttachModalVisible(false)}
-        onPickCamera={() => {
-          pickCamera(); // your logic
-          setAttachModalVisible(false);
+        onPickGallery={async () => {
+          await setAttachModalVisible(false);
+          setTimeout(() => pickImageLibrary(), 100); // 👈 delay closing
         }}
-        onPickGallery={() => {
-          pickImageLibrary(); // your logic
-          setAttachModalVisible(false);
+        onPickCamera={async () => {
+          await pickCamera();
+          setTimeout(() => setAttachModalVisible(false), 200);
         }}
         onPickDocument={() => {
           // pickDocument(); // your logic

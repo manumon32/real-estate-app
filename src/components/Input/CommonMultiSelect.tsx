@@ -84,14 +84,17 @@ export function CommonMultiSelect<V = string | number>({
             Clear all
           </Chip>
         )}
-        {selectedOptions.map(opt => (
-          <Chip
-            key={String(opt._id)}
-            onClose={() => toggle(opt._id)}
-            style={styles.chip}>
-            {opt.name}
-          </Chip>
-        ))}
+        {selectedOptions.map(
+          opt =>
+            opt.name && (
+              <Chip
+                key={String(opt._id)}
+                onClose={() => toggle(opt._id)}
+                style={styles.chip}>
+                {opt.name}
+              </Chip>
+            ),
+        )}
       </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -127,10 +130,10 @@ export function CommonMultiSelect<V = string | number>({
                 return item.name && item._id ? (
                   <TouchableOpacity
                     style={styles.row}
-                    onPress={() => toggle(item._id)}>
+                    onPress={() => item._id && toggle(item._id)}>
                     <Checkbox
                       status={checked ? 'checked' : 'unchecked'}
-                      onPress={() => toggle(item._id)}
+                      onPress={() => item._id && toggle(item._id)}
                     />
                     <Text style={styles.rowLabel}>{item.name}</Text>
                   </TouchableOpacity>
@@ -180,7 +183,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     maxHeight: '80%',
     paddingHorizontal: 16,
-    paddingVertical:25,
+    paddingVertical: 25,
     paddingTop: 12,
   },
   header: {
