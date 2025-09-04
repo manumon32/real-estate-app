@@ -40,7 +40,10 @@ const FavAds = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 100,
-          backgroundColor: theme.colors.background,
+          backgroundColor:
+            favorites.length <= 0
+              ? theme.colors.background
+              : theme.colors.backgroundHome,
           minHeight: 900,
         }}
         refreshControl={

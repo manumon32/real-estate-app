@@ -43,7 +43,7 @@ const FormattedDate = (arg: string | number | Date) => {
     hour12: true,
   };
 
-  const FormattedDate = `Repoted on ${date
+  const FormattedDate = `Reported on ${date
     .toLocaleString('en-US', options)
     .replace(':', '.')}`;
   return FormattedDate;

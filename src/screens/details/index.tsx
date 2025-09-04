@@ -12,6 +12,8 @@ import {
   Pressable,
   useColorScheme,
   Alert,
+  Linking,
+  TouchableOpacity,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Image from 'react-native-fast-image';
@@ -231,6 +233,23 @@ const PropertyDetails = React.memo(() => {
         position: 'bottom',
       });
     }
+  };
+
+  const openMap = (latitude: any, longitude: any) => {
+    const scheme = Platform.select({
+      ios: 'maps:0,0?q=',
+      android: 'geo:0,0?q=',
+    });
+    const latLng = `${latitude},${longitude}`;
+    const label = 'Custom Location';
+    const url = Platform.select({
+      ios: `${scheme}${label}@${latLng}`,
+      android: `${scheme}${latLng}(${label})`,
+    });
+
+    Linking.openURL(url!).catch(() => {
+      Alert.alert('Error', 'Unable to open the map app.');
+    });
   };
 
   const Footer = ({details, bearerToken, createRoom, setVisible}: any) => {
@@ -456,7 +475,7 @@ const PropertyDetails = React.memo(() => {
                   : formatINR(items?.price)}
               </Text>
               <Text style={[styles.squrft, {color: theme.colors.text}]}>
-                ({property?.areaSize}/ Sq.ft)
+                ({property?.areaSize}/ sq.ft)
               </Text>
               <View style={styles.nogotiable}>
                 <Text style={styles.nogotiableText}>Negotiable</Text>
@@ -629,13 +648,18 @@ const PropertyDetails = React.memo(() => {
                   // top: 15,
                   margin: 16,
                   padding: 16,
-                  backgroundColor: '#2F8D79',
+                  backgroundColor:
+                    property?.appointmentStatus === 'pending'
+                      ? '#ea860bff'
+                      : '#2F8D79',
                   borderRadius: 10,
                   height: 56,
                   alignItems: 'center',
                   flexDirection: 'row',
                   borderWidth: 1,
-                  borderColor: '#88E4CF',
+                  borderColor:  property?.appointmentStatus === 'pending'
+                      ? '#ea860bff'
+                      : '#2F8D79',
                 }}>
                 <IconButton
                   iconSize={24}
@@ -659,7 +683,7 @@ const PropertyDetails = React.memo(() => {
                     {property?.appointmentStatus === 'active'
                       ? 'Plan a Site Visit'
                       : property?.appointmentStatus === 'pending'
-                      ? 'Your Visit rquest is pending'
+                      ? 'Your Visit request is pending'
                       : property?.appointmentStatus === 'scheduled'
                       ? 'Your Visit is Scheduled'
                       : 'Plan a Site Visit'}
@@ -727,7 +751,7 @@ const PropertyDetails = React.memo(() => {
                 <Text
                   numberOfLines={1}
                   style={[styles.iconsTextStle, {color: '#171717'}]}>
-                  {'Sq.ft'}
+                  {'sq.ft'}
                 </Text>
               </View>
               {property?.loanEligible && (
@@ -931,7 +955,7 @@ const PropertyDetails = React.memo(() => {
                         {'Area Size'}
                       </Text>
                       <Text style={[styles.value, sectionColor]}>
-                        {property?.areaSize} /{'Sq.ft'}
+                        {property?.areaSize} /{'sq.ft'}
                       </Text>
                     </View>
                   ) : (
@@ -946,7 +970,7 @@ const PropertyDetails = React.memo(() => {
                         {property?.carpetArea} /
                         {property?.carpetAreaUnitId?.name
                           ? property?.carpetAreaUnitId?.name
-                          : 'Sq.ft'}
+                          : 'sq.ft'}
                       </Text>
                     </View>
                   ) : (
@@ -961,7 +985,7 @@ const PropertyDetails = React.memo(() => {
                         {property?.builtUpArea} /
                         {property?.builtUpAreaUnitId?.name
                           ? property?.builtUpAreaUnitId?.name
-                          : 'Sq.ft'}
+                          : 'sq.ft'}
                       </Text>
                     </View>
                   ) : (
@@ -976,7 +1000,7 @@ const PropertyDetails = React.memo(() => {
                         {property?.superBuiltUpArea} /
                         {property?.superBuiltAreaUnitId?.name
                           ? property?.superBuiltAreaUnitId?.name
-                          : 'Sq.ft'}
+                          : 'sq.ft'}
                       </Text>
                     </View>
                   ) : (
@@ -1049,14 +1073,38 @@ const PropertyDetails = React.memo(() => {
                 </Pressable>
               </View>
             )}
+            <TouchableOpacity
+              onPress={() => {
+                openMap(
+                  property?.location?.coordinates[1],
+                  property?.location?.coordinates[0],
+                );
+              }}>
+              {Platform.OS === 'android' &&
+                isValidLatLng(
+                  property?.location?.coordinates[1],
+                  property?.location?.coordinates[0],
+                ) && (
+                  <MapView
+                    provider={PROVIDER_GOOGLE}
+                    style={styles.map}
+                    region={{
+                      latitude: Number(property?.location?.coordinates[1]),
+                      longitude: Number(property?.location?.coordinates[0]),
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    }}>
+                    <Marker
+                      coordinate={{
+                        latitude: Number(property?.location?.coordinates[1]),
+                        longitude: Number(property?.location?.coordinates[0]),
+                      }}
+                    />
+                  </MapView>
+                )}
 
-            {Platform.OS === 'android' &&
-              isValidLatLng(
-                property?.location?.coordinates[1],
-                property?.location?.coordinates[0],
-              ) && (
+              {Platform.OS !== 'android' && (
                 <MapView
-                  provider={PROVIDER_GOOGLE}
                   style={styles.map}
                   region={{
                     latitude: Number(property?.location?.coordinates[1]),
@@ -1072,24 +1120,7 @@ const PropertyDetails = React.memo(() => {
                   />
                 </MapView>
               )}
-
-            {Platform.OS !== 'android' && (
-              <MapView
-                style={styles.map}
-                region={{
-                  latitude: Number(property?.location?.coordinates[1]),
-                  longitude: Number(property?.location?.coordinates[0]),
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}>
-                <Marker
-                  coordinate={{
-                    latitude: Number(property?.location?.coordinates[1]),
-                    longitude: Number(property?.location?.coordinates[0]),
-                  }}
-                />
-              </MapView>
-            )}
+            </TouchableOpacity>
 
             <View
               style={{

@@ -9,6 +9,8 @@ import {
   View,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import useBoundStore from '@stores/index';
@@ -34,8 +36,8 @@ const BankSelectModal = ({
       return {
         ...bank,
         ...{
-          name: bank.bankId.name,
-          logoUrl: bank.bankId.logoUrl,
+          name: bank?.bankId?.name,
+          logoUrl: bank?.bankId?.logoUrl,
         }, // spread bankId fields into top-level
       };
     });
@@ -50,30 +52,32 @@ const BankSelectModal = ({
   }, [enrichedBanks, search]);
 
   const renderItem = ({item}: {item: any}) => (
-    <List.Item
-      title={item.name}
-      onPress={() => {
-        onSelect(item);
-        // onDismiss();
-      }}
-      left={() => (
-        <Image
-          source={{uri: item.logoUrl}}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      )}
-      right={() =>
-        item.status === 'verified' ? (
-          <MaterialCommunityIcons
-            name="check-circle-outline"
-            size={20}
-            color={theme.colors.primary}
-            style={{marginTop: 8, marginRight: 8}}
+    <>
+      <List.Item
+        title={item.name}
+        onPress={() => {
+          onSelect(item);
+          // onDismiss();
+        }}
+        left={() => (
+          <Image
+            source={{uri: item.logoUrl}}
+            style={styles.logo}
+            resizeMode="contain"
           />
-        ) : null
-      }
-    />
+        )}
+        right={() =>
+          item.status === 'verified' ? (
+            <MaterialCommunityIcons
+              name="check-circle-outline"
+              size={20}
+              color={theme.colors.primary}
+              style={{marginTop: 8, marginRight: 8}}
+            />
+          ) : null
+        }
+      />
+    </>
   );
 
   return (
@@ -86,37 +90,45 @@ const BankSelectModal = ({
       <TouchableWithoutFeedback onPress={onDismiss}>
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>
-      <View style={styles.modalContainer}>
-        <Text style={styles.title}>Select Your Bank</Text>
-        <TextInput
-          mode="outlined"
-          placeholder="Search bank..."
-          value={search}
-          onChangeText={setSearch}
-          style={styles.input}
-          left={<TextInput.Icon icon="magnify" />}
-        />
-        <FlatList
-          data={filteredBanks}
-          keyExtractor={(item: any) => item?._id}
-          renderItem={renderItem}
-          keyboardShouldPersistTaps="handled"
-          ListFooterComponent={
-            <>
-              {filteredBanks.length <= 0 && bankVerification_loading ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" />
-                </View>
-              ) : (
-                <></>
-              )}
-            </>
-          }
-        />
-        <Button onPress={onDismiss} style={styles.closeBtn}>
-          Cancel
-        </Button>
-      </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+        <View style={styles.overlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.title}>Select Your Bank</Text>
+            <TextInput
+              mode="outlined"
+              placeholder="Search bank..."
+              value={search}
+              onChangeText={setSearch}
+              style={styles.input}
+              left={<TextInput.Icon icon="magnify" />}
+            />
+            <View style={{maxHeight:250}}>
+            <FlatList
+              data={filteredBanks}
+              keyExtractor={(item: any) => item?._id}
+              renderItem={renderItem}
+              keyboardShouldPersistTaps="handled"
+              ListFooterComponent={
+                <>
+                  {filteredBanks.length <= 0 && bankVerification_loading ? (
+                    <View style={styles.loadingContainer}>
+                      <ActivityIndicator size="large" />
+                    </View>
+                  ) : (
+                    <></>
+                  )}
+                </>
+              }
+            />
+            </View>
+            <Button onPress={onDismiss} style={styles.closeBtn}>
+              Cancel
+            </Button>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };

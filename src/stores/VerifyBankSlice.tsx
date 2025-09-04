@@ -51,6 +51,7 @@ export const createBankVerificationSlice = (
       let newPayload = {
         filter_propertyId: payload,
         populate: 'bankId',
+        // noPagination: true,
       };
 
       const res = await fetchVerifiedBankAPI(newPayload, {
@@ -73,19 +74,15 @@ export const createBankVerificationSlice = (
       bankVerification_page: 0,
     });
     try {
-      await startBankVerificationAPI(
+      const res = await startBankVerificationAPI(
         {propertyId: payload},
         {
           token: get().token,
           clientId: get().clientId,
           bearerToken: get().bearerToken,
         },
-      ).catch(error => {
-        console.warn('startBankVerificationAPI failed:', error);
-      });
-      set({
-        bankVerification_loading: false,
-      });
+      );
+      set({bankVerification_loading: false, banks: res.rows});
     } catch (err: any) {
       // navigate('VerifyListing', {items: {id: '6853e34e05711055c493ff3b'}});
       set({

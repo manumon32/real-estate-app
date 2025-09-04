@@ -252,16 +252,26 @@ const EditProfile = () => {
                   </TouchableOpacity>
                 ) : (
                   email && (
-                    <Text
-                      style={{
-                        color: 'green',
-                        fontSize: 12,
-                        textDecorationLine: 'underline',
-                        cursor: 'pointer',
-                        marginLeft: 15,
-                      }}>
-                      Verified
-                    </Text>
+                    <TouchableOpacity
+                    // onPress={() => {
+                    //   setLoginVar('email');
+                    //   setLoginType(email);
+                    //   sentEmailOTP({
+                    //     email: email,
+                    //   });
+                    // }}
+                    >
+                      <Text
+                        style={{
+                          color: 'green',
+                          fontSize: 12,
+                          textDecorationLine: 'underline',
+                          cursor: 'pointer',
+                          marginLeft: 15,
+                        }}>
+                        Verified
+                      </Text>
+                    </TouchableOpacity>
                   )
                 )}
                 <View style={styles.inputContainer}>
@@ -321,6 +331,30 @@ const EditProfile = () => {
                   )
                 )}
               </ScrollView>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 6,
+                  paddingHorizontal: 12,
+                }}>
+                <MaterialCommunityIcons
+                  name="information"
+                  size={16}
+                  color="red"
+                  style={{marginRight: 6}}
+                />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: 'red',
+                    textAlign: 'center',
+                    flexShrink: 1,
+                  }}>
+                  Phone number and email can only be saved after verification.
+                </Text>
+              </View>
               <View style={{padding: 12}}>
                 <TouchableOpacity
                   onPress={async () => {

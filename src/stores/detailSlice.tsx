@@ -129,6 +129,7 @@ export const createDetailSlice = (set: any, get: any): DetailSlice => ({
       const res = await fetchDetailsAPI(id, {
         token: get().token,
         clientId: get().clientId,
+        bearerToken: get().bearerToken,
       });
       res &&
         set(() => ({

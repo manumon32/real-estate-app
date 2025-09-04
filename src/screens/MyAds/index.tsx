@@ -26,7 +26,6 @@ import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
 import Toast from 'react-native-toast-message';
 import NoChats from '@components/NoChatFound';
-// import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
   title: string;
@@ -41,6 +40,7 @@ interface ListingCardProps {
   markasSold?: any;
   makePayment: any;
   theme: any;
+  openBoostPopup: (ad: any) => void;
 }
 
 const FormattedDate = (arg: string | number | Date) => {
@@ -92,6 +92,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   markasSold,
   makePayment,
   theme,
+  openBoostPopup,
 }) => {
   const isDarkMode = useColorScheme() === 'dark';
   const {label, backgroundColor, textColor} = useMemo(() => {
@@ -244,7 +245,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
         )}
         {label === 'Active' && !items.isFeatured && (
           <TouchableOpacity
-            onPress={() => makePayment(items._id)}
+            onPress={() => openBoostPopup(items)}
             style={styles.boostButton}>
             <Text style={styles.boostButtonText}>Boost your Ad</Text>
           </TouchableOpacity>
@@ -272,6 +273,8 @@ const MyAds = () => {
   const {theme} = useTheme();
   const [filterBy, setFilterBy] = useState<any>(null);
   const [paymentLoading, setPaymentLoading] = useState<any>(false);
+  const [selectedAd, setSelectedAd] = useState<any>(null);
+  const [showBoostPopup, setShowBoostPopup] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -279,16 +282,6 @@ const MyAds = () => {
       fetchMyAds();
     }, []),
   );
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     if (paymentLoading) {
-  //       navigation.getParent()?.setOptions({tabBarStyle: {display: 'none'}});
-  //     } else {
-  //       navigation.getParent()?.setOptions({tabBarStyle: {display: 'flex'}});
-  //     }
-  //   }, [paymentLoading]),
-  // );
 
   const markasSold = async (id: string) => {
     let payload = {
@@ -319,38 +312,11 @@ const MyAds = () => {
       });
     }
   };
-  const renderAdItem = useCallback(
-    (items: any) => {
-      return (
-        <ListingCard
-          title={items.item?.title || ''}
-          location={items.item?.address || ''}
-          price={items.item?.price}
-          status={items.item?.adStatus}
-          date={items.item?.createdAt}
-          views={items.item?.viewsCount}
-          navigation={navigation}
-          items={items.item}
-          makePayment={makePayment}
-          theme={theme}
-          imageUrl={
-            items.item?.imageUrls[0]
-              ? items.item?.imageUrls[0]
-              : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM='
-          }
-          markasSold={markasSold}
-        />
-      );
-    },
-    [navigation],
-  );
 
   const makePayment = useCallback(
     async (id: any) => {
       setPaymentLoading(true);
       try {
-        console.log('managePlansList', managePlansList);
-        // @ts-ignore
         const featuredPlan: any = managePlansList?.[0] ?? null;
         if (featuredPlan) {
           const paymentPayload = {
@@ -390,6 +356,36 @@ const MyAds = () => {
     [managePlansList, uploadParams, user, fetchMyAds, fetchPlans],
   );
 
+  const renderAdItem = useCallback(
+    (items: any) => {
+      return (
+        <ListingCard
+          title={items.item?.title || ''}
+          location={items.item?.address || ''}
+          price={items.item?.price}
+          status={items.item?.adStatus}
+          date={items.item?.createdAt}
+          views={items.item?.viewsCount}
+          navigation={navigation}
+          items={items.item}
+          makePayment={makePayment}
+          theme={theme}
+          imageUrl={
+            items.item?.imageUrls[0]
+              ? items.item?.imageUrls[0]
+              : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM='
+          }
+          markasSold={markasSold}
+          openBoostPopup={(ad: any) => {
+            setSelectedAd(ad);
+            setShowBoostPopup(true);
+          }}
+        />
+      );
+    },
+    [navigation],
+  );
+
   return (
     <SafeAreaView
       style={{backgroundColor: theme.colors.background, height: '100%'}}>
@@ -410,15 +406,10 @@ const MyAds = () => {
           paddingBottom: 120,
           backgroundColor: theme.colors.background,
           minHeight: 900,
-          //  padding: 14,
         }}
         ListHeaderComponent={
           <>
-            <CommonHeader
-              title="My Ads"
-              textColor="#171717"
-              // onBackPress={onBackPress}
-            />
+            <CommonHeader title="My Ads" textColor="#171717" />
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -431,7 +422,6 @@ const MyAds = () => {
                 }}>
                 <Text
                   style={[
-                    // newselected?.includes(item._id)
                     styles.chipText,
                     {color: theme.colors.text},
                     !filterBy && styles.chipTextSelected,
@@ -452,7 +442,6 @@ const MyAds = () => {
                     }}>
                     <Text
                       style={[
-                        // newselected?.includes(item._id)
                         styles.chipText,
                         {color: theme.colors.text},
                         filterBy === AdStatusEnum[items] &&
@@ -466,9 +455,7 @@ const MyAds = () => {
             </ScrollView>
           </>
         }
-        ListHeaderComponentStyle={{
-          padding: 0,
-        }}
+        ListHeaderComponentStyle={{padding: 0}}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -477,7 +464,7 @@ const MyAds = () => {
               fetchMyAds();
               fetchPlans();
             }}
-            colors={['#40DABE', '#40DABE', '#227465']}
+            colors={['#2A9D8F', '#2A9D8F', '#227465']}
           />
         }
         ListFooterComponent={
@@ -517,17 +504,50 @@ const MyAds = () => {
           </>
         }
       />
+
+      {/* Boost Popup */}
+      {showBoostPopup && selectedAd && (
+        <View style={styles.popupOverlay}>
+          <View style={styles.popupContainer}>
+            <Text style={styles.popupTitle}>Boost Your Ad</Text>
+            <Text style={styles.popupAmount}>
+              Amount: ₹{managePlansList?.[0]?.price ?? 'N/A'}
+            </Text>
+            <Text style={styles.popupBenefits}>
+              Benefits:
+              {'\n'}• Get more visibility
+              {'\n'}• Reach more buyers
+              {'\n'}• Highlight your ad at the top
+            </Text>
+            <View style={styles.popupActions}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowBoostPopup(false)}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.continueButton}
+                onPress={() => {
+                  setShowBoostPopup(false);
+                  makePayment(selectedAd._id);
+                }}>
+                <Text style={styles.continueButtonText}>Continue</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject, // fills the screen
-    backgroundColor: 'rgba(0, 0, 0, 0.78)', // transparent dark overlay
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.78)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 999, // ensure it's on top
+    zIndex: 999,
   },
   card: {
     backgroundColor: '#fff',
@@ -608,64 +628,99 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 10,
-    paddingVertical: 10,
-    marginHorizontal: 4,
+    paddingVertical: 8,
+    marginRight: 8,
     alignItems: 'center',
   },
-
+  buttonText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
   boostButton: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: 'green',
-    backgroundColor: 'green',
+    backgroundColor: '#2A9D8F',
     borderRadius: 10,
-    paddingVertical: 10,
-    marginHorizontal: 4,
+    paddingVertical: 8,
     alignItems: 'center',
   },
   boostButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
     color: '#fff',
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  endText: {
-    textAlign: 'center',
-    color: '#000',
-    padding: 12,
-    fontWeight: 500,
-    fontFamily: Fonts.BOLD,
-    top: -30,
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+    fontWeight: '600',
+    fontSize: 13,
   },
   chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ccc',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginRight: 5,
-    // marginBottom: 5,
+    marginRight: 10,
   },
   chipSelected: {
     backgroundColor: '#2A9D8F',
     borderColor: '#2A9D8F',
   },
   chipText: {
-    color: '#333',
+    fontSize: 13,
   },
   chipTextSelected: {
     color: '#fff',
+    fontWeight: '600',
+  },
+  popupOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  popupContainer: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+  },
+  popupTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  popupAmount: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  popupBenefits: {
+    fontSize: 13,
+    color: '#555',
+    marginBottom: 16,
+  },
+  popupActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  cancelButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#ddd',
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  continueButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#2A9D8F',
+    borderRadius: 8,
+  },
+  continueButtonText: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '600',
   },
 });
 

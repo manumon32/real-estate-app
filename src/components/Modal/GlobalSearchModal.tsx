@@ -460,7 +460,7 @@ const GlobalSearchModal: React.FC<Props> = ({
                 // keyboardType="web-search"
                 returnKeyType="search"
                 placeholder="Search"
-                placeholderTextColor={theme.colors.background}
+                placeholderTextColor={theme.colors.text}
                 style={[styles.input]}
                 onFocus={() => setFocusedIndex(0)} // 👈 "Search" box focused
                 onBlur={() => setFocusedIndex(null)}
@@ -471,14 +471,16 @@ const GlobalSearchModal: React.FC<Props> = ({
                   handleSearch(false, false);
                 }}
               />
-              <MaterialCommunityIcons
-                name="close"
-                size={20}
-                color="#696969"
-                onPress={() => {
-                  setFilterBy('');
-                }}
-              />
+              {filterBy.length > 0 && (
+                <MaterialCommunityIcons
+                  name="close"
+                  size={20}
+                  color="#696969"
+                  onPress={() => {
+                    setFilterBy('');
+                  }}
+                />
+              )}
             </View>
 
             {focusedIndex === 0 &&
@@ -519,14 +521,17 @@ const GlobalSearchModal: React.FC<Props> = ({
                 autoCorrect={false} // disables autocorrect
               />
 
-              <MaterialCommunityIcons
-                name="close"
-                size={20}
-                color="#696969"
-                onPress={() => {
-                  setQuery('');
-                }}
-              />
+              {query.length > 0 && (
+                <MaterialCommunityIcons
+                  name="close"
+                  size={20}
+                  color="#696969"
+                  onPress={() => {
+                    setQuery('');
+                    setPredictions([]);
+                  }}
+                />
+              )}
             </View>
 
             {focusedIndex === 0 && searchHistory.length > 0 && (

@@ -28,7 +28,7 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {sendBankDetails, uploadDocuments, uploadImages} from '@api/services';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {pick} from '@react-native-documents/picker';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -299,8 +299,14 @@ const Verification = ({navigation}: any) => {
                 )}
                 {items.status === 'pending' && (
                   <Text style={[styles.text, {color: theme.colors.text}]}>
-                    loan process is still in progress, You can still upload any
+                    loan process is in progress, You can still upload any
                     documents you have for it.
+                  </Text>
+                )}
+                {!items.status && (
+                  <Text style={[styles.text, {color: theme.colors.text}]}>
+                    we will asiign an agent for the further proceedings, You can
+                    still upload any documents you have for it.
                   </Text>
                 )}
                 {items.status === 'rejected' && (

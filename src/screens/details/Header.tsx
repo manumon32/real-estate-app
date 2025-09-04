@@ -114,14 +114,14 @@ function Header(props: any): React.JSX.Element {
                 iconName={'heart-outline'}
               />
             </TouchableOpacity> */}
-            {((!detailLoading && (!user?._id) ||
-              user?._id !== details?.customerId?._id)) && (
-              <FavoriteButton
-                IconButtonStyle={styles.heartRight}
-                iconSize={24}
-                item={details}
-              />
-            )}
+            {!detailLoading &&
+              (user?._id !== details?.customerId?._id ||   !user?._id ) && (
+                <FavoriteButton
+                  IconButtonStyle={styles.heartRight}
+                  iconSize={24}
+                  item={details}
+                />
+              )}
           </View>
         </View>
         <Carousel

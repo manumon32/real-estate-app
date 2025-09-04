@@ -62,6 +62,7 @@ export default function NotificationListSwipe() {
     token,
     clientId,
     bearerToken,
+    updateNotificationCount,
   } = useBoundStore();
   const {theme} = useThemes();
   const [refreshing, setRefreshing] = useState(false);
@@ -134,7 +135,7 @@ export default function NotificationListSwipe() {
               n._id === item._id ? {...n, read: true} : n,
             );
             updateNotifications(updated);
-            // markAllAsRead(item._id);
+            markAllAsRead(item._id);
             navigateByNotification(item as any as INotification);
           }
         }}>
@@ -217,7 +218,7 @@ export default function NotificationListSwipe() {
         : selectedNotification,
     };
     try {
-      await markAllReadNotificationsAPI(body, {
+      const res = await markAllReadNotificationsAPI(body, {
         token,
         clientId,
         bearerToken,
@@ -228,6 +229,8 @@ export default function NotificationListSwipe() {
           text1: 'Notifications marked as read successfully',
           position: 'bottom',
         });
+        console.log(res)
+        updateNotificationCount(0)
         clearSelection();
         fetchNotifications();
       }

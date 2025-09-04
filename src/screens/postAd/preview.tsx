@@ -169,7 +169,7 @@ const PropertyDetails = React.memo((props: any) => {
               />
               {property?.price ? property?.price : items?.price}
             </Text>
-            <Text style={styles.squrft}>({property?.areaSize}/ Sq.ft)</Text>
+            <Text style={styles.squrft}>({property?.areaSize}/ sq.ft)</Text>
             <View style={styles.nogotiable}>
               <Text style={styles.nogotiableText}>Negotiable</Text>
             </View>
@@ -480,7 +480,7 @@ const PropertyDetails = React.memo((props: any) => {
                 {property?.carpetArea} /
                 {property?.carpetAreaUnitId?.name
                   ? property?.carpetAreaUnitId?.name
-                  : 'Sq.ft'}
+                  : 'sq.ft'}
               </Text>
             </View>
           )}
@@ -491,7 +491,7 @@ const PropertyDetails = React.memo((props: any) => {
                 {property?.builtUpArea} /
                 {property?.builtUpAreaUnitId?.name
                   ? property?.builtUpAreaUnitId?.name
-                  : 'Sq.ft'}
+                  : 'sq.ft'}
               </Text>
             </View>
           )}
@@ -503,7 +503,7 @@ const PropertyDetails = React.memo((props: any) => {
                 {property?.superBuiltUpArea} /
                 {property?.superBuiltAreaUnitId?.name
                   ? property?.superBuiltAreaUnitId?.name
-                  : 'Sq.ft'}
+                  : 'sq.ft'}
               </Text>
             </View>
           )}

@@ -51,7 +51,7 @@ const FormattedDate = (arg: string | number | Date) => {
     hour12: true,
   };
 
-  const FormattedDate = `Schduled on ${date
+  const FormattedDate = `Scheduled on ${date
     .toLocaleString('en-US', options)
     .replace(':', '.')}`;
   return FormattedDate;
@@ -256,7 +256,7 @@ const Appointments = () => {
         ListHeaderComponent={
           <>
             <CommonHeader
-              title="Appontments"
+              title="Appointments"
               textColor="#171717"
               // onBackPress={onBackPress}
             />

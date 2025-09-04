@@ -40,7 +40,7 @@ export const createManagePlanSlice = (set: any, get: any): ManagePlanSlice => ({
       if (res) {
         Toast.show({
           type: 'success',
-          text1:'Repoted Successfully',
+          text1:'Reprted Successfully',
           position: 'bottom',
         });
         set(() => ({

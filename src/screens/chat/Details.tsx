@@ -18,7 +18,6 @@ import {
   // ActivityIndicator,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import ChatBubble from './ChatBubble';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -91,7 +90,7 @@ const ChatFooter = React.memo(
               style={[styles.input]}
               theme={{roundness: 50}}
               outlineColor="#F5F6FA"
-              activeOutlineColor="#F5F6FA"
+              activeOutlineColor="#c1c1c1ff"
             />
             <Icon
               name="send"

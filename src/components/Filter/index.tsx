@@ -9,23 +9,33 @@ import {
   StyleSheet,
   Pressable,
   Platform,
+  TextInput,
+  FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import IconButton from '@components/Buttons/IconButton';
 import StepSlider from '@components/Input/StepSlider';
 import useBoundStore from '@stores/index';
 import {Fonts} from '@constants/font';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
-import { useTheme } from '@theme/ThemeProvider';
+import {useTheme} from '@theme/ThemeProvider';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const FilterModal = ({visible, onClose, onApply}: any) => {
+  const GOOGLE_API_KEY = 'AIzaSyA83qLdbImZmSqqXEV7xeiYegOGcZhUq_o'; // Replace this
+
   //
-  const {appConfigs, setFilters, resetFilters, filters} = useBoundStore();
+  const {appConfigs, setFilters, resetFilters, filters, setLocation, location} =
+    useBoundStore();
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(false);
   // const [price, setprice] = useState<number[]>([1000000, 5000000]);
   const [fields, setFields] = useState<{}>({});
   const [filtersNew, setFilterNew] = useState<any>(filters);
   const {theme} = useTheme();
   const PROPERTY_TYPES = appConfigs?.propertyTypes || [];
   const LISTING_TYPES = appConfigs?.listingTypes || [];
+  const [predictions, setPredictions] = useState<any[]>([]);
   const FURNISHING_STATS = appConfigs?.furnishingStatuses || [];
   const AVAILABILITY_STATS = appConfigs?.availabilityStatuses || [];
   const BEDROOMS = [
@@ -50,6 +60,58 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
       }
     },
     [filtersNew],
+  );
+
+  const fetchPredictions = useCallback(async (text: string) => {
+    setQuery(text);
+    if (text.length < 2) {
+      setPredictions([]);
+      return;
+    }
+
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_API_KEY}&language=en`;
+    try {
+      const res = await fetch(url);
+      const json = await res.json();
+      setPredictions(json?.predictions || []);
+    } catch (err) {
+      console.error('Prediction fetch failed', err);
+    }
+  }, []);
+
+  const fetchPlaceDetails = async (placeId: string) => {
+    setLoading(true);
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`;
+    try {
+      const res = await fetch(url);
+      const json = await res.json();
+      console.log('res', json.result);
+      const locations = json.result.geometry.location;
+      setLocation({
+        name: json.result.formatted_address,
+        lat: locations.lat,
+        lng: locations.lng,
+      });
+      setPredictions([]);
+    } catch (err) {
+      console.error('Details fetch failed', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderItem = ({item}: {item: any}) => (
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => fetchPlaceDetails(item.place_id)}>
+      <MaterialCommunityIcons
+        name="map-marker"
+        size={20}
+        color="#696969"
+        style={{marginRight: 10}}
+      />
+      <Text style={styles.itemText}>{item.description}</Text>
+    </TouchableOpacity>
   );
 
   const getMergedFields = useCallback((id: any, argFields: string[]) => {
@@ -88,9 +150,13 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     [filtersNew, setFilterNew],
   );
 
-  useEffect(()=>{
+  useEffect(() => {
     setFilterNew(filters);
-  },[filters])
+  }, [filters]);
+
+  useEffect(() => {
+    setQuery(location?.name ?? '');
+  }, [location]);
 
   const renderChips = useCallback(
     (items: any[], selected?: any, setSelected?: any) => (
@@ -139,7 +205,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     setFilters(filtersNew);
     onApply();
   }, [filtersNew, onApply, setFilters]);
-  const labelColor = {color:theme.colors.text};
+  const labelColor = {color: theme.colors.text};
 
   return (
     <Modal
@@ -157,11 +223,13 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
           style={{
             marginTop: 'auto',
             height: '80%',
-             backgroundColor: theme.colors.backgroundHome,
+            backgroundColor: theme.colors.backgroundHome,
             borderRadius: 20,
           }}>
           <View style={{flexDirection: 'row', padding: 20, paddingBottom: 0}}>
-            <Text style={[styles.title, {color: theme.colors.text}]}>Filters & Sort</Text>
+            <Text style={[styles.title, {color: theme.colors.text}]}>
+              Filters & Sort
+            </Text>
             <Pressable
               onPress={() => {
                 onClose();
@@ -190,10 +258,71 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             }}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
-              backgroundColor:theme.colors.backgroundHome,
+              backgroundColor: theme.colors.backgroundHome,
               padding: 20,
               paddingTop: 0,
             }}>
+            <View
+              style={{
+                top: 10,
+                height: 48,
+                borderWidth: 1,
+                borderColor: '#EBEBEB',
+                borderRadius: 12,
+                flexDirection: 'row',
+                backgroundColor: '#fff',
+                width: '100%',
+                paddingHorizontal: 12,
+                marginBottom: 10,
+                alignItems: 'center',
+              }}>
+              <MaterialCommunityIcons
+                name="magnify"
+                size={20}
+                color="#696969"
+              />
+              <TextInput
+                value={query}
+                onChangeText={text => fetchPredictions(text)}
+                placeholder="Enter location"
+                style={{
+                  height: 48,
+                  width: '80%',
+                  borderRadius: 12,
+                  paddingHorizontal: 12,
+                  fontSize: 16,
+                }}
+              />
+              <MaterialCommunityIcons
+                name="close"
+                size={20}
+                onPress={()=>{setQuery('');
+                  setPredictions([])
+                }}
+                color="#696969"
+              />
+            </View>
+            {loading ? (
+              <ActivityIndicator style={{marginTop: 20}} />
+            ) : (
+              predictions.length > 0 && (<>
+                <FlatList
+                  data={predictions}
+                  keyExtractor={item => item.place_id}
+                  renderItem={renderItem}
+                  keyboardShouldPersistTaps="handled"
+                  contentContainerStyle={{
+                    backgroundColor: '#fff',
+                    borderRadius: 12,
+                    borderColor: '#EBEBEB',
+                    borderWidth: 1,
+                    marginTop: 10,
+                    padding: 8,
+                  }}
+                />
+                </>
+              )
+            )}
             <Text style={[styles.label, labelColor]}>Type</Text>
             {renderChips(PROPERTY_TYPES)}
 
@@ -208,9 +337,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             {renderChips(BATHROOMS)}
             <View style={{marginTop: 20, marginBottom: -20}}>
               <StepSlider
-                value={
-                  filtersNew?.price ? filtersNew?.price : [0, 0]
-                }
+                value={filtersNew?.price ? filtersNew?.price : [0, 0]}
                 theme={theme}
                 onChange={updatePrice}
                 // min={1000}
@@ -218,7 +345,9 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             </View>
             {isStringInEitherArray('furnishedStatus') && (
               <>
-                <Text style={[styles.label, labelColor]}>Furnishing Status</Text>
+                <Text style={[styles.label, labelColor]}>
+                  Furnishing Status
+                </Text>
 
                 {renderChips(FURNISHING_STATS)}
               </>
@@ -240,7 +369,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
               </>
             )}
           </ScrollView>
-          <View style={{flexDirection: 'row', bottom:10}}>
+          <View style={{flexDirection: 'row', bottom: 10}}>
             <TouchableOpacity
               style={styles.clearButton}
               onPress={() => {
@@ -248,7 +377,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
                 setFilterNew({});
                 resetFilters();
               }}>
-              <Text style={[styles.applyText, {color:'#000'}]}>Clear</Text>
+              <Text style={[styles.applyText, {color: '#000'}]}>Clear</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
               <Text style={styles.applyText}>Apply</Text>
@@ -302,6 +431,17 @@ const styles = StyleSheet.create({
     // marginRight: 5,
     // marginBottom: 5,
   },
+
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  itemText: {
+    fontSize: 14,
+    flex: 1,
+    color: 'rgba(0, 0, 0, 0.82)',
+  },
   chipSelected: {
     backgroundColor: '#2A9D8F',
     borderColor: '#2A9D8F',
@@ -314,9 +454,9 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     backgroundColor: '#f4f4f4',
-    width:'45%',
+    width: '45%',
     padding: 15,
-    borderWidth:0.5,
+    borderWidth: 0.5,
     marginRight: 5,
     marginLeft: 15,
     borderRadius: 10,
@@ -324,7 +464,7 @@ const styles = StyleSheet.create({
     marginBottom: Platform.OS === 'android' ? 0 : 30,
   },
   applyButton: {
-    width:'45%',
+    width: '45%',
     backgroundColor: '#2A9D8F',
     padding: 15,
     paddingRight: 15,

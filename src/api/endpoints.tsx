@@ -51,7 +51,7 @@ export const API = {
   },
   NOTIFICATIONS: {
     GET: '/notification',
-    MARK_AS_READ: 'notification/read',
+    MARK_AS_READ: '/notification/read',
   },
   PLANS: {
     GET: '/purchase-plan',

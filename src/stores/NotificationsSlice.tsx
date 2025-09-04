@@ -15,10 +15,10 @@ export const createNotificationsSlice = (
   get: any,
 ): NotificationsSlice => ({
   notifications_List: [],
-  notifications_Loading: true,
+  notifications_Loading: false,
   notificationsCount: 0,
   fetchNotifications: async () => {
-    set({notifications_ListLoading: true});
+    set({notifications_ListLoading: true, notifications_Loading: true});
     try {
       const res = await fetchNotificationsAPI({
         token: get().token,
@@ -29,14 +29,15 @@ export const createNotificationsSlice = (
         set(() => ({
           notifications_List: res.rows,
           notifications_ListLoading: false,
+          notifications_Loading: false,
         }));
     } catch (err) {
       // Rollback if API fails
-      set({notifications_ListLoading: false});
+      set({notifications_ListLoading: false,notifications_Loading: false,});
     }
   },
   updateNotificationCount: async (payload: any) => {
-    set({notificationsCount: payload});
+    set({notificationsCount: payload,});
   },
   updateNotifications: async (payload: any) => {
     set({notifications_List: payload});

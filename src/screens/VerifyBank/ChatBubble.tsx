@@ -77,7 +77,7 @@ export default function ChatBubble(props: any) {
       ) : (
         <View style={styles.containerRight}>
           <View style={styles.messageWrapper}>
-            <View style={[styles.bubble, {backgroundColor: theme.colors.text}]}>
+            <View style={[styles.bubble, {backgroundColor: theme.colors.chatBubbleLeft}]}>
               {items.files?.[0] && (
                 <TouchableOpacity
                   onPress={() => {
@@ -109,7 +109,7 @@ export default function ChatBubble(props: any) {
                 </TouchableOpacity>
               )}
               {items?.message && (
-                <Text style={[styles.messageText, {color: theme.colors.background}]}>{items?.message}</Text>
+                <Text style={[styles.messageText, {color: theme.colors.chatBubbleText}]}>{items?.message}</Text>
               )}
             </View>
             <View

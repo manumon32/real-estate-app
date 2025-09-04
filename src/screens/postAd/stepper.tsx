@@ -499,7 +499,7 @@ const PostAdContainer = (props: any) => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{flex: 1}}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}>
         {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
         <View style={{flex: 1}}>
           <ScrollView
