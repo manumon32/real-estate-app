@@ -51,6 +51,7 @@ const ImagePickerModal: React.FC<Props> = ({
       statusBarTranslucent
       visible={visible}
       animationType="slide"
+      transparent
       onRequestClose={onClose}>
       <SafeAreaView style={styles.container}>
         {/* Header */}

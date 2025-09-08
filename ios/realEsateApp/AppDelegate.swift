@@ -4,10 +4,6 @@ import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import Firebase
 import FBSDKCoreKit
-import AuthenticationServices
-
-
-
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -20,44 +16,66 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-
+    
+    // React Native setup
     let delegate = ReactNativeDelegate()
     let factory = RCTReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
-    FirebaseApp.configure()
-
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
     window = UIWindow(frame: UIScreen.main.bounds)
-
     factory.startReactNative(
       withModuleName: "realEsateApp",
       in: window,
       launchOptions: launchOptions
     )
+
+    // Firebase
+    FirebaseApp.configure()
     
-      
-      ApplicationDelegate.shared.application(
-                  application,
-                  didFinishLaunchingWithOptions: launchOptions
-              )
+    // Facebook SDK
+    ApplicationDelegate.shared.application(
+      application,
+      didFinishLaunchingWithOptions: launchOptions
+    )
+
     return true
   }
+
+  // Handle custom URL schemes (fb login, myapp:// links, etc.)
   func application(
-         _ app: UIApplication,
-         open url: URL,
-         options: [UIApplication.OpenURLOptionsKey : Any] = [:]
-     ) -> Bool {
-         ApplicationDelegate.shared.application(
-             app,
-             open: url,
-             sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String,
-             annotation: options[UIApplication.OpenURLOptionsKey.annotation]
-         )
-     }
+    _ app: UIApplication,
+    open url: URL,
+    options: [UIApplication.OpenURLOptionsKey : Any] = [:]
+  ) -> Bool {
+    // Facebook
+    if ApplicationDelegate.shared.application(
+      app,
+      open: url,
+      sourceApplication: options[.sourceApplication] as? String,
+      annotation: options[.annotation]
+    ) {
+      return true
+    }
+
+    // React Native deep links
+    return RCTLinkingManager.application(app, open: url, options: options)
+  }
+
+  // Handle Universal Links (https://hotplotz.com/...)
+  func application(
+    _ application: UIApplication,
+    continue userActivity: NSUserActivity,
+    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
+  ) -> Bool {
+    return RCTLinkingManager.application(application,
+                                         continue: userActivity,
+                                         restorationHandler: restorationHandler)
+  }
 }
 
+// React Native delegate setup
 class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
   override func sourceURL(for bridge: RCTBridge) -> URL? {
     self.bundleURL()
@@ -65,9 +83,9 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 
   override func bundleURL() -> URL? {
 #if DEBUG
-    RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+    return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
 #else
-    Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+    return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
   }
 }

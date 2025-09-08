@@ -26,6 +26,16 @@ const Communication = () => {
         [key]: !commPrefs[key],
       },
     };
+
+    // ✅ Optimistic local update (instant UI change)
+    useBoundStore.setState(state => ({
+      user: {
+        ...state.user,
+        communicationPreferences: payload.communicationPreferences,
+      },
+    }));
+
+    // ✅ Optional: sync with backend
     updateuser(payload);
   };
 

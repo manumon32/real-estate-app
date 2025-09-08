@@ -81,7 +81,7 @@ function Header({navigation}: any): React.JSX.Element {
                   : setVisible();
               }}>
               <IconButton
-                iconSize={20}
+                iconSize={24}
                 iconColor={theme.colors.text}
                 iconName={'bell'}
               />

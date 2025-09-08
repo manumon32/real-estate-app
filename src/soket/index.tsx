@@ -1,7 +1,7 @@
 import {io, Socket} from 'socket.io-client';
 import useBoundStore from '@stores/index';
 import {getCurrentRouteName} from '@navigation/RootNavigation';
-import {Vibration} from 'react-native';
+// import {Vibration} from 'react-native';
 // import Toast from 'react-native-toast-message';
 
 var socket: Socket | null = null;
@@ -47,7 +47,7 @@ const updateChatList = (msg: any) => {
     updateChat(msg.lastMessage);
   } else {
     // Message is from another room
-    Vibration.vibrate(500);
+    // Vibration.vibrate(500);
 
     const filteredList = chatList.filter(item => item?.roomId !== roomId);
 

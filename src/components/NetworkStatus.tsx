@@ -43,10 +43,11 @@ const NetworkStatus = () => {
 const styles = StyleSheet.create({
   banner: {
     position: 'absolute',
-    top: 0,
+    bottom: 0,
     width: '100%',
     backgroundColor: '#ff4d4d',
     padding: 10,
+    height: 60,
     zIndex: 999,
     alignItems: 'center',
   },

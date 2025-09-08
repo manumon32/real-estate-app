@@ -25,6 +25,7 @@ import {
 import {useTheme as useThemes} from '@theme/ThemeProvider';
 import {INotification} from '@screens/home/HomeScreen';
 import {navigateByNotification} from '../../firebase/notificationService';
+import NoChats from '@components/NoChatFound';
 
 type NotificationType = 'message' | 'offer' | 'listing' | 'system';
 
@@ -186,7 +187,7 @@ export default function NotificationListSwipe() {
     };
     console.log('Deleting chats with IDs:', body);
     try {
-      await deleteNotificationsAPI(body, {
+      const res = await deleteNotificationsAPI(body, {
         token,
         clientId,
         bearerToken,
@@ -196,6 +197,7 @@ export default function NotificationListSwipe() {
         text1: 'Notifications deleted successfully',
         position: 'bottom',
       });
+      updateNotificationCount(res?.count ?? 0);
       clearSelection();
       fetchNotifications();
     } catch (error) {
@@ -229,8 +231,8 @@ export default function NotificationListSwipe() {
           text1: 'Notifications marked as read successfully',
           position: 'bottom',
         });
-        console.log(res)
-        updateNotificationCount(0)
+        console.log('notification count', res.count);
+        updateNotificationCount(res?.count ?? 0);
         clearSelection();
         fetchNotifications();
       }
@@ -341,7 +343,10 @@ export default function NotificationListSwipe() {
         disableLeftSwipe
         contentContainerStyle={[
           styles.container,
-          {minHeight: windowHeight, backgroundColor: theme.colors.background},
+          {
+            minHeight: notifications_List.length > 0 ? windowHeight : 0,
+            backgroundColor: theme.colors.background,
+          },
         ]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -349,12 +354,7 @@ export default function NotificationListSwipe() {
         ItemSeparatorComponent={() => <Divider />}
         ListEmptyComponent={
           !notifications_Loading ? (
-            <View style={[styles.empty]}>
-              <Icon name="bell-off-outline" size={48} color={colors.outline} />
-              <Text style={{color: theme.colors.text}}>
-                No notifications yet
-              </Text>
-            </View>
+            <NoChats icon="bell-off-outline" title="No Notifications" />
           ) : notifications_Loading ? (
             <ActivityIndicator color={theme.colors.text} />
           ) : (

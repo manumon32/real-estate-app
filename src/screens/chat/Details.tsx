@@ -131,6 +131,7 @@ const Chat = React.memo(({navigation}: any) => {
     clientId,
     bearerToken,
     onlineUsers,
+    updateChatUnreadCount,
   } = useBoundStore();
   const {items}: any = route.params;
   console.log('items', items);
@@ -142,6 +143,7 @@ const Chat = React.memo(({navigation}: any) => {
 
   useEffect(() => {
     fetchChatDetails(items.propertyId);
+    updateChatUnreadCount(items.propertyId, 0);
   }, [items.propertyId]);
 
   const renderAdItem = useCallback(
@@ -328,7 +330,7 @@ const Chat = React.memo(({navigation}: any) => {
               backgroundColor: theme.colors.background,
               paddingBottom: 24,
               flexGrow: 1,
-              minHeight: '90%',
+              minHeight: chat_loading ? 0 : '90%',
             }}
             ListHeaderComponentStyle={{
               padding: 0,
@@ -406,8 +408,8 @@ const Chat = React.memo(({navigation}: any) => {
           setTimeout(() => pickImageLibrary(), 100); // 👈 delay closing
         }}
         onPickCamera={async () => {
-          await pickCamera();
-          setTimeout(() => setAttachModalVisible(false), 200);
+          await setAttachModalVisible(false);
+          setTimeout(() => pickCamera(), 200);
         }}
         onPickDocument={() => {
           // pickDocument(); // your logic

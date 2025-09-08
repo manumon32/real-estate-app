@@ -1,9 +1,13 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
 import CommonHeader from '@components/Header/CommonHeader';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useTheme} from '@theme/ThemeProvider';
 import {
   View,
@@ -167,7 +171,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
             onPress={() =>
               updateStatus({
                 status: 'scheduled',
-                  propertyId: items.propertyId._id,
+                propertyId: items.propertyId._id,
                 appointmentId: items._id,
                 note: '',
               })
@@ -188,6 +192,8 @@ const Appointments = () => {
     appointmentsLoading,
     updateAppointments,
   } = useBoundStore();
+  const route: any = useRoute();
+  const items: any = route?.params?.items;
 
   const [filterBy, setFilterBy] = useState<string>('myAppointments');
 
@@ -199,6 +205,10 @@ const Appointments = () => {
       fetchAppointments();
     }, []),
   );
+
+  useEffect(() => {
+    items?.type && setFilterBy(items?.type);
+  }, [items]);
 
   const updateStatus = async (payload: any) => {
     try {
@@ -236,7 +246,7 @@ const Appointments = () => {
         />
       );
     },
-    [navigation, filterBy, ],
+    [navigation, filterBy],
   );
 
   return (
@@ -320,7 +330,10 @@ const Appointments = () => {
         }
         ListFooterComponent={
           <>
-            {appointmentsLoading && <AdsListSkelton />}
+            {/* @ts-ignore */}
+            {appointmentsLoading && appointments?.[filterBy].length === 0 && (
+              <AdsListSkelton />
+            )}
             {!appointmentsLoading &&
               // @ts-ignore
               appointments?.[filterBy].length === 0 && (
@@ -330,7 +343,11 @@ const Appointments = () => {
                     navigation.navigate('Main');
                   }}
                   icon="alert-circle-outline"
-                  title="You don’t have any appointments yet."
+                  title={
+                    filterBy === 'myAppointments'
+                      ? 'You  dont have any pending requests'
+                      : 'You don’t have any Appointments yet.'
+                  }
                   // body="Looks like you haven’t listed any ads yet."
                   buttonText={'Explore'}
                 />

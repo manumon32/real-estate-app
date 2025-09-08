@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   FlatList,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -97,7 +98,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
 };
 
 const ReportAd = () => {
-  const {reportAdList, fetchReportedAd} = useBoundStore();
+  const {reportAdList, fetchReportedAd, reportAdListLoading} = useBoundStore();
   const navigation = useNavigation();
   const {theme} = useTheme();
 
@@ -130,6 +131,11 @@ const ReportAd = () => {
   return (
     <SafeAreaView
       style={{backgroundColor: theme.colors.background, height: '100%'}}>
+      {reportAdListLoading && (
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
       <FlatList
         data={reportAdList}
         renderItem={renderAdItem}
@@ -137,7 +143,7 @@ const ReportAd = () => {
         contentContainerStyle={{
           paddingBottom: 120,
           backgroundColor: theme.colors.backgroundHome,
-          minHeight: 900,
+          minHeight: 500,
           //  padding: 14,
         }}
         ListHeaderComponent={
@@ -163,7 +169,7 @@ const ReportAd = () => {
           />
         }
         ListFooterComponent={
-          reportAdList.length <= 0 ? (
+          !reportAdListLoading && reportAdList.length <= 0 ? (
             <NoChats
               onExplore={() => {
                 // @ts-ignore
@@ -193,6 +199,14 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
     marginHorizontal: 16,
+  },
+
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.78)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
   },
   row: {
     flexDirection: 'row',

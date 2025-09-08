@@ -13,6 +13,8 @@ import {
   BackHandler,
   ToastAndroid,
   AppState,
+  Linking,
+  Alert,
 } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 
@@ -161,6 +163,30 @@ function App({navigation}: any): React.JSX.Element {
     };
   }, [bearerToken]);
 
+  const handleDeepLink = (event: {url: string}) => {
+    const url = event.url; // e.g., myapp://property/12345
+    const match = url.match(/details\/([^/?#]+)/);
+    if (match) {
+      const propertyId = match[1];
+      // navigation.navigate('Details', {items: {_id: propertyId}});
+    }
+  };
+
+  useEffect(() => {
+      // Listen when app is already open
+      const sub = Linking.addEventListener('url', handleDeepLink);
+  
+      // Also handle when app is opened from a killed state
+      Linking.getInitialURL().then(url => {
+        if (url) {
+          // Alert.alert(url)
+          // setDeepLink({url});
+        }
+      });
+  
+      return () => sub.remove();
+    }, []);
+
   useEffect(() => {
     requestUserPermission();
 
@@ -171,6 +197,7 @@ function App({navigation}: any): React.JSX.Element {
     //   navigateByNotification(data as any as INotification);
     //   // }
     // });
+    
 
     const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
       remoteMessage => {

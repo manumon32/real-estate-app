@@ -51,7 +51,7 @@ const AdStatusEnum: any = {
 
 const PropertyDetails = React.memo(() => {
   const route = useRoute();
-  const {items}: any = route.params;
+  const {items, id}: any = route.params;
   const navigation = useNavigation();
   const [error, setError] = useState(false);
   const [bankModalVisible, setBankModalVisible] = useState(false);
@@ -339,24 +339,25 @@ const PropertyDetails = React.memo(() => {
   };
 
   useEffect(() => {
-    if (items?._id) {
-      bearerToken && fetchBanks(items?._id);
+    console.log('DEtails Pages', items)
+    if (items?._id && !id) {
+      bearerToken && fetchBanks(items?._id ?? id);
     }
-  }, [bearerToken, fetchBanks, items, navigation]);
+  }, [bearerToken, fetchBanks, id, items, navigation]);
 
   useFocusEffect(
     React.useCallback(() => {
-      if (!items?._id) {
+      if (!items?._id && !id) {
         // @ts-ignore
         navigation.navigate('Main');
       } else {
-        fetchDetails(items?._id);
+        fetchDetails(items?._id ?? id);
       }
       return () => {
         setProperty(null);
         clearDetails();
       };
-    }, [clearDetails, fetchDetails, items?._id, navigation]),
+    }, [clearDetails, fetchDetails, id, items?._id, navigation]),
   );
 
   React.useEffect(() => {
@@ -417,9 +418,10 @@ const PropertyDetails = React.memo(() => {
       );
       Toast.show({
         type: 'success',
-        text1: 'Appointment Sceduled',
+        text1: 'Appointment Request Sent',
         position: 'bottom',
       });
+      property?._id && fetchDetails(property?._id);
     } catch (error) {
       Toast.show({
         type: 'error',
@@ -639,10 +641,12 @@ const PropertyDetails = React.memo(() => {
             {!isOwner && details?.adStatus === 'active' && bearerToken && (
               <Pressable
                 onPress={() => {
-                  details?.appointmentStatus === 'active' && setShowModal(true);
-                  details?.appointmentStatus === 'scheduled' &&
+                  if (details?.appointmentStatus === 'active') {
+                    setShowModal(true);
+                  } else {
                     // @ts-ignore
                     navigation.navigate('Appointments');
+                  }
                 }}
                 style={{
                   // top: 15,
@@ -657,7 +661,8 @@ const PropertyDetails = React.memo(() => {
                   alignItems: 'center',
                   flexDirection: 'row',
                   borderWidth: 1,
-                  borderColor:  property?.appointmentStatus === 'pending'
+                  borderColor:
+                    property?.appointmentStatus === 'pending'
                       ? '#ea860bff'
                       : '#2F8D79',
                 }}>

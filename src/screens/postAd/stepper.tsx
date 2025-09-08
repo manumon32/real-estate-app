@@ -28,6 +28,7 @@ import {postAdAPI, uploadImages} from '@api/services';
 import {RequestMethod} from '@api/request';
 import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
 import {useTheme} from '@theme/ThemeProvider';
+import {compressImage} from '../../helpers/ImageCompressor';
 
 interface FooterProps {
   currentStep: number;
@@ -116,6 +117,7 @@ const PostAdContainer = (props: any) => {
     touched,
     fields,
     setFields,
+    validateForm,
   } = props;
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
@@ -167,10 +169,11 @@ const PostAdContainer = (props: any) => {
 
   const toggleItem = useCallback(
     (name: string, item: any, setSelectedList?: any) => {
+      console.log(name);
       if (name) {
         if (postAd[name] && postAd[name][0] === item) {
           delete postAd[name];
-          setFieldValue(name, '');
+          setFieldValue(name, null);
         } else {
           postAd[name] = [item];
           setFieldValue(name, item);
@@ -212,7 +215,7 @@ const PostAdContainer = (props: any) => {
                     styles.chipSelected,
                 ]}
                 onPress={() => {
-                  console.log(item.fields);
+                  console.log(item._id);
                   item.fields && getMergedFields(item.filterName, item.fields);
                   toggleItem(item.filterName, item._id, setSelected);
                 }}>
@@ -240,29 +243,27 @@ const PostAdContainer = (props: any) => {
       3: ['areaSize'],
       4: [],
       5: [],
-      // 3: imageUrls ['nearbyLandmarks'],
     };
+
+    // Mark fields as touched
     await setTouched(
-      // @ts-ignore
       requiredFields[currentStep]?.reduce((acc, key) => {
         acc[key] = true;
         return acc;
       }, {} as {[key: string]: boolean}),
-      true, // validate after touching
+      false, // don't validate immediately
     );
+
+    // Force validation to get fresh errors
+    const validationErrors = await validateForm();
     prevCountRef.current = currentStep;
-    if (
-      // @ts-ignore
-      requiredFields[currentStep]?.some(
-        // @ts-ignore
-        field =>
-          currentStep === 1
-            ? !!errors[field] || !touched[field]
-            : !!errors[field],
-      )
-    ) {
-      return false;
-    } else {
+
+    // Check if current step has any errors
+    const hasErrors = requiredFields[currentStep]?.some(
+      field => !!validationErrors[field],
+    );
+
+    if (!hasErrors) {
       currentStep < 5 && setCurrentStep(prev => prev + 1);
     }
   };
@@ -350,7 +351,10 @@ const PostAdContainer = (props: any) => {
 
     try {
       // Filter local vs uploaded images
-      const localImages = images.filter((img: any) => img?.uri);
+      const localImages = images.filter(async (img: any) => {
+        return await compressImage(img?.uri);
+      });
+      console.log('localImages', localImages);
       const existingImageUrls = images.filter((img: any) => !img.uri);
 
       const localFloorPlans = floorPlans.filter((fp: any) => fp?.uri);
@@ -439,10 +443,7 @@ const PostAdContainer = (props: any) => {
       setFields([]);
     } catch (error) {
       console.error('Post Ad Error:', error);
-      Alert.alert(
-        'Something went wrong',
-        'Failed to post ad, please try again later',
-      );
+      Alert.alert(JSON.stringify(error));
     } finally {
       setLoading(false);
     }

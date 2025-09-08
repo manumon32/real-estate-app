@@ -130,7 +130,7 @@ const ContactUsCard = () => {
                 marginTop: 6,
                 fontSize: 12,
                 fontWeight: '600',
-                color: '#333',
+                color: theme.colors.text,
                 textAlign:'center'
               }}>
               {item.title}

@@ -107,7 +107,7 @@ export default function ChatBubble(props: any) {
                   ) : (
                     <>
                       <Icon name="file" size={50} color="#e74c3c" />
-                      <Text
+                      {/* <Text
                         numberOfLines={3}
                         style={[
                           styles.messageText,
@@ -118,7 +118,7 @@ export default function ChatBubble(props: any) {
                           },
                         ]}>
                         {items.files?.[0]}
-                      </Text>
+                      </Text> */}
                     </>
                   )}
                 </TouchableOpacity>

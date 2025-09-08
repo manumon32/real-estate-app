@@ -50,7 +50,7 @@ function Header(props: any): React.JSX.Element {
     Share.share({
       title: 'Hotplotz',
       message,
-      url: link, // for iOS, some apps use this field
+      // url: link, // for iOS, some apps use this field
     });
   };
 
@@ -79,7 +79,12 @@ function Header(props: any): React.JSX.Element {
           ]}>
           <TouchableOpacity
             onPress={() => {
-              navigation.goBack();
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              } else {
+                // @ts-ignore
+                navigation.navigate('Main');
+              }
             }}>
             <IconButton
               style={[styles.heart, {backgroundColor: theme.colors.background}]}
@@ -90,21 +95,23 @@ function Header(props: any): React.JSX.Element {
             />
           </TouchableOpacity>
           <View style={styles.headerIconContainer}>
-            <TouchableOpacity
-              onPress={() => {
-                shareProperty(details);
-              }}>
-              <IconButton
-                style={[
-                  styles.heartRight,
-                  {backgroundColor: theme.colors.background},
-                ]}
-                iconSize={24}
-                //red , heart
-                iconColor={theme.colors.text}
-                iconName={'share-variant'}
-              />
-            </TouchableOpacity>
+            {details?.adStatus !== 'sold' && (
+              <TouchableOpacity
+                onPress={() => {
+                  shareProperty(details);
+                }}>
+                <IconButton
+                  style={[
+                    styles.heartRight,
+                    {backgroundColor: theme.colors.background},
+                  ]}
+                  iconSize={24}
+                  //red , heart
+                  iconColor={theme.colors.text}
+                  iconName={'share-variant'}
+                />
+              </TouchableOpacity>
+            )}
             {/* <TouchableOpacity>
               <IconButton
                 style={[styles.heartRight]}
@@ -115,7 +122,7 @@ function Header(props: any): React.JSX.Element {
               />
             </TouchableOpacity> */}
             {!detailLoading &&
-              (user?._id !== details?.customerId?._id ||   !user?._id ) && (
+              (user?._id !== details?.customerId?._id || !user?._id) && (
                 <FavoriteButton
                   IconButtonStyle={styles.heartRight}
                   iconSize={24}

@@ -64,6 +64,20 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
         flexDirection: 'row',
         flexWrap: 'wrap',
       }}>
+        <TouchableOpacity
+        style={[
+          styles.chipSort,
+          filters.orderBy == 'distance' && styles.chipSelected,
+        ]}
+        onPress={() => handleSort('distance', 'asc')}>
+        <Text
+          style={[
+            styles.chipText,
+            filters.orderBy == 'distance' && styles.chipTextSelected,
+          ]}>
+          {'Disance'}
+        </Text>
+      </TouchableOpacity>
       <TouchableOpacity
         style={[
           styles.chipSort,

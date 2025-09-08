@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, ScrollView, RefreshControl, StyleSheet} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
@@ -13,21 +13,27 @@ const Notifications = () => {
     useBoundStore();
   const {theme} = useTheme();
 
-  const notificationPrefs = user?.notificationPreferences || {
+  // ✅ Local state for notifications
+  const [notificationPrefs, setNotificationPrefs] = useState({
     pushNotification: true,
     emailNotification: true,
     receiveUpdates: true,
     receiveRecommendations: true,
-  };
+  });
+
+  // Initialize local state from store user
+  useEffect(() => {
+    if (user?.notificationPreferences) {
+      setNotificationPrefs(user.notificationPreferences);
+    }
+  }, [user?.notificationPreferences]);
 
   const handleToggle = (key: keyof typeof notificationPrefs) => {
-    const payload = {
-      notificationPreferences: {
-        ...notificationPrefs,
-        [key]: !notificationPrefs[key],
-      },
-    };
-    updateuser(payload);
+    const updated = {...notificationPrefs, [key]: !notificationPrefs[key]};
+    setNotificationPrefs(updated); // ✅ Instant local update
+
+    // Optional: sync with backend
+    updateuser({notificationPreferences: updated});
   };
 
   return (

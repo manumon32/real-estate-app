@@ -45,6 +45,8 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
         ...filters,
         ...{
           filter_near: [get().location?.lat, get().location?.lng, 30].join(','),
+          orderBy: 'distance',
+          orderByDir:'asc',
         },
       };
     }

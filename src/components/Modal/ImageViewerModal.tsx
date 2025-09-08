@@ -22,7 +22,7 @@ const ImageViewerModal: React.FC<Props> = ({
     <Modal
       statusBarTranslucent
       visible={visible}
-      transparent={true}
+      transparent
       onRequestClose={onClose}>
       <ImageViewer
         imageUrls={images}

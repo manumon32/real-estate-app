@@ -93,7 +93,8 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       isValidEmail(arg ? arg : loginVar) ||
       isValidPhone(arg ? arg : loginVar)
     ) {
-      login({phone: arg ? arg : loginVar});
+      let flag = isValidEmail(arg ? arg : loginVar) ? 'email' : 'phone';
+      login({[flag]: arg ? arg : loginVar});
     } else {
       setMessage('❌  Invalid input');
     }
@@ -282,7 +283,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
   return (
     <Modal
       visible={visible}
-      transparent={false} // not overlay ‑> full sheet
+      transparent={true} // not overlay ‑> full sheet
       presentationStyle={
         Platform.OS === 'ios' ? 'fullScreen' : 'overFullScreen'
       }

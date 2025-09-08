@@ -418,12 +418,12 @@ const GlobalSearchModal: React.FC<Props> = ({
   }, [searchSuggestions, filterBy]);
 
   return (
-    <SafeAreaView style={{backgroundColor: theme.colors.background}}>
       <Modal
         visible={visible}
         // animationType="slide"
-        transparent
+        animationType="slide"
         statusBarTranslucent
+        transparent
         onRequestClose={onClose}>
         <View style={styles.overlay}>
           <View
@@ -698,7 +698,6 @@ const GlobalSearchModal: React.FC<Props> = ({
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
   );
 };
 const styles = StyleSheet.create({

@@ -8,6 +8,11 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>https://hotplotz.com/</string>
+		<string>applinks:hotplotz.com</string>
+	</array>
 	<key>keychain-access-groups</key>
 	<array/>
 </dict>

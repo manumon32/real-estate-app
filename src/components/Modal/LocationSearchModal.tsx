@@ -195,9 +195,9 @@ const CommonLocationModal: React.FC<Props> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      transparent
       statusBarTranslucent
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+      transparent>
       <View style={styles.overlay}>
         <View
           style={[

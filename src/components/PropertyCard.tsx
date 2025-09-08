@@ -73,6 +73,11 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
         )}
       </View>
       <View style={styles.content}>
+
+
+        <Text style={[styles.price, {color: theme.colors.text}]}>
+          {formatINR(items.price)}
+        </Text>
         <Text
           style={[styles.title, {color: theme.colors.text}]}
           numberOfLines={2}>
@@ -109,9 +114,13 @@ const PropertyCard = React.memo(({items, navigation, arg}: any) => {
             <></>
           )}
         </View>
-
-        <Text style={[styles.price, {color: theme.colors.text}]}>
-          {formatINR(items.price)}
+        <Text
+          numberOfLines={1}
+          style={[styles.subtitle, {color: theme.colors.text}]}>
+          {new Date(items?.createdAt).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'long',
+          })}
         </Text>
       </View>
     </TouchableOpacity>
@@ -191,7 +200,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   price: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: Fonts.MEDIUM,
     fontWeight: 'bold',
     marginTop: 4,

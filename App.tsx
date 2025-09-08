@@ -33,7 +33,8 @@ export default function App() {
   const linking = {
     prefixes: [
       'myapp://', // custom scheme
-      'https://hotplotz.com', // universal link
+      'https://hotplotz.com', // universal link,
+      'hotplotz://',
     ],
     config: {
       screens: {

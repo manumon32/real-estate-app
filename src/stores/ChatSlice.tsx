@@ -40,6 +40,7 @@ export interface ChatSlice {
   setUnreadCount: (count: number) => Promise<void>;
   setChatList: (arg: any) => Promise<void>;
   fetchChatDetails: (filters?: any, page?: number) => Promise<void>;
+  updateChatUnreadCount: (roomId: string, count: number) => Promise<any>;
   updateChat: (msg?: any) => Promise<any>;
   updateOnlineUsers: (msg?: any) => Promise<any>;
   resetChatDetails: (msg?: any) => Promise<void>;
@@ -48,7 +49,7 @@ export interface ChatSlice {
 
 export const createChatSlice = (set: any, get: any): ChatSlice => ({
   chatList: [],
-  onlineUsers:[],
+  onlineUsers: [],
   error: null,
   chatListloading: false,
   unreadCount: 0,
@@ -82,7 +83,7 @@ export const createChatSlice = (set: any, get: any): ChatSlice => ({
       set({error: err.message, chatListloading: false});
     }
   },
-  updateOnlineUsers: (users) =>{
+  updateOnlineUsers: users => {
     return set({onlineUsers: users});
   },
   setChatList: (list: any) => set({chatList: list}),
@@ -105,6 +106,15 @@ export const createChatSlice = (set: any, get: any): ChatSlice => ({
     } catch (err: any) {
       set({error: err.message, loading: false});
     }
+  },
+  updateChatUnreadCount: (roomId: string, count: number) => {
+    const {chatList} = get();
+
+    const updatedChatList = chatList.map((chat: any) =>
+      chat.roomId === roomId ? {...chat, unreadCount: count} : chat,
+    );
+
+    return set({chatList: updatedChatList});
   },
   updateChat: (msg: any) => {
     const state = get();

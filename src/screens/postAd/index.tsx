@@ -155,6 +155,7 @@ const PostAd = () => {
             handleBlur,
             setTouched,
             handleChange,
+            validateForm
           }) => (
             <PostAdContainer
               values={values}
@@ -167,6 +168,7 @@ const PostAd = () => {
               handleChange={handleChange}
               fields={fields}
               setFields={setFields}
+              validateForm={validateForm}
             />
           )}
         </Formik>

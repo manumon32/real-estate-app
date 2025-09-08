@@ -16,7 +16,10 @@ export interface FiltersSlice {
   resetFilters: () => void;
 }
 
-const defaultFilters: any = {};
+const defaultFilters: any = {
+  orderBy: 'distance',
+  orderByDir: 'asc',
+};
 
 export const createFiltersSlice = (set: any): FiltersSlice => ({
   filters: defaultFilters,

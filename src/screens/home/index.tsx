@@ -24,6 +24,7 @@ function Index({navigation}: any): React.JSX.Element {
     clientId,
     getConfigData,
     fetchFavouriteAds,
+    fetchListings,
     bearerToken,
   } = useBoundStore();
   const [error, setError] = useState(true);
@@ -62,10 +63,10 @@ function Index({navigation}: any): React.JSX.Element {
 
   const handleDeepLink = (event: {url: string}) => {
     const url = event.url; // e.g., myapp://property/12345
-    const match = url.match(/property\/(\w+)/);
+    const match = url.match(/details\/(\w+)/);
     if (match) {
       const propertyId = match[1];
-      navigation.navigate('Details', {items: {_id: propertyId}});
+      // navigation.navigate('Details', {items: {_id: propertyId}});
     }
   };
 
@@ -135,7 +136,7 @@ function Index({navigation}: any): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-    <AppUpdateChecker />
+      <AppUpdateChecker />
       <Animated.Image
         source={require('@assets/images/logo.png')}
         style={[styles.image, {transform: [{scale: scaleAnim}]}]}

@@ -65,6 +65,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
     try {
       set({
         emailOTPLoading: true,
+        loginErrorMessage: '',
       });
       const resp = await sendEmailOTP(payload, {
         token: get().token,
@@ -105,6 +106,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   verifyEmailOTP: async payload => {
     set({
       emailOTPLoading: true,
+      loginErrorMessage: '',
     });
     try {
       const resp = await verifyEmailOTP(payload, {
@@ -119,6 +121,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           otpLoading: false,
           user: {...get().user, email: payload.email, isEmailVerified: true},
           emailOTPLoading: false,
+          loginErrorMessage: '',
         });
         Toast.show({
           type: 'success',
@@ -152,6 +155,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
     try {
       set({
         phoneOTPLoading: true,
+        loginErrorMessage: '',
       });
       const resp = await sendPhoneOTP(payload, {
         token: get().token,
@@ -192,6 +196,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   verifyPhoneOTP: async payload => {
     set({
       phoneOTPLoading: true,
+      loginErrorMessage: '',
     });
     try {
       const resp = await verifyPhoneOTP(payload, {
