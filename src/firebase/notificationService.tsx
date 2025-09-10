@@ -2,7 +2,7 @@ import messaging from '@react-native-firebase/messaging';
 import {navigationRef} from '@navigation/RootNavigation';
 import {INotification} from '@screens/home/HomeScreen';
 import useBoundStore from '@stores/index';
-import {registerFCMToken} from '@api/services';
+import {markAllReadNotificationsAPI, registerFCMToken} from '@api/services';
 import {PermissionsAndroid, Platform} from 'react-native';
 
 var isReady = false;
@@ -78,13 +78,15 @@ const TabSCREENS: any = {
   filter: 'filter',
 };
 
-export const navigateByNotification = (notification: INotification) => {
+export const navigateByNotification = async (notification: INotification) => {
+  const {token, clientId, bearerToken, updateNotificationCount} =
+    useBoundStore.getState();
   if (!navigationRef?.isReady() || !isReady) {
     pendingNotification = notification;
     return;
   }
 
-  const {entityType, entityId, metadata} = notification;
+  const {entityType, entityId, metadata, notificationId} = notification;
 
   if (!entityType) {
     // @ts-ignore
@@ -95,14 +97,56 @@ export const navigateByNotification = (notification: INotification) => {
   const screenName = SCREENS?.[entityType]
     ? SCREENS[entityType]
     : TabSCREENS[entityType]; // assuming screen name is same as entityType
-
+  // @ts-ignore
+  let parsedData =
+    typeof metadata === 'string' ? JSON.parse(metadata) : metadata;
   const params = {
     items: {
       _id: entityId, // optional
-      ...metadata,
+      ...parsedData,
     },
   };
   try {
+    console.log('notificationId', notificationId);
+    if (bearerToken && notificationId) {
+      const body = {notifications: [notificationId]};
+
+      // run in a safe block so navigation isn't blocked
+      try {
+        const res = await markAllReadNotificationsAPI(body, {
+          token,
+          clientId,
+          bearerToken,
+        });
+
+        if (res?.message) {
+          console.log('notification count', res.count);
+          updateNotificationCount(res?.count ?? 0);
+          if (SCREENS[entityType]) {
+            // @ts-ignore
+            navigationRef.navigate(screenName, entityId ? params : {});
+          } else {
+            // @ts-ignore
+            navigationRef.navigate('Main', {
+              screen: 'Chat',
+              params,
+            });
+          }
+        }
+      } catch (apiErr) {
+        if (SCREENS[entityType]) {
+          // @ts-ignore
+          navigationRef.navigate(screenName, entityId ? params : {});
+        } else {
+          // @ts-ignore
+          navigationRef.navigate('Main', {
+            screen: 'Chat',
+            params,
+          });
+        }
+      }
+    }
+
     if (SCREENS[entityType]) {
       // @ts-ignore
       navigationRef.navigate(screenName, entityId ? params : {});
@@ -114,6 +158,7 @@ export const navigateByNotification = (notification: INotification) => {
       });
     }
   } catch (err) {
+    console.warn('Unexpected error:', err);
     // @ts-ignore
     navigationRef.navigate('Main');
   }

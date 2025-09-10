@@ -136,7 +136,7 @@ export default function NotificationListSwipe() {
               n._id === item._id ? {...n, read: true} : n,
             );
             updateNotifications(updated);
-            markAllAsRead(item._id);
+            // markAllAsRead(item._id);
             navigateByNotification(item as any as INotification);
           }
         }}>
@@ -225,12 +225,12 @@ export default function NotificationListSwipe() {
         clientId,
         bearerToken,
       });
-      if (!notificationId) {
-        Toast.show({
-          type: 'success',
-          text1: 'Notifications marked as read successfully',
-          position: 'bottom',
-        });
+      if (res?.message) {
+        // Toast.show({
+        //   type: 'success',
+        //   text1: 'Notifications marked as read successfully',
+        //   position: 'bottom',
+        // });
         console.log('notification count', res.count);
         updateNotificationCount(res?.count ?? 0);
         clearSelection();

@@ -6,7 +6,7 @@ import {getCurrentRouteName} from '@navigation/RootNavigation';
 
 var socket: Socket | null = null;
 
-const SOCKET_URL = 'http://13.61.181.173:8082';
+const SOCKET_URL = 'https://chat.hotplotz.com';
 
 const updateChatList = (msg: any) => {
   const {

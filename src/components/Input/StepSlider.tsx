@@ -17,9 +17,9 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
   value,
   onChange,
   min = 0,
-  max = 10000000,
+  max = 500000,
   step = 100,
-  sliderLength = 300,
+  sliderLength = 350,
   theme,
 }) => {
   const [minValue, setMinValue] = useState(value[0]);
@@ -55,7 +55,7 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
 
       <View style={styles.inputRow}>
         <TextInput
-          style={[styles.input, ]}
+          style={[styles.input]}
           keyboardType="numeric"
           value={minValue.toString()}
           onChangeText={text => handleInputChange(text, 'min')}
@@ -64,20 +64,23 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
         />
         <Text style={[styles.toText, {color: theme?.colors?.text}]}>to</Text>
         <TextInput
-          style={[styles.input,]}
+          style={[styles.input]}
           keyboardType="numeric"
           value={maxValue.toString()}
-          onChangeText={text => handleInputChange(text, 'max')}
+          onChangeText={text => {
+            return minValue <= maxValue && handleInputChange(text, 'max');
+          }}
           placeholder="Max"
           placeholderTextColor="#aaa"
         />
       </View>
 
-      <Text style={[styles.rangeText, {color: theme?.colors?.text}]}>
+      {/* <Text style={[styles.rangeText, {color: theme?.colors?.text}]}>
         ₹{minValue.toLocaleString()} - ₹{maxValue.toLocaleString()}
-      </Text>
+        {maxValue === max ? '+' : ''}
+      </Text> */}
 
-      <MultiSlider
+      {/* <MultiSlider
         values={[minValue, maxValue]}
         min={min}
         max={max}
@@ -88,7 +91,7 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
         unselectedStyle={styles.unselectedColor}
         markerStyle={styles.markerStyle}
         trackStyle={{height: 6}}
-      />
+      /> */}
     </View>
   );
 };

@@ -36,6 +36,7 @@ interface Props {
     name: string;
     lat: number;
     lng: number;
+    // address_components: any;
   }) => void;
 }
 
@@ -45,7 +46,7 @@ const CommonLocationModal: React.FC<Props> = ({
   onSelectLocation,
   locationHistory,
 }) => {
-  const {location} = useBoundStore();
+  const {location, resetLocationHistory} = useBoundStore();
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -108,10 +109,31 @@ const CommonLocationModal: React.FC<Props> = ({
       const json = await res.json();
       console.log('res', json.result);
       const locations = json.result.geometry.location;
+      let name = json.result.formatted_address || '';
+      if (json.result.address_components) {
+        const components = json.result.address_components;
+        const city = components.find((c: any) => c.types.includes('locality'));
+        const district = components.find((c: any) =>
+          c.types.includes('administrative_area_level_2'),
+        );
+        const state = components.find((c: any) =>
+          c.types.includes('administrative_area_level_1'),
+        );
+        const country = components.find((c: any) =>
+          c.types.includes('country'),
+        );
+        console.log(city, district, state, country);
+
+        // if (city) name = city.long_name;
+        // else if (district) name = district.long_name;
+        // else if (state) name = state.long_name;
+        // else if (country) name = country.long_name;
+      }
       onSelectLocation({
-        name: json.result.formatted_address,
+        name: name,
         lat: locations.lat,
         lng: locations.lng,
+        // address_components: json.result.address_components,
       });
       setQuery('');
       setPredictions([]);
@@ -152,8 +174,7 @@ const CommonLocationModal: React.FC<Props> = ({
 
         const res = await fetch(url);
         const json = await res.json();
-        const address =
-          json.results[0]?.formatted_address || 'Kerala';
+        const address = json.results[0]?.formatted_address || 'Kerala';
         setLocation({
           name: address,
           lat: latitude,
@@ -207,9 +228,15 @@ const CommonLocationModal: React.FC<Props> = ({
             },
           ]}>
           <View style={styles.header}>
-            <Text style={[styles.title,{color: theme.colors.text}]}>Location</Text>
+            <Text style={[styles.title, {color: theme.colors.text}]}>
+              Location
+            </Text>
             <TouchableOpacity onPress={onClose}>
-              <MaterialCommunityIcons name="close" size={24} color={theme.colors.text} />
+              <MaterialCommunityIcons
+                name="close"
+                size={24}
+                color={theme.colors.text}
+              />
             </TouchableOpacity>
           </View>
           <View style={styles.inputContainer}>
@@ -268,56 +295,84 @@ const CommonLocationModal: React.FC<Props> = ({
           {loading ? (
             <ActivityIndicator style={{marginTop: 20}} />
           ) : (
-            <FlatList
-              data={predictions}
-              keyExtractor={item => item.place_id}
-              renderItem={renderItem}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{
-                backgroundColor: '#fff',
-                borderRadius: 12,
-                borderColor: '#EBEBEB',
-                borderWidth: 1,
-                marginTop: 10,
-                padding: 8,
-              }}
-              ListFooterComponent={
-                <View>
-                  {
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        marginTop: 15,
-                        color: '#696969',
-                        margin: 5,
-                      }}>
-                      Recent Searches
-                    </Text>
-                  }
-                  {locationHistory?.map(
-                    (item: {lat: any; name: string; lng: any}, index: number) =>
-                      index <= 4 &&
-                      currentLocation?.lat !== item.lat && (
-                        <TouchableOpacity
-                          key={index}
-                          style={styles.item}
-                          onPress={() => {
-                            onSelectLocation(item);
-                            onClose();
+            (predictions.length > 0 ||
+              locationHistory.filter(
+                (item: {lat: any}, index: number) =>
+                  index <= 4 && currentLocation?.lat !== item.lat,
+              ).length > 0) && (
+              <FlatList
+                data={predictions}
+                keyExtractor={item => item.place_id}
+                renderItem={renderItem}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{
+                  backgroundColor: '#fff',
+                  borderRadius: 12,
+                  borderColor: '#EBEBEB',
+                  borderWidth: 1,
+                  marginTop: 10,
+                  padding: 8,
+                }}
+                ListFooterComponent={
+                  locationHistory.filter(
+                    (item: {lat: any}, index: number) =>
+                      index <= 4 && currentLocation?.lat !== item.lat,
+                  ).length > 0 ? (
+                    <View>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                        }}>
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            marginTop: 15,
+                            color: '#696969',
+                            margin: 5,
                           }}>
-                          <MaterialCommunityIcons
-                            name="clock"
-                            size={20}
-                            color="#696969"
-                            style={{marginRight: 10}}
-                          />
-                          <Text style={styles.itemText}>{item.name}</Text>
+                          Recent Searches
+                        </Text>
+                        <TouchableOpacity onPress={resetLocationHistory}>
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              marginTop: 15,
+                              color: '#696969',
+                              margin: 5,
+                            }}>
+                            Clear All
+                          </Text>
                         </TouchableOpacity>
-                      ),
-                  )}
-                </View>
-              }
-            />
+                      </View>
+
+                      {locationHistory
+                        .filter(
+                          (item: {lat: any}, index: number) =>
+                            index <= 4 && currentLocation?.lat !== item.lat,
+                        )
+                        .map((item: {lat: any; lng: any; name: any}) => (
+                          <TouchableOpacity
+                            key={`${item.lat}-${item.lng}`} // unique key
+                            style={styles.item}
+                            onPress={() => {
+                              onSelectLocation(item);
+                              onClose();
+                            }}>
+                            <MaterialCommunityIcons
+                              name="clock"
+                              size={20}
+                              color="#696969"
+                              style={{marginRight: 10}}
+                            />
+                            <Text style={styles.itemText}>{item.name}</Text>
+                          </TouchableOpacity>
+                        ))}
+                    </View>
+                  ) : null
+                }
+              />
+            )
           )}
         </View>
       </View>

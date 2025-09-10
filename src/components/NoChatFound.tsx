@@ -5,7 +5,7 @@ import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const NoChats = (props: any) => {
-  const {onExplore, title, body, icon, buttonText} = props;
+  const {onExplore, title, body, icon, buttonText, color} = props;
   const {theme} = useTheme();
   return (
     <View
@@ -13,7 +13,7 @@ const NoChats = (props: any) => {
       <MaterialCommunityIcons
         name={icon}
         size={64}
-        color="#B0B0B0"
+        color={color ? color : '#B0B0B0'}
         style={styles.icon}
       />
       {title && (
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
     backgroundColor: '#fff',
-    width:'100%'
+    width: '100%',
   },
   icon: {
     marginBottom: 16,
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 8,
     fontFamily: Fonts.BOLD,
-    textAlign:'center',
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
     fontFamily: Fonts.BOLD,
-    textAlign:'center',
+    textAlign: 'center',
   },
 });
 

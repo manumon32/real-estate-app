@@ -18,6 +18,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import NoChats from '@components/NoChatFound';
+import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -131,11 +132,6 @@ const ReportAd = () => {
   return (
     <SafeAreaView
       style={{backgroundColor: theme.colors.background, height: '100%'}}>
-      {reportAdListLoading && (
-        <View style={styles.overlay}>
-          <ActivityIndicator size="large" color="#fff" />
-        </View>
-      )}
       <FlatList
         data={reportAdList}
         renderItem={renderAdItem}
@@ -143,7 +139,7 @@ const ReportAd = () => {
         contentContainerStyle={{
           paddingBottom: 120,
           backgroundColor: theme.colors.backgroundHome,
-          minHeight: 500,
+          minHeight: 800,
           //  padding: 14,
         }}
         ListHeaderComponent={
@@ -169,19 +165,24 @@ const ReportAd = () => {
           />
         }
         ListFooterComponent={
-          !reportAdListLoading && reportAdList.length <= 0 ? (
-            <NoChats
-              onExplore={() => {
-                // @ts-ignore
-                navigation.navigate('Main');
-              }}
-              icon="message-text-outline"
-              title="No Ads Found"
-              // buttonText={'Explore now'}
-            />
-          ) : (
-            <></>
-          )
+          <>
+            {reportAdListLoading && reportAdList.length <= 0 && (
+              <AdsListSkelton />
+            )}
+            {!reportAdListLoading && reportAdList.length <= 0 ? (
+              <NoChats
+                onExplore={() => {
+                  // @ts-ignore
+                  navigation.navigate('Main');
+                }}
+                icon="message-text-outline"
+                title="No Ads Found"
+                // buttonText={'Explore now'}
+              />
+            ) : (
+              <></>
+            )}
+          </>
         }
       />
     </SafeAreaView>

@@ -198,6 +198,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   };
 
   const updatePrice = (items: any) => {
+    console.log(items)
     updateFilter('price', items);
   };
 
@@ -337,7 +338,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             {renderChips(BATHROOMS)}
             <View style={{marginTop: 20, marginBottom: -20}}>
               <StepSlider
-                value={filtersNew?.price ? filtersNew?.price : [0, 0]}
+                value={filtersNew?.price ? filtersNew?.price : [0, 1000]}
                 theme={theme}
                 onChange={updatePrice}
                 // min={1000}

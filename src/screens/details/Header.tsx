@@ -9,11 +9,11 @@ import {
   Text,
   Dimensions,
   Linking,
-  Share,
 } from 'react-native';
+import Share from 'react-native-share';
 import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '@theme/ThemeProvider';
 import IconButton from '@components/Buttons/IconButton';
 import Carousel from 'react-native-reanimated-carousel';
@@ -42,16 +42,24 @@ function Header(props: any): React.JSX.Element {
     setModalVisible(true);
   }, []);
 
-  const shareProperty = (details: any) => {
-    const link = `https://hotplotz.com/details/${details._id}`;
+  const shareProperty = async (details: any) => {
+    try {
+      const link = `https://hotplotz.com/details/${details._id}`;
 
-    const message =
-      `I have found this on Hotlplotz ${details.title} Check out this property on HotPlotz 👇${link}`.trim();
-    Share.share({
-      title: 'Hotplotz',
-      message,
-      // url: link, // for iOS, some apps use this field
-    });
+      const message = `I found this on Hotplotz: ${details.title}\n\nCheck out this property 👇\n${link}`;
+
+      const shareOptions = {
+        title: 'Hotplotz',
+        message,
+        urls: [
+          details?.imageUrls?.[0], // first image from array
+        ],
+      };
+
+      await Share.open(shareOptions);
+    } catch (error) {
+      console.log('Share Error =>', error);
+    }
   };
 
   const renderItem = useCallback(

@@ -24,7 +24,6 @@ function Index({navigation}: any): React.JSX.Element {
     clientId,
     getConfigData,
     fetchFavouriteAds,
-    fetchListings,
     bearerToken,
   } = useBoundStore();
   const [error, setError] = useState(true);
@@ -65,7 +64,7 @@ function Index({navigation}: any): React.JSX.Element {
     const url = event.url; // e.g., myapp://property/12345
     const match = url.match(/details\/(\w+)/);
     if (match) {
-      const propertyId = match[1];
+      // const propertyId = match[1];
       // navigation.navigate('Details', {items: {_id: propertyId}});
     }
   };

@@ -1,83 +1,91 @@
 /* eslint-disable react-native/no-inline-styles */
-/* eslint-disable react-hooks/exhaustive-deps */
-import CommonHeader from '@components/Header/CommonHeader';
 import React from 'react';
-import {
-  StyleSheet,
-  ScrollView,
-  Text,
-  View,
-  //   FlatList,
-  //   Text,
-  //   RefreshControl,
-} from 'react-native';
+import {StyleSheet, ScrollView, Text, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import CommonHeader from '@components/Header/CommonHeader';
+import {useTheme} from '@theme/ThemeProvider';
 import {Fonts} from '@constants/font';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '@theme/ThemeProvider';
 
 const TermsConditions = () => {
   const {theme} = useTheme();
+  const Section = ({children}: {children: React.ReactNode}) => (
+    <Text style={[styles.section, {color: theme.colors.text}]}>{children}</Text>
+  );
+
+  const SubSection = ({children}: {children: React.ReactNode}) => (
+    <Text style={[styles.subSection, {color: theme.colors.text}]}>
+      {children}
+    </Text>
+  );
 
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
-      <CommonHeader title="Terms and Conditions" textColor="#171717" />
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      <CommonHeader title="Terms & Conditions" textColor="#171717" />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{padding: 15}}
-        contentContainerStyle={{
-          paddingBottom: 120,
-        }}>
+        contentContainerStyle={styles.scrollContent}>
         <View
-          style={{
-            borderWidth: 1,
-            borderRadius: 20,
-            backgroundColor: theme.colors.background,
-            padding: 10,
-            borderColor: '#EBEBEB',
-            height: '100%',
-          }}>
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: Fonts.MEDIUM,
-              letterSpacing: 0.1,
-              lineHeight: 32,
-              color: theme.colors.text,
-            }}>
-            Your privacy is important to us. It is Brainstorming's policy to
-            respect your privacy regarding any information we may collect from
-            you across our website, and other sites we own and operate.
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: Fonts.MEDIUM,
-              letterSpacing: 0.1,
-              lineHeight: 32,
-              marginTop: 10,
-              color: theme.colors.text,
-            }}>
-            We only ask for personal information when we truly need it to
-            provide a service to you. We collect it by fair and lawful means,
-            with your knowledge and consent. We also let you know why we’re
-            collecting it and how it will be used.
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: Fonts.MEDIUM,
-              letterSpacing: 0.1,
-              lineHeight: 32,
-              marginTop: 10,
-              color: theme.colors.text,
-            }}>
-            We only retain collected information for as long as necessary to
-            provide you with your requested service. What data we store, we’ll
-            protect within commercially acceptable means to prevent loss and
-            theft, as well as unauthorized access, disclosure, copying, use or
-            modification. We don’t share any personally identifying information
-            publicly or with third-parties, except when required to by law.
-          </Text>
+          style={[
+            styles.card,
+            {backgroundColor: theme.colors.background, borderColor: '#EBEBEB'},
+          ]}>
+          <Section>
+            1. Eligibility
+            <SubSection>Users must be 18+ and legally capable under</SubSection>
+            Indian law.
+          </Section>
+
+          <Section>
+            2. Services{'\n'}- Hotplotz provides a platform for buying, selling,
+            and renting properties. We do not own, verify, or guarantee the
+            accuracy of listings.
+          </Section>
+
+          <Section>
+            3. User Responsibilities{'\n'}- Users must provide accurate
+            information, avoid fraud/spam, and use the platform lawfully.
+          </Section>
+
+          <Section>
+            4. Property Listings{'\n'}- All property details are submitted by
+            users. Independent verification is advised. We are not liable for
+            errors or disputes.
+          </Section>
+
+          <Section>5. Paid Services & Payment Gateways</Section>
+          <SubSection>
+            - Subscriptions and payments are processed securely via third-party
+            providers.
+          </SubSection>
+          <SubSection>
+            - We are not responsible for errors, delays, or failures caused by
+            payment providers.
+          </SubSection>
+          <SubSection>
+            - Users must ensure accurate billing details. Refunds are not
+            provided except where legally required.
+          </SubSection>
+
+          <Section>
+            6. Data Security{'\n'}- Reasonable security practices (IT Act 2000,
+            SPDI Rules 2011) are followed, including encryption and secure
+            servers.
+          </Section>
+
+          <Section>
+            7. Limitation of Liability{'\n'}- We are not liable for losses,
+            damages, or disputes arising from use of the platform or property
+            transactions.
+          </Section>
+
+          <Section>
+            8. Changes to Terms{'\n'}- We may update these Terms & Conditions
+            from time to time. Updates will be communicated via the app/email.
+          </Section>
+
+          <Text style={styles.footer}>Last updated: September 2025</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -86,114 +94,40 @@ const TermsConditions = () => {
 
 const styles = StyleSheet.create({
   container: {
-    height: '100%',
     flex: 1,
-    backgroundColor: '#fff',
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 120,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 14,
-    marginVertical: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  image: {
-    width: 70,
-    height: 70,
-    borderRadius: 12,
-    marginRight: 12,
-  },
-  info: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  title: {
-    fontWeight: '600',
-    fontSize: 15,
-    flex: 1,
-  },
-  badge: {
-    backgroundColor: '#e0f5ec',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  badgeText: {
-    fontSize: 11,
-    color: '#15937c',
-    fontWeight: '600',
-  },
-  location: {
-    fontSize: 13,
-    color: '#888',
-  },
-  price: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#1e1e1e',
-  },
-  metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginTop: 10,
-    gap: 16,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  metaText: {
-    fontSize: 12,
-    color: '#888',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    marginTop: 12,
-    justifyContent: 'space-between',
-  },
-  outlinedButton: {
-    flex: 1,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    paddingVertical: 10,
-    marginHorizontal: 4,
-    alignItems: 'center',
+    borderRadius: 20,
+    padding: 16,
   },
-  buttonText: {
+  section: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-
-  endText: {
-    textAlign: 'center',
-    color: '#888',
-    padding: 12,
-    fontStyle: 'italic',
-  },
-  loadingContainer: {
-    paddingVertical: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
     fontFamily: Fonts.MEDIUM,
+    letterSpacing: 0.1,
+    lineHeight: 22,
+    color: '#333333',
+    marginTop: 12,
   },
-  loadingText: {
-    marginTop: 8,
+  subSection: {
+    fontSize: 13,
+    fontFamily: Fonts.MEDIUM,
     color: '#555',
-    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 6,
+    marginLeft: 12,
+  },
+  footer: {
+    marginTop: 20,
+    fontSize: 12,
+    fontFamily: Fonts.MEDIUM,
+    color: '#888',
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });
 

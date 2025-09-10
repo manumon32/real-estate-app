@@ -5,16 +5,12 @@ import {
   StatusBar,
   useColorScheme,
   FlatList,
-  Text,
-  StyleSheet,
   // ActivityIndicator,
   RefreshControl,
-  Image,
   BackHandler,
   ToastAndroid,
   AppState,
   Linking,
-  Alert,
 } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 
@@ -27,10 +23,11 @@ import {useTheme} from '@theme/ThemeProvider';
 import Header from './Header/Header';
 import PropertyCard from '@components/PropertyCard';
 import useBoundStore from '@stores/index';
-import {Fonts} from '@constants/font';
 import {connectSocket, disconnectSocket} from './../../soket';
 import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
 import {useFocusEffect} from '@react-navigation/native';
+import NoChats from '@components/NoChatFound';
+import Toast from 'react-native-toast-message';
 
 export interface INotification {
   userId: string;
@@ -42,6 +39,7 @@ export interface INotification {
   read: boolean;
   createdAt: Date;
   metadata?: Record<string, any>;
+  notificationId: string;
 }
 
 function App({navigation}: any): React.JSX.Element {
@@ -55,7 +53,7 @@ function App({navigation}: any): React.JSX.Element {
     location,
     setTriggerRelaod,
     bearerToken,
-    fetchChatListings
+    fetchChatListings,
   } = useBoundStore();
 
   const {theme} = useTheme();
@@ -107,8 +105,6 @@ function App({navigation}: any): React.JSX.Element {
     },
     [navigation],
   );
-
-
 
   useEffect(() => {
     bearerToken && connectSocket();
@@ -167,61 +163,69 @@ function App({navigation}: any): React.JSX.Element {
     const url = event.url; // e.g., myapp://property/12345
     const match = url.match(/details\/([^/?#]+)/);
     if (match) {
-      const propertyId = match[1];
+      // const propertyId = match[1];
       // navigation.navigate('Details', {items: {_id: propertyId}});
     }
   };
 
   useEffect(() => {
-      // Listen when app is already open
-      const sub = Linking.addEventListener('url', handleDeepLink);
-  
-      // Also handle when app is opened from a killed state
-      Linking.getInitialURL().then(url => {
-        if (url) {
-          // Alert.alert(url)
-          // setDeepLink({url});
-        }
-      });
-  
-      return () => sub.remove();
-    }, []);
+    // Listen when app is already open
+    const sub = Linking.addEventListener('url', handleDeepLink);
+
+    // Also handle when app is opened from a killed state
+    Linking.getInitialURL().then(url => {
+      if (url) {
+        // Alert.alert(url)
+        // setDeepLink({url});
+      }
+    });
+
+    return () => sub.remove();
+  }, []);
 
   useEffect(() => {
     requestUserPermission();
 
-    // const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
-    //   const data = remoteMessage?.data;
-    //   console.log('remoteMessage', remoteMessage);
-    //   // if (data?.type) {
-    //   navigateByNotification(data as any as INotification);
-    //   // }
-    // });
-    
+    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+      const data = remoteMessage?.data;
+      console.log('remoteMessage 1', remoteMessage);
+      if (data?.type) {
+        Toast.show({
+          type: 'info',
+          text1: data?.title ? String(data.title) : 'You have a notification',
+          text2: data?.message ? String(data.message) : 'Tes ',
+          position: 'top',
+          onPress: () => {
+            navigateByNotification(data as any as INotification);
+          },
+        });
+      }
+    });
 
     const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
       remoteMessage => {
-      console.log('remoteMessage', remoteMessage);
+        console.log('remoteMessage 2', remoteMessage);
         const data = remoteMessage?.data;
         navigateByNotification(data as any as INotification);
       },
     );
 
     messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('remoteMessage', remoteMessage);
+      console.log('remoteMessage 3', remoteMessage);
       const data = remoteMessage?.data;
       navigateByNotification(data as any as INotification);
     });
 
-    // messaging()
-    //   .getInitialNotification()
-    //   .then(remoteMessage => {
-    //     const data = remoteMessage?.data;
-    //     navigateByNotification(data as any as INotification);
-    //   });
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        console.log('remoteMessage 4', remoteMessage);
+        const data = remoteMessage?.data;
+        navigateByNotification(data as any as INotification);
+      });
 
     return () => {
-      // unsubscribeForeground();
+      unsubscribeForeground();
       unsubscribeOpenedApp();
     };
   }, [bearerToken]);
@@ -262,7 +266,12 @@ function App({navigation}: any): React.JSX.Element {
             <HomepageSkelton />
           ) : listings.length <= 0 ? (
             <>
-              <Image
+              <NoChats
+                icon="magnify-close"
+                color="#9E9E9E"
+                title="Oops.. we cannot find anything for this search."
+              />
+              {/* <Image
                 source={require('@assets/images/noads.png')}
                 style={{
                   height: 200,
@@ -271,10 +280,7 @@ function App({navigation}: any): React.JSX.Element {
                   justifyContent: 'center',
                   alignSelf: 'center',
                 }}
-              />
-              <Text style={styles.endText}>
-                Oops.. we cannot find anything for this search.
-              </Text>
+              /> */}
             </>
           ) : (
             <></>
@@ -284,65 +290,5 @@ function App({navigation}: any): React.JSX.Element {
     </SafeAreaView>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    marginBottom: 12,
-    padding: 12,
-    elevation: 2,
-  },
-  image: {
-    width: '100%',
-    height: 150,
-    borderRadius: 6,
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  price: {
-    fontSize: 14,
-    color: '#666',
-  },
-  featured: {
-    marginTop: 6,
-    color: '#e91e63',
-    fontWeight: 'bold',
-  },
-  loadMoreBtn: {
-    padding: 12,
-    backgroundColor: '#007bff',
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  loadMoreText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  endText: {
-    textAlign: 'center',
-    color: '#888',
-    padding: 12,
-    fontWeight: 500,
-    fontFamily: Fonts.BOLD,
-    top: -40,
-  },
-  loadingContainer: {
-    paddingVertical: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingText: {
-    marginTop: 8,
-    color: '#555',
-    fontSize: 14,
-  },
-});
 
 export default App;

@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   View,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
   //   FlatList,
   //   Text,
   //   RefreshControl,
@@ -65,129 +67,145 @@ const HelpSupport = () => {
             textColor="#171717"
             backgroundColor="#fff"
           />
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps={'handled'}
-            contentContainerStyle={{
-              paddingBottom: 120,
-              backgroundColor: theme.colors.background,
-              padding: 16,
-              // height: '100%',
-            }}
-            style={{
-              height: '100%',
-            }}>
-            <ContactUsCard />
-            <View
-              style={{
-                backgroundColor: '#fff',
-                borderRadius: 16,
-                padding: 16,
-                shadowColor: '#000',
-                shadowOffset: {width: 0, height: 4},
-                shadowOpacity: 0.1,
-                shadowRadius: 6,
-                elevation: 5,
-                top: 20,
-              }}>
-              <Text
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{flex: 1}}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+            {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+            <View style={{flex: 1}}>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps={'handled'}
+                contentContainerStyle={{
+                  paddingBottom: 120,
+                  backgroundColor: theme.colors.background,
+                  padding: 16,
+                  // height: '100%',
+                }}
                 style={{
-                  fontFamily: Fonts.MEDIUM,
-                  fontSize: 18,
-                  color: theme.colors.text,
+                  height: '100%',
                 }}>
-                Submit a Request
-              </Text>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Full Name</Text>
-                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-                <TextInput
-                  placeholder="Name"
-                  value={name}
-                  onChangeText={text => {
-                    setName(text);
-                  }}
-                  // onBlur={handleBlur('title')}
-                  // error={touched?.title && errors?.title ? true : false}
-                />
-              </View>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Email*</Text>
-                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-                <TextInput
-                  placeholder="Email"
-                  value={email}
-                  editable={!user?.email}
-                  onChangeText={text => {
-                    setEmail(text);
-                  }}
-                  // onBlur={handleBlur('title')}
-                  // error={touched?.title && errors?.title ? true : false}
-                />
-              </View>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Phone Number</Text>
-                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-                <TextInput
-                  placeholder="Phone"
-                  value={phoneNumber}
-                  editable={!user?.phone}
-                  onChangeText={text => {
-                    setPhoneNumber(text);
-                  }}
-                  // onBlur={handleBlur('title')}
-                  // error={touched?.title && errors?.title ? true : false}
-                />
-              </View>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Description*</Text>
-                {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-                <TextInput
-                  placeholder="Description"
-                  multiline
-                  value={description}
-                  onChangeText={text => {
-                    setDescription(text);
-                  }}
-                  style={{minHeight: 100, justifyContent: 'center'}}
-                  // onBlur={handleBlur('title')}
-                  // error={touched?.title && errors?.title ? true : false}
-                />
-              </View>
+                <ContactUsCard />
+                <View
+                  style={{
+                    backgroundColor: '#fff',
+                    borderRadius: 16,
+                    padding: 16,
+                    shadowColor: '#000',
+                    shadowOffset: {width: 0, height: 4},
+                    shadowOpacity: 0.1,
+                    shadowRadius: 6,
+                    elevation: 5,
+                    top: 20,
+                  }}>
+                  <Text
+                    style={{
+                      fontFamily: Fonts.MEDIUM,
+                      fontSize: 18,
+                      color: theme.colors.text,
+                    }}>
+                    Submit a Request
+                  </Text>
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Full Name</Text>
+                    {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                    <TextInput
+                      placeholder="Name"
+                      value={name}
+                      onChangeText={text => {
+                        setName(text);
+                      }}
+                      // onBlur={handleBlur('title')}
+                      // error={touched?.title && errors?.title ? true : false}
+                    />
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Email*</Text>
+                    {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                    <TextInput
+                      placeholder="Email"
+                      value={email}
+                      editable={!user?.email}
+                      onChangeText={text => {
+                        setEmail(text);
+                      }}
+                      onFocus={()=>{}}
+                      // onBlur={handleBlur('title')}
+                      // error={touched?.title && errors?.title ? true : false}
+                    />
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Phone Number</Text>
+                    {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                    <TextInput
+                      placeholder="Phone"
+                      value={phoneNumber}
+                      editable={!user?.phone}
+                      onChangeText={text => {
+                        setPhoneNumber(text);
+                      }}
+                      // onBlur={handleBlur('title')}
+                      // error={touched?.title && errors?.title ? true : false}
+                    />
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Description*</Text>
+                    {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                    <TextInput
+                      placeholder="Description"
+                      multiline
+                      value={description}
+                      onChangeText={text => {
+                        setDescription(text);
+                      }}
+                      style={{minHeight: 100, justifyContent: 'center'}}
+                      // onBlur={handleBlur('title')}
+                      // error={touched?.title && errors?.title ? true : false}
+                    />
+                  </View>
 
-              <View style={{padding: 12, top: 10}}>
-                <TouchableOpacity
-                  onPress={() => {
-                    if (name && email && phoneNumber && description) {
-                      if (isValidEmail(email) || isValidPhone(phoneNumber)) {
-                        let payload = {
-                          fullName: name,
-                          email: email,
-                          phone: phoneNumber,
-                          topic: 'Request',
-                          description: description,
-                        };
-                        submitRequest(payload);
-                      }
-                    }
-                  }}
-                  style={[
-                    styles.buyButton,
-                    (!name || !email || !phoneNumber || !description || !isValidEmail(email)) && {
-                      backgroundColor: '#ccc',
-                    },
-                  ]}
-                  accessibilityRole="button">
-                  {!updateLoading && (
-                    <Text style={styles.buyText}>{'Submit'}</Text>
-                  )}
-                  {updateLoading && (
-                    <ActivityIndicator color={'#fff'} size={'small'} />
-                  )}
-                </TouchableOpacity>
-              </View>
+                  <View style={{padding: 12, top: 10}}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (name && email && phoneNumber && description) {
+                          if (
+                            isValidEmail(email) ||
+                            isValidPhone(phoneNumber)
+                          ) {
+                            let payload = {
+                              fullName: name,
+                              email: email,
+                              phone: phoneNumber,
+                              topic: 'Request',
+                              description: description,
+                            };
+                            submitRequest(payload);
+                          }
+                        }
+                      }}
+                      style={[
+                        styles.buyButton,
+                        (!name ||
+                          !email ||
+                          !phoneNumber ||
+                          !description ||
+                          !isValidEmail(email)) && {
+                          backgroundColor: '#ccc',
+                        },
+                      ]}
+                      accessibilityRole="button">
+                      {!updateLoading && (
+                        <Text style={styles.buyText}>{'Submit'}</Text>
+                      )}
+                      {updateLoading && (
+                        <ActivityIndicator color={'#fff'} size={'small'} />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </ScrollView>
             </View>
-          </ScrollView>
+          </KeyboardAvoidingView>
           <CommonSuccessModal
             visible={visible}
             title="Success."

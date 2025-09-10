@@ -1,5 +1,12 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {StyleSheet, View, Text, FlatList, Pressable} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  TouchableOpacity,
+} from 'react-native';
 import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
@@ -9,7 +16,8 @@ import ImagePickerModal from '@components/Modal/ImagePickerModal';
 import useBoundStore from '@stores/index';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
 import {useTheme} from '@theme/ThemeProvider';
-import { useRoute } from '@react-navigation/native';
+import {useRoute} from '@react-navigation/native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Step5MediaUpload = (props: any) => {
   const route = useRoute();
@@ -19,6 +27,7 @@ const Step5MediaUpload = (props: any) => {
     useBoundStore();
   const [assets, setAssets] = useState<any[]>(images || []);
   const [floorPlan, setFloorPlan] = useState<any[]>(floorPlans || []);
+  const [showBoostPopup, setShowBoostPopup] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
   const {
@@ -182,19 +191,61 @@ const Step5MediaUpload = (props: any) => {
         </View>
       )}
 
-      {!items?._id && <View style={styles.inputContainer}>
-        <CommonAmenityToggle
-          label={
-            // @ts-ignore
-            String(price)
-              ? // @ts-ignore
-                'Featured Property (₹' + String(price) + ')'
-              : 'Featured Property '
-          }
-          selected={values.featured}
-          onToggle={() => setFieldValue('featured', !values.featured)}
-        />
-      </View>}
+      {!items?._id && (
+        <View style={[styles.inputContainer, {flexDirection: 'row'}]}>
+          <View style={{width: '90%'}}>
+            <CommonAmenityToggle
+              label={
+                // @ts-ignore
+                String(price)
+                  ? // @ts-ignore
+                    'Featured Property (₹' + String(price) + ')'
+                  : 'Featured Property '
+              }
+              selected={values.featured}
+              onToggle={() => setFieldValue('featured', !values.featured)}
+            />
+          </View>
+          <TouchableOpacity
+            onPress={() => setShowBoostPopup(true)}
+            style={{
+              justifyContent: 'center',
+              alignContent: 'center',
+              margin: 10,
+            }}>
+            <MaterialCommunityIcons
+              name="information"
+              size={30}
+              color="#3d94ffff"
+            />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {showBoostPopup && (
+        <View style={styles.popupOverlay}>
+          <View style={styles.popupContainer}>
+            <Text style={styles.popupTitle}>Feature Your Ad</Text>
+            <Text style={styles.popupAmount}>Amount: ₹{price ?? 'N/A'}</Text>
+            <Text style={styles.popupBenefits}>
+              Benefits:
+              {'\n'}• Get more visibility
+              {'\n'}• Reach more buyers
+              {'\n'}• Highlight your ad at the top
+            </Text>
+            <View style={styles.popupActions}>
+              <TouchableOpacity
+                style={styles.continueButton}
+                onPress={() => {
+                  setShowBoostPopup(false);
+                  // makePayment(selectedAd._id);
+                }}>
+                <Text style={styles.continueButtonText}>Ok</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
 
       <ImagePickerModal
         visible={modalVisible}
@@ -261,6 +312,64 @@ const styles = StyleSheet.create({
     left: 10,
     fontSize: 12,
     fontFamily: Fonts.REGULAR,
+  },
+
+  popupOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf:'center',
+    zIndex: 999,
+    borderRadius: 20,
+  },
+  popupContainer: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+  },
+  popupTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  popupAmount: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  popupBenefits: {
+    fontSize: 13,
+    color: '#555',
+    marginBottom: 16,
+  },
+  popupActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  cancelButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#ddd',
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  continueButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#2A9D8F',
+    borderRadius: 8,
+  },
+  continueButtonText: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '600',
   },
 });
 

@@ -27,7 +27,7 @@ import FilterModal from '@components/Filter';
 import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
 import NoChats from '@components/NoChatFound';
 
-const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
+const SortChips: React.FC<any> = ({setFilters, fetchFilterListings, theme}) => {
   const {filters, filter_loading, clearFilterList} = useBoundStore();
   const handleSort = useCallback(
     (orderBy: string, orderByDir: 'asc' | 'desc') => {
@@ -58,13 +58,13 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
   return (
     <View
       style={{
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
         paddingRight: 8,
         padding: 2,
         flexDirection: 'row',
         flexWrap: 'wrap',
       }}>
-        <TouchableOpacity
+      <TouchableOpacity
         style={[
           styles.chipSort,
           filters.orderBy == 'distance' && styles.chipSelected,
@@ -87,6 +87,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
         <Text
           style={[
             styles.chipText,
+            {color: theme.colors.text},
             filters.orderBy == 'createdAt' && styles.chipTextSelected,
           ]}>
           {'Date published'}
@@ -103,6 +104,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
         <Text
           style={[
             styles.chipText,
+            {color: theme.colors.text},
             filters.orderBy == 'price' &&
               filters.orderByDir == 'asc' &&
               styles.chipTextSelected,
@@ -122,6 +124,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings}) => {
         <Text
           style={[
             styles.chipText,
+            {color: theme.colors.text},
             filters.orderBy == 'price' &&
               filters.orderByDir == 'desc' &&
               styles.chipTextSelected,
@@ -242,6 +245,7 @@ function App(): React.JSX.Element {
             filters={filters}
             setFilters={setFilters}
             fetchFilterListings={fetchFilterListings}
+            theme={theme}
           />
         )}
         <>

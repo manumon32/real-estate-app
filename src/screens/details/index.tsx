@@ -339,7 +339,7 @@ const PropertyDetails = React.memo(() => {
   };
 
   useEffect(() => {
-    console.log('DEtails Pages', items)
+    console.log('DEtails Pages', items);
     if (items?._id && !id) {
       bearerToken && fetchBanks(items?._id ?? id);
     }
@@ -645,7 +645,9 @@ const PropertyDetails = React.memo(() => {
                     setShowModal(true);
                   } else {
                     // @ts-ignore
-                    navigation.navigate('Appointments');
+                    navigation.navigate('Appointments', {
+                      items: {type: 'requestedAppointments'},
+                    });
                   }
                 }}
                 style={{

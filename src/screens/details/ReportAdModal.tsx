@@ -19,10 +19,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 
 const reportOptions = [
   'Offensive content',
-  'Fraud',
+  'fraud',
   'Duplicate ad',
   'Product already sold',
-  'Other',
+  'other',
 ];
 
 const ReportAdModal = ({visible, onClose, onSubmit}: any) => {
@@ -80,7 +80,7 @@ const ReportAdModal = ({visible, onClose, onSubmit}: any) => {
                       size={22}
                       color="#333"
                     />
-                    <Text style={styles.optionText}>{item}</Text>
+                    <Text style={styles.optionText}>{item.charAt(0).toUpperCase() + item.slice(1)}</Text>
                   </Pressable>
                 )}
                 scrollEnabled={false}

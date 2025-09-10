@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import {Fonts} from '@constants/font';
 import {JSX} from 'react';
-import {View, Text} from 'react-native';
+import {View, Text, TouchableOpacity} from 'react-native';
 import {
   // BaseToast,
   BaseToastProps,
@@ -159,5 +159,56 @@ export const ToastConfig = {
       <Text>{text1}</Text>
       <Text>{props.uuid}</Text>
     </View>
+  ),
+
+ info: (props: BaseToastProps & { onPress?: () => void }) => (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={props.onPress} // <-- handle toast press
+      style={{
+        backgroundColor: '#1976D2',
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        marginHorizontal: 10,
+        marginTop: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
+        gap: 4,
+      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: props.text2 ? 4 : 0,
+          width:'100%',
+        }}>
+        <MaterialCommunityIcons name="information" size={20} color="#fff" />
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 16,
+            flex: 1,
+            fontFamily: Fonts.MEDIUM,
+            marginLeft: 8,
+          }}>
+          {props.text1}
+        </Text>
+      </View>
+      {props.text2 ? (
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 12,
+            flex: 1,
+            fontFamily: Fonts.MEDIUM,
+            marginLeft: 28,
+          }}>
+          {props.text2}
+        </Text>
+      ) : null}
+    </TouchableOpacity>
   ),
 };

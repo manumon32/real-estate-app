@@ -1,83 +1,105 @@
 /* eslint-disable react-native/no-inline-styles */
-/* eslint-disable react-hooks/exhaustive-deps */
-import CommonHeader from '@components/Header/CommonHeader';
 import React from 'react';
-import {
-  StyleSheet,
-  ScrollView,
-  Text,
-  View,
-  //   FlatList,
-  //   Text,
-  //   RefreshControl,
-} from 'react-native';
-import {Fonts} from '@constants/font';
+import {StyleSheet, ScrollView, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import { useTheme } from '@theme/ThemeProvider';
+import CommonHeader from '@components/Header/CommonHeader';
+import {useTheme} from '@theme/ThemeProvider';
+import {Fonts} from '@constants/font';
 
 const PrivacyPolicy = () => {
   const {theme} = useTheme();
 
+  const Section = ({children}: {children: React.ReactNode}) => (
+    <Text style={[styles.section, {color: theme.colors.text}]}>{children}</Text>
+  );
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}  ]}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <CommonHeader title="Privacy Policy" textColor="#171717" />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{padding: 15}}
-        contentContainerStyle={{
-          paddingBottom: 120,
-        }}>
+        contentContainerStyle={styles.scrollContent}>
         <View
-          style={{
-            borderWidth: 1,
-            borderRadius: 20,
-            backgroundColor: theme.colors.background,
-            padding: 10,
-            borderColor: '#EBEBEB',
-            height: '100%',
-          }}>
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: Fonts.MEDIUM,
-              letterSpacing: 0.1,
-              lineHeight: 32,
-              color: theme.colors.text,
-            }}>
-            Your privacy is important to us. It is Brainstorming's policy to
-            respect your privacy regarding any information we may collect from
-            you across our website, and other sites we own and operate.
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: Fonts.MEDIUM,
-              letterSpacing: 0.1,
-              lineHeight: 32,
-              marginTop: 10,
-              color: theme.colors.text,
-            }}>
-            We only ask for personal information when we truly need it to
-            provide a service to you. We collect it by fair and lawful means,
-            with your knowledge and consent. We also let you know why we’re
-            collecting it and how it will be used.
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              fontFamily: Fonts.MEDIUM,
-              letterSpacing: 0.1,
-              lineHeight: 32,
-              marginTop: 10,
-              color: theme.colors.text,
-            }}>
-            We only retain collected information for as long as necessary to
-            provide you with your requested service. What data we store, we’ll
-            protect within commercially acceptable means to prevent loss and
-            theft, as well as unauthorized access, disclosure, copying, use or
-            modification. We don’t share any personally identifying information
-            publicly or with third-parties, except when required to by law.
-          </Text>
+          style={[
+            styles.card,
+            {backgroundColor: theme.colors.background, borderColor: '#EBEBEB'},
+          ]}>
+          <Section>
+            JR GROUP (“Company,” “we,” “our,” or “us”) operates the Hotplotz
+            mobile application (“App”) and related services in India. We value
+            your trust and are committed to protecting your personal information
+            in accordance with applicable Indian laws.
+          </Section>
+
+          <Section>
+            1. Information We Collect{'\n'}- Personal Information: Name, phone
+            number, email, ID proof, payment details{'\n'}- Property &
+            Transaction Info: Listings, preferences, communications{'\n'}-
+            Device Data: OS, IP address, logs, geolocation (with consent){'\n'}-
+            Communication Data: Chats, calls, feedback
+          </Section>
+
+          <Section>
+            2. Purpose of Processing{'\n'}- To provide and improve services,
+            enable transactions, connect users, process payments, prevent fraud,
+            send updates, comply with law.
+          </Section>
+
+          <Section>
+            3. Legal Basis{'\n'}- Consent, Contractual necessity, Legal
+            obligations, Legitimate interests
+          </Section>
+
+          <Section>
+            4. Data Sharing{'\n'}- With property owners/agents, service
+            providers, legal authorities, and business partners.
+          </Section>
+
+          <Section>
+            5. Data Retention{'\n'}- Retained as long as necessary for services,
+            disputes, legal compliance.
+          </Section>
+
+          <Section>
+            6. Data Security{'\n'}- Reasonable security practices (IT Act 2000,
+            SPDI Rules 2011), encryption, secure servers.
+          </Section>
+
+          <Section>
+            7. User Rights{'\n'}- Access, correction, deletion, withdrawal
+            consent, grievance redressal.
+          </Section>
+
+          <Section>
+            8. Children’s Privacy{'\n'}- Not for under 18 years. Data from
+            minors deleted.
+          </Section>
+
+          <Section>
+            9. Third-Party Links{'\n'}- Not responsible for third-party
+            practices.
+          </Section>
+
+          <Section>
+            10. International Transfers{'\n'}- Data may be processed outside
+            India with adequate safeguards.
+          </Section>
+
+          <Section>
+            11. Policy Updates{'\n'}- Changes notified via app/email.
+          </Section>
+
+          <Section>
+            12. Contact{'\n'}
+            Data Protection Officer (DPO){'\n'}
+            JR GROUP{'\n'}
+            THOTTUMKARA, PURATHEZHATHU, Sakthikulangara, SAKTHIKULANGARA,
+            Primary Health Centre Sakthikulangara, SAKTHIKULANGARA, Kollam,
+            Kollam, Kerala, 691581{'\n'}
+            Email: contact@hotplotz.com{'\n'}
+            Phone: +91 8593987471
+          </Section>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -86,114 +108,23 @@ const PrivacyPolicy = () => {
 
 const styles = StyleSheet.create({
   container: {
-    height: '100%',
     flex: 1,
-    backgroundColor: '#fff',
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 120,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 14,
-    marginVertical: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  image: {
-    width: 70,
-    height: 70,
-    borderRadius: 12,
-    marginRight: 12,
-  },
-  info: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  title: {
-    fontWeight: '600',
-    fontSize: 15,
-    flex: 1,
-  },
-  badge: {
-    backgroundColor: '#e0f5ec',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  badgeText: {
-    fontSize: 11,
-    color: '#15937c',
-    fontWeight: '600',
-  },
-  location: {
-    fontSize: 13,
-    color: '#888',
-  },
-  price: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#1e1e1e',
-  },
-  metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginTop: 10,
-    gap: 16,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  metaText: {
-    fontSize: 12,
-    color: '#888',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    marginTop: 12,
-    justifyContent: 'space-between',
-  },
-  outlinedButton: {
-    flex: 1,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    paddingVertical: 10,
-    marginHorizontal: 4,
-    alignItems: 'center',
+    borderRadius: 20,
+    padding: 16,
   },
-  buttonText: {
+  section: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-
-  endText: {
-    textAlign: 'center',
-    color: '#888',
-    padding: 12,
-    fontStyle: 'italic',
-  },
-  loadingContainer: {
-    paddingVertical: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
     fontFamily: Fonts.MEDIUM,
-  },
-  loadingText: {
-    marginTop: 8,
-    color: '#555',
-    fontSize: 14,
+    letterSpacing: 0.1,
+    lineHeight: 22,
+    marginTop: 12,
   },
 });
 
