@@ -25,8 +25,7 @@ import {
 } from 'react-native-permissions';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
-
-const GOOGLE_API_KEY = 'AIzaSyA83qLdbImZmSqqXEV7xeiYegOGcZhUq_o'; // Replace this
+import {GOOGLE_API_KEY} from '@constants/google';
 
 interface Props {
   visible: boolean;
@@ -36,7 +35,10 @@ interface Props {
     name: string;
     lat: number;
     lng: number;
-    // address_components: any;
+    city: string;
+    district: string;
+    state: string;
+    country: string;
   }) => void;
 }
 
@@ -107,9 +109,12 @@ const CommonLocationModal: React.FC<Props> = ({
     try {
       const res = await fetch(url);
       const json = await res.json();
-      console.log('res', json.result);
       const locations = json.result.geometry.location;
       let name = json.result.formatted_address || '';
+      let city_name = null;
+      let district_name = null;
+      let state_name = null;
+      let country_name = null;
       if (json.result.address_components) {
         const components = json.result.address_components;
         const city = components.find((c: any) => c.types.includes('locality'));
@@ -122,17 +127,38 @@ const CommonLocationModal: React.FC<Props> = ({
         const country = components.find((c: any) =>
           c.types.includes('country'),
         );
-        console.log(city, district, state, country);
 
-        // if (city) name = city.long_name;
-        // else if (district) name = district.long_name;
-        // else if (state) name = state.long_name;
-        // else if (country) name = country.long_name;
+        if (city) {
+          city_name = city.long_name;
+        }
+        if (district) {
+          district_name = district.long_name;
+        }
+        if (state) {
+          state_name = state.long_name;
+        }
+        if (country) {
+          country_name = country.long_name;
+        }
       }
+      console.log({
+        name: name,
+        lat: locations.lat,
+        lng: locations.lng,
+        city: city_name,
+        district: district_name,
+        state: state_name,
+        country: country_name,
+        // address_components: json.result.address_components,
+      });
       onSelectLocation({
         name: name,
         lat: locations.lat,
         lng: locations.lng,
+        city: city_name,
+        district: district_name,
+        state: state_name,
+        country: country_name,
         // address_components: json.result.address_components,
       });
       setQuery('');
@@ -174,11 +200,49 @@ const CommonLocationModal: React.FC<Props> = ({
 
         const res = await fetch(url);
         const json = await res.json();
-        const address = json.results[0]?.formatted_address || 'Kerala';
+        const locations = json.results[0]?.geometry.location;
+        const name = json.results[0]?.formatted_address || 'Kerala';
+        let city_name = null;
+        let district_name = null;
+        let state_name = null;
+        let country_name = null;
+        if (json.results[0].address_components) {
+          const components = json.results[0].address_components;
+          const city = components.find((c: any) =>
+            c.types.includes('locality'),
+          );
+          const district = components.find((c: any) =>
+            c.types.includes('administrative_area_level_2'),
+          );
+          const state = components.find((c: any) =>
+            c.types.includes('administrative_area_level_1'),
+          );
+          const country = components.find((c: any) =>
+            c.types.includes('country'),
+          );
+
+          if (city) {
+            city_name = city.long_name;
+          }
+          if (district) {
+            district_name = district.long_name;
+          }
+          if (state) {
+            state_name = state.long_name;
+          }
+          if (country) {
+            country_name = country.long_name;
+          }
+        }
         setLocation({
-          name: address,
-          lat: latitude,
-          lng: longitude,
+          name: name,
+          lat: locations.lat,
+          lng: locations.lng,
+          city: city_name,
+          district: district_name,
+          state: state_name,
+          country: country_name,
+          // address_components: json.result.address_components,
         });
         visible && onClose();
         setLoading(false);
@@ -351,7 +415,7 @@ const CommonLocationModal: React.FC<Props> = ({
                           (item: {lat: any}, index: number) =>
                             index <= 4 && currentLocation?.lat !== item.lat,
                         )
-                        .map((item: {lat: any; lng: any; name: any}) => (
+                        .map((item: any) => (
                           <TouchableOpacity
                             key={`${item.lat}-${item.lng}`} // unique key
                             style={styles.item}

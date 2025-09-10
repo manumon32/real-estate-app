@@ -1,54 +1,57 @@
-import messaging from '@react-native-firebase/messaging';
+import {
+  getMessaging,
+  requestPermission,
+  getToken,
+  AuthorizationStatus,
+} from '@react-native-firebase/messaging';
+import {getApp} from '@react-native-firebase/app';
 import {navigationRef} from '@navigation/RootNavigation';
 import {INotification} from '@screens/home/HomeScreen';
 import useBoundStore from '@stores/index';
 import {markAllReadNotificationsAPI, registerFCMToken} from '@api/services';
 import {PermissionsAndroid, Platform} from 'react-native';
 
-var isReady = false;
+let isReady = false;
 let pendingNotification: INotification | null = null;
 
 export const requestUserPermission = async () => {
   const {bearerToken} = useBoundStore.getState();
+  const messaging = getMessaging(getApp());
+
   if (Platform.OS === 'android' && Platform.Version >= 33) {
     await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
     );
   }
-  const authStatus = await messaging().requestPermission();
+
+  const authStatus = await requestPermission(messaging);
   const enabled =
-    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    authStatus === AuthorizationStatus.AUTHORIZED ||
+    authStatus === AuthorizationStatus.PROVISIONAL;
 
   if (enabled && bearerToken) {
     console.log('Authorization status:', authStatus);
     try {
-      // await messaging().registerDeviceForRemoteMessages();
       getFcmToken(); // fetch FCM token
     } catch (err) {
-      console.log('FCM', err);
-      console.log(err);
+      console.log('FCM error:', err);
     }
   }
 };
 
 const getFcmToken = async () => {
   const {token, clientId, bearerToken} = useBoundStore.getState();
+  const messaging = getMessaging(getApp());
+
   try {
-    const fcmToken = await messaging().getToken();
+    const fcmToken = await getToken(messaging);
     if (fcmToken) {
-      let payload = {
-        fcmToken: fcmToken,
-      };
-      await registerFCMToken(payload, {
-        token: token,
-        clientId: clientId,
-        bearerToken,
-      });
+      let payload = {fcmToken};
+      await registerFCMToken(payload, {token, clientId, bearerToken});
       console.log('fcmToken', fcmToken);
     }
   } catch (err) {
-    console.log(err);
+    console.log('getFcmToken error:', err);
   }
 };
 
@@ -81,6 +84,7 @@ const TabSCREENS: any = {
 export const navigateByNotification = async (notification: INotification) => {
   const {token, clientId, bearerToken, updateNotificationCount} =
     useBoundStore.getState();
+
   if (!navigationRef?.isReady() || !isReady) {
     pendingNotification = notification;
     return;
@@ -89,29 +93,25 @@ export const navigateByNotification = async (notification: INotification) => {
   const {entityType, entityId, metadata, notificationId} = notification;
 
   if (!entityType) {
-    // @ts-ignore
-    navigationRef.navigate('Main');
+    navigationRef.navigate('Main' as never);
     return;
   }
 
-  const screenName = SCREENS?.[entityType]
-    ? SCREENS[entityType]
-    : TabSCREENS[entityType]; // assuming screen name is same as entityType
-  // @ts-ignore
-  let parsedData =
+  const screenName = SCREENS?.[entityType] ?? TabSCREENS[entityType];
+  const parsedData =
     typeof metadata === 'string' ? JSON.parse(metadata) : metadata;
+
   const params = {
     items: {
-      _id: entityId, // optional
+      _id: entityId,
       ...parsedData,
     },
   };
+
   try {
-    console.log('notificationId', notificationId);
     if (bearerToken && notificationId) {
       const body = {notifications: [notificationId]};
 
-      // run in a safe block so navigation isn't blocked
       try {
         const res = await markAllReadNotificationsAPI(body, {
           token,
@@ -122,44 +122,31 @@ export const navigateByNotification = async (notification: INotification) => {
         if (res?.message) {
           console.log('notification count', res.count);
           updateNotificationCount(res?.count ?? 0);
-          if (SCREENS[entityType]) {
-            // @ts-ignore
-            navigationRef.navigate(screenName, entityId ? params : {});
-          } else {
-            // @ts-ignore
-            navigationRef.navigate('Main', {
-              screen: 'Chat',
-              params,
-            });
-          }
         }
       } catch (apiErr) {
-        if (SCREENS[entityType]) {
-          // @ts-ignore
-          navigationRef.navigate(screenName, entityId ? params : {});
-        } else {
-          // @ts-ignore
-          navigationRef.navigate('Main', {
-            screen: 'Chat',
-            params,
-          });
-        }
+        console.log('markAllReadNotificationsAPI error:', apiErr);
       }
     }
 
+    // Single navigation decision
     if (SCREENS[entityType]) {
-      // @ts-ignore
-      navigationRef.navigate(screenName, entityId ? params : {});
+      navigationRef.navigate(
+        // @ts-ignore
+        screenName as never,
+        entityId ? (params as never) : {},
+      );
     } else {
-      // @ts-ignore
-      navigationRef.navigate('Main', {
-        screen: 'Chat',
-        params,
-      });
+      navigationRef.navigate(
+        // @ts-ignore
+        'Main' as never,
+        {
+          screen: 'Chat',
+          params,
+        } as never,
+      );
     }
   } catch (err) {
     console.warn('Unexpected error:', err);
-    // @ts-ignore
-    navigationRef.navigate('Main');
+    navigationRef.navigate('Main' as never);
   }
 };

@@ -25,7 +25,8 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import auth from '@react-native-firebase/auth';
+import { getAuth, OAuthProvider, signInWithCredential } from '@react-native-firebase/auth';
+import {getApp} from '@react-native-firebase/app';
 import appleAuth from '@invertase/react-native-apple-authentication';
 
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
@@ -39,6 +40,7 @@ import {
 } from 'react-native-fbsdk-next';
 
 // import LogoIcon from '@assets/svg/logo.svg';
+// @ts-ignore
 import GroupIcon from '@assets/svg/group.svg';
 import IconButton from '@components/Buttons/IconButton';
 import {useTheme} from '@theme/ThemeProvider';
@@ -62,6 +64,8 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     otpLoading,
     loginErrorMessage,
   } = useBoundStore();
+  const app = getApp();
+  const auth = getAuth(app);
   const [loginVar, setLoginVar] = useState('');
   const [socialLoading, setSocialLoading] = useState(false);
 
@@ -191,65 +195,62 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     }
   };
 
-  const signInWithApple = async () => {
-    if (Platform.OS !== 'ios') return;
+const signInWithApple = async () => {
+  if (Platform.OS !== 'ios') return;
 
-    try {
-      // Start the Apple sign-in request
-      const appleAuthRequestResponse = await appleAuth.performRequest({
-        requestedOperation: appleAuth.Operation.LOGIN, // ✅ correct usage
-        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME], // ✅ correct usage
-      });
+  try {
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+      requestedOperation: appleAuth.Operation.LOGIN,
+      requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+    });
 
-      const {identityToken, nonce} = appleAuthRequestResponse;
+    const { identityToken, nonce } = appleAuthRequestResponse;
 
-      if (!identityToken) throw new Error('No identity token');
+    if (!identityToken) {
+      throw new Error('Apple Sign-In failed: No identity token returned');
+    }
 
-      if (!identityToken) {
-        throw new Error('Apple Sign-In failed: No identity token returned');
-      }
+    // ✅ Modular Apple provider
+    const provider = new OAuthProvider('apple.com');
+    const appleCredential = provider.credential({
+      idToken: identityToken,
+      rawNonce: nonce,
+    });
 
-      // Create a Firebase credential with the token
-      const appleCredential = auth.AppleAuthProvider.credential(
-        identityToken,
-        nonce,
-      );
+    // ✅ Modular Firebase auth
+    const auth = getAuth(getApp());
+    const userCredential = await signInWithCredential(auth, appleCredential);
 
-      // Sign in with Firebase
-      const userCredential = await auth().signInWithCredential(appleCredential);
+    if (userCredential.user?.email) {
+      setUserInfo({ ...userCredential.user, socialProvider: 'apple' });
+      setLoginVar(userCredential.user?.email);
 
-      // Alert.alert(
-      //   'Firebase Sign-In successful:',
-      //   JSON.stringify(userCredential.user),
-      // );
-      if (userCredential.user?.email) {
-        setUserInfo({...userCredential.user, socialProvider: 'apple'});
-        setLoginVar(userCredential.user?.email);
-        let payload: any = {};
-        payload.email = userCredential.user?.email ?? null;
-        payload.profilePicture = userCredential.user?.photoURL ?? '';
-        payload.name = userCredential.user?.displayName ?? '';
-        payload.socialProvider = 'apple';
-        payload.socialProviderId = 'apple.com';
-        payload.isSocialLogin = true;
-        verifyOTP(payload);
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: 'Apple Sign-in failed',
-          position: 'bottom',
-          visibilityTime: 1000,
-        });
-      }
-    } catch (err) {
+      let payload: any = {
+        email: userCredential.user?.email ?? null,
+        profilePicture: userCredential.user?.photoURL ?? '',
+        name: userCredential.user?.displayName ?? '',
+        socialProvider: 'apple',
+        socialProviderId: 'apple.com',
+        isSocialLogin: true,
+      };
+      verifyOTP(payload);
+    } else {
       Toast.show({
         type: 'error',
-        text1: 'Apple Sign-in failed, Email is required',
+        text1: 'Apple Sign-in failed',
         position: 'bottom',
         visibilityTime: 1000,
       });
     }
-  };
+  } catch (err) {
+    Toast.show({
+      type: 'error',
+      text1: 'Apple Sign-in failed, Email is required',
+      position: 'bottom',
+      visibilityTime: 1000,
+    });
+  }
+};
 
   const getFacebookUserInfo = (token: string) => {
     const infoRequest = new GraphRequest(
@@ -285,7 +286,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       visible={visible}
       transparent={true} // not overlay ‑> full sheet
       presentationStyle={
-        Platform.OS === 'ios' ? 'fullScreen' : 'overFullScreen'
+        Platform.OS === 'ios' ? 'overFullScreen' : 'overFullScreen'
       }
       statusBarTranslucent
       animationType="fade"

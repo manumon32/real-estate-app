@@ -36,19 +36,31 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchListings: async () => {
     set({loading: true, triggerRefresh: false});
-    let filters = {
+    let filters: any = {
       pageNum: get().page + 1,
       pageSize: 6,
     };
-    if (get().location?.lat && get().location?.lng) {
-      filters = {
-        ...filters,
-        ...{
-          filter_near: [get().location?.lat, get().location?.lng, 30].join(','),
+    if (get().location) {
+      const {city, district, state, country, lat, lng} = get().location;
+
+      if (city || district) {
+        filters = {
+          ...filters,
+          filter_near: [lat, lng, city ? 30 : 50].join(','), // 30 = radius
           orderBy: 'distance',
-          orderByDir:'asc',
-        },
-      };
+          orderByDir: 'asc',
+        };
+      } else if (state) {
+        filters = {
+          ...filters,
+          filter_state: state,
+        };
+      } else if (country) {
+        filters = {
+          ...filters,
+          filter_country: country,
+        };
+      }
     }
     try {
       const res = await fetchListingsFromAPI(filters, {

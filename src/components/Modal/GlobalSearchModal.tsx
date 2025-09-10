@@ -26,9 +26,7 @@ import {
 } from 'react-native-permissions';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
-import {SafeAreaView} from 'react-native-safe-area-context';
-
-const GOOGLE_API_KEY = 'AIzaSyA83qLdbImZmSqqXEV7xeiYegOGcZhUq_o'; // Replace this
+import {GOOGLE_API_KEY} from '@constants/google';
 
 interface Props {
   visible: boolean;
@@ -38,6 +36,10 @@ interface Props {
     name: string;
     lat: number;
     lng: number;
+    city: string;
+    district: string;
+    state: string;
+    country: string;
   }) => void;
 }
 
@@ -291,12 +293,47 @@ const GlobalSearchModal: React.FC<Props> = ({
     try {
       const res = await fetch(url);
       const json = await res.json();
-      console.log('res', json.result);
       const locations = json.result.geometry.location;
+      let name = json.result.formatted_address || '';
+
+      let city_name = null;
+      let district_name = null;
+      let state_name = null;
+      let country_name = null;
+      if (json.result.address_components) {
+        const components = json.result.address_components;
+        const city = components.find((c: any) => c.types.includes('locality'));
+        const district = components.find((c: any) =>
+          c.types.includes('administrative_area_level_2'),
+        );
+        const state = components.find((c: any) =>
+          c.types.includes('administrative_area_level_1'),
+        );
+        const country = components.find((c: any) =>
+          c.types.includes('country'),
+        );
+
+        if (city) {
+          city_name = city.long_name;
+        }
+        if (district) {
+          district_name = district.long_name;
+        }
+        if (state) {
+          state_name = state.long_name;
+        }
+        if (country) {
+          country_name = country.long_name;
+        }
+      }
       onSelectLocation({
-        name: json.result.formatted_address,
+        name: name,
         lat: locations.lat,
         lng: locations.lng,
+        city: city_name,
+        district: district_name,
+        state: state_name,
+        country: country_name,
       });
       setQuery('');
       setPredictions([]);
@@ -337,11 +374,49 @@ const GlobalSearchModal: React.FC<Props> = ({
 
         const res = await fetch(url);
         const json = await res.json();
-        const address = json.results[0]?.formatted_address || 'Kerala';
+        const locations = json.results[0]?.geometry.location;
+        const name = json.results[0]?.formatted_address || 'Kerala';
+        let city_name = null;
+        let district_name = null;
+        let state_name = null;
+        let country_name = null;
+        if (json.results[0].address_components) {
+          const components = json.results[0].address_components;
+          const city = components.find((c: any) =>
+            c.types.includes('locality'),
+          );
+          const district = components.find((c: any) =>
+            c.types.includes('administrative_area_level_2'),
+          );
+          const state = components.find((c: any) =>
+            c.types.includes('administrative_area_level_1'),
+          );
+          const country = components.find((c: any) =>
+            c.types.includes('country'),
+          );
+
+          if (city) {
+            city_name = city.long_name;
+          }
+          if (district) {
+            district_name = district.long_name;
+          }
+          if (state) {
+            state_name = state.long_name;
+          }
+          if (country) {
+            country_name = country.long_name;
+          }
+        }
         setLocation({
-          name: address,
-          lat: latitude,
-          lng: longitude,
+          name: name,
+          lat: locations.lat,
+          lng: locations.lng,
+          city: city_name,
+          district: district_name,
+          state: state_name,
+          country: country_name,
+          // address_components: json.result.address_components,
         });
         setLoading(false);
       },
@@ -418,79 +493,218 @@ const GlobalSearchModal: React.FC<Props> = ({
   }, [searchSuggestions, filterBy]);
 
   return (
-      <Modal
-        visible={visible}
-        // animationType="slide"
-        animationType="slide"
-        statusBarTranslucent
-        transparent
-        onRequestClose={onClose}>
-        <View style={styles.overlay}>
-          <View
-            style={[
-              styles.container,
-              {
-                backgroundColor: theme.colors.backgroundHome,
-              },
-            ]}>
-            <View style={styles.header}>
-              <Text style={[styles.title, {color: theme.colors.text}]}>
-                Search
-              </Text>
-              <TouchableOpacity onPress={onClose}>
-                <MaterialCommunityIcons
-                  name="close"
-                  size={24}
-                  color={theme.colors.text}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.inputContainer}>
+    <Modal
+      visible={visible}
+      // animationType="slide"
+      animationType="slide"
+      statusBarTranslucent
+      transparent
+      onRequestClose={onClose}>
+      <View style={styles.overlay}>
+        <View
+          style={[
+            styles.container,
+            {
+              backgroundColor: theme.colors.backgroundHome,
+            },
+          ]}>
+          <View style={styles.header}>
+            <Text style={[styles.title, {color: theme.colors.text}]}>
+              Search
+            </Text>
+            <TouchableOpacity onPress={onClose}>
               <MaterialCommunityIcons
-                name="magnify"
+                name="close"
+                size={24}
+                color={theme.colors.text}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <MaterialCommunityIcons name="magnify" size={20} color="#696969" />
+            <TextInput
+              value={filterBy}
+              onChangeText={text => {
+                setFilterBy(text);
+              }}
+              // keyboardType="web-search"
+              returnKeyType="search"
+              placeholder="Search"
+              placeholderTextColor={theme.colors.text}
+              style={[styles.input]}
+              onFocus={() => setFocusedIndex(0)} // 👈 "Search" box focused
+              onBlur={() => setFocusedIndex(null)}
+              autoFocus
+              autoComplete="off" // disables autocomplete
+              autoCorrect={false} // disables autocorrect
+              onSubmitEditing={() => {
+                handleSearch(false, false);
+              }}
+            />
+            {filterBy.length > 0 && (
+              <MaterialCommunityIcons
+                name="close"
                 size={20}
                 color="#696969"
-              />
-              <TextInput
-                value={filterBy}
-                onChangeText={text => {
-                  setFilterBy(text);
-                }}
-                // keyboardType="web-search"
-                returnKeyType="search"
-                placeholder="Search"
-                placeholderTextColor={theme.colors.text}
-                style={[styles.input]}
-                onFocus={() => setFocusedIndex(0)} // 👈 "Search" box focused
-                onBlur={() => setFocusedIndex(null)}
-                autoFocus
-                autoComplete="off" // disables autocomplete
-                autoCorrect={false} // disables autocorrect
-                onSubmitEditing={() => {
-                  handleSearch(false, false);
+                onPress={() => {
+                  setFilterBy('');
                 }}
               />
-              {filterBy.length > 0 && (
-                <MaterialCommunityIcons
-                  name="close"
-                  size={20}
-                  color="#696969"
-                  onPress={() => {
-                    setFilterBy('');
+            )}
+          </View>
+
+          {focusedIndex === 0 &&
+            filterBy.length > 2 &&
+            suggestionSearch.length > 0 && (
+              <View style={{top: -10}}>
+                <FlatList
+                  data={filterBy.length > 2 ? suggestionSearch : []}
+                  keyExtractor={item => item.id.toString()}
+                  renderItem={renderItemSearch}
+                  keyboardShouldPersistTaps="handled"
+                  contentContainerStyle={{
+                    backgroundColor: '#fff',
+                    borderRadius: 12,
+                    borderColor: '#EBEBEB',
+                    borderWidth: 1,
+                    marginTop: 10,
+                    padding: 8,
                   }}
                 />
+              </View>
+            )}
+          <View style={styles.inputContainer}>
+            <MaterialCommunityIcons
+              name="map-marker"
+              size={20}
+              color="#696969"
+            />
+            <TextInput
+              value={query}
+              onChangeText={fetchPredictions}
+              placeholder="Enter location"
+              placeholderTextColor={theme.colors.background}
+              style={[styles.input]}
+              onFocus={() => setFocusedIndex(1)} // 👈 "Search" box focused
+              onBlur={() => setFocusedIndex(null)}
+              autoComplete="off" // disables autocomplete
+              autoCorrect={false} // disables autocorrect
+            />
+
+            {query.length > 0 && (
+              <MaterialCommunityIcons
+                name="close"
+                size={20}
+                color="#696969"
+                onPress={() => {
+                  setQuery('');
+                  setPredictions([]);
+                }}
+              />
+            )}
+          </View>
+
+          {focusedIndex === 0 && searchHistory.length > 0 && (
+            <View
+              style={{
+                backgroundColor: '#fff',
+                borderRadius: 12,
+                borderColor: '#EBEBEB',
+                borderWidth: 1,
+                marginTop: 10,
+                padding: 8,
+              }}>
+              {
+                <Text
+                  style={{
+                    fontSize: 14,
+                    marginTop: 15,
+                    color: '#696969',
+                    margin: 5,
+                  }}>
+                  Recent Searches
+                </Text>
+              }
+              {searchHistory?.map(
+                (item: string, index: number) =>
+                  index <= 4 && (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.item}
+                      onPress={() => {
+                        handleSearch(item, true);
+                      }}>
+                      <MaterialCommunityIcons
+                        name="clock"
+                        size={20}
+                        color="#696969"
+                        style={{marginRight: 10}}
+                      />
+                      <Text style={styles.itemText}>{item}</Text>
+                    </TouchableOpacity>
+                  ),
               )}
             </View>
+          )}
 
-            {focusedIndex === 0 &&
-              filterBy.length > 2 &&
-              suggestionSearch.length > 0 && (
-                <View style={{top: -10}}>
+          {focusedIndex == 1 && (
+            <View>
+              <TouchableOpacity
+                style={styles.currentLocationBtn}
+                onPress={useCurrentLocation}>
+                <View
+                  style={{
+                    width: '10%',
+                  }}>
+                  <MaterialCommunityIcons
+                    name="crosshairs-gps"
+                    size={20}
+                    color="#2F8D79"
+                  />
+                </View>
+                <View>
+                  <Text style={styles.currentLocationText}>
+                    Use Current Location
+                  </Text>
+                  {!loading && currentLocation?.name && (
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        fontSize: 12,
+                        color: 'rgba(0, 0, 0, 0.55)',
+                        textAlign: 'left',
+                        maxWidth: 250,
+                      }}>
+                      {currentLocation?.name}
+                    </Text>
+                  )}
+                  {loading && (
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        fontSize: 12,
+                        color: 'rgba(0, 0, 0, 0.55)',
+                        textAlign: 'left',
+                        maxWidth: 250,
+                      }}>
+                      {'Fetching'}
+                    </Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+
+              {loading ? (
+                <ActivityIndicator style={{marginTop: 20}} />
+              ) : (
+                (predictions.length > 0 ||
+                  locationHistory.filter(
+                    (item: {lat: any}) => currentLocation?.lat !== item.lat,
+                  ).length > 0) && (
                   <FlatList
-                    data={filterBy.length > 2 ? suggestionSearch : []}
-                    keyExtractor={item => item.id.toString()}
-                    renderItem={renderItemSearch}
+                    data={predictions}
+                    keyExtractor={item => item.place_id}
+                    renderItem={renderItem}
                     keyboardShouldPersistTaps="handled"
                     contentContainerStyle={{
                       backgroundColor: '#fff',
@@ -500,204 +714,57 @@ const GlobalSearchModal: React.FC<Props> = ({
                       marginTop: 10,
                       padding: 8,
                     }}
+                    ListFooterComponent={
+                      locationHistory.filter(
+                        (item: {lat: any}) => currentLocation?.lat !== item.lat,
+                      ).length > 0 ? (
+                        <View>
+                          {
+                            <Text
+                              style={{
+                                fontSize: 14,
+                                marginTop: 15,
+                                color: '#696969',
+                                margin: 5,
+                              }}>
+                              Recent Searches
+                            </Text>
+                          }
+                          {locationHistory?.map(
+                            (item: any, index: number) =>
+                              index <= 4 &&
+                              currentLocation?.lat !== item.lat && (
+                                <TouchableOpacity
+                                  key={index}
+                                  style={styles.item}
+                                  onPress={() => {
+                                    onSelectLocation(item);
+                                  }}>
+                                  <MaterialCommunityIcons
+                                    name="clock"
+                                    size={20}
+                                    color="#696969"
+                                    style={{marginRight: 10}}
+                                  />
+                                  <Text style={styles.itemText}>
+                                    {item.name}
+                                  </Text>
+                                </TouchableOpacity>
+                              ),
+                          )}
+                        </View>
+                      ) : (
+                        <></>
+                      )
+                    }
                   />
-                </View>
-              )}
-            <View style={styles.inputContainer}>
-              <MaterialCommunityIcons
-                name="map-marker"
-                size={20}
-                color="#696969"
-              />
-              <TextInput
-                value={query}
-                onChangeText={fetchPredictions}
-                placeholder="Enter location"
-                placeholderTextColor={theme.colors.background}
-                style={[styles.input]}
-                onFocus={() => setFocusedIndex(1)} // 👈 "Search" box focused
-                onBlur={() => setFocusedIndex(null)}
-                autoComplete="off" // disables autocomplete
-                autoCorrect={false} // disables autocorrect
-              />
-
-              {query.length > 0 && (
-                <MaterialCommunityIcons
-                  name="close"
-                  size={20}
-                  color="#696969"
-                  onPress={() => {
-                    setQuery('');
-                    setPredictions([]);
-                  }}
-                />
+                )
               )}
             </View>
-
-            {focusedIndex === 0 && searchHistory.length > 0 && (
-              <View
-                style={{
-                  backgroundColor: '#fff',
-                  borderRadius: 12,
-                  borderColor: '#EBEBEB',
-                  borderWidth: 1,
-                  marginTop: 10,
-                  padding: 8,
-                }}>
-                {
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      marginTop: 15,
-                      color: '#696969',
-                      margin: 5,
-                    }}>
-                    Recent Searches
-                  </Text>
-                }
-                {searchHistory?.map(
-                  (item: string, index: number) =>
-                    index <= 4 && (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.item}
-                        onPress={() => {
-                          handleSearch(item, true);
-                        }}>
-                        <MaterialCommunityIcons
-                          name="clock"
-                          size={20}
-                          color="#696969"
-                          style={{marginRight: 10}}
-                        />
-                        <Text style={styles.itemText}>{item}</Text>
-                      </TouchableOpacity>
-                    ),
-                )}
-              </View>
-            )}
-
-            {focusedIndex == 1 && (
-              <View>
-                <TouchableOpacity
-                  style={styles.currentLocationBtn}
-                  onPress={useCurrentLocation}>
-                  <View
-                    style={{
-                      width: '10%',
-                    }}>
-                    <MaterialCommunityIcons
-                      name="crosshairs-gps"
-                      size={20}
-                      color="#2F8D79"
-                    />
-                  </View>
-                  <View>
-                    <Text style={styles.currentLocationText}>
-                      Use Current Location
-                    </Text>
-                    {!loading && currentLocation?.name && (
-                      <Text
-                        numberOfLines={1}
-                        style={{
-                          fontSize: 12,
-                          color: 'rgba(0, 0, 0, 0.55)',
-                          textAlign: 'left',
-                          maxWidth: 250,
-                        }}>
-                        {currentLocation?.name}
-                      </Text>
-                    )}
-                    {loading && (
-                      <Text
-                        numberOfLines={1}
-                        style={{
-                          fontSize: 12,
-                          color: 'rgba(0, 0, 0, 0.55)',
-                          textAlign: 'left',
-                          maxWidth: 250,
-                        }}>
-                        {'Fetching'}
-                      </Text>
-                    )}
-                  </View>
-                </TouchableOpacity>
-
-                {loading ? (
-                  <ActivityIndicator style={{marginTop: 20}} />
-                ) : (
-                  (predictions.length > 0 ||
-                    locationHistory.filter(
-                      (item: {lat: any}) => currentLocation?.lat !== item.lat,
-                    ).length > 0) && (
-                    <FlatList
-                      data={predictions}
-                      keyExtractor={item => item.place_id}
-                      renderItem={renderItem}
-                      keyboardShouldPersistTaps="handled"
-                      contentContainerStyle={{
-                        backgroundColor: '#fff',
-                        borderRadius: 12,
-                        borderColor: '#EBEBEB',
-                        borderWidth: 1,
-                        marginTop: 10,
-                        padding: 8,
-                      }}
-                      ListFooterComponent={
-                        locationHistory.filter(
-                          (item: {lat: any}) =>
-                            currentLocation?.lat !== item.lat,
-                        ).length > 0 ? (
-                          <View>
-                            {
-                              <Text
-                                style={{
-                                  fontSize: 14,
-                                  marginTop: 15,
-                                  color: '#696969',
-                                  margin: 5,
-                                }}>
-                                Recent Searches
-                              </Text>
-                            }
-                            {locationHistory?.map(
-                              (
-                                item: {lat: any; name: string; lng: any},
-                                index: number,
-                              ) =>
-                                index <= 4 &&
-                                currentLocation?.lat !== item.lat && (
-                                  <TouchableOpacity
-                                    key={index}
-                                    style={styles.item}
-                                    onPress={() => {
-                                      onSelectLocation(item);
-                                    }}>
-                                    <MaterialCommunityIcons
-                                      name="clock"
-                                      size={20}
-                                      color="#696969"
-                                      style={{marginRight: 10}}
-                                    />
-                                    <Text style={styles.itemText}>
-                                      {item.name}
-                                    </Text>
-                                  </TouchableOpacity>
-                                ),
-                            )}
-                          </View>
-                        ) : (
-                          <></>
-                        )
-                      }
-                    />
-                  )
-                )}
-              </View>
-            )}
-          </View>
+          )}
         </View>
-      </Modal>
+      </View>
+    </Modal>
   );
 };
 const styles = StyleSheet.create({

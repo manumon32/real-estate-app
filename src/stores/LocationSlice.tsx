@@ -42,7 +42,6 @@ export const createLocationSlice = (set: any, get: any): LocationSlice => ({
   locationHistory: [],
   adPostModal: false,
   setLocation: updates => {
-    console.log('adPostModal', get().adPostModal);
     if (!get().adPostModal) {
       let serchers = [{...updates}, ...get().locationHistory];
       const result = uniqueObjects(serchers);

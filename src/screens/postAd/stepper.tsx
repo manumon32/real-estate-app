@@ -350,10 +350,18 @@ const PostAdContainer = (props: any) => {
     setLoading(true);
 
     try {
+      console.log;
       // Filter local vs uploaded images
-      const localImages = images.filter(async (img: any) => {
-        return await compressImage(img?.uri);
-      });
+      const localImages = (
+        await Promise.all(
+          images.map(async (img: any) => {
+            if (!img?.uri) return null;
+
+            const compressed = await compressImage(img.uri);
+            return compressed ? {...img, uri: compressed} : null;
+          }),
+        )
+      ).filter(Boolean);
       console.log('localImages', localImages);
       const existingImageUrls = images.filter((img: any) => !img.uri);
 
@@ -388,9 +396,13 @@ const PostAdContainer = (props: any) => {
 
       // Merge location data
       const finalLocation = {
-        latitude: locationForAdpost.lat || location.lat,
-        longitude: locationForAdpost.lng || location.lng,
-        address: locationForAdpost.name || location.name,
+        latitude: locationForAdpost.lat,
+        longitude: locationForAdpost.lng ,
+        address: locationForAdpost.name,
+        state: locationForAdpost.state ,
+        country: locationForAdpost.country ,
+        district: locationForAdpost.district ,
+        city: locationForAdpost.city,
       };
 
       // Prepare full payload

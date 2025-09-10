@@ -17,11 +17,11 @@ const Step3LocationDetails = (props: any) => {
     values,
     errors,
     isStringInEitherArray,
+
     touched,
   } = props;
   const {setlocationModalVisible, locationForAdpost, setadPostModal} =
     useBoundStore();
-  //
 
   const {theme} = useTheme();
   return (
@@ -45,6 +45,10 @@ const Step3LocationDetails = (props: any) => {
               setFieldValue('address', text);
               setFieldValue('latitude', locationForAdpost?.lat);
               setFieldValue('longitude', locationForAdpost?.lng);
+              setFieldValue('city', locationForAdpost?.city);
+              setFieldValue('country', locationForAdpost?.country);
+              setFieldValue('district', locationForAdpost?.district);
+              setFieldValue('state', locationForAdpost?.state);
             }}
             placeholder="Select Location"
           />
@@ -119,7 +123,7 @@ const Step3LocationDetails = (props: any) => {
           <CommonDistanceInput
             label="Carpet Area"
             unit="/sq.ft"
-            value={values.carpetArea?String(values.carpetArea): ''}
+            value={values.carpetArea ? String(values.carpetArea) : ''}
             onChange={text => setFieldValue('carpetArea', text)}
           />
         </View>
@@ -129,7 +133,7 @@ const Step3LocationDetails = (props: any) => {
           <CommonDistanceInput
             label="Build-up Area"
             unit="/sq.ft"
-            value={values.builtUpArea ? String(values.builtUpArea): ''}
+            value={values.builtUpArea ? String(values.builtUpArea) : ''}
             onChange={text => setFieldValue('builtUpArea', text)}
           />
         </View>
@@ -140,7 +144,9 @@ const Step3LocationDetails = (props: any) => {
           <CommonDistanceInput
             label="Super Build-up Area"
             unit="/sq.ft"
-            value={values.superBuiltUpArea? String(values.superBuiltUpArea): ''}
+            value={
+              values.superBuiltUpArea ? String(values.superBuiltUpArea) : ''
+            }
             onChange={text => setFieldValue('superBuiltUpArea', text)}
           />
         </View>

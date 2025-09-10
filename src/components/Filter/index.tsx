@@ -20,9 +20,9 @@ import {Fonts} from '@constants/font';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
 import {useTheme} from '@theme/ThemeProvider';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { GOOGLE_API_KEY } from '@constants/google';
 
 const FilterModal = ({visible, onClose, onApply}: any) => {
-  const GOOGLE_API_KEY = 'AIzaSyA83qLdbImZmSqqXEV7xeiYegOGcZhUq_o'; // Replace this
 
   //
   const {appConfigs, setFilters, resetFilters, filters, setLocation, location} =

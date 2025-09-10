@@ -9,6 +9,7 @@ import useBoundStore from '@stores/index';
 import {useRoute} from '@react-navigation/native';
 import {fetchDetailsAPI} from '@api/services';
 import {useTheme} from '@theme/ThemeProvider';
+import {View, ActivityIndicator, StyleSheet} from 'react-native';
 
 const PostAd = () => {
   const route = useRoute();
@@ -42,6 +43,10 @@ const PostAd = () => {
     loanEligible: false,
     reraApproved: false,
     reraId: '',
+    city: locationForAdpost?.city,
+    country: locationForAdpost?.country,
+    district: locationForAdpost?.district,
+    state: locationForAdpost?.state,
     areaSize: '',
     carpetArea: '',
     builtUpArea: '',
@@ -82,10 +87,10 @@ const PostAd = () => {
       console.log('newInitialValues', newInitialValues);
       const {coordinates} = newInitialValues.location;
       setLocation({
-          name: newInitialValues.address,
-          lat: coordinates[1],
-          lng: coordinates[0],
-        });
+        name: newInitialValues.address,
+        lat: coordinates[1],
+        lng: coordinates[0],
+      });
       // @ts-ignore
       const listingTypeFields = newInitialValues.listingTypeId?.fields;
       // @ts-ignore
@@ -100,6 +105,10 @@ const PostAd = () => {
         furnishingStatusId: [newInitialValues.furnishingStatusId?._id],
         numberOfBedrooms: [String(newInitialValues.numberOfBedrooms)],
         numberOfBathrooms: [String(newInitialValues.numberOfBedrooms)],
+        state: newInitialValues.state,
+        country: newInitialValues.country,
+        district: newInitialValues.district,
+        city: newInitialValues.city,
       };
       let amenityIds = newInitialValues.amenityIds.map((item: any) => item._id);
 
@@ -139,6 +148,11 @@ const PostAd = () => {
   const {theme} = useTheme();
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
+      {loading && (
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
       {!loading && (
         <Formik
           initialValues={initialValues}
@@ -155,7 +169,7 @@ const PostAd = () => {
             handleBlur,
             setTouched,
             handleChange,
-            validateForm
+            validateForm,
           }) => (
             <PostAdContainer
               values={values}
@@ -177,4 +191,13 @@ const PostAd = () => {
   );
 };
 
+const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // fills the screen
+    backgroundColor: 'rgba(0, 0, 0, 0.78)', // transparent dark overlay
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999, // ensure it's on top
+  },
+});
 export default PostAd;

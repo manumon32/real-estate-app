@@ -5,14 +5,18 @@ import {
   StatusBar,
   useColorScheme,
   FlatList,
-  // ActivityIndicator,
   RefreshControl,
   BackHandler,
   ToastAndroid,
   AppState,
   Linking,
 } from 'react-native';
-import messaging from '@react-native-firebase/messaging';
+import {
+  getMessaging,
+  onMessage,
+  onNotificationOpenedApp,
+  getInitialNotification,
+} from '@react-native-firebase/messaging';
 
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {
@@ -42,7 +46,7 @@ export interface INotification {
   notificationId: string;
 }
 
-function App({navigation}: any): React.JSX.Element {
+function HomeScreen({navigation}: any): React.JSX.Element {
   const {
     listings,
     fetchListings,
@@ -58,12 +62,15 @@ function App({navigation}: any): React.JSX.Element {
 
   const {theme} = useTheme();
   const isDarkMode = useColorScheme() === 'dark';
-  const prevFiltersRef = useRef<string[] | null>(null);
+  const prevFiltersRef = useRef<any>(null);
 
+  /** Load more on scroll */
   const loadMore = () => {
     if (loading || !hasMore) return;
     fetchListings();
   };
+
+  /** Double back press exit */
   const useDoubleBackExit = () => {
     const backPressedOnce = useRef(false);
 
@@ -71,7 +78,7 @@ function App({navigation}: any): React.JSX.Element {
       useCallback(() => {
         const onBackPress = () => {
           if (backPressedOnce.current) {
-            BackHandler.exitApp(); // ✅ Exit the app
+            BackHandler.exitApp();
             return true;
           }
 
@@ -82,7 +89,7 @@ function App({navigation}: any): React.JSX.Element {
             backPressedOnce.current = false;
           }, 2000);
 
-          return true; // Prevent default back behavior
+          return true;
         };
 
         const backHandler = BackHandler.addEventListener(
@@ -94,22 +101,22 @@ function App({navigation}: any): React.JSX.Element {
       }, []),
     );
   };
-
   useDoubleBackExit();
 
+  /** Render each property */
   const renderAdItem = useCallback(
-    (items: any) => {
-      return (
-        <PropertyCard items={items.item} navigation={navigation} arg={'home'} />
-      );
-    },
+    (items: any) => (
+      <PropertyCard items={items.item} navigation={navigation} arg={'home'} />
+    ),
     [navigation],
   );
 
+  /** Connect socket if logged in */
   useEffect(() => {
     bearerToken && connectSocket();
   }, [bearerToken]);
 
+  /** Refresh listings */
   useEffect(() => {
     triggerRefresh && fetchListings();
   }, [triggerRefresh]);
@@ -118,13 +125,11 @@ function App({navigation}: any): React.JSX.Element {
     !loading && fetchListings();
   };
 
+  /** Reload when location changes */
   useEffect(() => {
     if (
-      // @ts-ignore
       (!prevFiltersRef.current?.lat && location.lat) ||
-      // @ts-ignore
       (prevFiltersRef.current?.lat &&
-        // @ts-ignore
         prevFiltersRef.current?.lat !== location.lat)
     ) {
       setTriggerRelaod();
@@ -136,6 +141,7 @@ function App({navigation}: any): React.JSX.Element {
     !loading && fetchData();
   }, [location]);
 
+  /** Socket cleanup on app state change */
   useEffect(() => {
     const handleAppStateChange = (nextState: string) => {
       if (nextState === 'background' || nextState === 'inactive') {
@@ -155,45 +161,46 @@ function App({navigation}: any): React.JSX.Element {
 
     return () => {
       subscription.remove();
-      disconnectSocket(); // Cleanup
+      disconnectSocket();
     };
   }, [bearerToken]);
 
+  /** Handle deep links */
   const handleDeepLink = (event: {url: string}) => {
-    const url = event.url; // e.g., myapp://property/12345
+    const url = event.url; // e.g., myapp://details/12345
     const match = url.match(/details\/([^/?#]+)/);
     if (match) {
-      // const propertyId = match[1];
-      // navigation.navigate('Details', {items: {_id: propertyId}});
+      const propertyId = match[1];
+      navigation.navigate('Details', {items: {_id: propertyId}});
     }
   };
 
   useEffect(() => {
-    // Listen when app is already open
     const sub = Linking.addEventListener('url', handleDeepLink);
 
-    // Also handle when app is opened from a killed state
     Linking.getInitialURL().then(url => {
       if (url) {
-        // Alert.alert(url)
-        // setDeepLink({url});
+        handleDeepLink({url});
       }
     });
 
     return () => sub.remove();
   }, []);
 
+  /** Firebase Notification Setup */
   useEffect(() => {
     requestUserPermission();
+    const messaging = getMessaging();
 
-    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+    // Foreground notifications
+    const unsubscribeForeground = onMessage(messaging, async remoteMessage => {
       const data = remoteMessage?.data;
-      console.log('remoteMessage 1', remoteMessage);
+      console.log('remoteMessage (foreground):', remoteMessage);
       if (data?.type) {
         Toast.show({
           type: 'info',
-          text1: data?.title ? String(data.title) : 'You have a notification',
-          text2: data?.message ? String(data.message) : 'Tes ',
+          text1: data?.title ? String(data.title) : 'Notification',
+          text2: data?.message ? String(data.message) : '',
           position: 'top',
           onPress: () => {
             navigateByNotification(data as any as INotification);
@@ -202,33 +209,31 @@ function App({navigation}: any): React.JSX.Element {
       }
     });
 
-    const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
+    // When app opened from background
+    const unsubscribeOpenedApp = onNotificationOpenedApp(
+      messaging,
       remoteMessage => {
-        console.log('remoteMessage 2', remoteMessage);
+        console.log('remoteMessage (openedApp):', remoteMessage);
         const data = remoteMessage?.data;
-        navigateByNotification(data as any as INotification);
+        if (data) navigateByNotification(data as any as INotification);
       },
     );
 
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('remoteMessage 3', remoteMessage);
-      const data = remoteMessage?.data;
-      navigateByNotification(data as any as INotification);
-    });
-
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        console.log('remoteMessage 4', remoteMessage);
+    // When app opened from killed state
+    getInitialNotification(messaging).then(remoteMessage => {
+      if (remoteMessage) {
+        console.log('remoteMessage (initialNotification):', remoteMessage);
         const data = remoteMessage?.data;
-        navigateByNotification(data as any as INotification);
-      });
+        if (data) navigateByNotification(data as any as INotification);
+      }
+    });
 
     return () => {
       unsubscribeForeground();
       unsubscribeOpenedApp();
     };
   }, [bearerToken]);
+
   return (
     <SafeAreaView style={{backgroundColor: theme.colors.homepageSafeArea}}>
       <StatusBar
@@ -238,12 +243,9 @@ function App({navigation}: any): React.JSX.Element {
       <FlatList
         data={listings}
         renderItem={renderAdItem}
-        keyboardShouldPersistTaps="handled"
-        refreshing={true}
         keyExtractor={item => item._id}
         numColumns={2}
         ListHeaderComponent={<Header navigation={navigation} />}
-        centerContent={true}
         contentContainerStyle={{
           paddingBottom: 100,
           backgroundColor: theme.colors.backgroundHome,
@@ -255,9 +257,7 @@ function App({navigation}: any): React.JSX.Element {
         refreshControl={
           <RefreshControl
             refreshing={false}
-            onRefresh={() => {
-              setTriggerRefresh();
-            }}
+            onRefresh={() => setTriggerRefresh()}
             colors={['#40DABE', '#40DABE', '#227465']}
           />
         }
@@ -265,30 +265,16 @@ function App({navigation}: any): React.JSX.Element {
           hasMore || loading ? (
             <HomepageSkelton />
           ) : listings.length <= 0 ? (
-            <>
-              <NoChats
-                icon="magnify-close"
-                color="#9E9E9E"
-                title="Oops.. we cannot find anything for this search."
-              />
-              {/* <Image
-                source={require('@assets/images/noads.png')}
-                style={{
-                  height: 200,
-                  width: 200,
-                  alignContent: 'center',
-                  justifyContent: 'center',
-                  alignSelf: 'center',
-                }}
-              /> */}
-            </>
-          ) : (
-            <></>
-          )
+            <NoChats
+              icon="magnify-close"
+              color="#9E9E9E"
+              title="Oops.. we cannot find anything for this search."
+            />
+          ) : null
         }
       />
     </SafeAreaView>
   );
 }
 
-export default App;
+export default HomeScreen;
