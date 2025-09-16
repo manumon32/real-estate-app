@@ -9,6 +9,10 @@
 		<string>https://hotplotz.com/</string>
 		<string>applinks:hotplotz.com</string>
 	</array>
+	<key>com.apple.developer.in-app-payments</key>
+	<array>
+		<string>merchant.com.hotplotz</string>
+	</array>
 	<key>keychain-access-groups</key>
 	<array/>
 </dict>

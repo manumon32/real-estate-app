@@ -15,7 +15,7 @@ export const createFavoritesSlice = (set: any, get: any): FavoritesSlice => ({
   toggleFavorite: async item => {
     const {favorites} = get();
     const exists = favorites.find((fav: {_id: any}) => fav._id === item._id);
-    let payload = {propertyId: item._id, note: 'Dream flat!'};
+    let payload = {propertyId: item._id, note: ''};
     if (exists) {
       set({favorites: favorites.filter((f: {_id: any}) => f._id !== item._id)});
       try {

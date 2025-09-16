@@ -143,9 +143,10 @@ export const createChatSlice = (set: any, get: any): ChatSlice => ({
       },
     }));
   },
-  resetChatDetails: (msg: any) =>
+  resetChatDetails: () =>
     set(() => ({
-      chatDetails: msg,
+      chatDetails: {},
+      chatList: [],
       chat_page: 0,
       chat_hasMore: false,
       filter_roomId: null,

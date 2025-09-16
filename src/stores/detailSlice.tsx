@@ -17,6 +17,7 @@ export interface Detail {
   facingDirectionId: NamedEntity;
   ownershipTypeId: NamedEntity;
   availabilityStatusId: NamedEntity;
+  bachelersAllowed: boolean;
   amenityIds: Amenity[];
   featureIds: Feature[];
   imageUrls: string[];

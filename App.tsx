@@ -1,6 +1,6 @@
-import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-// import messaging from '@react-native-firebase/messaging';
+import React, {useEffect} from 'react';
+import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
+import {Linking} from 'react-native';
 import {ThemeProvider} from '@theme/ThemeProvider';
 import RootNavigator from '@navigation/RootNavigator';
 import CommonLocationModal from '@components/Modal/LocationSearchModal';
@@ -18,40 +18,58 @@ export default function App() {
     locationModalvisible,
     setlocationModalVisible,
     globalModalvisible,
-    setGlobalModalVisible, 
+    setGlobalModalVisible,
     setLocation,
     locationHistory,
     visible,
-    setVisible
+    setVisible,
   } = useBoundStore();
 
-  // // Handle background messages using setBackgroundMessageHandler
-  // messaging().setBackgroundMessageHandler(async remoteMessage => {
-  //   console.log('Message handled in the background!', remoteMessage);
-  // });
-
+  // ✅ Linking configuration
   const linking = {
     prefixes: [
-      'myapp://', // custom scheme
-      'https://hotplotz.com', // universal link,
+      'myapp://',
+      'https://hotplotz.com',
       'hotplotz://',
     ],
     config: {
       screens: {
-        Home: 'HomeIndex',
-        Details: 'details/:id',
+        Root: {
+          screens: {
+            Home: '', // https://hotplotz.com → Home
+            Details: 'details/:id', // https://hotplotz.com/details/123 → Details
+          },
+        },
       },
     },
   };
+
+  // ✅ Ensure we handle links if NavigationContainer misses it
+  useEffect(() => {
+    const handleDeepLink = (event: { url: string }) => {
+      console.log('🔗 Incoming link:', event.url);
+    };
+
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+
+    // Check if app was cold-started with a link
+    Linking.getInitialURL().then(url => {
+      if (url) console.log('🔗 Initial link:', url);
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   return (
     <ThemeProvider>
       <NavigationContainer
         ref={navigationRef}
         linking={linking}
+        theme={DefaultTheme}
         onReady={onNavigationReady}>
         <RootNavigator />
 
+        {/* Modals */}
         <CommonLocationModal
           visible={locationModalvisible}
           onClose={() => setlocationModalVisible()}

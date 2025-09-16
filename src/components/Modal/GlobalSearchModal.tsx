@@ -69,28 +69,33 @@ const GlobalSearchModal: React.FC<Props> = ({
   ];
 
   const PROPERTY_TYPES = [
-    'House',
-    'Apartment',
-    'Villa',
+    {label: 'House', id: '684171ae1f127510367ef56d'},
+    {label: 'Apartment', id: '684171ae1f127510367ef56d'},
+    {label: 'Villa', id: '684171ae1f127510367ef56d'},
     // you can extend this list if needed
   ];
 
   const TRANSACTION_TYPES = [
-    {key: 'Sale', label: 'for Sale'},
-    {key: 'Rent', label: 'for Rent'},
-    {key: 'Lease', label: 'for Lease'},
+    {key: 'Sale', label: 'for Sale', id: '684176d84eb67a1a216b94fd'},
+    {key: 'Rent', label: 'for Rent', id: '684176e74eb67a1a216b9501'},
+    {key: 'Lease', label: 'for Lease', id: '6841770a4eb67a1a216b9505'},
   ];
 
   // 🔥 Generate dynamic search suggestions
   const bedroomPropertySuggestions = BEDROOMS.flatMap(bedroom =>
     PROPERTY_TYPES.flatMap(property =>
       TRANSACTION_TYPES.map(trans => ({
-        id: `${bedroom._id}-${property}-${trans.key}`,
-        label: `${bedroom.name} ${property} ${trans.label}`,
+        id: `${bedroom._id}-${property.label}-${trans.key}`,
+        label: `${bedroom.name} ${property.label} ${trans.label}`,
         type: trans.key,
         filter: {
-          [bedroom.filterName]: bedroom._id,
-          propertyType: property.toLowerCase(),
+          [bedroom.filterName]: [bedroom._id],
+          propertyType: property.label.toLowerCase(),
+        },
+        payload: {
+          [bedroom.filterName]: [bedroom._id],
+          listingTypeId: [trans.id],
+          propertyTypeId: [property.id],
         },
       })),
     ),
@@ -202,29 +207,200 @@ const GlobalSearchModal: React.FC<Props> = ({
     },
 
     // Rent
-    {id: 31, label: 'House for Rent', type: 'Rent'},
-    {id: 32, label: 'House for Rent near me', type: 'Rent'},
-    {id: 11, label: 'Apartment near me', type: 'Rent'},
-    {id: 12, label: 'PG for Rent', type: 'Rent'},
-    {id: 13, label: 'Guest House for Rent', type: 'Rent'},
-    {id: 14, label: 'Studio Apartment for Rent', type: 'Rent'},
-    {id: 15, label: 'Villa for Rent', type: 'Rent'},
-    {id: 17, label: 'Agricultural Land for Rent', type: 'Rent'},
-    {id: 18, label: 'Office Space for Rent', type: 'Rent'},
-    {id: 19, label: 'Shop / Showroom for Rent', type: 'Rent'},
-    {id: 20, label: 'Warehouse for Rent', type: 'Rent'},
+    {
+      id: 31,
+      label: 'House for Rent',
+      type: 'Rent',
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 32,
+      label: 'House for Rent near me',
+      type: 'Rent',
+
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 11,
+      label: 'Apartment near me',
+      type: 'Rent',
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 12,
+      label: 'PG for Rent',
+      type: 'Rent',
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '6841760e4eb67a1a216b94f1',
+      },
+    },
+    {
+      id: 13,
+      label: 'Guest House for Rent',
+      type: 'Rent',
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '6841760e4eb67a1a216b94f1',
+      },
+    },
+    {
+      id: 14,
+      label: 'Studio Apartment for Rent',
+      type: 'Rent',
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 15,
+      label: 'Villa for Rent',
+      type: 'Rent',
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 17,
+      label: 'Agricultural Land for Rent',
+      type: 'Rent',
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '6841753e4a95cf182c60a307',
+      },
+    },
+    {
+      id: 18,
+      label: 'Office Space for Rent',
+      type: 'Rent',
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '684175aa4eb67a1a216b94ed',
+      },
+    },
+    {
+      id: 19,
+      label: 'Shop / Showroom for Rent',
+      type: 'Rent',
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '684175aa4eb67a1a216b94ed',
+      },
+    },
+    {
+      id: 20,
+      label: 'Warehouse for Rent',
+      type: 'Rent',
+      payload: {
+        listingTypeId: '684176e74eb67a1a216b9501',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
 
     // Lease
-    {id: 21, label: 'House for Lease', type: 'Lease'},
-    {id: 4, label: 'Plot / Land for Lease', type: 'Lease'},
-    {id: 22, label: 'Apartment for Lease', type: 'Lease'},
-    {id: 23, label: 'Villa for Lease', type: 'Lease'},
-    {id: 24, label: 'Farmhouse for Lease', type: 'Lease'},
-    {id: 25, label: 'Agricultural Land for Lease', type: 'Lease'},
-    {id: 26, label: 'Commercial Space for Lease', type: 'Lease'},
-    {id: 27, label: 'Office Space for Lease', type: 'Lease'},
-    {id: 28, label: 'Shop for Lease', type: 'Lease'},
-    {id: 29, label: 'Industrial Shed for Lease', type: 'Lease'},
+    {
+      id: 21,
+      label: 'House for Lease',
+      type: 'Lease',
+
+      payload: {
+        listingTypeId: '6841770a4eb67a1a216b9505',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 4,
+      label: 'Plot / Land for Lease',
+      type: 'Lease',
+
+      payload: {
+        listingTypeId: '6841770a4eb67a1a216b9505',
+        propertyTypeId: '6841753e4a95cf182c60a307',
+      },
+    },
+    {
+      id: 22,
+      label: 'Apartment for Lease',
+      type: 'Lease',
+      payload: {
+        listingTypeId: '6841770a4eb67a1a216b9505',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 23,
+      label: 'Villa for Lease',
+      type: 'Lease',
+      payload: {
+        listingTypeId: '6841770a4eb67a1a216b9505',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 24,
+      label: 'Farmhouse for Lease',
+      type: 'Lease',
+      payload: {
+        listingTypeId: '6841770a4eb67a1a216b9505',
+        propertyTypeId: '684171ae1f127510367ef56d',
+      },
+    },
+    {
+      id: 25,
+      label: 'Agricultural Land for Lease',
+      type: 'Lease',
+      payload: {
+        listingTypeId: '6841770a4eb67a1a216b9505',
+        propertyTypeId: '6841753e4a95cf182c60a307',
+      },
+    },
+    {
+      id: 26,
+      label: 'Commercial Space for Lease',
+      type: 'Lease',
+      payload: {
+        listingTypeId: '6841770a4eb67a1a216b9505',
+        propertyTypeId: '684175aa4eb67a1a216b94ed',
+      },
+    },
+    {
+      id: 27,
+      label: 'Office Space for Lease',
+      type: 'Lease',
+      payload: {
+        listingTypeId: '6841770a4eb67a1a216b9505',
+        propertyTypeId: '684175aa4eb67a1a216b94ed',
+      },
+    },
+    {
+      id: 28,
+      label: 'Shop for Lease',
+      type: 'Lease',
+      payload: {
+        listingTypeId: '6841770a4eb67a1a216b9505',
+        propertyTypeId: '684175aa4eb67a1a216b94ed',
+      },
+    },
+    {
+      id: 29,
+      label: 'Industrial Shed for Lease',
+      type: 'Lease',
+      payload: {
+        listingTypeId: '6841770a4eb67a1a216b9505',
+        propertyTypeId: '684175aa4eb67a1a216b94ed',
+      },
+    },
 
     // Bedrooms
     ...bedroomPropertySuggestions,
@@ -531,7 +707,7 @@ const GlobalSearchModal: React.FC<Props> = ({
               // keyboardType="web-search"
               returnKeyType="search"
               placeholder="Search"
-              placeholderTextColor={theme.colors.text}
+              placeholderTextColor={'#434343ff'}
               style={[styles.input]}
               onFocus={() => setFocusedIndex(0)} // 👈 "Search" box focused
               onBlur={() => setFocusedIndex(null)}

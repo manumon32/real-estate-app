@@ -21,7 +21,6 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {postAdAPI} from '@api/services';
-import {Fonts} from '@constants/font';
 import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
 import Toast from 'react-native-toast-message';
@@ -90,7 +89,6 @@ const ListingCard: React.FC<ListingCardProps> = ({
   imageUrl = '',
   navigation,
   markasSold,
-  makePayment,
   theme,
   openBoostPopup,
 }) => {
@@ -317,6 +315,7 @@ const MyAds = () => {
     async (id: any) => {
       setPaymentLoading(true);
       try {
+        //@ts-ignore
         const featuredPlan: any = managePlansList?.[0] ?? null;
         if (featuredPlan) {
           const paymentPayload = {
@@ -511,6 +510,7 @@ const MyAds = () => {
           <View style={styles.popupContainer}>
             <Text style={styles.popupTitle}>Boost Your Ad</Text>
             <Text style={styles.popupAmount}>
+              {/* @ts-ignore */}
               Amount: ₹{managePlansList?.[0]?.price ?? 'N/A'}
             </Text>
             <Text style={styles.popupBenefits}>

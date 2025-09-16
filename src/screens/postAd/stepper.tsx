@@ -143,7 +143,6 @@ const PostAdContainer = (props: any) => {
     setImages,
     setFloorPlans,
   } = useBoundStore();
-  console.log('values', values);
   const prevStep = prevCountRef.current;
   const {theme} = useTheme();
 
@@ -151,11 +150,7 @@ const PostAdContainer = (props: any) => {
     (id: any, argFields: string[]) => {
       setFields((prev: any) => {
         const newMap: any = {...prev};
-        // if (newMap[id]) {
-        //   delete newMap[id];
-        // } else {
         newMap[id] = argFields;
-        // }
         return newMap;
       });
     },
@@ -247,6 +242,7 @@ const PostAdContainer = (props: any) => {
 
     // Mark fields as touched
     await setTouched(
+      // @ts-ignore
       requiredFields[currentStep]?.reduce((acc, key) => {
         acc[key] = true;
         return acc;
@@ -259,8 +255,9 @@ const PostAdContainer = (props: any) => {
     prevCountRef.current = currentStep;
 
     // Check if current step has any errors
+      // @ts-ignore
     const hasErrors = requiredFields[currentStep]?.some(
-      field => !!validationErrors[field],
+      (field: any) => !!validationErrors[field],
     );
 
     if (!hasErrors) {

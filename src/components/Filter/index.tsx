@@ -20,10 +20,9 @@ import {Fonts} from '@constants/font';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
 import {useTheme} from '@theme/ThemeProvider';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { GOOGLE_API_KEY } from '@constants/google';
+import {GOOGLE_API_KEY} from '@constants/google';
 
 const FilterModal = ({visible, onClose, onApply}: any) => {
-
   //
   const {appConfigs, setFilters, resetFilters, filters, setLocation, location} =
     useBoundStore();
@@ -87,10 +86,45 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
       const json = await res.json();
       console.log('res', json.result);
       const locations = json.result.geometry.location;
+      let name = json.result.formatted_address || '';
+      let city_name = null;
+      let district_name = null;
+      let state_name = null;
+      let country_name = null;
+      if (json.result.address_components) {
+        const components = json.result.address_components;
+        const city = components.find((c: any) => c.types.includes('locality'));
+        const district = components.find((c: any) =>
+          c.types.includes('administrative_area_level_2'),
+        );
+        const state = components.find((c: any) =>
+          c.types.includes('administrative_area_level_1'),
+        );
+        const country = components.find((c: any) =>
+          c.types.includes('country'),
+        );
+
+        if (city) {
+          city_name = city.long_name;
+        }
+        if (district) {
+          district_name = district.long_name;
+        }
+        if (state) {
+          state_name = state.long_name;
+        }
+        if (country) {
+          country_name = country.long_name;
+        }
+      }
       setLocation({
-        name: json.result.formatted_address,
+        name: name,
         lat: locations.lat,
         lng: locations.lng,
+        city: city_name,
+        district: district_name,
+        state: state_name,
+        country: country_name,
       });
       setPredictions([]);
     } catch (err) {
@@ -100,8 +134,9 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     }
   };
 
-  const renderItem = ({item}: {item: any}) => (
+  const renderItem = (item: any) => (
     <TouchableOpacity
+      key={item.place_id}
       style={styles.item}
       onPress={() => fetchPlaceDetails(item.place_id)}>
       <MaterialCommunityIcons
@@ -130,10 +165,11 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     (name: string, item: any, setSelectedList?: any) => {
       if (name) {
         let newFilter = filtersNew?.[name] ? filtersNew?.[name] : [];
+        console.log(filtersNew);
         setFilterNew({
           ...filtersNew,
           [name]: newFilter?.includes(item)
-            ? newFilter.filter((i: any) => i !== item)
+            ? newFilter?.filter((i: any) => i !== item)
             : [...newFilter, item],
         });
       } else {
@@ -141,7 +177,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
           const isMulti = Array.isArray(prev);
           return isMulti
             ? prev?.includes(item)
-              ? prev.filter((i: any) => i !== item)
+              ? prev?.filter((i: any) => i !== item)
               : [...prev, item]
             : item;
         });
@@ -198,7 +234,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
   };
 
   const updatePrice = (items: any) => {
-    console.log(items)
+    console.log(items);
     updateFilter('price', items);
   };
 
@@ -297,8 +333,9 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
               <MaterialCommunityIcons
                 name="close"
                 size={20}
-                onPress={()=>{setQuery('');
-                  setPredictions([])
+                onPress={() => {
+                  setQuery('');
+                  setPredictions([]);
                 }}
                 color="#696969"
               />
@@ -306,22 +343,20 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             {loading ? (
               <ActivityIndicator style={{marginTop: 20}} />
             ) : (
-              predictions.length > 0 && (<>
-                <FlatList
-                  data={predictions}
-                  keyExtractor={item => item.place_id}
-                  renderItem={renderItem}
-                  keyboardShouldPersistTaps="handled"
-                  contentContainerStyle={{
+              predictions.length > 0 && (
+                <View
+                  style={{
                     backgroundColor: '#fff',
                     borderRadius: 12,
                     borderColor: '#EBEBEB',
                     borderWidth: 1,
                     marginTop: 10,
                     padding: 8,
-                  }}
-                />
-                </>
+                  }}>
+                  {predictions.map(items => {
+                    return renderItem(items);
+                  })}
+                </View>
               )
             )}
             <Text style={[styles.label, labelColor]}>Type</Text>

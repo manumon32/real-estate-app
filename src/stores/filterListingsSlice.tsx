@@ -45,21 +45,35 @@ export const createFilterListingsSlice = (
       filter_triggerRefresh: false,
       filter_listings: get().filter_page == 0 ? [] : get().filter_listings,
     });
-    let filters = {
+    let filters: any = {
       pageNum: get().filter_page + 1,
       pageSize: 6,
     };
-    if (get().location?.lat && get().location?.lng) {
-      filters = {
-        ...filters,
-        ...{
-          filter_near: [get().location?.lat, get().location?.lng, 30].join(','),
-        },
-      };
+
+    if (get().location) {
+      const {city, district, state, country, lat, lng} = get().location;
+      // console.log(city, district, state, country, lat, lng)
+
+      if (city || district) {
+        filters = {
+          ...filters,
+          filter_near: [lat, lng, city ? 30 : 50].join(','), // 30 = radius
+        };
+      } else if (state) {
+        filters = {
+          ...filters,
+          filter_state: state,
+        };
+      } else if (country) {
+        filters = {
+          ...filters,
+          filter_country: country,
+        };
+      }
     }
     let filterData = get().filters;
     Object.keys(filterData).map(filter => {
-      console.log('test', filterData[filter]);
+      // console.log('test', filterData[filter]);
       if (Array.isArray(filterData[filter])) {
         if (filterData[filter]?.length > 0) {
           if (filter === 'price') {

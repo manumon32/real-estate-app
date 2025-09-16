@@ -71,7 +71,7 @@ const Profile = () => {
           />
           <View style={styles.info}>
             <Text style={[styles.name, {color: theme.colors.text}]}>
-              {user?.name || 'App User'}
+              {user?.name || 'Hotplotz User'}
             </Text>
             {user?.email && (
               <Text style={[styles.email, {color: theme.colors.text}]}>

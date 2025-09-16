@@ -54,11 +54,15 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
         filters = {
           ...filters,
           filter_state: state,
+          orderBy: 'distance',
+          orderByDir: 'asc',
         };
       } else if (country) {
         filters = {
           ...filters,
           filter_country: country,
+          orderBy: 'distance',
+          orderByDir: 'asc',
         };
       }
     }

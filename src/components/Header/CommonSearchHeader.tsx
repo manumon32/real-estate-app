@@ -54,9 +54,9 @@ const CommonSearchHeader: FC<CommonSearchHeaderProps> = ({
               color="#888"
               style={styles.searchIcon}
             />
-            <Text
-              style={styles.input}
-            >{searchValue}</Text>
+            <Text style={[styles.input, {color: '#434343ff'}]}>
+              {searchValue ? searchValue : 'Search'}
+            </Text>
           </TouchableOpacity>
         ) : (
           <View style={styles.searchContainer}>
@@ -71,7 +71,7 @@ const CommonSearchHeader: FC<CommonSearchHeaderProps> = ({
               onChangeText={handleTextChange}
               placeholder={inputPlaceholder}
               style={styles.input}
-              placeholderTextColor="#888"
+              placeholderTextColor={theme.colors.text}
               {...inputProps}
             />
           </View>

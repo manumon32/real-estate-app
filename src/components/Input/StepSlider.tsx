@@ -36,10 +36,10 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
 
     if (type === 'min') {
       setMinValue(numericValue);
-      onChange([Math.max(min, numericValue), maxValue]);
+      onChange([Math.min(maxValue, numericValue), maxValue]);
     } else {
       setMaxValue(numericValue);
-      onChange([minValue, Math.min(max, numericValue)]);
+      onChange([minValue, numericValue]);
     }
   };
 
@@ -68,7 +68,7 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
           keyboardType="numeric"
           value={maxValue.toString()}
           onChangeText={text => {
-            return minValue <= maxValue && handleInputChange(text, 'max');
+            return handleInputChange(text, 'max');
           }}
           placeholder="Max"
           placeholderTextColor="#aaa"

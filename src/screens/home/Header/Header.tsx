@@ -25,6 +25,7 @@ function Header({navigation}: any): React.JSX.Element {
     bearerToken,
     setVisible,
     notificationsCount,
+    listings,
   } = useBoundStore();
 
   const backgroundStyle = {
@@ -85,28 +86,29 @@ function Header({navigation}: any): React.JSX.Element {
                 iconColor={theme.colors.text}
                 iconName={'bell'}
               />
-            {notificationsCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{notificationsCount}</Text>
-              </View>
-            )}
+              {notificationsCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{notificationsCount}</Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
           <SearchContent />
           <HeaderIconContent />
         </LinearGradient>
       </View>
-      <View
-        style={{
-          borderRadius: 20,
-          backgroundColor: theme.colors.backgroundHome,
-          bottom: 8,
-          width: '100%',
-        }}>
-        <Text style={[styles.freshTextStyle, {color: theme.colors.text}]}>
-          {/* Fresh Recommendations */}
-        </Text>
-      </View>
+      {listings.length > 0 && (
+        <View
+          style={{
+            borderRadius: 20,
+            backgroundColor: theme.colors.backgroundHome,
+            bottom: 8,
+            width: '100%',
+          }}>
+          <Text
+            style={[styles.freshTextStyle, {color: theme.colors.text}]}></Text>
+        </View>
+      )}
     </>
   );
 }

@@ -26,6 +26,7 @@ import {useNavigation} from '@react-navigation/native';
 import FilterModal from '@components/Filter';
 import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
 import NoChats from '@components/NoChatFound';
+import FilterChips from './FilterSort';
 
 const SortChips: React.FC<any> = ({setFilters, fetchFilterListings, theme}) => {
   const {filters, filter_loading, clearFilterList} = useBoundStore();
@@ -73,6 +74,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings, theme}) => {
         <Text
           style={[
             styles.chipText,
+            {color: theme.colors.text},
             filters.orderBy == 'distance' && styles.chipTextSelected,
           ]}>
           {'Disance'}
@@ -156,7 +158,9 @@ function App(): React.JSX.Element {
   } = useBoundStore();
   const {theme} = useTheme();
   const [visible, setVisible] = useState(false);
-  const [searchText, setSearchText] = useState(filters?.['searchText'] ?? '');
+  const [searchText, setSearchText] = useState(
+    filters?.['searchText'] ?? 'Search',
+  );
   const [sort, setSort] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const prevFiltersRef = useRef<string[] | null>(location);
@@ -175,7 +179,7 @@ function App(): React.JSX.Element {
   // console.warn(renderAdItem);
 
   useEffect(() => {
-    setSearchText(filters?.searchText ?? '');
+    setSearchText(filters?.searchText ?? 'Search');
   }, [filters]);
 
   const FilterView = useCallback(() => {
@@ -240,6 +244,14 @@ function App(): React.JSX.Element {
             </View>
           </View>
         </View>
+
+        {!sort && (
+          <FilterChips
+            setFilters={setFilters}
+            fetchFilterListings={fetchFilterListings}
+            theme={theme}
+          />
+        )}
         {sort && (
           <SortChips
             filters={filters}
@@ -249,9 +261,11 @@ function App(): React.JSX.Element {
           />
         )}
         <>
-          <Text style={[styles.resusltText, {color: theme.colors.text}]}>
-            {'Showing ' + filter_listings.length + ' of ' + filter_totalpages}
-          </Text>
+          {filter_totalpages > 0 && (
+            <Text style={[styles.resusltText, {color: theme.colors.text}]}>
+              {'Showing ' + filter_listings.length + ' of ' + filter_totalpages}
+            </Text>
+          )}
         </>
       </>
     );
@@ -331,7 +345,7 @@ function App(): React.JSX.Element {
         ListHeaderComponent={
           <View
             style={{
-              backgroundColor: theme.colors.backgroundHome,
+              backgroundColor: theme.colors.background,
               paddingTop: Platform.OS === 'android' ? 5 : 5,
             }}>
             <Pressable
@@ -422,6 +436,12 @@ function App(): React.JSX.Element {
   );
 }
 const styles = StyleSheet.create({
+  containerForFilter: {
+    padding: 16,
+    paddingRight: 8,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
   container: {
     padding: 16,
   },
@@ -521,8 +541,8 @@ const styles = StyleSheet.create({
     color: '#696969',
     fontSize: 12,
     fontFamily: Fonts.BOLD_ITALIC,
-    margin: 5,
-    top: 5,
+    margin: 8,
+    top: 2,
   },
 
   chipTextSelected: {

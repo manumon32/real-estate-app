@@ -6,6 +6,9 @@ import {
   FlatList,
   Pressable,
   TouchableOpacity,
+  ScrollView,
+  useColorScheme,
+  Dimensions,
 } from 'react-native';
 import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
@@ -42,6 +45,7 @@ const Step5MediaUpload = (props: any) => {
   } = props;
 
   const [price, setPrice] = useState(null);
+  const [benifits, setBenifits] = useState([]);
   console.log('managePlansList', managePlansList);
 
   const removeAsset = useCallback((uri: string | undefined) => {
@@ -63,6 +67,8 @@ const Step5MediaUpload = (props: any) => {
     if (managePlansList?.[0].price) {
       // @ts-ignore
       setPrice(managePlansList?.[0].price);
+      // @ts-ignore
+      setBenifits(managePlansList?.[0].benifits);
     }
   }, [managePlansList]);
 
@@ -154,6 +160,17 @@ const Step5MediaUpload = (props: any) => {
   );
 
   const {theme} = useTheme();
+  const isDarkMode = useColorScheme() === 'dark';
+  const [scrollY, setScrollY] = useState(0);
+
+  const {height} = Dimensions.get('window');
+  const CONTENT_HEIGHT = 2000; // your scrollable content height
+  const visibleHeight = height;
+  const indicatorHeight = (visibleHeight / CONTENT_HEIGHT) * visibleHeight;
+
+  const scrollIndicatorPosition =
+    (scrollY / (CONTENT_HEIGHT - visibleHeight)) *
+    (visibleHeight - indicatorHeight);
 
   return (
     <SlideInView direction={currentStep === 4 ? 'right' : 'left'}>
@@ -224,15 +241,54 @@ const Step5MediaUpload = (props: any) => {
 
       {showBoostPopup && (
         <View style={styles.popupOverlay}>
-          <View style={styles.popupContainer}>
-            <Text style={styles.popupTitle}>Feature Your Ad</Text>
-            <Text style={styles.popupAmount}>Amount: ₹{price ?? 'N/A'}</Text>
-            <Text style={styles.popupBenefits}>
-              Benefits:
-              {'\n'}• Get more visibility
-              {'\n'}• Reach more buyers
-              {'\n'}• Highlight your ad at the top
+          <View
+            style={[
+              styles.popupContainer,
+              {backgroundColor: theme.colors.text},
+            ]}>
+            <Text style={[styles.popupTitle, {color: theme.colors.background}]}>
+              Feature Your Ad
             </Text>
+            <Text
+              style={[styles.popupAmount, {color: theme.colors.background}]}>
+              Amount: ₹{price ?? 'N/A'}
+            </Text>
+            <Text
+              style={[
+                [styles.popupBenefits, {marginBottom: 5}],
+                {color: theme.colors.background},
+              ]}>
+              Benefits:
+            </Text>
+            <ScrollView
+              showsVerticalScrollIndicator={false} // hide native
+              onScroll={e => setScrollY(e.nativeEvent.contentOffset.y)}
+              scrollEventThrottle={16}
+              indicatorStyle={isDarkMode ? 'black' : 'white'}
+              style={{maxHeight: 200, padding: 10}}>
+              {benifits.map(items => (
+                <Text
+                  key={items}
+                  style={[
+                    styles.popupBenefits,
+                    {color: theme.colors.background},
+                  ]}>
+                  {'  '}• {items}
+                </Text>
+              ))}
+            </ScrollView>
+            {/* Custom Scroll Indicator */}
+            <View style={styles.scrollBarTrack}>
+              <View
+                style={[
+                  styles.scrollBarThumb,
+                  {
+                    height: 200,
+                    transform: [{translateY: scrollIndicatorPosition}],
+                  },
+                ]}
+              />
+            </View>
             <View style={styles.popupActions}>
               <TouchableOpacity
                 style={styles.continueButton}
@@ -257,6 +313,22 @@ const Step5MediaUpload = (props: any) => {
 };
 
 const styles = StyleSheet.create({
+  scrollBarTrack: {
+    position: 'absolute',
+    right: 50,
+    top: 0,
+    bottom: 0,
+    display:'none',
+    width: 8, // 🔹 track width
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 4,
+    height:50
+  },
+  scrollBarThumb: {
+    width: 8, // 🔹 indicator width
+    backgroundColor: '#40DABE',
+    borderRadius: 4,
+  },
   priceContainer: {
     flexDirection: 'row',
   },
@@ -316,22 +388,23 @@ const styles = StyleSheet.create({
 
   popupOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    // backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    alignSelf:'center',
+    alignSelf: 'center',
     zIndex: 999,
     borderRadius: 20,
   },
   popupContainer: {
-    width: '80%',
-    backgroundColor: '#fff',
+    width: '90%',
+    backgroundColor: '#000',
     borderRadius: 16,
     padding: 20,
     elevation: 5,
+    borderWidth: 2,
   },
   popupTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
   },
@@ -343,7 +416,7 @@ const styles = StyleSheet.create({
   popupBenefits: {
     fontSize: 13,
     color: '#555',
-    marginBottom: 16,
+    marginBottom: 5,
   },
   popupActions: {
     flexDirection: 'row',

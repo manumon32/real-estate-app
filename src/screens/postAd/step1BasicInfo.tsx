@@ -21,11 +21,13 @@ const Step1BasicInfo = (props: any) => {
   // const {refs: chipScrollRefs, scrollToChipIndex} = useChipScrollRefs();
 
   const {appConfigs} = useBoundStore();
-    const {theme} = useTheme();
+  const {theme} = useTheme();
 
   const PROPERTY_TYPES = appConfigs?.propertyTypes || [];
   const LISTING_TYPES = appConfigs?.listingTypes || [];
   const FURNISHING_STATS = appConfigs?.furnishingStatuses || [];
+  const OWNERSHIP_TYPE = appConfigs?.ownershipTypes || [];
+  const FACING_DIRECTION = appConfigs?.facingDirections || [];
   const AVAILABILITY_STATS = appConfigs?.availabilityStatuses || [];
   const BEDROOMS = [
     {name: '1 BHK', _id: '1', filterName: 'numberOfBedrooms'},
@@ -57,6 +59,7 @@ const Step1BasicInfo = (props: any) => {
   useEffect(() => {
     // scrollToIndex();
   }, []);
+  console.log(isStringInEitherArray('furnishedStatus'))
 
   return (
     <SlideInView direction={currentStep == null ? 'right' : 'left'} keyboardShouldPersistTaps={'handled'}>
@@ -104,6 +107,17 @@ const Step1BasicInfo = (props: any) => {
         </View>
 
         <View style={styles.inputContainer}>
+          {/* {isStringInEitherArray('ownershipTypeId') && ( */}
+            <>
+              <Text style={[styles.label, {color: theme.colors.text}]}>Ownership Type</Text>
+              {renderChips(OWNERSHIP_TYPE)}
+            </>
+          {/* )} */}
+        </View>
+
+        
+
+        <View style={styles.inputContainer}>
           <Text style={[styles.label, {color: theme.colors.text}]}>Availability Status</Text>
 
           {renderChips(AVAILABILITY_STATS)}
@@ -129,6 +143,17 @@ const Step1BasicInfo = (props: any) => {
             {renderChips(BATHROOMS)}
           </View>
         )}
+
+
+
+        <View style={styles.inputContainer}>
+          {/* {isStringInEitherArray('ownershipTypeId') && ( */}
+            <>
+              <Text style={[styles.label, {color: theme.colors.text}]}>Facing</Text>
+              {renderChips(FACING_DIRECTION)}
+            </>
+          {/* )} */}
+        </View>
 
         <View style={styles.inputContainer}>
           <Text style={[styles.label, {color: theme.colors.text}]}>Title*</Text>

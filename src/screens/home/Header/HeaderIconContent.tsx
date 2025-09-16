@@ -24,8 +24,8 @@ function HeaderIconContent(): React.JSX.Element {
       type: 'listingTypeId',
     },
     {
-      label: 'Lease',
-      icon: 'calendar-month',
+      label: 'Sell',
+      icon: 'plus',
       _id: ['6841770a4eb67a1a216b9505'],
       type: 'listingTypeId',
     },
@@ -51,16 +51,21 @@ function HeaderIconContent(): React.JSX.Element {
       {tabIcons.map((items, index) => (
         <TouchableOpacity
           key={index}
-          style={{width:'20%'}}
+          style={{width: '20%'}}
           onPress={() => {
-            resetFilters();
-            clearFilterList();
-            let filterPayload = {
-              [`${items.type}`]: items._id,
-            };
-            setFilters(filterPayload);
-            // @ts-ignore
-            navigation.navigate('filter');
+            if (items.label === 'Sell') {
+              // @ts-ignore
+              navigation.navigate('PostAd');
+            } else {
+              resetFilters();
+              clearFilterList();
+              let filterPayload = {
+                [`${items.type}`]: items._id,
+              };
+              setFilters(filterPayload);
+              // @ts-ignore
+              navigation.navigate('filter');
+            }
           }}>
           <View style={styles.iconContainer}>
             <IconButton iconSize={28} iconName={items.icon} />

@@ -42,5 +42,5 @@ export const createNotificationsSlice = (
   updateNotifications: async (payload: any) => {
     set({notifications_List: payload});
   },
-  resetNotifications: () =>set({notifications_List:[]}),
+  resetNotifications: () =>set({notifications_List:[], notificationsCount:0}),
 });

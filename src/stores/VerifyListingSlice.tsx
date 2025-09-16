@@ -51,7 +51,7 @@ export const createVerificationSlice = (
         bearerToken: get().bearerToken,
       });
       set({verification_loading: false});
-      navigate('VerifyListing', {items: {id: res._id}});
+      navigate('VerifyListing', {items: {_id: res._id}});
     } catch (err: any) {
       // navigate('VerifyListing', {items: {id: '6853e34e05711055c493ff3b'}});
       set({verificationError: err.message, verification_loading: false});

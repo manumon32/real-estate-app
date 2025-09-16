@@ -791,19 +791,18 @@ const PropertyDetails = React.memo(() => {
                     onPress={() => {}}
                   />
                 )}
-                {property?.ownershipTypeId?.name && (
+                {property?.facingDirectionId && (
                   <Button
                     style={{margin: 5}}
-                    label={property?.ownershipTypeId?.name}
+                    label={'Facing Direction - ' + property?.facingDirectionId}
                     onPress={() => {}}
                   />
                 )}
-                {property?.facingDirectionId?.name && (
+
+                {property?.bachelersAllowed && (
                   <Button
                     style={{margin: 5}}
-                    label={
-                      'Facing Direction - ' + property?.facingDirectionId?.name
-                    }
+                    label={'Bachelors allowed'}
                     onPress={() => {}}
                   />
                 )}
@@ -956,6 +955,16 @@ const PropertyDetails = React.memo(() => {
                     styles.additionalDetailsContainer,
                     {backgroundColor: theme.colors.background},
                   ]}>
+                  {property?.ownershipTypeId?.name && (
+                    <View style={styles.adittionalDetailsRow}>
+                      <Text style={[styles.label, sectionColor]}>
+                        {'Ownership'}
+                      </Text>
+                      <Text style={[styles.value, sectionColor]}>
+                        {property?.ownershipTypeId?.name}
+                      </Text>
+                    </View>
+                  )}
                   {property?.areaSize ? (
                     <View style={styles.adittionalDetailsRow}>
                       <Text style={[styles.label, sectionColor]}>
@@ -1012,6 +1021,17 @@ const PropertyDetails = React.memo(() => {
                     </View>
                   ) : (
                     <></>
+                  )}
+
+                  {property?.facingDirectionId?.name && (
+                    <View style={styles.adittionalDetailsRow}>
+                      <Text style={[styles.label, sectionColor]}>
+                        {'Facing'}
+                      </Text>
+                      <Text style={[styles.value, sectionColor]}>
+                        {property?.facingDirectionId?.name}
+                      </Text>
+                    </View>
                   )}
                 </View>
               </>
@@ -1243,7 +1263,7 @@ const PropertyDetails = React.memo(() => {
         onSelect={(data: any) => {
           setSelectedBank(data);
           setBankModalVisible(false);
-          navigate('VerifyBankList', {items: {...data, id: data?._id}});
+          navigate('VerifyBankList', {items: {...data, _id: data?._id}});
         }}
         selectedBank={selectedBank}
       />

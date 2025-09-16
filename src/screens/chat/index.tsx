@@ -85,7 +85,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
       onLongPress={onLongPress}
       style={[
         styles.container,
-        {backgroundColor: isSelected ? '#f0f0f0' : theme.colors.backgroundHome},
+        {backgroundColor: isSelected ? theme.colors.backgroundHome : theme.colors.backgroundHome},
         !isActive && {opacity: 0.8},
       ]}>
       {(isSelected || isSelectionMode) && (
@@ -215,13 +215,13 @@ const MessageCard: React.FC<MessageCardProps> = ({
           </Text>
         </View>
       )}
-      <MaterialCommunityIcons
+      {!isSelected &&<MaterialCommunityIcons
         onPress={() => {
           !isSelectionMode && setBottomModalVisible?.();
         }}
         name="dots-vertical"
         size={20}
-      />
+      />}
 
       {!isActive && (
         <>
@@ -403,8 +403,8 @@ const Chat = React.memo(({navigation}: any) => {
                   onPress={() => {
                     clearSelection();
                   }}>
-                  <MaterialCommunityIcons name="close" size={20} />
-                  <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16}}>
+                  <MaterialCommunityIcons name="close" color={theme.colors.text} size={20} />
+                  <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16, color:theme.colors.text}}>
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -417,8 +417,8 @@ const Chat = React.memo(({navigation}: any) => {
                     onPress={() => {
                       deleteChats();
                     }}>
-                    <MaterialCommunityIcons name="delete" size={20} />
-                    <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16}}>
+                    <MaterialCommunityIcons name="delete" size={20} color={theme.colors.text}/>
+                    <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16, color:theme.colors.text}}>
                       Delete All
                     </Text>
                   </TouchableOpacity>

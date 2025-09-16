@@ -23,17 +23,20 @@
     </intent-filter>
 
     <!-- Deep link -->
-    <intent-filter android:autoVerify="true">
+    <intent-filter android:label="DeepLink" android:autoVerify="true">
         <action android:name="android.intent.action.VIEW" />
 
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
 
-        <!-- Handle your app’s universal links -->
+        <!-- Custom scheme -->
+        <data android:scheme="myapp" android:host="app" />
+
+        <!-- Universal link -->
         <data
-            android:scheme="https"
-            android:host="hotplotz.com"
-            android:pathPrefix="/details" />
+                android:scheme="https"
+                android:host="hotplotz.com"
+                android:pathPrefix="/details" />
     </intent-filter>
 		</activity>
 		<meta-data

@@ -158,6 +158,7 @@ const HelpSupport = () => {
                       onChangeText={text => {
                         setDescription(text);
                       }}
+                      autoFocus
                       style={{minHeight: 100, justifyContent: 'center'}}
                       // onBlur={handleBlur('title')}
                       // error={touched?.title && errors?.title ? true : false}

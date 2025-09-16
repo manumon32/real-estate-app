@@ -106,11 +106,11 @@ const Verification = ({navigation}: any) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      items?.id && fetchverificationDetails(items?.id);
+      items?._id && fetchverificationDetails(items?._id);
       return () => {
         resetverificationDetails();
       };
-    }, [items?._id]),
+    }, [items]),
   );
 
   const renderAdItem = useCallback(
@@ -235,7 +235,7 @@ const Verification = ({navigation}: any) => {
   };
   const sendImageUrlToApi = async (imageUrl: string): Promise<any> => {
     let payload = {
-      verificationId: items?.id,
+      verificationId: items?._id,
       senderType: 'user',
       message: null,
       files: [imageUrl],
@@ -247,13 +247,13 @@ const Verification = ({navigation}: any) => {
       bearerToken,
     });
 
-    // return fetchverificationDetails(items?.id);
+    // return fetchverificationDetails(items?._id);
   };
 
   const handleSend = async (message: string) => {
     if (message.trim()) {
       let payload = {
-        verificationId: items?.id,
+        verificationId: items?._id,
         senderType: 'user',
         message: message,
         createdAt: new Date().toISOString(),
@@ -265,7 +265,7 @@ const Verification = ({navigation}: any) => {
           clientId,
           bearerToken,
         });
-        // fetchverificationDetails(items?.id);
+        // fetchverificationDetails(items?._id);
       } catch (error) {
         console.log(error);
       }

@@ -141,16 +141,6 @@ const CommonLocationModal: React.FC<Props> = ({
           country_name = country.long_name;
         }
       }
-      console.log({
-        name: name,
-        lat: locations.lat,
-        lng: locations.lng,
-        city: city_name,
-        district: district_name,
-        state: state_name,
-        country: country_name,
-        // address_components: json.result.address_components,
-      });
       onSelectLocation({
         name: name,
         lat: locations.lat,

@@ -49,7 +49,7 @@ export function startCheckoutPromise(params: any): Promise<void> {
           order_id: order.orderId,
           amount: amountPaise,
           currency: order.currency,
-          name: 'Real Estate App',
+          name: 'Hotplotz',
           description: '',
           image: 'https://i.imgur.com/3g7nmJC.png',
           prefill: {email: email, contact: phone},

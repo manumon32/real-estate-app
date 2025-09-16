@@ -33,6 +33,7 @@ const PostAd = () => {
     description: '',
     numberOfBedrooms: '',
     numberOfBathrooms: '',
+    ownershipTypeId: '',
     propertyTypeId: '',
     listingTypeId: '',
     price: '',
@@ -42,6 +43,7 @@ const PostAd = () => {
     propertyTax: 0,
     loanEligible: false,
     reraApproved: false,
+    bachelersAllowed: false,
     reraId: '',
     city: locationForAdpost?.city,
     country: locationForAdpost?.country,
@@ -63,6 +65,7 @@ const PostAd = () => {
     longitude: locationForAdpost?.lng,
     numberOfBalconies: 0,
     numberOfKitchens: 0,
+    facingDirectionId: null,
     carParking: 1,
     amenityIds: [],
     imageUrls: [],
@@ -95,7 +98,10 @@ const PostAd = () => {
       const listingTypeFields = newInitialValues.listingTypeId?.fields;
       // @ts-ignore
       const propertyTypeFields = newInitialValues.propertyTypeId?.fields;
-      setFields([...listingTypeFields, ...propertyTypeFields]);
+      setFields({
+        listingTypeId: listingTypeFields,
+        propertyTypeId: propertyTypeFields,
+      });
       let newpostAd = {
         // @ts-ignore
         listingTypeId: [newInitialValues.listingTypeId?._id],
@@ -103,6 +109,8 @@ const PostAd = () => {
         propertyTypeId: [newInitialValues.propertyTypeId?._id],
         availabilityStatusId: [newInitialValues.availabilityStatusId?._id],
         furnishingStatusId: [newInitialValues.furnishingStatusId?._id],
+        ownershipTypeId: [newInitialValues.ownershipTypeId?._id],
+        facingDirectionId: [newInitialValues.facingDirectionId?._id],
         numberOfBedrooms: [String(newInitialValues.numberOfBedrooms)],
         numberOfBathrooms: [String(newInitialValues.numberOfBedrooms)],
         state: newInitialValues.state,
