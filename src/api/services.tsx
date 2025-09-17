@@ -116,8 +116,6 @@ export const login = async (data: object, configArg: any): Promise<any> => {
   }
 };
 
-
-
 // 🔹 verifyOTP
 export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
   try {
@@ -140,9 +138,11 @@ export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
   }
 };
 
-
 // 🔹 Send Email OTP
-export const sendEmailOTP = async (data: object, configArg: any): Promise<any> => {
+export const sendEmailOTP = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
@@ -158,7 +158,10 @@ export const sendEmailOTP = async (data: object, configArg: any): Promise<any> =
 };
 
 // 🔹 verify Email OTP
-export const verifyEmailOTP = async (data: object, configArg: any): Promise<any> => {
+export const verifyEmailOTP = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
@@ -179,9 +182,11 @@ export const verifyEmailOTP = async (data: object, configArg: any): Promise<any>
   }
 };
 
-
 // 🔹 Send Phone OTP
-export const sendPhoneOTP = async (data: object, configArg: any): Promise<any> => {
+export const sendPhoneOTP = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
@@ -197,7 +202,10 @@ export const sendPhoneOTP = async (data: object, configArg: any): Promise<any> =
 };
 
 // 🔹 verify Phone OTP
-export const verifyPhoneOTP = async (data: object, configArg: any): Promise<any> => {
+export const verifyPhoneOTP = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
@@ -275,8 +283,6 @@ export const submitRequestAPI = async (
     throw new Error('Failed to Do so');
   }
 };
-
-
 
 export const logoutFromallDevicesAPI = async (
   data: object,
@@ -662,8 +668,6 @@ export const fetchAppointMentsAPI = async (configArg: any): Promise<any> => {
   }
 };
 
-
-
 //Transactions
 
 export const fetchTransactionsAPI = async (
@@ -716,6 +720,24 @@ export const fetchNotificationsAPI = async (configArg: any): Promise<any> => {
         orderBy: 'createdAt',
         orderByDir: 'desc',
       },
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch Details');
+  }
+};
+
+//fetch suggesions
+
+export const fetchSuggesionsAPI = async (configArg: any): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'post',
+      url: API.SUGGESIONS.GET,
+      params: {},
       headers,
     };
     const response = await apiRequest(apiConfig);

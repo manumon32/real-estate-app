@@ -15,14 +15,20 @@ import {
 import {createLocationSlice, LocationSlice} from './LocationSlice';
 import {createPostAdSlice, PostAdSlice} from './PostAdSlice';
 import {createMyAdsSlice, MyAdsSlice} from './MyAdsSlice';
-import { createReportAdSlice, ReportAdSlice } from './ReportAdsSlice';
-import { createManagePlanSlice, ManagePlanSlice } from './managePlanSlice';
-import { ChatSlice, createChatSlice } from './ChatSlice';
-import { createTransactionsSlice, TransactionsSlice } from './TransactionsSlice';
-import { createVerificationSlice, VerificationSlice } from './VerifyListingSlice';
-import { createNotificationsSlice, NotificationsSlice } from './NotificationsSlice';
-import { BankVerificationSlice, createBankVerificationSlice } from './VerifyBankSlice';
-import { AppointmentsSlice, createAppointmentsSlice } from './AppointmentSlice';
+import {createReportAdSlice, ReportAdSlice} from './ReportAdsSlice';
+import {createManagePlanSlice, ManagePlanSlice} from './managePlanSlice';
+import {ChatSlice, createChatSlice} from './ChatSlice';
+import {createTransactionsSlice, TransactionsSlice} from './TransactionsSlice';
+import {createVerificationSlice, VerificationSlice} from './VerifyListingSlice';
+import {
+  createNotificationsSlice,
+  NotificationsSlice,
+} from './NotificationsSlice';
+import {
+  BankVerificationSlice,
+  createBankVerificationSlice,
+} from './VerifyBankSlice';
+import {AppointmentsSlice, createAppointmentsSlice} from './AppointmentSlice';
 // import {zustandStorage} from './storage';
 
 type StoreState = HandShakeSlice &
@@ -56,15 +62,15 @@ const useBoundStore = create<StoreState>()(
         ...createFilterListingsSlice(set, get),
         ...createPostAdSlice(set, get),
         ...createFiltersSlice(set),
-        ...createManagePlanSlice(set,get),
+        ...createManagePlanSlice(set, get),
         ...createReportAdSlice(set, get),
         ...createLocationSlice(set, get),
         ...createListingsSlice(set, get),
-        ...createTransactionsSlice(set,get),
+        ...createTransactionsSlice(set, get),
         ...createChatSlice(set, get),
-        ...createVerificationSlice(set,get),
-        ...createBankVerificationSlice(set,get),
-        ...createNotificationsSlice(set,get),
+        ...createVerificationSlice(set, get),
+        ...createBankVerificationSlice(set, get),
+        ...createNotificationsSlice(set, get),
         ...createDetailSlice(set, get),
         ...createMyAdsSlice(set, get),
         ...createFavoritesSlice(set, get),
@@ -85,6 +91,7 @@ const useBoundStore = create<StoreState>()(
           managePlansList: state.managePlansList,
           chatList: state.chatList,
           chatDetails: state.chatDetails,
+          listings: state.listings,
         }),
         onRehydrateStorage: () => state => {
           console.log('🔄 Rehydrated Zustand state:', state);

@@ -94,6 +94,7 @@ const updateOnlineUsers = (user: {userId: string; status: string}) => {
 
 export const connectSocket = () => {
   const token = useBoundStore.getState().bearerToken;
+  const currentScreen = getCurrentRouteName();
   if (!token) {
     console.warn('Connect No token available to connect socket.');
     return;
@@ -109,7 +110,8 @@ export const connectSocket = () => {
 
   socket.on('initialAppData', items => {
     useBoundStore.getState().updateOnlineUsers(items.onlineUsers);
-    useBoundStore.getState().setUnreadCount(items.chatListCount);
+    currentScreen !== 'Chat' &&
+      useBoundStore.getState().setUnreadCount(items.chatListCount);
     useBoundStore.getState().updateNotificationCount(items.notificationsCount);
     console.log('✅ initialAppData received', items);
   });

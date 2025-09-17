@@ -4,6 +4,7 @@ import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import Firebase
 import FBSDKCoreKit
+import PassKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {

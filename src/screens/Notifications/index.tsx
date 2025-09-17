@@ -135,9 +135,13 @@ export default function NotificationListSwipe() {
             const updated = notifications_List.map((n: any) =>
               n._id === item._id ? {...n, read: true} : n,
             );
+            console.log('item', item);
             updateNotifications(updated);
             // markAllAsRead(item._id);
-            navigateByNotification(item as any as INotification);
+            navigateByNotification({
+              ...item,
+              notificationId: item._id,
+            } as any as INotification);
           }
         }}>
         <View style={styles.row}>

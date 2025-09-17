@@ -75,15 +75,12 @@ const HelpSupport = () => {
             <View style={{flex: 1}}>
               <ScrollView
                 showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps={'handled'}
+                keyboardShouldPersistTaps={'always'}
                 contentContainerStyle={{
-                  paddingBottom: 120,
                   backgroundColor: theme.colors.background,
                   padding: 16,
                   // height: '100%',
-                }}
-                style={{
-                  height: '100%',
+                  flexGrow: 1,
                 }}>
                 <ContactUsCard />
                 <View
@@ -96,7 +93,6 @@ const HelpSupport = () => {
                     shadowOpacity: 0.1,
                     shadowRadius: 6,
                     elevation: 5,
-                    top: 20,
                   }}>
                   <Text
                     style={{
@@ -158,7 +154,6 @@ const HelpSupport = () => {
                       onChangeText={text => {
                         setDescription(text);
                       }}
-                      autoFocus
                       style={{minHeight: 100, justifyContent: 'center'}}
                       // onBlur={handleBlur('title')}
                       // error={touched?.title && errors?.title ? true : false}

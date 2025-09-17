@@ -1,4 +1,4 @@
-import {fetchListingsFromAPI} from '@api/services';
+import {fetchListingsFromAPI, fetchSuggesionsAPI} from '@api/services';
 
 // Types
 
@@ -15,6 +15,7 @@ interface Listing {
 
 export interface FilterListingsSlice {
   filter_listings: Listing[];
+  filter_suggestions: any[];
   filter_page: number;
   filter_hasMore: boolean;
   filter_loading: boolean;
@@ -22,6 +23,7 @@ export interface FilterListingsSlice {
   filter_triggerRefresh: boolean;
   filter_totalpages: number;
   filterSetTriggerRefresh: () => void;
+  fetchSuggestions: () => void;
   clearFilterList: () => void;
   fetchFilterListings: (filters?: any, page?: number) => Promise<void>;
 }
@@ -31,6 +33,7 @@ export const createFilterListingsSlice = (
   get: any,
 ): FilterListingsSlice => ({
   filter_listings: [],
+  filter_suggestions: [],
   filter_page: 0,
   filter_hasMore: false,
   filter_loading: false,
@@ -115,6 +118,20 @@ export const createFilterListingsSlice = (
     } catch (err: any) {
       set({filter_error: err.message, filter_loading: false});
     }
+  },
+
+  fetchSuggestions: async () => {
+    try {
+      const res = await fetchSuggesionsAPI({
+        token: get().token,
+        clientId: get().clientId,
+        bearerToken: get().bearerToken,
+      });
+      res?.suggestions &&
+        set(() => ({
+          filter_suggestions: res.suggestions,
+        }));
+    } catch (err) {}
   },
   clearFilterList: () =>
     set({

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useRef, useMemo} from 'react';
 import {
   StatusBar,
   useColorScheme,
@@ -17,21 +17,25 @@ import {
   onNotificationOpenedApp,
   getInitialNotification,
 } from '@react-native-firebase/messaging';
-
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {useTheme} from '@theme/ThemeProvider';
+import useBoundStore from '@stores/index';
+import {connectSocket, disconnectSocket} from './../../soket';
+import {useFocusEffect} from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
+
+// Lazy loaded components
+const Header = React.lazy(() => import('./Header/Header'));
+const PropertyCard = React.lazy(() => import('@components/PropertyCard'));
+const HomepageSkelton = React.lazy(
+  () => import('@components/SkeltonLoader/HomepageSkelton'),
+);
+const NoChats = React.lazy(() => import('@components/NoChatFound'));
+
 import {
   navigateByNotification,
   requestUserPermission,
 } from '../../firebase/notificationService';
-import {useTheme} from '@theme/ThemeProvider';
-import Header from './Header/Header';
-import PropertyCard from '@components/PropertyCard';
-import useBoundStore from '@stores/index';
-import {connectSocket, disconnectSocket} from './../../soket';
-import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
-import {useFocusEffect} from '@react-navigation/native';
-import NoChats from '@components/NoChatFound';
-import Toast from 'react-native-toast-message';
 
 export interface INotification {
   userId: string;
@@ -63,17 +67,16 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   const {theme} = useTheme();
   const isDarkMode = useColorScheme() === 'dark';
   const prevFiltersRef = useRef<any>(null);
+  const backPressedOnce = useRef(false);
 
-  /** Load more on scroll */
-  const loadMore = () => {
+  /** Load more with useCallback to avoid re-creating on each render */
+  const loadMore = useCallback(() => {
     if (loading || !hasMore) return;
     fetchListings();
-  };
+  }, [loading, hasMore]);
 
-  /** Double back press exit */
+  /** Double back press exit with useCallback */
   const useDoubleBackExit = () => {
-    const backPressedOnce = useRef(false);
-
     useFocusEffect(
       useCallback(() => {
         const onBackPress = () => {
@@ -81,51 +84,54 @@ function HomeScreen({navigation}: any): React.JSX.Element {
             BackHandler.exitApp();
             return true;
           }
-
           backPressedOnce.current = true;
           ToastAndroid.show('Press back again to exit', ToastAndroid.SHORT);
-
           setTimeout(() => {
             backPressedOnce.current = false;
           }, 2000);
-
           return true;
         };
-
         const backHandler = BackHandler.addEventListener(
           'hardwareBackPress',
           onBackPress,
         );
-
         return () => backHandler.remove();
       }, []),
     );
   };
   useDoubleBackExit();
 
-  /** Render each property */
+  /** Render each property using useCallback to memoize the function */
   const renderAdItem = useCallback(
-    (items: any) => (
-      <PropertyCard items={items.item} navigation={navigation} arg={'home'} />
+    ({item}: any) => (
+      <PropertyCard items={item} navigation={navigation} arg={true} />
     ),
     [navigation],
   );
 
-  /** Connect socket if logged in */
+  /** Memoized header component to prevent unnecessary rerenders */
+  const MemoHeader = useMemo(() => {
+    return <Header navigation={navigation} />;
+  }, [navigation]);
+
+  /** Connect socket on login */
   useEffect(() => {
-    bearerToken && connectSocket();
+    if (bearerToken) {
+      connectSocket();
+    }
   }, [bearerToken]);
 
-  /** Refresh listings */
+  /** Refresh listings when triggered */
   useEffect(() => {
-    triggerRefresh && fetchListings();
+    if (triggerRefresh) fetchListings();
   }, [triggerRefresh]);
 
-  const fetchData = async () => {
-    !loading && fetchListings();
-  };
+  /** Fetch data once */
+  const fetchData = useCallback(() => {
+    if (!loading) fetchListings();
+  }, [loading]);
 
-  /** Reload when location changes */
+  /** Handle location changes */
   useEffect(() => {
     if (
       (!prevFiltersRef.current?.lat && location.lat) ||
@@ -134,31 +140,28 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     ) {
       setTriggerRelaod();
       setTimeout(() => {
-        !loading && fetchListings();
+        if (!loading) fetchListings();
       }, 100);
     }
     prevFiltersRef.current = location;
-    !loading && fetchData();
+    if (!loading) fetchData();
   }, [location]);
 
-  /** Socket cleanup on app state change */
+  /** Handle app state changes */
   useEffect(() => {
     const handleAppStateChange = (nextState: string) => {
       if (nextState === 'background' || nextState === 'inactive') {
         disconnectSocket();
       }
-
       if (nextState === 'active' && bearerToken) {
         connectSocket();
         fetchChatListings();
       }
     };
-
     const subscription = AppState.addEventListener(
       'change',
       handleAppStateChange,
     );
-
     return () => {
       subscription.remove();
       disconnectSocket();
@@ -166,63 +169,54 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   }, [bearerToken]);
 
   /** Handle deep links */
-  const handleDeepLink = (event: {url: string}) => {
-    const url = event.url; // e.g., myapp://details/12345
-    const match = url.match(/details\/([^/?#]+)/);
-    if (match) {
-      const propertyId = match[1];
-      navigation.navigate('Details', {items: {_id: propertyId}});
-    }
-  };
+  const handleDeepLink = useCallback(
+    (event: {url: string}) => {
+      const url = event.url;
+      const match = url.match(/details\/([^/?#]+)/);
+      if (match) {
+        const propertyId = match[1];
+        navigation.navigate('Details', {items: {_id: propertyId}});
+      }
+    },
+    [navigation],
+  );
 
   useEffect(() => {
     const sub = Linking.addEventListener('url', handleDeepLink);
-
     Linking.getInitialURL().then(url => {
-      if (url) {
-        handleDeepLink({url});
-      }
+      if (url) handleDeepLink({url});
     });
-
     return () => sub.remove();
-  }, []);
+  }, [handleDeepLink]);
 
-  /** Firebase Notification Setup */
+  /** Firebase notification handlers */
   useEffect(() => {
     requestUserPermission();
     const messaging = getMessaging();
 
-    // Foreground notifications
-    const unsubscribeForeground = onMessage(messaging, async remoteMessage => {
+    const unsubscribeForeground = onMessage(messaging, remoteMessage => {
       const data = remoteMessage?.data;
-      console.log('remoteMessage (foreground):', remoteMessage);
       if (data?.type) {
         Toast.show({
           type: 'info',
           text1: data?.title ? String(data.title) : 'Notification',
           text2: data?.message ? String(data.message) : '',
           position: 'top',
-          onPress: () => {
-            navigateByNotification(data as any as INotification);
-          },
+          onPress: () => navigateByNotification(data as any as INotification),
         });
       }
     });
 
-    // When app opened from background
     const unsubscribeOpenedApp = onNotificationOpenedApp(
       messaging,
       remoteMessage => {
-        console.log('remoteMessage (openedApp):', remoteMessage);
         const data = remoteMessage?.data;
         if (data) navigateByNotification(data as any as INotification);
       },
     );
 
-    // When app opened from killed state
     getInitialNotification(messaging).then(remoteMessage => {
       if (remoteMessage) {
-        console.log('remoteMessage (initialNotification):', remoteMessage);
         const data = remoteMessage?.data;
         if (data) navigateByNotification(data as any as INotification);
       }
@@ -234,18 +228,46 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     };
   }, [bearerToken]);
 
+  /** Memoize the footer component */
+  const ListFooter = useMemo(() => {
+    if (loading) {
+      return <HomepageSkelton />;
+    }
+    if (listings.length <= 0) {
+      return (
+        <NoChats
+          icon="magnify-close"
+          color="#9E9E9E"
+          title="Oops.. we cannot find anything for this search."
+        />
+      );
+    }
+    return null;
+  }, [loading, listings.length]);
+
+  /** Memoize refresh control to avoid rerenders */
+  const refreshControl = useMemo(() => {
+    return (
+      <RefreshControl
+        refreshing={false}
+        onRefresh={() => setTriggerRefresh()}
+        colors={['#40DABE', '#40DABE', '#227465']}
+      />
+    );
+  }, []);
+
   return (
     <SafeAreaView style={{backgroundColor: theme.colors.homepageSafeArea}}>
       <StatusBar
         barStyle={isDarkMode ? 'dark-content' : 'dark-content'}
-        backgroundColor={theme.colors.backgroundPalette[0]}
+        backgroundColor={theme.colors.homepageSafeArea}
       />
       <FlatList
         data={listings}
         renderItem={renderAdItem}
         keyExtractor={item => item._id}
         numColumns={2}
-        ListHeaderComponent={<Header navigation={navigation} />}
+        ListHeaderComponent={MemoHeader}
         contentContainerStyle={{
           paddingBottom: 100,
           backgroundColor: theme.colors.backgroundHome,
@@ -254,24 +276,8 @@ function HomeScreen({navigation}: any): React.JSX.Element {
         showsVerticalScrollIndicator={false}
         onEndReachedThreshold={0.5}
         onEndReached={loadMore}
-        refreshControl={
-          <RefreshControl
-            refreshing={false}
-            onRefresh={() => setTriggerRefresh()}
-            colors={['#40DABE', '#40DABE', '#227465']}
-          />
-        }
-        ListFooterComponent={
-          hasMore || loading ? (
-            <HomepageSkelton />
-          ) : listings.length <= 0 ? (
-            <NoChats
-              icon="magnify-close"
-              color="#9E9E9E"
-              title="Oops.. we cannot find anything for this search."
-            />
-          ) : null
-        }
+        refreshControl={refreshControl}
+        ListFooterComponent={ListFooter}
       />
     </SafeAreaView>
   );

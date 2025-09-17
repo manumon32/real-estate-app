@@ -456,27 +456,7 @@ const PostAdContainer = (props: any) => {
     } finally {
       setLoading(false);
     }
-  }, [
-    errors,
-    images,
-    floorPlans,
-    token,
-    clientId,
-    bearerToken,
-    locationForAdpost.lat,
-    locationForAdpost.lng,
-    locationForAdpost.name,
-    location.lat,
-    location.lng,
-    location.name,
-    values,
-    setImages,
-    setFloorPlans,
-    setFields,
-    managePlansList,
-    user.phone,
-    user.email,
-  ]);
+  }, [errors, images, floorPlans, token, clientId, bearerToken, locationForAdpost.lat, locationForAdpost.lng, locationForAdpost.name, locationForAdpost.state, locationForAdpost.country, locationForAdpost.district, locationForAdpost.city, values, setImages, setFloorPlans, setFields, managePlansList, user.phone, user.email]);
 
   useEffect(() => {
     fetchPlans();

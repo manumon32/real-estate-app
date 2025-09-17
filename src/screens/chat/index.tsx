@@ -85,7 +85,11 @@ const MessageCard: React.FC<MessageCardProps> = ({
       onLongPress={onLongPress}
       style={[
         styles.container,
-        {backgroundColor: isSelected ? theme.colors.backgroundHome : theme.colors.backgroundHome},
+        {
+          backgroundColor: isSelected
+            ? theme.colors.backgroundHome
+            : theme.colors.backgroundHome,
+        },
         !isActive && {opacity: 0.8},
       ]}>
       {(isSelected || isSelectionMode) && (
@@ -210,18 +214,18 @@ const MessageCard: React.FC<MessageCardProps> = ({
       </View>
       {unreadCount > 0 && (
         <View style={styles.badge}>
-          <Text style={[styles.badgeText]}>
-            {unreadCount}
-          </Text>
+          <Text style={[styles.badgeText]}>{unreadCount}</Text>
         </View>
       )}
-      {!isSelected &&<MaterialCommunityIcons
-        onPress={() => {
-          !isSelectionMode && setBottomModalVisible?.();
-        }}
-        name="dots-vertical"
-        size={20}
-      />}
+      {!isSelected && (
+        <MaterialCommunityIcons
+          onPress={() => {
+            !isSelectionMode && setBottomModalVisible?.();
+          }}
+          name="dots-vertical"
+          size={20}
+        />
+      )}
 
       {!isActive && (
         <>
@@ -253,7 +257,6 @@ const Chat = React.memo(({navigation}: any) => {
     bearerToken,
     token,
     clientId,
-    setUnreadCount
   } = useBoundStore();
   const [filterBy, setFilterBy] = useState<any>(null);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -311,7 +314,6 @@ const Chat = React.memo(({navigation}: any) => {
 
   useEffect(() => {
     bearerToken && connectSocket();
-    setUnreadCount(0);
   }, [bearerToken]);
 
   const renderAdItem = useCallback(
@@ -403,8 +405,17 @@ const Chat = React.memo(({navigation}: any) => {
                   onPress={() => {
                     clearSelection();
                   }}>
-                  <MaterialCommunityIcons name="close" color={theme.colors.text} size={20} />
-                  <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16, color:theme.colors.text}}>
+                  <MaterialCommunityIcons
+                    name="close"
+                    color={theme.colors.text}
+                    size={20}
+                  />
+                  <Text
+                    style={{
+                      fontFamily: Fonts.REGULAR,
+                      fontSize: 16,
+                      color: theme.colors.text,
+                    }}>
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -417,8 +428,17 @@ const Chat = React.memo(({navigation}: any) => {
                     onPress={() => {
                       deleteChats();
                     }}>
-                    <MaterialCommunityIcons name="delete" size={20} color={theme.colors.text}/>
-                    <Text style={{fontFamily: Fonts.REGULAR, fontSize: 16, color:theme.colors.text}}>
+                    <MaterialCommunityIcons
+                      name="delete"
+                      size={20}
+                      color={theme.colors.text}
+                    />
+                    <Text
+                      style={{
+                        fontFamily: Fonts.REGULAR,
+                        fontSize: 16,
+                        color: theme.colors.text,
+                      }}>
                       Delete All
                     </Text>
                   </TouchableOpacity>

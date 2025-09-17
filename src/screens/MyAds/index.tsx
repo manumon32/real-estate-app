@@ -328,6 +328,8 @@ const MyAds = () => {
             phone: user.phone ?? '',
             email: user.email ?? '',
           };
+          console.log(paymentPayload);
+          // await payWithApplePay();
           await startCheckoutPromise(paymentPayload);
           fetchMyAds();
           fetchPlans();

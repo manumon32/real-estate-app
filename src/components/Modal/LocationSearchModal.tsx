@@ -117,10 +117,16 @@ const CommonLocationModal: React.FC<Props> = ({
       let country_name = null;
       if (json.result.address_components) {
         const components = json.result.address_components;
+        console.log('address_components', components);
         const city = components.find((c: any) => c.types.includes('locality'));
-        const district = components.find((c: any) =>
-          c.types.includes('administrative_area_level_2'),
+        let district = components.find((c: any) =>
+          c.types.includes('administrative_area_level_3'),
         );
+        if (!district) {
+         district=  components.find((c: any) =>
+            c.types.includes('administrative_area_level_2'),
+          );
+        }
         const state = components.find((c: any) =>
           c.types.includes('administrative_area_level_1'),
         );
@@ -141,6 +147,15 @@ const CommonLocationModal: React.FC<Props> = ({
           country_name = country.long_name;
         }
       }
+      console.log({
+        name: name,
+        lat: locations.lat,
+        lng: locations.lng,
+        city: city_name,
+        district: district_name,
+        state: state_name,
+        country: country_name,
+      });
       onSelectLocation({
         name: name,
         lat: locations.lat,

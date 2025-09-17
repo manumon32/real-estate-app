@@ -59,6 +59,9 @@ export const API = {
   SUBSCRIPTIONS: {
     GET: '/subscription',
   },
+  SUGGESIONS: {
+    GET: '/intelligent-search/build-suggestions',
+  },
   PAYMENT: {
     GET: '/payment',
     CREATE: '/payment/create-order',

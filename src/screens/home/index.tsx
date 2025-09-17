@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState, useMemo} from 'react';
 import {
   View,
   Animated,
@@ -20,69 +20,80 @@ function Index({navigation}: any): React.JSX.Element {
     token,
     gethandShakeToken,
     handShakeError,
-    // habdshakeErrorLog,
     clientId,
     getConfigData,
+    fetchSuggestions,
     fetchFavouriteAds,
     bearerToken,
   } = useBoundStore();
-  const [error, setError] = useState(true);
+
+  const [error, setError] = useState(false);
   const [deepLink, setDeepLink] = useState<any>(null);
 
-  const getDeviceId = () => {
-    return DeviceInfo.getUniqueId().then(uniqueId => {
-      return uniqueId;
-    });
-  };
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const fetchData = async () => {
-    setError(false);
-    const deviceId = await getDeviceId();
-    let version = DeviceInfo.getVersion();
-    const deviceModel = DeviceInfo.getModel();
-    const osVersion = DeviceInfo.getSystemVersion();
-    const data = {
-      deviceId: deviceId ? deviceId : '123456',
-      appVersion: version ?? '',
-      deviceModel: deviceModel,
+  /** Get device info once and memoize */
+  const deviceInfo = useMemo(() => {
+    return Promise.all([
+      DeviceInfo.getUniqueId(),
+      DeviceInfo.getVersion(),
+      DeviceInfo.getModel(),
+      DeviceInfo.getSystemVersion(),
+    ]).then(([deviceId, version, model, osVersion]) => ({
+      deviceId: deviceId || '123456',
+      appVersion: version || '',
+      deviceModel: model,
       osVersion: osVersion,
       fingerprintHash: 'hsde123231',
       rooted: false,
       emulator: false,
       debug: false,
       installer: 'com.android.vending',
-    };
-    console.log('handshake payload', data);
-    gethandShakeToken(data);
-  };
-
-  const getAppConfigData = async () => {
-    getConfigData();
-  };
-
-  const handleDeepLink = (event: {url: string}) => {
-    const url = event.url; // e.g., myapp://property/12345
-    const match = url.match(/details\/(\w+)/);
-    if (match) {
-      // const propertyId = match[1];
-      // navigation.navigate('Details', {items: {_id: propertyId}});
-    }
-  };
-
-  useEffect(() => {
-    // Listen when app is already open
-    const sub = Linking.addEventListener('url', handleDeepLink);
-
-    // Also handle when app is opened from a killed state
-    Linking.getInitialURL().then(url => {
-      if (url) {
-        setDeepLink({url});
-      }
-    });
-
-    return () => sub.remove();
+    }));
   }, []);
 
+  /** Fetch handshake data */
+  const fetchData = useCallback(async () => {
+    setError(false);
+    try {
+      const data = await deviceInfo;
+      console.log('handshake payload', data);
+      gethandShakeToken(data);
+    } catch (err) {
+      setError(true);
+    }
+  }, [deviceInfo]);
+
+  /** Get config data */
+  const getAppConfigData = useCallback(() => {
+    getConfigData();
+  }, []);
+
+  /** Handle deep links */
+  const handleDeepLink = useCallback(
+    (event: {url: string}) => {
+      const url = event.url;
+      const match = url.match(/details\/(\w+)/);
+      if (match) {
+        const propertyId = match[1];
+        navigation.navigate('Details', {items: {_id: propertyId}});
+      }
+    },
+    [navigation],
+  );
+
+  /** Setup deep link listeners */
+  useEffect(() => {
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+
+    Linking.getInitialURL().then(url => {
+      if (url) setDeepLink({url});
+    });
+
+    return () => subscription.remove();
+  }, [handleDeepLink]);
+
+  /** Initialize app state when focused */
   useFocusEffect(
     useCallback(() => {
       const initialize = async () => {
@@ -90,12 +101,12 @@ function Index({navigation}: any): React.JSX.Element {
         try {
           console.log('Token & ClientId', token, clientId);
           if (!token || !clientId) {
-            fetchData();
+            await fetchData();
           } else {
             if (bearerToken) {
               fetchFavouriteAds();
             }
-            getAppConfigData();
+            Promise.allSettled([getAppConfigData(), fetchSuggestions()]);
             if (deepLink) {
               handleDeepLink(deepLink);
             } else {
@@ -106,15 +117,20 @@ function Index({navigation}: any): React.JSX.Element {
           setError(true);
         }
       };
-
       initialize();
-
-      return () => {};
-    }, [token, navigation]),
+    }, [
+      token,
+      clientId,
+      bearerToken,
+      deepLink,
+      fetchData,
+      getAppConfigData,
+      handleDeepLink,
+      navigation,
+    ]),
   );
 
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
+  /** Start animation once */
   useEffect(() => {
     const pulse = Animated.loop(
       Animated.sequence([
@@ -131,7 +147,8 @@ function Index({navigation}: any): React.JSX.Element {
       ]),
     );
     pulse.start();
-  }, [scaleAnim]);
+    return () => pulse.stop();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -140,20 +157,16 @@ function Index({navigation}: any): React.JSX.Element {
         source={require('@assets/images/logo.png')}
         style={[styles.image, {transform: [{scale: scaleAnim}]}]}
       />
-      {error ||
-        (handShakeError && (
-          <View style={{alignItems: 'center', marginTop: 100}}>
-            <Text style={{marginBottom: 10, fontFamily: Fonts.MEDIUM}}>
-              🔌 APP Initialization failed. Please try again.
-            </Text>
-            {/* <Text style={{marginBottom: 10, fontFamily: Fonts.MEDIUM}}>
-              {JSON.stringify(habdshakeErrorLog)}
-            </Text> */}
-            <TouchableOpacity style={styles.loginBtn} onPress={fetchData}>
-              <Text style={styles.loginText}>Retry</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+      {(error || handShakeError) && (
+        <View style={{alignItems: 'center', marginTop: 100}}>
+          <Text style={{marginBottom: 10, fontFamily: Fonts.MEDIUM}}>
+            🔌 APP Initialization failed. Please try again.
+          </Text>
+          <TouchableOpacity style={styles.loginBtn} onPress={fetchData}>
+            <Text style={styles.loginText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }

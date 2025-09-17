@@ -99,11 +99,13 @@ const BottomTabBar = ({state, navigation}: any) => {
                         iconColor={color}
                         iconName={renderTabIcon(route.name)}
                       />
-                      {route.name === 'Chat' && unreadCount > 0 && !isFocused &&  (
-                        <View style={styles.badge}>
-                          <Text style={styles.badgeText}>{unreadCount}</Text>
-                        </View>
-                      )}
+                      {route.name === 'Chat' &&
+                        unreadCount > 0 &&
+                        !isFocused && (
+                          <View style={styles.badge}>
+                            <Text style={styles.badgeText}>{unreadCount}</Text>
+                          </View>
+                        )}
                     </>
                   ) : (
                     <View style={styles.addButton}>

@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React, {useMemo, useCallback, Suspense} from 'react';
 import {
   View,
   Text,
@@ -10,128 +10,178 @@ import {
 } from 'react-native';
 import Image from 'react-native-fast-image';
 import IconButton from '@components/Buttons/IconButton';
+// @ts-ignore
 import FeaturedIcon from '@assets/svg/featured.svg';
 import {Fonts} from '@constants/font';
-import FavoriteButton from './FavoriteButton';
 import {useTheme} from '@theme/ThemeProvider';
 import useBoundStore from '@stores/index';
 
-const PropertyCard = React.memo(({items, navigation, arg}: any) => {
-  const {theme} = useTheme();
-  const isDarkMode = useColorScheme() === 'dark';
-  const {user} = useBoundStore();
-  const formatINR = (value: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-  return (
-    <TouchableOpacity
-      style={[
-        styles.card,
-        {
-          bottom: arg ? 30 : 0,
-          top: arg ? -30 : 10,
-          backgroundColor: theme.colors.background,
-          borderColor: theme.colors.text,
-          borderWidth: isDarkMode ? 0.2 : 0,
-        },
-      ]}
-      onPress={() => {
-        navigation.navigate('Details', {items});
-      }}>
-      {/* Featured badge */}
-      {items.isFeatured && (
-        <View style={styles.badge}>
-          <FeaturedIcon />
-        </View>
-      )}
+// Lazy load favorite button
+const FavoriteButton = React.lazy(() => import('./FavoriteButton'));
 
-      <View style={styles.imageWrapper}>
-        <Image
-          source={{
-            uri: items.imageUrls?.[0]
-              ? items.imageUrls[0]
-              : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM=',
-            priority: Image.priority.normal,
-            cache: Image.cacheControl.immutable,
-          }}
-          resizeMode="contain"
-          style={styles.image}
-        />
-        {(!user?._id || user?._id !== items.customerId) && (
-          <FavoriteButton
-            item={items}
-            tuchableStyle={{
-              position: 'absolute',
-              top: 4,
-              right: 4,
-            }}
-          />
+interface PropertyCardProps {
+  items: any;
+  navigation: any;
+  arg?: boolean;
+  horizontal?: boolean;
+}
+
+const InfoItem = React.memo(
+  ({icon, text, color}: {icon: string; text: string; color: string}) => (
+    <View style={styles.infoItem}>
+      <IconButton iconSize={16} iconColor={color} iconName={icon} />
+      <Text style={[styles.infoText, {color}]} numberOfLines={1}>
+        {text}
+      </Text>
+    </View>
+  ),
+);
+
+const PropertyCard = React.memo(
+  ({items, navigation, arg, horizontal}: PropertyCardProps) => {
+    const {theme} = useTheme();
+    const isDarkMode = useColorScheme() === 'dark';
+    const {user} = useBoundStore();
+
+    /** Format price */
+    const formattedPrice = useMemo(
+      () =>
+        new Intl.NumberFormat('en-IN', {
+          style: 'currency',
+          currency: 'INR',
+          maximumFractionDigits: 0,
+        }).format(items.price),
+      [items.price],
+    );
+
+    /** Format date */
+    const formattedDate = useMemo(
+      () =>
+        new Date(items?.createdAt).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'long',
+        }),
+      [items?.createdAt],
+    );
+
+    /** Distance formatting */
+    const distanceText = useMemo(() => {
+      if (!items?.distance) return null;
+      return items.distance < 1000
+        ? `${items.distance.toFixed(2)} m`
+        : `${(items.distance * 0.001).toFixed(2)} km`;
+    }, [items?.distance]);
+
+    /** Navigation handler */
+    const handlePress = useCallback(() => {
+      navigation.navigate('Details', {items});
+    }, [navigation, items]);
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.card,
+          {
+            bottom: arg ? 30 : 0,
+            top: arg ? -30 : 10,
+            backgroundColor: theme.colors.background,
+            borderColor: theme.colors.text,
+            borderWidth: isDarkMode ? 0.2 : 0,
+            width: horizontal ? '90%' : '47%',
+          },
+        ]}
+        onPress={handlePress}
+        accessible
+        accessibilityLabel={`View details for ${items.title}`}>
+        {/* Featured badge */}
+        {items.isFeatured && (
+          <View style={styles.badge}>
+            <FeaturedIcon />
+          </View>
         )}
-      </View>
-      <View style={styles.content}>
 
-
-        <Text style={[styles.price, {color: theme.colors.text}]}>
-          {formatINR(items.price)}
-        </Text>
-        <Text
-          style={[styles.title, {color: theme.colors.text}]}
-          numberOfLines={2}>
-          {items.title}
-        </Text>
-        <View style={{flexDirection: 'row'}}>
-          <IconButton
-            iconSize={16}
-            iconColor={theme.colors.text}
-            iconName={'map-marker'}
+        {/* Property Image */}
+        <View style={styles.imageWrapper}>
+          <Image
+            source={{
+              uri: items.imageUrls?.[0]
+                ? items.imageUrls[0]
+                : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612',
+              priority: Image.priority.normal,
+              cache: Image.cacheControl.immutable,
+            }}
+            resizeMode="cover"
+            style={styles.image}
           />
+
+          {/* Lazy Favorite button */}
+          {(!user?._id || user?._id !== items.customerId) && (
+            <Suspense fallback={<View style={styles.heart} />}>
+              <FavoriteButton
+                item={items}
+                tuchableStyle={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                }}
+              />
+            </Suspense>
+          )}
+        </View>
+
+        {/* Content */}
+        <View style={styles.content}>
+          <Text style={[styles.price, {color: theme.colors.text}]}>
+            {formattedPrice}
+          </Text>
+
+          <Text
+            style={[styles.title, {color: theme.colors.text}]}
+            numberOfLines={2}>
+            {items.title}
+          </Text>
+
+          {/* Address */}
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <IconButton
+              iconSize={16}
+              iconColor={theme.colors.text}
+              iconName={'map-marker'}
+            />
+            <Text
+              numberOfLines={1}
+              style={[styles.subtitle, {color: theme.colors.text}]}>
+              {items.address}
+            </Text>
+          </View>
+
+          {/* Distance */}
+          {distanceText && (
+            <View style={styles.infoRow}>
+              <InfoItem
+                icon="vector-line"
+                text={distanceText}
+                color={theme.colors.text}
+              />
+            </View>
+          )}
+
+          {/* Date */}
           <Text
             numberOfLines={1}
             style={[styles.subtitle, {color: theme.colors.text}]}>
-            {items.address}
+            {formattedDate}
           </Text>
         </View>
-
-        <View style={styles.infoRow}>
-          {items?.distance ? (
-            <View style={styles.infoItem}>
-              <IconButton
-                iconSize={16}
-                iconColor={theme.colors.text}
-                iconName={'vector-line'}
-              />
-              <Text style={styles.infoText}>
-                {items?.distance < 1000
-                  ? (items?.distance).toFixed(2) + ' m'
-                  : (items?.distance * 0.001).toFixed(2) + ' km'}
-              </Text>
-            </View>
-          ) : (
-            <></>
-          )}
-        </View>
-        <Text
-          numberOfLines={1}
-          style={[styles.subtitle, {color: theme.colors.text}]}>
-          {new Date(items?.createdAt).toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'long',
-          })}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-});
+      </TouchableOpacity>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   card: {
     left: Platform.OS === 'android' ? 2 : 0,
     width: '47%',
-    // height: 234,
     backgroundColor: '#fff',
     borderRadius: 12,
     overflow: 'hidden',
@@ -148,11 +198,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     zIndex: 10,
   },
-  badgeText: {
-    fontSize: 12,
-    color: '#fff',
-    fontWeight: '600',
-  },
   imageWrapper: {
     position: 'relative',
     width: '100%',
@@ -168,6 +213,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     right: 4,
+    width: 28,
+    height: 28,
   },
   content: {
     padding: 5,
@@ -175,11 +222,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontFamily: Fonts.MEDIUM,
-    lineHeight: 24,
+    lineHeight: 20,
   },
   subtitle: {
     fontSize: 12,
-    color: '#777',
     marginVertical: 2,
     maxWidth: 150,
   },
@@ -195,7 +241,6 @@ const styles = StyleSheet.create({
   infoText: {
     marginLeft: 4,
     fontSize: 12,
-    color: '#666',
     fontFamily: Fonts.REGULAR,
     fontWeight: '400',
   },

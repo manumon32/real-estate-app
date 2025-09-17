@@ -1,4 +1,9 @@
 import RazorpayCheckout, {CheckoutOptions} from 'react-native-razorpay';
+import { PaymentRequest } from '@rnw-community/react-native-payments';
+// @ts-ignore
+import { PaymentMethodNameEnum, SupportedNetworkEnum } from '@rnw-community/react-native-payments/src';
+
+
 import axios from 'axios';
 import {usePaymentStore} from '../../stores/paymentSlice';
 import {createOrder, updateOrder} from '@api/services';
@@ -115,4 +120,73 @@ export function startCheckoutPromise(params: any): Promise<void> {
         throw err; // bubble so caller can retry / log
       })
   );
+}
+
+export async function payWithApplePay() {
+  const methodData = [
+  {
+    supportedMethods: [PaymentMethodNameEnum.ApplePay],
+    data: {
+      merchantIdentifier: 'merchant.com.yourapp.id',      // your merchant ID
+      supportedNetworks: [SupportedNetworkEnum.Visa, SupportedNetworkEnum.Mastercard],
+      countryCode: 'IN',       // your country ISO
+      currencyCode: 'INR',      // currency you charge in
+      // optional: you can also provide applicationData (metadata)
+      // applicationData: JSON.stringify({ orderId: '12345' }),
+    }
+  }
+];
+
+const details = {
+  id: 'order-001',   // unique order id
+  displayItems: [
+    {
+      label: 'Item A',
+      amount: { currency: 'INR', value: '10.00' }
+    },
+  ],
+  total: {
+    label: 'Hotplotz',
+    amount: { currency: 'INR', value: '12.00' }
+  }
+};
+  try {
+    // @ts-ignore
+    const paymentRequest = new PaymentRequest(methodData, details);
+
+    // Check if Apple Pay is possible/enabled
+    const isCapable = await paymentRequest.canMakePayment();
+    if (!isCapable) {
+      console.log('Apple Pay is not available on this device/configuration');
+      return;
+    }
+
+    // Show payment sheet
+    const paymentResponse = await paymentRequest.show();
+
+    // At this point user has authorized, you have token etc:
+    // const { applePayToken, transactionIdentifier } = paymentResponse.details;
+    console.log(paymentResponse.details)
+    // There may also be payer info etc if requested.
+
+    // Send the `applePayToken` (and perhaps other details) to your backend to process with your payment gateway
+    // await sendTokenToBackend(applePayToken, {
+    //   transactionIdentifier,
+    //   displayItems: details.displayItems,
+    //   total: details.total,
+    //   orderId: details.id,
+    // });
+
+    // Once backend confirms, complete the sheet
+    // paymentResponse.complete(PaymentComplete.Success);
+
+    // any UI / state updates
+    console.log('Payment successful');
+
+  } catch (err) {
+    console.log('Payment failed or cancelled', err);
+    // If needed complete failure
+    // If paymentResponse exists:
+    // paymentResponse.complete(PaymentComplete.Fail);
+  }
 }

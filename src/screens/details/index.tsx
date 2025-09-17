@@ -38,6 +38,7 @@ import BankSelectModal from '@components/Modal/BankListModal';
 import {navigate} from '@navigation/RootNavigation';
 import CustomDummyLoader from '@components/SkeltonLoader/CustomDummyLoader';
 import DateTimeModal from '@components/Modal/DateTimeModal';
+import SimilarAds from './SimilarAds';
 
 const AdStatusEnum: any = {
   pending: 'Pending',
@@ -66,6 +67,7 @@ const PropertyDetails = React.memo(() => {
     reportAd,
     token,
     clientId,
+    location,
     bearerToken,
     setChatRoomId,
     setVisible,
@@ -1207,22 +1209,26 @@ const PropertyDetails = React.memo(() => {
             />
           </>
         )}
-        {/* <View style={styles.additionalDetailsContainer}>
-          <Text style={styles.heading}>Similar Products</Text>
-          <FlatList
-            data={products}
-            renderItem={renderAdItem}
-            keyExtractor={item => item.id}
-            numColumns={2}
-            centerContent={true}
-            // eslint-disable-next-line react-native/no-inline-styles
-            contentContainerStyle={{
-              top: 20,
-              backgroundColor: theme.colors.backgroundHome,
-            }}
-            showsVerticalScrollIndicator={false}
-          />
-        </View> */}
+        {property?.listingTypeId?._id || property?.propertyTypeId?._id ? (<>
+
+
+            <Text style={[styles.section, sectionColor]}>
+              Similar Ads
+            </Text>
+          <View
+            style={[
+              {backgroundColor: theme.colors.background},
+            ]}>
+            <SimilarAds
+              token={token}
+              clientId={clientId}
+              listingTypeId={property?.listingTypeId?._id}
+              propertyTypeId={property?.propertyTypeId?._id}
+              location={location}
+              propertyId={details?._id}
+            />
+          </View>
+       </> ) : null}
         <ReportAdModal
           visible={isReportVisible}
           onClose={() => setIsReportVisible(false)}
