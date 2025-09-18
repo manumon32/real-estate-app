@@ -10,6 +10,7 @@ import {
   ToastAndroid,
   AppState,
   Linking,
+  Dimensions,
 } from 'react-native';
 import {
   getMessaging,
@@ -68,11 +69,16 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   const prevFiltersRef = useRef<any>(null);
   const backPressedOnce = useRef(false);
+  const screenHeight = Dimensions.get('window').height;
+
 
   /** Load more with useCallback to avoid re-creating on each render */
   const loadMore = useCallback(() => {
-    if (loading || !hasMore) return;
-    fetchListings();
+    console.log('values', 'loadMore', loading, hasMore);
+    if (loading || !hasMore) {
+      return;
+    }
+    fetchData();
   }, [loading, hasMore]);
 
   /** Double back press exit with useCallback */
@@ -123,12 +129,17 @@ function HomeScreen({navigation}: any): React.JSX.Element {
 
   /** Refresh listings when triggered */
   useEffect(() => {
-    if (triggerRefresh) fetchListings();
+    if (triggerRefresh) {
+      fetchData();
+    }
   }, [triggerRefresh]);
 
   /** Fetch data once */
   const fetchData = useCallback(() => {
-    if (!loading) fetchListings();
+    console.log('values', 'renderd');
+    if (!loading) {
+      fetchListings();
+    }
   }, [loading]);
 
   /** Handle location changes */
@@ -140,11 +151,15 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     ) {
       setTriggerRelaod();
       setTimeout(() => {
-        if (!loading) fetchListings();
+        if (!loading) {
+          fetchData();
+        }
       }, 100);
     }
     prevFiltersRef.current = location;
-    if (!loading) fetchData();
+    if (!loading) {
+      fetchData();
+    }
   }, [location]);
 
   /** Handle app state changes */
@@ -184,7 +199,9 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   useEffect(() => {
     const sub = Linking.addEventListener('url', handleDeepLink);
     Linking.getInitialURL().then(url => {
-      if (url) handleDeepLink({url});
+      if (url) {
+        handleDeepLink({url});
+      }
     });
     return () => sub.remove();
   }, [handleDeepLink]);
@@ -211,14 +228,18 @@ function HomeScreen({navigation}: any): React.JSX.Element {
       messaging,
       remoteMessage => {
         const data = remoteMessage?.data;
-        if (data) navigateByNotification(data as any as INotification);
+        if (data) {
+          navigateByNotification(data as any as INotification);
+        }
       },
     );
 
     getInitialNotification(messaging).then(remoteMessage => {
       if (remoteMessage) {
         const data = remoteMessage?.data;
-        if (data) navigateByNotification(data as any as INotification);
+        if (data) {
+          navigateByNotification(data as any as INotification);
+        }
       }
     });
 
@@ -255,6 +276,7 @@ function HomeScreen({navigation}: any): React.JSX.Element {
       />
     );
   }, []);
+  console.log('values', hasMore, loading);
 
   return (
     <SafeAreaView style={{backgroundColor: theme.colors.homepageSafeArea}}>
@@ -278,6 +300,13 @@ function HomeScreen({navigation}: any): React.JSX.Element {
         onEndReached={loadMore}
         refreshControl={refreshControl}
         ListFooterComponent={ListFooter}
+        onContentSizeChange={(w, h) => {
+          console.log('values', 'ividea')
+          // If list shorter than screen and hasMore, load more
+          if (h < screenHeight && hasMore && !loading) {
+            loadMore();
+          }
+        }}
       />
     </SafeAreaView>
   );

@@ -565,7 +565,7 @@ const PropertyDetails = React.memo(() => {
                       (item: any, index: number) =>
                         item.status === 'verified' && (
                           <View key={index} style={styles.bankBadge}>
-                            {item.bankId.name ? (
+                            {item?.bankId?.name ? (
                               <Image
                                 source={{
                                   uri: item.bankId.logoUrl,
@@ -793,15 +793,8 @@ const PropertyDetails = React.memo(() => {
                     onPress={() => {}}
                   />
                 )}
-                {property?.facingDirectionId && (
-                  <Button
-                    style={{margin: 5}}
-                    label={'Facing Direction - ' + property?.facingDirectionId}
-                    onPress={() => {}}
-                  />
-                )}
 
-                {property?.bachelersAllowed && (
+                {property?.bachelorsAllowed && (
                   <Button
                     style={{margin: 5}}
                     label={'Bachelors allowed'}
@@ -957,6 +950,14 @@ const PropertyDetails = React.memo(() => {
                     styles.additionalDetailsContainer,
                     {backgroundColor: theme.colors.background},
                   ]}>
+                  {property?.propertyTypeId?.name && (
+                    <View style={styles.adittionalDetailsRow}>
+                      <Text style={[styles.label, sectionColor]}>{'Type'}</Text>
+                      <Text style={[styles.value, sectionColor]}>
+                        {property?.propertyTypeId?.name}
+                      </Text>
+                    </View>
+                  )}
                   {property?.ownershipTypeId?.name && (
                     <View style={styles.adittionalDetailsRow}>
                       <Text style={[styles.label, sectionColor]}>
@@ -1035,18 +1036,20 @@ const PropertyDetails = React.memo(() => {
                       </Text>
                     </View>
                   )}
+                  {property?.listedById?.name && (
+                    <View style={styles.adittionalDetailsRow}>
+                      <Text style={[styles.label, sectionColor]}>
+                        {'Listed By'}
+                      </Text>
+                      <Text style={[styles.value, sectionColor]}>
+                        {property?.listedById?.name}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </>
             }
 
-            {property?.amenityIds && property?.amenityIds?.length > 0 && (
-              <>
-                <Text style={[styles.section, sectionColor]}>Amenities</Text>
-                <View style={styles.amenities}>
-                  {property?.amenityIds?.map(renderAmenity)}
-                </View>
-              </>
-            )}
 
             <View
               style={{
@@ -1057,6 +1060,14 @@ const PropertyDetails = React.memo(() => {
                 top: 15,
               }}
             />
+            {property?.amenityIds && property?.amenityIds?.length > 0 && (
+              <>
+                <Text style={[styles.section, sectionColor]}>Amenities</Text>
+                <View style={styles.amenities}>
+                  {property?.amenityIds?.map(renderAmenity)}
+                </View>
+              </>
+            )}
 
             <View
               style={{
@@ -1209,26 +1220,21 @@ const PropertyDetails = React.memo(() => {
             />
           </>
         )}
-        {property?.listingTypeId?._id || property?.propertyTypeId?._id ? (<>
-
-
-            <Text style={[styles.section, sectionColor]}>
-              Similar Ads
-            </Text>
-          <View
-            style={[
-              {backgroundColor: theme.colors.background},
-            ]}>
-            <SimilarAds
-              token={token}
-              clientId={clientId}
-              listingTypeId={property?.listingTypeId?._id}
-              propertyTypeId={property?.propertyTypeId?._id}
-              location={location}
-              propertyId={details?._id}
-            />
-          </View>
-       </> ) : null}
+        {property?.listingTypeId?._id || property?.propertyTypeId?._id ? (
+          <>
+            <Text style={[styles.section, sectionColor, {marginBottom:10}]}>Similar Ads</Text>
+            <View style={[{backgroundColor: theme.colors.backgroundHome, paddingBottom:10}]}>
+              <SimilarAds
+                token={token}
+                clientId={clientId}
+                listingTypeId={property?.listingTypeId?._id}
+                propertyTypeId={property?.propertyTypeId?._id}
+                location={location}
+                propertyId={details?._id}
+              />
+            </View>
+          </>
+        ) : null}
         <ReportAdModal
           visible={isReportVisible}
           onClose={() => setIsReportVisible(false)}
@@ -1389,7 +1395,7 @@ const styles = StyleSheet.create({
 
   additionalDetailsContainer: {
     backgroundColor: '#fff',
-    padding: 16,
+    paddingHorizontal: 16,
   },
   heading: {
     fontSize: 16,

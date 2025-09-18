@@ -26,7 +26,7 @@ export interface ListingsSlice {
 }
 
 export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
-  listings: [],
+  listings: get()?.listings || [],
   page: 0,
   hasMore: false,
   loading: false,
@@ -35,7 +35,10 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchListings: async () => {
-    set({loading: true, triggerRefresh: false});
+    set({
+      loading: true,
+      triggerRefresh: false,
+    });
     let filters: any = {
       pageNum: get().page + 1,
       pageSize: 6,

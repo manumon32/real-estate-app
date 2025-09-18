@@ -15,9 +15,10 @@ export interface Detail {
   superBuiltAreaUnitId: any | null;
   furnishingStatusId: any;
   facingDirectionId: NamedEntity;
+  listedById: NamedEntity;
   ownershipTypeId: NamedEntity;
   availabilityStatusId: NamedEntity;
-  bachelersAllowed: boolean;
+  bachelorsAllowed: boolean;
   amenityIds: Amenity[];
   featureIds: Feature[];
   imageUrls: string[];

@@ -29,6 +29,7 @@ import {RequestMethod} from '@api/request';
 import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
 import {useTheme} from '@theme/ThemeProvider';
 import {compressImage} from '../../helpers/ImageCompressor';
+import Toast from 'react-native-toast-message';
 
 interface FooterProps {
   currentStep: number;
@@ -114,7 +115,6 @@ const PostAdContainer = (props: any) => {
     setTouched,
     setFieldValue,
     values,
-    touched,
     fields,
     setFields,
     validateForm,
@@ -134,7 +134,6 @@ const PostAdContainer = (props: any) => {
     token,
     clientId,
     bearerToken,
-    location,
     locationForAdpost,
     floorPlans,
     managePlansList,
@@ -255,7 +254,7 @@ const PostAdContainer = (props: any) => {
     prevCountRef.current = currentStep;
 
     // Check if current step has any errors
-      // @ts-ignore
+    // @ts-ignore
     const hasErrors = requiredFields[currentStep]?.some(
       (field: any) => !!validationErrors[field],
     );
@@ -342,7 +341,16 @@ const PostAdContainer = (props: any) => {
   };
 
   const submitPostAd = useCallback(async () => {
-    if (Object.keys(errors).length > 0 || images.length === 0) return;
+    if (Object.keys(errors).length > 0 || images.length === 0) {
+      if (images.length === 0) {
+        Toast.show({
+          type: 'error',
+          text1: 'You need to choose at least one image to continue. ',
+          position: 'bottom',
+        });
+      }
+      return;
+    }
 
     setLoading(true);
 
@@ -394,11 +402,11 @@ const PostAdContainer = (props: any) => {
       // Merge location data
       const finalLocation = {
         latitude: locationForAdpost.lat,
-        longitude: locationForAdpost.lng ,
+        longitude: locationForAdpost.lng,
         address: locationForAdpost.name,
-        state: locationForAdpost.state ,
-        country: locationForAdpost.country ,
-        district: locationForAdpost.district ,
+        state: locationForAdpost.state,
+        country: locationForAdpost.country,
+        district: locationForAdpost.district,
         city: locationForAdpost.city,
       };
 
@@ -456,7 +464,28 @@ const PostAdContainer = (props: any) => {
     } finally {
       setLoading(false);
     }
-  }, [errors, images, floorPlans, token, clientId, bearerToken, locationForAdpost.lat, locationForAdpost.lng, locationForAdpost.name, locationForAdpost.state, locationForAdpost.country, locationForAdpost.district, locationForAdpost.city, values, setImages, setFloorPlans, setFields, managePlansList, user.phone, user.email]);
+  }, [
+    errors,
+    images,
+    floorPlans,
+    token,
+    clientId,
+    bearerToken,
+    locationForAdpost.lat,
+    locationForAdpost.lng,
+    locationForAdpost.name,
+    locationForAdpost.state,
+    locationForAdpost.country,
+    locationForAdpost.district,
+    locationForAdpost.city,
+    values,
+    setImages,
+    setFloorPlans,
+    setFields,
+    managePlansList,
+    user.phone,
+    user.email,
+  ]);
 
   useEffect(() => {
     fetchPlans();

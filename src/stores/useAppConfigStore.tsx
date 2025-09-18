@@ -16,6 +16,7 @@ export interface ConfigState {
   areaUnits: ConfigItem[];
   availabilityStatuses: ConfigItem[];
   facingDirections: ConfigItem[];
+  listedBy: ConfigItem[];
   features: ConfigItem[];
   furnishingStatuses: ConfigItem[];
   listingTypes: ConfigItem[];

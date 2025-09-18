@@ -91,7 +91,7 @@ const useBoundStore = create<StoreState>()(
           managePlansList: state.managePlansList,
           chatList: state.chatList,
           chatDetails: state.chatDetails,
-          listings: state.listings,
+          // listings: state.listings,
         }),
         onRehydrateStorage: () => state => {
           console.log('🔄 Rehydrated Zustand state:', state);

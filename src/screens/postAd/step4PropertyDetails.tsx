@@ -6,6 +6,7 @@ import CommonStepperInput from '@components/Input/stepperInput';
 import useBoundStore from '@stores/index';
 import {CommonMultiSelect} from '@components/Input/CommonMultiSelect';
 import { useTheme } from '@theme/ThemeProvider';
+import CommonAmenityToggle from '@components/Input/amenityToggle';
 
 const Step4PropertyDetails = (props: any) => {
   // const amenityOptions = [
@@ -87,6 +88,17 @@ const Step4PropertyDetails = (props: any) => {
             showSelectAll
           />
         </>
+        {isStringInEitherArray('bachelorsAllowed') && (
+          <View style={styles.inputContainer}>
+            <CommonAmenityToggle
+              label="Bachelor's Allowed"
+              selected={values.bachelorsAllowed}
+              onToggle={() =>
+                setFieldValue('bachelorsAllowed', !values.bachelorsAllowed)
+              }
+            />
+          </View>
+        )}
       {/* )} */}
       {/* <View style={styles.inputContainer}>
         <CommonAmenityToggle

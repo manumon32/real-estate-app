@@ -4,7 +4,7 @@ import TextInput from '@components/Input/textInput';
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
 import useBoundStore from '@stores/index';
-import { useTheme } from '@theme/ThemeProvider';
+import {useTheme} from '@theme/ThemeProvider';
 // import {RenderChips, useChipScrollRefs} from '@components/RenderChips';
 
 const Step1BasicInfo = (props: any) => {
@@ -28,6 +28,7 @@ const Step1BasicInfo = (props: any) => {
   const FURNISHING_STATS = appConfigs?.furnishingStatuses || [];
   const OWNERSHIP_TYPE = appConfigs?.ownershipTypes || [];
   const FACING_DIRECTION = appConfigs?.facingDirections || [];
+  const LISTED_BY = appConfigs?.listedBy || [];
   const AVAILABILITY_STATS = appConfigs?.availabilityStatuses || [];
   const BEDROOMS = [
     {name: '1 BHK', _id: '1', filterName: 'numberOfBedrooms'},
@@ -59,10 +60,11 @@ const Step1BasicInfo = (props: any) => {
   useEffect(() => {
     // scrollToIndex();
   }, []);
-  console.log(isStringInEitherArray('furnishedStatus'))
 
   return (
-    <SlideInView direction={currentStep == null ? 'right' : 'left'} keyboardShouldPersistTaps={'handled'}>
+    <SlideInView
+      direction={currentStep == null ? 'right' : 'left'}
+      keyboardShouldPersistTaps={'handled'}>
       <>
         {/* <Text style={styles.headingText}>Basic Details</Text> */}
         <View style={styles.inputContainer}>
@@ -85,7 +87,7 @@ const Step1BasicInfo = (props: any) => {
           <Text
             style={[
               styles.label,
-               {color: theme.colors.text},
+              {color: theme.colors.text},
               touched?.listingTypeId && errors?.listingTypeId && {color: 'red'},
             ]}>
             Subtype*
@@ -96,36 +98,43 @@ const Step1BasicInfo = (props: any) => {
             <Text style={styles.error}>{errors?.listingTypeId}</Text>
           )}
         </View>
-
-        <View style={styles.inputContainer}>
-          {isStringInEitherArray('furnishedStatus') && (
+        {OWNERSHIP_TYPE.length > 0 && (
+          <View style={styles.inputContainer}>
+            {/* {isStringInEitherArray('ownershipTypeId') && ( */}
             <>
-              <Text style={[styles.label, {color: theme.colors.text}]}>Furnishing Status</Text>
-              {renderChips(FURNISHING_STATS)}
-            </>
-          )}
-        </View>
-
-        <View style={styles.inputContainer}>
-          {/* {isStringInEitherArray('ownershipTypeId') && ( */}
-            <>
-              <Text style={[styles.label, {color: theme.colors.text}]}>Ownership Type</Text>
+              <Text style={[styles.label, {color: theme.colors.text}]}>
+                Ownership Type
+              </Text>
               {renderChips(OWNERSHIP_TYPE)}
             </>
-          {/* )} */}
-        </View>
+            {/* )} */}
+          </View>
+        )}
+        {isStringInEitherArray('furnishedStatus') &&
+          FURNISHING_STATS.length > 0 && (
+            <View style={styles.inputContainer}>
+              <Text style={[styles.label, {color: theme.colors.text}]}>
+                Furnishing Status
+              </Text>
+              {renderChips(FURNISHING_STATS)}
+            </View>
+          )}
 
-        
+        {AVAILABILITY_STATS.length > 0 && (
+          <View style={styles.inputContainer}>
+            <Text style={[styles.label, {color: theme.colors.text}]}>
+              Availability Status
+            </Text>
 
-        <View style={styles.inputContainer}>
-          <Text style={[styles.label, {color: theme.colors.text}]}>Availability Status</Text>
-
-          {renderChips(AVAILABILITY_STATS)}
-        </View>
+            {renderChips(AVAILABILITY_STATS)}
+          </View>
+        )}
 
         {isStringInEitherArray('bedroom') && (
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, {color: theme.colors.text}]}>Bedrooms</Text>
+            <Text style={[styles.label, {color: theme.colors.text}]}>
+              Bedrooms
+            </Text>
             {renderChips(BEDROOMS)}
             {/* <RenderChips
           data={BEDROOMS}
@@ -139,21 +148,37 @@ const Step1BasicInfo = (props: any) => {
         )}
         {isStringInEitherArray('bathrooom') && (
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, {color: theme.colors.text}]}>Bathrooms</Text>
+            <Text style={[styles.label, {color: theme.colors.text}]}>
+              Bathrooms
+            </Text>
             {renderChips(BATHROOMS)}
           </View>
         )}
 
-
-
-        <View style={styles.inputContainer}>
-          {/* {isStringInEitherArray('ownershipTypeId') && ( */}
+        {FACING_DIRECTION.length > 0 && (
+          <View style={styles.inputContainer}>
+            {/* {isStringInEitherArray('ownershipTypeId') && ( */}
             <>
-              <Text style={[styles.label, {color: theme.colors.text}]}>Facing</Text>
+              <Text style={[styles.label, {color: theme.colors.text}]}>
+                Facing
+              </Text>
               {renderChips(FACING_DIRECTION)}
             </>
-          {/* )} */}
-        </View>
+            {/* )} */}
+          </View>
+        )}
+        {LISTED_BY.length > 0 && (
+          <View style={styles.inputContainer}>
+            {/* {isStringInEitherArray('ownershipTypeId') && ( */}
+            <>
+              <Text style={[styles.label, {color: theme.colors.text}]}>
+                Listed By
+              </Text>
+              {renderChips(LISTED_BY)}
+            </>
+            {/* )} */}
+          </View>
+        )}
 
         <View style={styles.inputContainer}>
           <Text style={[styles.label, {color: theme.colors.text}]}>Title*</Text>
