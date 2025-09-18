@@ -11,12 +11,23 @@ import useBoundStore from '@stores/index';
 function SearchContent(): React.JSX.Element {
   const [visible, setVisibles] = useState(false);
   const navigation = useNavigation();
-  const {clearFilterList, bearerToken, setVisible, setGlobalModalVisible} = useBoundStore();
+  const {
+    clearFilterList,
+    bearerToken,
+    setVisible,
+    setGlobalModalVisible,
+    resetFilters,
+  } = useBoundStore();
   return (
     <>
       <View style={styles.container}>
         <TouchableOpacity
-          onPress={() => setGlobalModalVisible()}
+          onPress={() => {
+            resetFilters();
+            setTimeout(() => {
+              setGlobalModalVisible();
+            }, 100);
+          }}
           style={styles.searchicon}>
           <SearchBar
             onChangeText={text => console.log(text)}
@@ -70,8 +81,8 @@ function SearchContent(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    paddingLeft:16,
-    paddingRight:16,
+    paddingLeft: 16,
+    paddingRight: 16,
     padding: 10,
   },
   searchicon: {width: '70%', zIndex: 10, opacity: 10},

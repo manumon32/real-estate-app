@@ -11,6 +11,8 @@ import {
   Linking,
 } from 'react-native';
 import Share from 'react-native-share';
+import RNFS from 'react-native-fs';
+import RNFetchBlob from 'rn-fetch-blob';
 import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
 import {useNavigation} from '@react-navigation/native';
@@ -42,25 +44,45 @@ function Header(props: any): React.JSX.Element {
     setModalVisible(true);
   }, []);
 
-  const shareProperty = async (details: any) => {
-    try {
-      const link = `https://hotplotz.com/details/${details._id}`;
+const shareProperty = async (details: any) => {
+  try {
+    const link = `https://hotplotz.com/details/${details._id}`;
+    const message = `I found this on Hotplotz: ${details.title}\n\nCheck out this property 👇\n${link}`;
 
-      const message = `I found this on Hotplotz: ${details.title}\n\nCheck out this property 👇\n${link}`;
+    let imagePath: string | undefined;
 
-      const shareOptions = {
-        title: 'Hotplotz',
-        message,
-        urls: [
-          details?.imageUrls?.[0], // first image from array
-        ],
-      };
+    if (details?.imageUrls?.[0]) {
+      // ✅ Save into cache dir, not app-private dir
+      const destPath = `${RNFS.CachesDirectoryPath}/hotplotz_${Date.now()}.jpg`;
 
-      await Share.open(shareOptions);
-    } catch (error) {
-      console.log('Share Error =>', error);
+      const download = await RNFS.downloadFile({
+        fromUrl: details.imageUrls[0],
+        toFile: destPath,
+      }).promise;
+
+      if (download.statusCode === 200) {
+        imagePath = `file://${destPath}`;
+      }
     }
-  };
+
+    const shareOptions: any = {
+      title: 'Hotplotz',
+      message,
+      failOnCancel: false,
+    };
+
+    if (imagePath) {
+      shareOptions.urls = [imagePath]; // ✅ use array
+      shareOptions.type = 'image/jpeg';
+    }
+
+    console.log('Final shareOptions =>', shareOptions);
+
+    await Share.open(shareOptions);
+  } catch (error) {
+    console.log('Share Error =>', error);
+  }
+};
 
   const renderItem = useCallback(
     ({item}: {item: string; index: number}) => (

@@ -55,7 +55,7 @@ export const createFilterListingsSlice = (
 
     if (get().location) {
       const {city, district, state, country, lat, lng} = get().location;
-      // console.log(city, district, state, country, lat, lng)
+      console.log(city, district, state, country, lat, lng)
 
       if (city || district) {
         filters = {

@@ -16,10 +16,20 @@ export interface LocationSlice {
   location: any;
   locationHistory: [];
   setLocation: (updates: Partial<any>) => void;
+  setLocatioForAdPost: (updates: Partial<any>) => void;
   resetLocation: () => void;
 }
 
-const defaultLocation: any = {};
+const defaultLocation: any = {
+  name: 'India',
+  lat: 20.593684,
+  lng: 78.96288,
+  city: null,
+  district: null,
+  state: null,
+  country: 'India',
+  default:true
+};
 const getKey = (obj: any) => JSON.stringify(obj);
 
 const uniqueObjects = (arr: any[]) => {
@@ -56,6 +66,12 @@ export const createLocationSlice = (set: any, get: any): LocationSlice => ({
         adPostModal: false,
       }));
     }
+  },
+  setLocatioForAdPost: updates => {
+    set(() => ({
+      locationForAdpost: updates,
+      adPostModal: false,
+    }));
   },
   setlocationModalVisible: () =>
     set((state: any) => ({

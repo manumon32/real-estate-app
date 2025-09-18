@@ -180,7 +180,9 @@ function App(): React.JSX.Element {
 
   useEffect(() => {
     setSearchText(filters?.searchText ?? 'Search');
+    // setSort(false);
   }, [filters]);
+
 
   const FilterView = useCallback(() => {
     return (

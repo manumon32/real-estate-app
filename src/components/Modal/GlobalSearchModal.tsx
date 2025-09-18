@@ -17,6 +17,8 @@ import Geolocation from '@react-native-community/geolocation';
 import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Fonts} from '@constants/font';
+import {getCurrentRouteName} from '@navigation/RootNavigation';
+
 import {
   check,
   request,
@@ -51,12 +53,13 @@ const GlobalSearchModal: React.FC<Props> = ({
 }) => {
   const {
     location,
-    setFilters,
     filters,
+    setFilters,
     resetFilters,
     clearFilterList,
     filter_suggestions,
   } = useBoundStore();
+  const currentScreen = getCurrentRouteName();
   const [query, setQuery] = useState(location?.name ?? '');
   const navigation = useNavigation();
   const [predictions, setPredictions] = useState<any[]>([]);
@@ -87,10 +90,6 @@ const GlobalSearchModal: React.FC<Props> = ({
       console.error('Prediction fetch failed', err);
     }
   }, []);
-
-  useEffect(() => {
-    setFilterBy(filters?.searchText ?? '');
-  }, [filters]);
 
   const checkAndRequestPermission = async () => {
     const permission =
@@ -186,6 +185,11 @@ const GlobalSearchModal: React.FC<Props> = ({
     }
   };
 
+  useEffect(() => {
+    console.log('currentScreen', currentScreen);
+    setFilterBy(currentScreen === 'Home' ? '' : filters?.searchText ?? '');
+  }, [filters]);
+
   React.useEffect(() => {
     checkAndRequestPermission();
   }, []);
@@ -200,7 +204,7 @@ const GlobalSearchModal: React.FC<Props> = ({
   };
 
   const setLocation = (updatelocation: any) => {
-    if ((!visible && !location?.lat) || visible) {
+    if ((!visible && location?.default) || visible) {
       onSelectLocation(updatelocation);
     }
     setCurrentLocation(updatelocation);
@@ -249,6 +253,7 @@ const GlobalSearchModal: React.FC<Props> = ({
             country_name = country.long_name;
           }
         }
+        console.log('locationslocationslocationslocationslocations', locations);
         setLocation({
           name: name,
           lat: locations.lat,
@@ -317,6 +322,7 @@ const GlobalSearchModal: React.FC<Props> = ({
         : {search: menu ? arg.label : arg, searchText: menu ? arg.label : arg};
     }
     setFilters(payload);
+    // setFilterBy('');
     // @ts-ignore
     navigation.navigate('filter');
   };

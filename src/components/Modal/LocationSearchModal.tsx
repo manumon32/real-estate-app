@@ -190,7 +190,7 @@ const CommonLocationModal: React.FC<Props> = ({
   };
 
   const setLocation = (updatelocation: any) => {
-    if ((!visible && !location?.lat) || visible) {
+    if ((!visible && location?.default) || visible) {
       onSelectLocation(updatelocation);
     }
     setCurrentLocation(updatelocation);
@@ -243,7 +243,7 @@ const CommonLocationModal: React.FC<Props> = ({
           name: name,
           lat: locations.lat,
           lng: locations.lng,
-          city: city_name,
+          city: city_name,  
           district: district_name,
           state: state_name,
           country: country_name,
@@ -253,7 +253,7 @@ const CommonLocationModal: React.FC<Props> = ({
         setLoading(false);
       },
       () => {
-        // Alert.alert('Lat Long fetch failed');
+        Alert.alert('Lat Long fetch failed');
         setLoading(false);
       },
       {

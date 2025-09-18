@@ -17,6 +17,7 @@ const PostAd = () => {
   const items = route?.params?.items || null;
   const {
     locationForAdpost,
+    location,
     token,
     clientId,
     setPostAd,
@@ -25,6 +26,7 @@ const PostAd = () => {
     fetchPlans,
     setLocation,
     setadPostModal,
+    setLocatioForAdPost,
   } = useBoundStore();
   const [loading, setLoading] = useState(false);
   const [fields, setFields] = useState<{}>({});
@@ -146,8 +148,18 @@ const PostAd = () => {
   }, []);
 
   useEffect(() => {
+    console.log('location', location);
     if (items && items._id) {
       fetchDetails();
+    } else {
+      setInitialValues({
+        ...initialValues,
+        city: location?.city,
+        country: location?.country,
+        district: location?.district,
+        state: location?.state,
+      });
+      setLocatioForAdPost(location);
     }
     fetchPlans();
     // eslint-disable-next-line react-hooks/exhaustive-deps

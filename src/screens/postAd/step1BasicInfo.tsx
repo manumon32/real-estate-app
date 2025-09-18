@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useEffect} from 'react';
 import {StyleSheet, View, Text} from 'react-native';
 import TextInput from '@components/Input/textInput';
@@ -35,7 +36,7 @@ const Step1BasicInfo = (props: any) => {
     {name: '2 BHK', _id: '2', filterName: 'numberOfBedrooms'},
     {name: '3 BHK', _id: '3', filterName: 'numberOfBedrooms'},
     {name: '4 BHK', _id: '4', filterName: 'numberOfBedrooms'},
-    {name: '4+ BHK', _id: '4%2B', filterName: 'numberOfBedrooms'},
+    {name: '4+ BHK', _id: '5', filterName: 'numberOfBedrooms'},
     // {name: '4+ BHK', _id: '6', filterName: 'numberOfBedrooms'},
     // {name: '4+ BHK', _id: '7', filterName: 'numberOfBedrooms'},
     // {name: '4+ BHK', _id: '8', filterName: 'numberOfBedrooms'},
@@ -45,7 +46,7 @@ const Step1BasicInfo = (props: any) => {
     {name: '2', _id: '2', filterName: 'numberOfBathrooms'},
     {name: '3', _id: '3', filterName: 'numberOfBathrooms'},
     {name: '4', _id: '4', filterName: 'numberOfBathrooms'},
-    {name: '4+', _id: '4%2B', filterName: 'numberOfBathrooms'},
+    {name: '4+', _id: '5', filterName: 'numberOfBathrooms'},
   ];
 
   // const scrollRefs = useRef<ScrollView[]>([]);
@@ -181,7 +182,16 @@ const Step1BasicInfo = (props: any) => {
         )}
 
         <View style={styles.inputContainer}>
-          <Text style={[styles.label, {color: theme.colors.text}]}>Title*</Text>
+          <Text
+            style={[
+              styles.label,
+              {
+                color:
+                  touched?.title && errors?.title ? 'red' : theme.colors.text,
+              },
+            ]}>
+            Title*
+          </Text>
           {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
           <TextInput
             placeholder="Property Title"
@@ -195,7 +205,16 @@ const Step1BasicInfo = (props: any) => {
           )}
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Additional information*</Text>
+          <Text
+            style={[
+              styles.label,
+              {
+                color:
+                  touched?.description && errors?.description ? 'red' : theme.colors.text,
+              },
+            ]}>
+            Additional information*
+          </Text>
           <TextInput
             onChangeText={text => setFieldValue('description', text)}
             value={values?.description}

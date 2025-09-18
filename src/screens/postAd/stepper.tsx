@@ -345,7 +345,7 @@ const PostAdContainer = (props: any) => {
       if (images.length === 0) {
         Toast.show({
           type: 'error',
-          text1: 'You need to choose at least one image to continue. ',
+          text1: 'Please select at least one image.',
           position: 'bottom',
         });
       }
@@ -460,7 +460,6 @@ const PostAdContainer = (props: any) => {
       setFields([]);
     } catch (error) {
       console.error('Post Ad Error:', error);
-      Alert.alert(JSON.stringify(error));
     } finally {
       setLoading(false);
     }

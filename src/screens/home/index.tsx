@@ -25,6 +25,7 @@ function Index({navigation}: any): React.JSX.Element {
     fetchSuggestions,
     fetchFavouriteAds,
     bearerToken,
+    fetchInitialListings,
   } = useBoundStore();
 
   const [error, setError] = useState(false);
@@ -106,11 +107,14 @@ function Index({navigation}: any): React.JSX.Element {
             if (bearerToken) {
               fetchFavouriteAds();
             }
-            Promise.allSettled([getAppConfigData(), fetchSuggestions()]);
+            Promise.allSettled([
+              getAppConfigData(),
+              fetchSuggestions(),
+            ]);
             if (deepLink) {
               handleDeepLink(deepLink);
             } else {
-              navigation.navigate('Main');
+              fetchInitialListings()
             }
           }
         } catch (err) {

@@ -50,7 +50,7 @@ export function startCheckoutPromise(params: any): Promise<void> {
         PaymentStore().setStage('CHECKOUT_SHOWN');
 
         const options: CheckoutOptions = {
-          key: 'rzp_test_IjDpxmHi7vULgK', // ← fetch from server in prod
+          key: 'rzp_test_RJ066i1Rc2I4Q3', // ← fetch from server in prod
           order_id: order.orderId,
           amount: amountPaise,
           currency: order.currency,

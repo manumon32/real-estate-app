@@ -10,7 +10,6 @@ import {
   Pressable,
   Platform,
   TextInput,
-  FlatList,
   ActivityIndicator,
 } from 'react-native';
 import IconButton from '@components/Buttons/IconButton';
@@ -42,14 +41,14 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
     {name: '2 BHK', _id: '2', filterName: 'numberOfBedrooms'},
     {name: '3 BHK', _id: '3', filterName: 'numberOfBedrooms'},
     {name: '4 BHK', _id: '4', filterName: 'numberOfBedrooms'},
-    {name: '4+ BHK', _id: '4%2B', filterName: 'numberOfBedrooms'},
+    {name: '4+ BHK', _id: '4+', filterName: 'numberOfBedrooms'},
   ];
   const BATHROOMS = [
     {name: '1', _id: '1', filterName: 'numberOfBathrooms'},
     {name: '2', _id: '2', filterName: 'numberOfBathrooms'},
     {name: '3', _id: '3', filterName: 'numberOfBathrooms'},
     {name: '4', _id: '4', filterName: 'numberOfBathrooms'},
-    {name: '4+', _id: '4%2B', filterName: 'numberOfBathrooms'},
+    {name: '4+', _id: '4+', filterName: 'numberOfBathrooms'},
   ];
 
   const updateFilter = useCallback(

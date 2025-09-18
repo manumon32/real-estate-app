@@ -33,7 +33,6 @@ function Header({navigation}: any): React.JSX.Element {
   };
 
   const isDarkMode = useColorScheme() === 'dark';
-
   return (
     <>
       <View style={[backgroundStyle]}>
