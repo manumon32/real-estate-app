@@ -12,73 +12,69 @@ import {
   TouchableOpacity,
   FlatList,
   RefreshControl,
-  ScrollView,
+  Image,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import NoChats from '@components/NoChatFound';
-// import PropertyCard from '@components/PropertyCard';
 
-interface ListingCardProps {
-  title: string;
-  price: string;
-  status: string;
-  date: string;
-  navigation: any;
-  items: any;
-  markasSold?: any;
-  theme?: any;
-}
-
-const FormattedDate = (arg: string | number | Date) => {
+const formatDate = (arg: string | number | Date) => {
   const date = new Date(arg);
-
-  const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
     month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
     hour12: true,
-  };
-
-  const FormattedDate = `${date
-    .toLocaleString('en-US', options)
-    .replace(':', '.')}`;
-  return FormattedDate;
+  });
 };
 
-const ListingCard: React.FC<ListingCardProps> = ({
-  items,
-  title = '',
-  price = 0,
-  date = '',
-  navigation,
-}) => {
+const ListingCard = ({item, theme, navigation}: any) => {
+  const plan = item?.subscriptionPlanId;
+  const property = item?.propertyId;
+
   return (
     <View
       style={[
         styles.card,
+        {
+          backgroundColor: theme.colors.background,
+          borderWidth: 1,
+          borderColor: '#fff',
+        },
       ]}>
       <TouchableOpacity
         onPress={() => {
-          // navigation.navigate('Details', {items});
+          // navigate to property or details page
+          item.status === 'active' &&
+            navigation.navigate('Details', {items: property});
         }}>
         <View style={styles.row}>
+          {/* Property Image */}
+          <Image
+            source={{
+              uri: property?.imageUrls?.[0] || 'https://via.placeholder.com/80',
+            }}
+            style={styles.image}
+          />
+
+          {/* Info */}
           <View style={styles.info}>
             <View style={styles.headerRow}>
-              <Text style={styles.title}>{title}</Text>
+              <Text style={[styles.title, {color: theme.colors.text}]}>
+                {property?.title || plan?.name}
+              </Text>
             </View>
-            <Text style={styles.price}>₹{price}</Text>
-          </View>
-        </View>
 
-        <View style={styles.metaRow}>
-          <View style={styles.metaItem}>
-            <Icon name="clock-outline" size={16} color="#888" />
-            <Text style={styles.metaText}>
-              {'Purchased on - ' + FormattedDate(date)}
+            <Text style={[styles.price, {color: theme.colors.text}]}>
+              ₹{plan?.price}
+            </Text>
+            <Text style={[styles.subText, {color: theme.colors.text}]}>
+              Featured
+            </Text>
+            <Text style={[styles.subText, {color: theme.colors.text}]}>
+              Purchased on: {formatDate(item.createdAt)}
             </Text>
           </View>
         </View>
@@ -96,88 +92,24 @@ const Transactions = () => {
     fetchTransactions();
   }, []);
 
-  const renderAdItem = useCallback(
-    (items: any) => {
-      return (
-        <ListingCard
-          title={items.item?.subscriptionPlanId?.name || ''}
-          price={items.item?.subscriptionPlanId?.price}
-          status={items.item?.status}
-          date={items.item?.createdAt}
-          navigation={navigation}
-          items={items.item}
-          theme={theme}
-        />
-      );
-    },
+  const renderItem = useCallback(
+    ({item}: any) => (
+      <ListingCard item={item} theme={theme} navigation={navigation} />
+    ),
     [navigation],
   );
 
   return (
-    <SafeAreaView style={{backgroundColor: theme.colors.background, height: '100%'}}>
-      <CommonHeader
-        title="Orders"
-        textColor="#171717"
-        // onBackPress={onBackPress}
-      />
+    <SafeAreaView style={{backgroundColor: theme.colors.background, flex: 1}}>
+      <CommonHeader title="Orders" textColor="#171717" />
+
       <FlatList
         data={transactions}
-        renderItem={renderAdItem}
-        keyboardShouldPersistTaps="handled"
+        renderItem={renderItem}
+        keyExtractor={(item: any) => item._id}
         contentContainerStyle={{
           paddingBottom: 120,
-          backgroundColor: theme.colors.backgroundHome,
-          minHeight: 900,
-          //  padding: 14,
-        }}
-        ListHeaderComponent={
-          <>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{flexDirection: 'row', padding: 10}}>
-              {/* <TouchableOpacity
-                style={[styles.chip, !filterBy && styles.chipSelected]}
-                onPress={() => {
-                  setFilterBy(null);
-                }}>
-                <Text
-                  style={[
-                    // newselected?.includes(item._id)
-                    styles.chipText,
-                    !filterBy && styles.chipTextSelected,
-                  ]}>
-                  {'All'}
-                </Text>
-              </TouchableOpacity>
-              {Object.keys(AdStatusEnum).map((items: any, index: number) => {
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.chip,
-                      filterBy === AdStatusEnum[items] && styles.chipSelected,
-                    ]}
-                    onPress={() => {
-                      setFilterBy(AdStatusEnum[items]);
-                    }}>
-                    <Text
-                      style={[
-                        // newselected?.includes(item._id)
-                        styles.chipText,
-                        filterBy === AdStatusEnum[items] &&
-                          styles.chipTextSelected,
-                      ]}>
-                      {items}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })} */}
-            </ScrollView>
-          </>
-        }
-        ListHeaderComponentStyle={{
-          padding: 0,
+          paddingTop: 10,
         }}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -186,7 +118,7 @@ const Transactions = () => {
             onRefresh={() => {
               fetchTransactions();
             }}
-            colors={['#40DABE', '#40DABE', '#227465']}
+            colors={['#40DABE', '#227465']}
           />
         }
         ListFooterComponent={
@@ -195,17 +127,15 @@ const Transactions = () => {
             {!transLoading &&
               (transactions.length <= 0 ? (
                 <NoChats
-                onExplore={() => {
-                  // @ts-ignore
-                  navigation.navigate('Main');
-                }}
-                icon="message-text-outline"
-                title="No Transactions Found"
-                buttonText={'Explore now'}
-              />
-              ) : (
-                <></>
-              ))}
+                  onExplore={() => {
+                    // @ts-ignore
+                    navigation.navigate('Main');
+                  }}
+                  icon="receipt-outline"
+                  title="No Transactions Found"
+                  buttonText={'Explore Plans'}
+                />
+              ) : null)}
           </>
         }
       />
@@ -215,22 +145,21 @@ const Transactions = () => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
     borderRadius: 16,
-    padding: 14,
-    marginVertical: 10,
+    padding: 10,
+    marginVertical: 8,
+    marginHorizontal: 10,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    marginHorizontal: 16,
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
   row: {
     flexDirection: 'row',
   },
   image: {
-    width: 70,
-    height: 70,
+    width: 80,
+    height: 80,
     borderRadius: 12,
     marginRight: 12,
   },
@@ -241,6 +170,7 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   title: {
     fontWeight: '600',
@@ -248,91 +178,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   badge: {
-    backgroundColor: '#e0f5ec',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
-    alignSelf: 'flex-start',
+    marginLeft: 8,
   },
   badgeText: {
     fontSize: 11,
-    color: '#15937c',
     fontWeight: '600',
   },
-  location: {
-    fontSize: 13,
-    color: '#888',
-  },
   price: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: 'bold',
+    marginTop: 4,
     color: '#1e1e1e',
   },
-  metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginTop: 10,
-    gap: 16,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  metaText: {
+  subText: {
     fontSize: 12,
-    color: '#888',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    marginTop: 12,
-    justifyContent: 'space-between',
-  },
-  outlinedButton: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    paddingVertical: 10,
-    marginHorizontal: 4,
-    alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  endText: {
-    textAlign: 'center',
-    color: '#888',
-    padding: 12,
-    fontStyle: 'italic',
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginRight: 5,
-    // marginBottom: 5,
-  },
-  chipSelected: {
-    backgroundColor: '#2A9D8F',
-    borderColor: '#2A9D8F',
-  },
-  chipText: {
-    color: '#333',
-  },
-  chipTextSelected: {
-    color: '#fff',
+    color: '#666',
+    marginTop: 2,
   },
 });
 

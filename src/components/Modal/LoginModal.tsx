@@ -25,10 +25,8 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { getAuth, OAuthProvider, signInWithCredential } from '@react-native-firebase/auth';
-import {getApp} from '@react-native-firebase/app';
-import appleAuth from '@invertase/react-native-apple-authentication';
-
+import auth, { AppleAuthProvider } from '@react-native-firebase/auth';
+import { appleAuth } from '@invertase/react-native-apple-authentication';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {
   AccessToken,
@@ -64,8 +62,6 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     otpLoading,
     loginErrorMessage,
   } = useBoundStore();
-  const app = getApp();
-  const auth = getAuth(app);
   const [loginVar, setLoginVar] = useState('');
   const [socialLoading, setSocialLoading] = useState(false);
 
@@ -209,28 +205,20 @@ const signInWithApple = async () => {
     if (!identityToken) {
       throw new Error('Apple Sign-In failed: No identity token returned');
     }
+    const appleCredential = AppleAuthProvider.credential(identityToken, nonce);
 
-    // ✅ Modular Apple provider
-    const provider = new OAuthProvider('apple.com');
-    const appleCredential = provider.credential({
-      idToken: identityToken,
-      rawNonce: nonce,
-    });
-
-    // ✅ Modular Firebase auth
-    const auth = getAuth(getApp());
-    const userCredential = await signInWithCredential(auth, appleCredential);
+    // ✅ Sign in with Firebase
+    const userCredential = await auth().signInWithCredential(appleCredential);
 
     if (userCredential.user?.email) {
       setUserInfo({ ...userCredential.user, socialProvider: 'apple' });
       setLoginVar(userCredential.user?.email);
-
       let payload: any = {
         email: userCredential.user?.email ?? null,
         profilePicture: userCredential.user?.photoURL ?? '',
         name: userCredential.user?.displayName ?? '',
         socialProvider: 'apple',
-        socialProviderId: 'apple.com',
+        socialProviderId: userCredential.user?.uid,
         isSocialLogin: true,
       };
       verifyOTP(payload);
@@ -242,7 +230,7 @@ const signInWithApple = async () => {
         visibilityTime: 1000,
       });
     }
-  } catch (err) {
+  } catch (err: any) {
     Toast.show({
       type: 'error',
       text1: 'Apple Sign-in failed, Email is required',

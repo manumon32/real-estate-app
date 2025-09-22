@@ -101,6 +101,7 @@ const BottomTabBar = ({state, navigation}: any) => {
                       />
                       {route.name === 'Chat' &&
                         unreadCount > 0 &&
+                        bearerToken &&
                         !isFocused && (
                           <View style={styles.badge}>
                             <Text style={styles.badgeText}>{unreadCount}</Text>
