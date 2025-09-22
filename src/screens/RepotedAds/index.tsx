@@ -13,7 +13,6 @@ import {
   TouchableOpacity,
   FlatList,
   RefreshControl,
-  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -137,9 +136,9 @@ const ReportAd = () => {
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
-          paddingBottom: 120,
+          paddingBottom: reportAdList.length > 0 ? 120 : 0,
           backgroundColor: theme.colors.backgroundHome,
-          minHeight: 800,
+          minHeight: reportAdList.length > 0 ? 800 : 0,
           //  padding: 14,
         }}
         ListHeaderComponent={
@@ -176,8 +175,10 @@ const ReportAd = () => {
                   navigation.navigate('Main');
                 }}
                 icon="message-text-outline"
-                title="No Ads Found"
-                // buttonText={'Explore now'}
+                title="Its quite here..."
+                body="Get out there to start finding great deals."
+                buttonText={'Explore now'}
+                iconName="ReportAd"
               />
             ) : (
               <></>

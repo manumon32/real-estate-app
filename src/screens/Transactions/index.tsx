@@ -73,8 +73,8 @@ const ListingCard = ({item, theme, navigation}: any) => {
             <Text style={[styles.subText, {color: theme.colors.text}]}>
               Featured
             </Text>
-            <Text style={[styles.subText, {color: theme.colors.text}]}>
-              Purchased on: {formatDate(item.createdAt)}
+            <Text style={styles.subText}>
+              Valid till: {formatDate(item.endDate)}
             </Text>
           </View>
         </View>
@@ -131,9 +131,10 @@ const Transactions = () => {
                     // @ts-ignore
                     navigation.navigate('Main');
                   }}
-                  icon="receipt-outline"
-                  title="No Transactions Found"
-                  buttonText={'Explore Plans'}
+                  icon="receipt"
+                  title="Its quite here..."
+                  body="Get out there to start finding great deals."
+                  buttonText={'Explore'}
                 />
               ) : null)}
           </>

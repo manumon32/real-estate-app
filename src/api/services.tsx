@@ -658,6 +658,7 @@ export const fetchAppointMentsAPI = async (configArg: any): Promise<any> => {
         noPagination: true,
         orderBy: 'createdAt',
         orderByDir: 'desc',
+        populate: 'propertyId',
       },
       headers,
     };

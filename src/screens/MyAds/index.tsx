@@ -406,54 +406,56 @@ const MyAds = () => {
         contentContainerStyle={{
           paddingBottom: 120,
           backgroundColor: theme.colors.background,
-          minHeight: 900,
+          minHeight: myAds.length > 0 ? 900 : 0,
         }}
         ListHeaderComponent={
           <>
             <CommonHeader title="My Ads" textColor="#171717" />
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{padding: 10}}
-              style={{flexDirection: 'row'}}>
-              <TouchableOpacity
-                style={[styles.chip, !filterBy && styles.chipSelected]}
-                onPress={() => {
-                  setFilterBy(null);
-                }}>
-                <Text
-                  style={[
-                    styles.chipText,
-                    {color: theme.colors.text},
-                    !filterBy && styles.chipTextSelected,
-                  ]}>
-                  {'All'}
-                </Text>
-              </TouchableOpacity>
-              {Object.keys(AdStatusEnum).map((items: any, index: number) => {
-                return (
-                  <TouchableOpacity
-                    key={index}
+            {myAds.length > 0 && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{padding: 10}}
+                style={{flexDirection: 'row'}}>
+                <TouchableOpacity
+                  style={[styles.chip, !filterBy && styles.chipSelected]}
+                  onPress={() => {
+                    setFilterBy(null);
+                  }}>
+                  <Text
                     style={[
-                      styles.chip,
-                      filterBy === AdStatusEnum[items] && styles.chipSelected,
-                    ]}
-                    onPress={() => {
-                      setFilterBy(AdStatusEnum[items]);
-                    }}>
-                    <Text
+                      styles.chipText,
+                      {color: theme.colors.text},
+                      !filterBy && styles.chipTextSelected,
+                    ]}>
+                    {'All'}
+                  </Text>
+                </TouchableOpacity>
+                {Object.keys(AdStatusEnum).map((items: any, index: number) => {
+                  return (
+                    <TouchableOpacity
+                      key={index}
                       style={[
-                        styles.chipText,
-                        {color: theme.colors.text},
-                        filterBy === AdStatusEnum[items] &&
-                          styles.chipTextSelected,
-                      ]}>
-                      {items}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+                        styles.chip,
+                        filterBy === AdStatusEnum[items] && styles.chipSelected,
+                      ]}
+                      onPress={() => {
+                        setFilterBy(AdStatusEnum[items]);
+                      }}>
+                      <Text
+                        style={[
+                          styles.chipText,
+                          {color: theme.colors.text},
+                          filterBy === AdStatusEnum[items] &&
+                            styles.chipTextSelected,
+                        ]}>
+                        {items}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            )}
           </>
         }
         ListHeaderComponentStyle={{padding: 0}}
@@ -495,9 +497,10 @@ const MyAds = () => {
                     navigation.navigate('PostAd');
                   }}
                   icon="alert-circle-outline"
-                  title="No Ads Found"
-                  body="Looks like you haven’t listed any ads yet."
+                  title="Its quite here..."
+                  body="Get out there to start finding great deals."
                   buttonText={'Post your Ad now'}
+                  iconName="MyAds"
                 />
               ) : (
                 <></>

@@ -1,23 +1,38 @@
 import React from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import {useTheme} from '@theme/ThemeProvider';
-import IconButton from '@components/Buttons/IconButton';
+// @ts-ignore
 import AdPostIcon from '@assets/svg/post.svg';
-import {Fonts} from '@constants/font';
-// import LoginModal from './Modal/LoginModal';
-import useBoundStore from '@stores/index';
-// import CommonLocationModal from './Modal/LocationSearchModal';
+// @ts-ignore
+import HomeIcon from '@assets/svg/new/home.svg';
+// @ts-ignore
+import ChatIcon from '@assets/svg/new/chat.svg';
+// @ts-ignore
+import MyAdsIcon from '@assets/svg/new/myads.svg';
+// @ts-ignore
+import ProfileIcon from '@assets/svg/new/profile.svg';
+// @ts-ignore
+import ProfileActiveIcon from '@assets/svg/new/profile_active.svg';
+// @ts-ignore
+import HomeActiveIcon from '@assets/svg/new/home_active.svg';
+// @ts-ignore
+import ChatActiveIcon from '@assets/svg/new/chat_active.svg';
+// @ts-ignore
+import MyadsActiveIcon from '@assets/svg/new/myads_active.svg';
 
-const renderTabIcon = (routeName: string) => {
+import {Fonts} from '@constants/font';
+import useBoundStore from '@stores/index';
+
+const renderIcons = (routeName: string, isFocused: boolean) => {
   switch (routeName) {
     case 'Home':
-      return 'home';
+      return isFocused ? <HomeActiveIcon /> : <HomeIcon />;
     case 'Chat':
-      return 'chat-processing-outline';
+      return isFocused ? <ChatActiveIcon /> : <ChatIcon />;
     case 'MyAds':
-      return 'file-document-outline';
+      return isFocused ? <MyadsActiveIcon /> : <MyAdsIcon />;
     case 'Profile':
-      return 'account';
+      return isFocused ? <ProfileActiveIcon /> : <ProfileIcon />;
     default:
       return '';
   }
@@ -25,17 +40,8 @@ const renderTabIcon = (routeName: string) => {
 
 const BottomTabBar = ({state, navigation}: any) => {
   const {theme} = useTheme();
-  const {
-    // visible,
-    setVisible,
-    bearerToken,
-    unreadCount,
-    setUnreadCount,
-    // locationModalvisible,
-    // setlocationModalVisible,
-    // setLocation,
-    // locationHistory,
-  } = useBoundStore();
+  const {setVisible, bearerToken, unreadCount, setUnreadCount} =
+    useBoundStore();
 
   const ingoreRoutes = [
     'Settings',
@@ -47,7 +53,6 @@ const BottomTabBar = ({state, navigation}: any) => {
   ];
 
   return (
-    // eslint-disable-next-line react-native/no-inline-styles
     <View
       style={[
         styles.container,
@@ -60,8 +65,6 @@ const BottomTabBar = ({state, navigation}: any) => {
           .filter((item: {name: string}) => !ingoreRoutes.includes(item.name))
           .map((route: any, index: number) => {
             const isFocused = state.index === index;
-
-            const color = isFocused ? '#2E7D32' : '#888';
             const onPress = () => {
               if (
                 (route.name === 'AddPost' ||
@@ -94,11 +97,7 @@ const BottomTabBar = ({state, navigation}: any) => {
                 <TouchableOpacity onPress={onPress} style={styles.button}>
                   {route.name !== 'AddPost' ? (
                     <>
-                      <IconButton
-                        iconSize={22}
-                        iconColor={color}
-                        iconName={renderTabIcon(route.name)}
-                      />
+                      {renderIcons(route.name, isFocused)}
                       {route.name === 'Chat' &&
                         unreadCount > 0 &&
                         bearerToken &&
@@ -131,13 +130,6 @@ const BottomTabBar = ({state, navigation}: any) => {
               </React.Fragment>
             );
           })}
-        {/* <LoginModal visible={visible} onClose={() => setVisible()} /> */}
-        {/* <CommonLocationModal
-          visible={locationModalvisible}
-          onClose={() => setlocationModalVisible()}
-          onSelectLocation={setLocation}
-          locationHistory={locationHistory}
-        /> */}
       </View>
     </View>
   );
@@ -150,6 +142,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 60,
     justifyContent: 'center',
+    borderTopWidth:0.2,
+    borderTopColor:'#ccc'
   },
   tabBar: {
     flexDirection: 'row',
@@ -157,7 +151,7 @@ const styles = StyleSheet.create({
   },
   textFocusedStyle: {
     fontSize: 12,
-    color: '#2E7D32',
+    color: '#1BAF49',
     fontFamily: Fonts.MEDIUM,
   },
   textStyle: {

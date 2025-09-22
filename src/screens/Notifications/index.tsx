@@ -15,7 +15,7 @@ import {formatDistanceToNow} from 'date-fns';
 import CommonHeader from '@components/Header/CommonHeader';
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import {
@@ -55,6 +55,7 @@ const getIconName = (type: NotificationType) => {
 
 export default function NotificationListSwipe() {
   const {colors} = useTheme();
+  const navigation = useNavigation();
   const {
     notifications_Loading,
     notifications_List,
@@ -358,7 +359,17 @@ export default function NotificationListSwipe() {
         ItemSeparatorComponent={() => <Divider />}
         ListEmptyComponent={
           !notifications_Loading ? (
-            <NoChats icon="bell-off-outline" title="No Notifications" />
+            <NoChats
+              icon="bell-off-outline"
+              title="Its quite here..."
+              body="Get out there to start finding great deals."
+              iconName="Notifications"
+              onExplore={() => {
+                // @ts-ignore
+                navigation.navigate('Main');
+              }}
+              buttonText={'Explore now'}
+            />
           ) : notifications_Loading ? (
             <ActivityIndicator color={theme.colors.text} />
           ) : (

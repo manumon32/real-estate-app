@@ -63,9 +63,10 @@ const FavAds = () => {
                 navigation.navigate('Main');
               }}
               icon="alert-circle-outline"
-              title="You havent liked anything yet.."
-              // body="You havent liked anything yet.."
+              title="Its quite here..."
+              body="Get out there to start finding great deals."
               buttonText={'Explore now'}
+              iconName={'Fav'}
             />
           ) : (
             <></>

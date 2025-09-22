@@ -133,9 +133,36 @@ const EditProfile = () => {
       {!otp && (
         <>
           <CommonHeader
-            title="Edit Profile"
+            // title="Edit Profile"
             textColor="#171717"
             backgroundColor="#fff"
+            rightButton
+            rightButtonText="Save"
+            onRightPress={async () => {
+              var imageUrls: any = '';
+              if (image.uri) {
+                let formData = new FormData();
+                formData.append('images', {
+                  uri: image.uri, // local path or blob URL
+                  name: `photo_.jpg`, // ⬅ server sees this
+                  type: 'image/jpeg',
+                } as any);
+                imageUrls = await uploadImages(formData, {
+                  token: token,
+                  clientId: clientId,
+                  bearerToken: bearerToken,
+                });
+              }
+              let payload: any = {
+                name: name,
+              };
+              if (imageUrls?.length > 0) {
+                payload.profilePicture = imageUrls[0];
+              }
+              updateuser(payload);
+            }}
+            rightButtonLoading={updateLoading}
+            rightButtonDisabled={!(name !== user.name  || image !== user.profilePicture ) }
           />
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -154,60 +181,71 @@ const EditProfile = () => {
                   // paddingBottom: 24,
                   flexGrow: 1,
                 }}>
-                <Image
-                  style={{
-                    height: 100,
-                    width: 100,
-                    borderRadius: 50,
-                    justifyContent: 'center',
-                    alignSelf: 'center',
-                  }}
-                  source={{
-                    uri: image.uri ? image.uri : image,
-                  }}
-                />
-
+                <Text style={[styles.label, {fontSize: 18}]}>
+                  Basic Informations
+                </Text>
                 <View
-                  style={[
-                    styles.badge,
-                    {
-                      borderRadius: 20,
-                      right: -25,
-                      bottom: 28,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      zIndex: 10,
-                    },
-                  ]}
-                  // onPress={onPress}
-                >
-                  <TouchableOpacity
-                    onPress={pick}
-                    style={{
-                      backgroundColor: '#000',
-                      padding: 8,
-                      borderRadius: 10,
-                    }}>
-                    <MaterialCommunityIcons
-                      name="camera"
-                      size={14}
-                      color="#fff"
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-evenly',
+                  }}>
+                  <TouchableOpacity style={{width: '30%'}} onPress={pick}>
+                    <Image
+                      style={{
+                        height: 100,
+                        width: 100,
+                        borderRadius: 50,
+                      }}
+                      source={{
+                        uri: image.uri ? image.uri : image,
+                      }}
                     />
+                    <View
+                      style={[
+                        styles.badge,
+                        {
+                          borderRadius: 20,
+                          // left: -110,
+                          bottom: 28,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          zIndex: 10,
+                        },
+                      ]}
+                      // onPress={onPress}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: '#000',
+                          padding: 8,
+                          borderRadius: 10,
+                        }}>
+                        <MaterialCommunityIcons
+                          name="camera"
+                          size={14}
+                          color="#fff"
+                        />
+                      </View>
+                    </View>
                   </TouchableOpacity>
+                  <View style={[styles.inputContainer, {width: '70%'}]}>
+                    <Text style={styles.label}>Full Name</Text>
+                    {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
+                    <TextInput
+                      placeholder="Name"
+                      value={name}
+                      onChangeText={text => {
+                        setName(text);
+                      }}
+                      // onBlur={handleBlur('title')}
+                      // error={touched?.title && errors?.title ? true : false}
+                    />
+                  </View>
                 </View>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Full Name</Text>
-                  {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-                  <TextInput
-                    placeholder="Name"
-                    value={name}
-                    onChangeText={text => {
-                      setName(text);
-                    }}
-                    // onBlur={handleBlur('title')}
-                    // error={touched?.title && errors?.title ? true : false}
-                  />
-                </View>
+
+                <Text style={[styles.label, {fontSize: 18}]}>
+                  Contact Informations
+                </Text>
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Email</Text>
                   {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
@@ -274,7 +312,7 @@ const EditProfile = () => {
                     </TouchableOpacity>
                   )
                 )}
-                <View style={styles.inputContainer}>
+                <View style={[styles.inputContainer]}>
                   <Text style={styles.label}>Phone Number</Text>
                   {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
                   <TextInput
@@ -331,32 +369,8 @@ const EditProfile = () => {
                   )
                 )}
               </ScrollView>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 6,
-                  paddingHorizontal: 12,
-                }}>
-                <MaterialCommunityIcons
-                  name="information"
-                  size={16}
-                  color="red"
-                  style={{marginRight: 6}}
-                />
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: 'red',
-                    textAlign: 'center',
-                    flexShrink: 1,
-                  }}>
-                  Phone number and email can only be saved after verification.
-                </Text>
-              </View>
               <View style={{padding: 12}}>
-                <TouchableOpacity
+                {/* <TouchableOpacity
                   onPress={async () => {
                     var imageUrls: any = '';
                     if (image.uri) {
@@ -388,7 +402,7 @@ const EditProfile = () => {
                   {updateLoading && (
                     <ActivityIndicator color={'#fff'} size={'small'} />
                   )}
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
             </View>
           </KeyboardAvoidingView>

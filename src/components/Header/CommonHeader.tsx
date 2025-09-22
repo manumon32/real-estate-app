@@ -14,17 +14,22 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {useNavigation} from '@react-navigation/native';
 import {Fonts} from '@constants/font';
 import {useTheme} from '@theme/ThemeProvider';
+import {Button} from 'react-native-paper';
 
 interface CommonHeaderProps {
-  title: string;
+  title?: string;
   onBackPress?: () => void;
   onRightPress?: () => void;
-  rightIcon?: string | boolean ;
+  rightIcon?: string | boolean;
   onlineStatus?: boolean;
   backgroundColor?: string;
   textColor?: string;
   containerStyle?: ViewStyle;
   rightText?: string;
+  rightButton?: boolean;
+  rightButtonText?: string;
+  rightButtonLoading?: boolean;
+  rightButtonDisabled?:boolean;
 }
 
 const CommonHeader: React.FC<CommonHeaderProps> = ({
@@ -32,11 +37,15 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
   onBackPress,
   onRightPress,
   rightIcon,
+  rightButton,
   backgroundColor = '#fff',
   onlineStatus = false,
   textColor = '#1C1C1E',
   containerStyle,
   rightText,
+  rightButtonText,
+  rightButtonLoading = false,
+  rightButtonDisabled=false
 }) => {
   const navigation = useNavigation();
   const isDarkMode = useColorScheme() === 'dark';
@@ -115,7 +124,7 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
             ]}
             onPress={onRightPress}>
             <MaterialCommunityIcons
-            // @ts-ignore
+              // @ts-ignore
               name={rightIcon}
               size={22}
               color={textColor}
@@ -128,6 +137,19 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
           <Text style={{fontSize: 14, fontFamily: Fonts.MEDIUM}}>
             {rightText}
           </Text>
+        ) : (
+          <></>
+        )}
+        {rightButton ? (
+          <Button
+            onPress={onRightPress}
+            disabled={rightButtonDisabled}
+            loading={rightButtonLoading}
+            mode="contained">
+            <Text style={{fontSize: 14, fontFamily: Fonts.MEDIUM}}>
+              {rightButtonText}
+            </Text>
+          </Button>
         ) : (
           <></>
         )}

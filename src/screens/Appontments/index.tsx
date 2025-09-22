@@ -19,6 +19,7 @@ import {
   RefreshControl,
   useColorScheme,
   ScrollView,
+  Image,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -117,6 +118,15 @@ const ListingCard: React.FC<ListingCardProps> = ({
           navigation.navigate('Details', {items: {_id: items.propertyId._id}});
         }}>
         <View style={styles.row}>
+          {/* Property Image */}
+          <Image
+            source={{
+              uri:
+                items.propertyId?.imageUrls?.[0] ||
+                'https://via.placeholder.com/80',
+            }}
+            style={styles.image}
+          />
           <View style={styles.info}>
             <View style={styles.headerRow}>
               <Text style={[styles.title, {color: theme.colors.text}]}>
@@ -131,13 +141,15 @@ const ListingCard: React.FC<ListingCardProps> = ({
               </View>
             </View>
 
+            {items?.propertyId?.address && (
+              <Text
+                style={[styles.location, {color: theme.colors.text}]}
+                numberOfLines={1}>
+                {items.propertyId.address}
+              </Text>
+            )}
             <Text style={[styles.location, {color: theme.colors.text}]}>
               {name}
-            </Text>
-            <Text
-              style={[styles.location, {color: theme.colors.text}]}
-              numberOfLines={1}>
-              {location}
             </Text>
           </View>
         </View>
@@ -260,7 +272,8 @@ const Appointments = () => {
         contentContainerStyle={{
           paddingBottom: 120,
           backgroundColor: theme.colors.background,
-          minHeight: 900,
+          // @ts-ignore
+          minHeight: appointments?.[filterBy].length > 0 ? 900 : 0,
           //  padding: 14,
         }}
         ListHeaderComponent={
@@ -343,13 +356,15 @@ const Appointments = () => {
                     navigation.navigate('Main');
                   }}
                   icon="alert-circle-outline"
-                  title={
-                    filterBy === 'myAppointments'
-                      ? 'You  dont have any pending requests'
-                      : 'You don’t have any Appointments yet.'
-                  }
-                  // body="Looks like you haven’t listed any ads yet."
+                  // title={
+                  //   filterBy === 'myAppointments'
+                  //     ? 'You don’t have any pending requests'
+                  //     : 'You don’t have any appointments yet.'
+                  // }
+                  title="Its quite here..."
+                  body="Get out there to start finding great deals."
                   buttonText={'Explore'}
+                  iconName="Appointment"
                 />
               )}
           </>
@@ -382,14 +397,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   image: {
-    width: 70,
-    height: 70,
+    width: 80,
+    height: 80,
     borderRadius: 12,
     marginRight: 12,
   },
   info: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
   },
   headerRow: {
     flexDirection: 'row',

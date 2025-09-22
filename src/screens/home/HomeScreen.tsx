@@ -199,7 +199,8 @@ function HomeScreen({navigation}: any): React.JSX.Element {
         <NoChats
           icon="magnify-close"
           color="#9E9E9E"
-          title="Oops.. we cannot find anything for this search."
+          title="Its quite here..."
+          body="Get out there to start finding great deals."
         />
       );
     }

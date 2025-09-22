@@ -383,7 +383,7 @@ const Chat = React.memo(({navigation}: any) => {
         contentContainerStyle={{
           paddingBottom: 120,
           backgroundColor: theme.colors.background,
-          minHeight: 900,
+          minHeight: chatList.length > 0 ? 900 : 0,
           //  padding: 14,
         }}
         ListHeaderComponent={
@@ -445,64 +445,66 @@ const Chat = React.memo(({navigation}: any) => {
                 )}
               </View>
             ) : (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{
-                  flexDirection: 'row',
-                  padding: 10,
-                  backgroundColor: theme.colors.backgroundHome,
-                }}>
-                <TouchableOpacity
-                  style={[styles.chip, !filterBy && styles.chipSelected]}
-                  onPress={() => {
-                    setFilterBy(null);
+              chatList.length > 0 && (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{
+                    flexDirection: 'row',
+                    padding: 10,
+                    backgroundColor: theme.colors.backgroundHome,
                   }}>
-                  <Text
+                  <TouchableOpacity
+                    style={[styles.chip, !filterBy && styles.chipSelected]}
+                    onPress={() => {
+                      setFilterBy(null);
+                    }}>
+                    <Text
+                      style={[
+                        styles.chipText,
+                        {color: theme.colors.text},
+                        !filterBy && styles.chipTextSelected,
+                      ]}>
+                      {'All'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
                     style={[
-                      styles.chipText,
-                      {color: theme.colors.text},
-                      !filterBy && styles.chipTextSelected,
-                    ]}>
-                    {'All'}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.chip,
-                    filterBy === 'sell' && styles.chipSelected,
-                  ]}
-                  onPress={() => {
-                    setFilterBy('sell');
-                  }}>
-                  <Text
+                      styles.chip,
+                      filterBy === 'sell' && styles.chipSelected,
+                    ]}
+                    onPress={() => {
+                      setFilterBy('sell');
+                    }}>
+                    <Text
+                      style={[
+                        styles.chipText,
+                        {color: theme.colors.text},
+                        filterBy === 'sell' && styles.chipTextSelected,
+                      ]}>
+                      {'Sell'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    // key={index}
                     style={[
-                      styles.chipText,
-                      {color: theme.colors.text},
-                      filterBy === 'sell' && styles.chipTextSelected,
-                    ]}>
-                    {'Sell'}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  // key={index}
-                  style={[
-                    styles.chip,
-                    filterBy === 'buy' && styles.chipSelected,
-                  ]}
-                  onPress={() => {
-                    setFilterBy('buy');
-                  }}>
-                  <Text
-                    style={[
-                      styles.chipText,
-                      {color: theme.colors.text},
-                      filterBy === 'buy' && styles.chipTextSelected,
-                    ]}>
-                    {'Buy'}
-                  </Text>
-                </TouchableOpacity>
-              </ScrollView>
+                      styles.chip,
+                      filterBy === 'buy' && styles.chipSelected,
+                    ]}
+                    onPress={() => {
+                      setFilterBy('buy');
+                    }}>
+                    <Text
+                      style={[
+                        styles.chipText,
+                        {color: theme.colors.text},
+                        filterBy === 'buy' && styles.chipTextSelected,
+                      ]}>
+                      {'Buy'}
+                    </Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              )
             )}
           </>
         }
@@ -527,10 +529,11 @@ const Chat = React.memo(({navigation}: any) => {
                 onExplore={() => {
                   navigation.navigate('filter');
                 }}
-                icon="message-text-outline"
-                title="No Chat Found"
-                body="Looks like you haven’t started any conversations yet."
                 buttonText={'Explore now'}
+                icon="message-text-outline"
+                iconName={'Chat'}
+                title="Its quite here..."
+                body="Get out there to start finding great deals."
               />
             ) : (
               <></>
