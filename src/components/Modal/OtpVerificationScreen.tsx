@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import {
-  getHash,
+  // getHash,
   startOtpListener,
   removeListener,
 } from 'react-native-otp-verify';
@@ -86,11 +86,11 @@ const OtpVerificationScreen = ({
 
   // OTP listener (Android auto-read)
   useEffect(() => {
-    getHash()
-      .then(hashArray => {
-        console.log('App hash:', hashArray[0]);
-      })
-      .catch(console.log);
+    // getHash()
+    //   .then(hashArray => {
+    //     console.log('App hash:', hashArray[0]);
+    //   })
+    //   .catch(console.log);
 
     startOtpListener(message => {
       console.log('OTP message:', message);

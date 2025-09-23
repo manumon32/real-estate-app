@@ -28,7 +28,7 @@ const defaultLocation: any = {
   district: null,
   state: null,
   country: 'India',
-  default:true
+  default:true,
 };
 const getKey = (obj: any) => JSON.stringify(obj);
 

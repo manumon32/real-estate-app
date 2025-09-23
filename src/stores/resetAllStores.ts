@@ -84,6 +84,8 @@ export const resetAllZustandStores = () => {
   state.resetBankSlice();
   state.resetverificationDetails();
   state.resetChat();
+  // state.resetLocation();
+  state.resetLocationHistory();
   state.logout();
 
   // Optionally clear persisted storage too:

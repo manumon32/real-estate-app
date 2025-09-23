@@ -108,7 +108,6 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   useEffect(() => {
     const prevLat = prevLocationRef.current?.lat;
     const newLat = location?.lat;
-    console.log(location);
     if (prevLat && newLat && prevLat !== newLat) {
       setTriggerRelaod();
       flatListRef.current?.scrollToOffset({offset: 0, animated: false});

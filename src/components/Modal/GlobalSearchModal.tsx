@@ -81,15 +81,81 @@ const GlobalSearchModal: React.FC<Props> = ({
       return;
     }
 
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_API_KEY}&language=en`;
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_API_KEY}&language=en&components=country:in&types=(regions)`;
     try {
       const res = await fetch(url);
       const json = await res.json();
-      setPredictions(json?.predictions || []);
+      const unwantedTypes = ['establishment', 'natural_feature'];
+
+      const filteredPredictions = json.predictions.filter(
+        (place: {types: any[]}) => {
+          // Check if none of the types are in the unwanted list
+          return !place.types.some(t => unwantedTypes.includes(t));
+        },
+      );
+
+      const filtered = filteredPredictions.filter((prediction: any) => {
+        const types = prediction.types;
+
+        // Include if it's a desired location type
+        const include =
+          types.includes('locality') ||
+          types.includes('administrative_area_level_3') ||
+          types.includes('administrative_area_level_1') ||
+          types.includes('country');
+
+        // Exclude unwanted types
+        const exclude =
+          types.includes('establishment') || types.includes('natural_feature');
+
+        return include && !exclude;
+      });
+
+      setPredictions(filtered || []);
     } catch (err) {
       console.error('Prediction fetch failed', err);
     }
   }, []);
+
+  function formatPlaceName(components: any[]): string {
+    let locality: any = null;
+    let city: any = null;
+    let district: any = null;
+    let state: any = null;
+
+    components.forEach(comp => {
+      if (comp.types.includes('locality') && !locality)
+        locality = comp.long_name;
+      if (comp.types.includes('administrative_area_level_2') && !city)
+        city = comp.long_name;
+      if (comp.types.includes('administrative_area_level_3') && !district)
+        district = comp.long_name;
+      if (
+        (comp.types.includes('establishment') ||
+          comp.types.includes('natural_feature')) &&
+        !district &&
+        !city &&
+        !locality
+      )
+        locality = comp.long_name;
+      if (comp.types.includes('administrative_area_level_1') && !state)
+        state = comp.long_name;
+    });
+
+    // Determine final parts according to OLX priority
+    const parts: string[] = [];
+
+    if (locality) parts.push(locality);
+    if (!locality && city) parts.push(city); // fallback if locality missing
+    if (!city && district) parts.push(district); // fallback
+    if (!district && state) parts.push(state);
+    // Remove duplicates
+    const uniqueParts = parts.filter(
+      (item, index) => parts.indexOf(item) === index,
+    );
+
+    return uniqueParts.join(', ');
+  }
 
   const checkAndRequestPermission = async () => {
     const permission =
@@ -165,6 +231,7 @@ const GlobalSearchModal: React.FC<Props> = ({
         if (country) {
           country_name = country.long_name;
         }
+        name = components ? formatPlaceName(components) : name;
       }
       onSelectLocation({
         name: name,
@@ -220,7 +287,7 @@ const GlobalSearchModal: React.FC<Props> = ({
         const res = await fetch(url);
         const json = await res.json();
         const locations = json.results[0]?.geometry.location;
-        const name = json.results[0]?.formatted_address || 'Kerala';
+        let name = json.results[0]?.formatted_address || 'Kerala';
         let city_name = null;
         let district_name = null;
         let state_name = null;
@@ -252,6 +319,7 @@ const GlobalSearchModal: React.FC<Props> = ({
           if (country) {
             country_name = country.long_name;
           }
+          name = components ? formatPlaceName(components) : name;
         }
         console.log('locationslocationslocationslocationslocations', locations);
         setLocation({
