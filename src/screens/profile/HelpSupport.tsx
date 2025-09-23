@@ -83,17 +83,7 @@ const HelpSupport = () => {
                   flexGrow: 1,
                 }}>
                 <ContactUsCard />
-                <View
-                  style={{
-                    backgroundColor: '#fff',
-                    borderRadius: 16,
-                    padding: 16,
-                    shadowColor: '#000',
-                    shadowOffset: {width: 0, height: 4},
-                    shadowOpacity: 0.1,
-                    shadowRadius: 6,
-                    elevation: 5,
-                  }}>
+                <View style={styles.requestContainer}>
                   <Text
                     style={{
                       fontFamily: Fonts.MEDIUM,
@@ -125,7 +115,7 @@ const HelpSupport = () => {
                       onChangeText={text => {
                         setEmail(text);
                       }}
-                      onFocus={()=>{}}
+                      onFocus={() => {}}
                       // onBlur={handleBlur('title')}
                       // error={touched?.title && errors?.title ? true : false}
                     />
@@ -227,6 +217,17 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: 'center',
     bottom: 15,
+  },
+  requestContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
+    top: 10,
   },
   buyText: {
     color: '#fff',

@@ -65,7 +65,6 @@ const FormattedDate = (arg: string | number | Date) => {
 const ListingCard: React.FC<ListingCardProps> = ({
   items,
   title = '',
-  location = '',
   status = 'Pending',
   date = '',
   name,
@@ -261,6 +260,32 @@ const Appointments = () => {
     [navigation, filterBy],
   );
 
+  const listFooter = () => {
+    return (
+      <>
+        {/* @ts-ignore */}
+        {appointmentsLoading && appointments?.[filterBy].length === 0 && (
+          <AdsListSkelton />
+        )}
+        {!appointmentsLoading &&
+          // @ts-ignore
+          appointments?.[filterBy].length === 0 && (
+            <NoChats
+              onExplore={() => {
+                // @ts-ignore
+                navigation.navigate('Main');
+              }}
+              icon="alert-circle-outline"
+              title="No Appointments yet."
+              body="Book appointments to see them here"
+              buttonText={'Book Appointment'}
+              iconName="Appointment"
+            />
+          )}
+      </>
+    );
+  };
+
   return (
     <SafeAreaView
       style={{backgroundColor: theme.colors.background, height: '100%'}}>
@@ -341,34 +366,7 @@ const Appointments = () => {
             colors={['#40DABE', '#40DABE', '#227465']}
           />
         }
-        ListFooterComponent={
-          <>
-            {/* @ts-ignore */}
-            {appointmentsLoading && appointments?.[filterBy].length === 0 && (
-              <AdsListSkelton />
-            )}
-            {!appointmentsLoading &&
-              // @ts-ignore
-              appointments?.[filterBy].length === 0 && (
-                <NoChats
-                  onExplore={() => {
-                    // @ts-ignore
-                    navigation.navigate('Main');
-                  }}
-                  icon="alert-circle-outline"
-                  // title={
-                  //   filterBy === 'myAppointments'
-                  //     ? 'You don’t have any pending requests'
-                  //     : 'You don’t have any appointments yet.'
-                  // }
-                  title="No Appointments yet."
-                  body="Book appointments to see them here"
-                  buttonText={'Book Appointment'}
-                  iconName="Appointment"
-                />
-              )}
-          </>
-        }
+        ListFooterComponent={listFooter}
       />
     </SafeAreaView>
   );

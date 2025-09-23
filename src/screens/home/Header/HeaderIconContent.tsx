@@ -42,30 +42,31 @@ function HeaderIconContent(): React.JSX.Element {
       type: 'propertyTypeId',
     },
   ];
+
+  const onPress = (items: any) => {
+    if (items.label === 'Sell') {
+      // @ts-ignore
+      navigation.navigate('PostAd');
+    } else {
+      resetFilters();
+      clearFilterList();
+      let filterPayload = {
+        [`${items.type}`]: items._id,
+      };
+      setFilters(filterPayload);
+      // @ts-ignore
+      navigation.navigate('filter');
+    }
+  };
+
   return (
-    // <ScrollView
-    //   horizontal
-    //   showsHorizontalScrollIndicator={false}
-    //   contentContainerStyle={styles.container}>
     <View style={styles.container}>
       {tabIcons.map((items, index) => (
         <TouchableOpacity
           key={index}
-          style={{width: '20%'}}
+          style={styles.tabbuttonStyle}
           onPress={() => {
-            if (items.label === 'Sell') {
-              // @ts-ignore
-              navigation.navigate('PostAd');
-            } else {
-              resetFilters();
-              clearFilterList();
-              let filterPayload = {
-                [`${items.type}`]: items._id,
-              };
-              setFilters(filterPayload);
-              // @ts-ignore
-              navigation.navigate('filter');
-            }
+            onPress(items);
           }}>
           <View style={styles.iconContainer}>
             <IconButton iconSize={28} iconName={items.icon} />
@@ -107,6 +108,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
   },
+  tabbuttonStyle: {width: '20%'},
   text: {
     fontSize: 16,
     fontWeight: '600',

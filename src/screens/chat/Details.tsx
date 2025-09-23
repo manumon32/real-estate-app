@@ -119,6 +119,55 @@ const ChatFooter = React.memo(
   },
 );
 
+const Addetails = React.memo(({theme, navigation, items}: any) => {
+  return (
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('Details', {items: {_id: items.property._id}})
+      }
+      style={[styles.adContainer, {backgroundColor: theme.colors.background}]}>
+      {items.property?.coverImage && (
+        <Image
+          style={styles.adImage}
+          source={{
+            uri: items.property?.coverImage,
+          }}
+        />
+      )}
+      <Text numberOfLines={1} style={[styles.name, {color: theme.colors.text}]}>
+        {items.property?.title}
+      </Text>
+    </TouchableOpacity>
+  );
+});
+
+const UploadImage = React.memo(({theme}: any) => {
+  return (
+    <View style={styles.uploadImageStyle}>
+      <ActivityIndicator size="small" color={theme.colors.text} />
+      <Text style={[styles.uploadImageText, {color: theme.colors.text}]}>
+        Uploading image...
+      </Text>
+    </View>
+  );
+});
+
+const LoadImage = React.memo(({selectedImage, setImage}: any) => {
+  return (
+    <View style={styles.imagePreviewContainer}>
+      {/* @ts-ignore */}
+      <Image source={{uri: selectedImage?.uri}} style={styles.image} />
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => {
+          setImage(null);
+        }}>
+        <Icon name="close-circle" size={20} color="#ff3333" />
+      </TouchableOpacity>
+    </View>
+  );
+});
+
 const Chat = React.memo(({navigation}: any) => {
   const {theme} = useTheme();
   const route = useRoute();
@@ -275,144 +324,63 @@ const Chat = React.memo(({navigation}: any) => {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-        style={{height: Platform.OS === 'ios' ? '85%' : '80%', flex: 1}}>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate('Details', {items: {_id: items.property._id}})
-          }
-          style={{
-            backgroundColor: theme.colors.background,
-            paddingLeft: 10,
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-            borderTopWidth: 0.2,
-            borderBottomWidth: 0.8,
-            borderColor: '#ccc',
-            padding: 10,
-          }}>
-          <Image
-            style={{
-              height: 30,
-              width: 30,
-              marginLeft: 5,
-            }}
-            source={{
-              uri:
-                items.property?.coverImage ??
-                'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_items_boosted&w=740',
-            }}
-          />
-          <Text
-            numberOfLines={1}
-            style={[styles.name, {color: theme.colors.text}]}>
-            {items.property?.title}
-          </Text>
-        </TouchableOpacity>
+        style={styles.keybordViewcontainer}>
+        {/* Ads Details  */}
+        <Addetails theme={theme} navigation={navigation} items={items} />
+
         {/* @ts-ignore */}
         {chat_loading && !chatDetails?.[items.propertyId] && (
           <ChatDetailSkeleton />
         )}
-        {
-          <FlatList
-            inverted
-            ref={flatListRef}
-            data={
-              // @ts-ignore
-              chatDetails[items.propertyId]
-                ? // @ts-ignore
-                  [...chatDetails[items.propertyId]].reverse()
-                : []
-            }
-            renderItem={renderAdItem}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{
-              backgroundColor: theme.colors.background,
-              paddingBottom: 24,
-              flexGrow: 1,
-              minHeight: chat_loading ? 0 : '90%',
-            }}
-            ListHeaderComponentStyle={{
-              padding: 0,
-              backgroundColor: '#fff',
-            }}
-            showsVerticalScrollIndicator={false}
-            // ListFooterComponent={
-            //   chat_hasMore || chat_loading ? (
-            //     <View style={styles.loadingContainer}>
-            //       <ActivityIndicator
-            //         size="large"
-            //         color={theme.colors.activityIndicatorColor}
-            //       />
-            //       {chat_loading && chatDetails?.length > 0 && (
-            //         <Text style={styles.loadingText}>
-            //           Loading more properties...
-            //         </Text>
-            //       )}
-            //     </View>
-            //   ) : chatDetails.length <= 0 ? (
-            //     <></>
-            //   ) : (
-            //     <></>
-            //   )
-            // }
-          />
-        }
-        {/* <SlideToRecordButton
-          onSend={filePath => {
-            console.log('📤 Sending audio file:', filePath);
 
-            // You can now:
-            // 1. Upload to server
-            // 2. Send in chat message
-            // 3. Share or preview
-          }}
-        /> */}
+        <FlatList
+          inverted
+          ref={flatListRef}
+          data={
+            // @ts-ignore
+            chatDetails[items.propertyId]
+              ? // @ts-ignore
+                [...chatDetails[items.propertyId]].reverse()
+              : []
+          }
+          renderItem={renderAdItem}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={[
+            styles.flatListContainer,
+            {
+              backgroundColor: theme.colors.background,
+              minHeight: chat_loading ? 0 : '90%',
+            },
+          ]}
+          showsVerticalScrollIndicator={false}
+        />
+
         {selectedImage && (
-          <View style={styles.imagePreviewContainer}>
-            {/* @ts-ignore */}
-            <Image source={{uri: selectedImage?.uri}} style={styles.image} />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => {
-                setImage(null);
-              }}>
-              <Icon name="close-circle" size={20} color="#ff3333" />
-            </TouchableOpacity>
-          </View>
+          <LoadImage selectedImage={selectedImage} setImage={setImage} />
         )}
-        {imageUploading && (
-          <View style={{padding: 10, alignItems: 'center'}}>
-            <ActivityIndicator size="small" color={theme.colors.text} />
-            <Text
-              style={{fontSize: 12, color: theme.colors.text, marginTop: 4}}>
-              Uploading image...
-            </Text>
-          </View>
-        )}
-        {
-          <ChatFooter
-            setAttachModalVisible={setAttachModalVisible}
-            handleSend={handleSend}
-            items={items}
-            theme={theme}
-          />
-        }
+
+        {imageUploading && <UploadImage theme={theme} />}
+
+        <ChatFooter
+          setAttachModalVisible={setAttachModalVisible}
+          handleSend={handleSend}
+          items={items}
+          theme={theme}
+        />
       </KeyboardAvoidingView>
 
       <AttachFileModal
         visible={attachModalVisible}
         onClose={() => setAttachModalVisible(false)}
-        onPickGallery={async () => {
-          await setAttachModalVisible(false);
+        onPickGallery={() => {
+          setAttachModalVisible(false);
           setTimeout(() => pickImageLibrary(), 100); // 👈 delay closing
         }}
-        onPickCamera={async () => {
-          await setAttachModalVisible(false);
+        onPickCamera={() => {
+          setAttachModalVisible(false);
           setTimeout(() => pickCamera(), 200);
         }}
         onPickDocument={() => {
-          // pickDocument(); // your logic
           setAttachModalVisible(false);
         }}
       />
@@ -430,6 +398,31 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     position: 'relative',
   },
+  keybordViewcontainer: {
+    height: Platform.OS === 'ios' ? '85%' : '80%',
+    flex: 1,
+  },
+  adContainer: {
+    paddingLeft: 10,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    borderTopWidth: 0.2,
+    borderBottomWidth: 0.8,
+    borderColor: '#ccc',
+    padding: 10,
+  },
+  adImage: {
+    height: 30,
+    width: 30,
+    marginLeft: 5,
+  },
+  uploadImageStyle: {padding: 10, alignItems: 'center'},
+  flatListContainer: {
+    paddingBottom: 24,
+    flexGrow: 1,
+  },
+  uploadImageText: {fontSize: 12, marginTop: 4},
   chatcontainer: {
     flexDirection: 'row',
     alignItems: 'center',

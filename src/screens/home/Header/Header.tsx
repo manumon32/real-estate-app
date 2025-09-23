@@ -98,14 +98,11 @@ function Header({navigation}: any): React.JSX.Element {
       </View>
       {listings.length > 0 && (
         <View
-          style={{
-            borderRadius: 20,
-            backgroundColor: theme.colors.backgroundHome,
-            bottom: 8,
-            width: '100%',
-          }}>
-          <Text
-            style={[styles.freshTextStyle, {color: theme.colors.text}]}></Text>
+          style={[
+            styles.divider,
+            {backgroundColor: theme.colors.backgroundHome},
+          ]}>
+          <Text style={[styles.freshTextStyle, {color: theme.colors.text}]} />
         </View>
       )}
     </>
@@ -139,6 +136,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
+  },
+  divider: {
+    borderRadius: 20,
+    bottom: 8,
+    width: '100%',
   },
   badgeText: {
     color: 'white',

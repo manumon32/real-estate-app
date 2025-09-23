@@ -65,13 +65,13 @@ const ContactUsCard = () => {
       color: '#E63946',
       type: 'email',
     },
-    {
-      id: 4,
-      title: 'Chat Support',
-      icon: 'chat',
-      color: '#2A9D8F',
-      type: 'chat',
-    },
+    // {
+    //   id: 4,
+    //   title: 'Chat Support',
+    //   icon: 'chat',
+    //   color: '#2A9D8F',
+    //   type: 'chat',
+    // },
   ];
 
   return (
@@ -102,8 +102,8 @@ const ContactUsCard = () => {
       <View
         style={{
           flexDirection: 'row',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
+          // flexWrap: 'wrap',
+          // justifyContent: 'space-evenly',
         }}>
         {contacts.map(item => (
           <TouchableOpacity
@@ -111,11 +111,12 @@ const ContactUsCard = () => {
             activeOpacity={0.7}
             accessibilityLabel={`Contact via ${item.title}`}
             style={{
-              flexBasis: '45%',
+              flexBasis: '30%',
               backgroundColor: `${item.color}20`, // lighter tint of icon color
               borderRadius: 14,
-              paddingVertical: 20,
+              paddingVertical: 10,
               marginBottom: 12,
+              margin:5,
               alignItems: 'center',
               justifyContent: 'center',
             }}

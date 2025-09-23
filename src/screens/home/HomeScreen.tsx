@@ -9,6 +9,7 @@ import {
   BackHandler,
   ToastAndroid,
   AppState,
+  Linking,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@theme/ThemeProvider';
@@ -134,6 +135,32 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     return () => subscription.remove();
   }, [bearerToken]);
 
+  /** Handle deep links */
+  const handleDeepLink = useCallback(
+    (event: {url: string}) => {
+      const url = event.url;
+      const match = url.match(/details\/(\w+)/);
+      if (match) {
+        const propertyId = match[1];
+        navigation.navigate('Details', {items: {_id: propertyId}});
+      }
+    },
+    [navigation],
+  );
+
+  /** Setup deep link listeners */
+  useEffect(() => {
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+
+    Linking.getInitialURL().then(url => {
+      if (url) {
+        handleDeepLink({url});
+      }
+    });
+
+    return () => subscription.remove();
+  }, [handleDeepLink]);
+
   /** Firebase notification handlers */
   useEffect(() => {
     requestUserPermission();
@@ -234,7 +261,10 @@ function HomeScreen({navigation}: any): React.JSX.Element {
         ListHeaderComponent={MemoHeader}
         contentContainerStyle={{
           paddingBottom: 100,
-          backgroundColor: listings.length > 0 ? theme.colors.backgroundHome: theme.colors.background,
+          backgroundColor:
+            listings.length > 0
+              ? theme.colors.backgroundHome
+              : theme.colors.background,
           minHeight: 900,
         }}
         showsVerticalScrollIndicator={false}

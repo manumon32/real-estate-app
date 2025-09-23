@@ -258,7 +258,6 @@ const Chat = React.memo(({navigation}: any) => {
     token,
     clientId,
     setFilters,
-    clearFilterList,
   } = useBoundStore();
   const [filterBy, setFilterBy] = useState<any>(null);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -379,9 +378,9 @@ const Chat = React.memo(({navigation}: any) => {
           : chatList.length <= 0) && !chatListloading ? (
           <NoChats
             onExplore={() => {
-            setFilters({page:0});
-            // @ts-ignore
-            navigation.navigate('filter');
+              setFilters({page: 0});
+              // @ts-ignore
+              navigation.navigate('filter');
             }}
             buttonText={'Explore'}
             icon="message-text-outline"
@@ -391,6 +390,128 @@ const Chat = React.memo(({navigation}: any) => {
           />
         ) : (
           <></>
+        )}
+      </>
+    );
+  };
+
+  const listHeader = () => {
+    return (
+      <>
+        {isSelectionMode ? (
+          <View
+            style={{
+              zIndex: 99,
+              backgroundColor: theme.colors.backgroundHome,
+              padding: 10,
+              borderRadius: 20,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}>
+            <TouchableOpacity
+              style={{
+                flexDirection: 'row',
+              }}
+              onPress={() => {
+                clearSelection();
+              }}>
+              <MaterialCommunityIcons
+                name="close"
+                color={theme.colors.text}
+                size={20}
+              />
+              <Text
+                style={{
+                  fontFamily: Fonts.REGULAR,
+                  fontSize: 16,
+                  color: theme.colors.text,
+                }}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+            {selectedChats.length > 0 && (
+              <TouchableOpacity
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  deleteChats();
+                }}>
+                <MaterialCommunityIcons
+                  name="delete"
+                  size={20}
+                  color={theme.colors.text}
+                />
+                <Text
+                  style={{
+                    fontFamily: Fonts.REGULAR,
+                    fontSize: 16,
+                    color: theme.colors.text,
+                  }}>
+                  Delete All
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
+          chatList.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{
+                flexDirection: 'row',
+                padding: 10,
+                backgroundColor: theme.colors.backgroundHome,
+              }}>
+              <TouchableOpacity
+                style={[styles.chip, !filterBy && styles.chipSelected]}
+                onPress={() => {
+                  setFilterBy(null);
+                }}>
+                <Text
+                  style={[
+                    styles.chipText,
+                    {color: theme.colors.text},
+                    !filterBy && styles.chipTextSelected,
+                  ]}>
+                  {'All'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  filterBy === 'sell' && styles.chipSelected,
+                ]}
+                onPress={() => {
+                  setFilterBy('sell');
+                }}>
+                <Text
+                  style={[
+                    styles.chipText,
+                    {color: theme.colors.text},
+                    filterBy === 'sell' && styles.chipTextSelected,
+                  ]}>
+                  {'Sell'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                // key={index}
+                style={[styles.chip, filterBy === 'buy' && styles.chipSelected]}
+                onPress={() => {
+                  setFilterBy('buy');
+                }}>
+                <Text
+                  style={[
+                    styles.chipText,
+                    {color: theme.colors.text},
+                    filterBy === 'buy' && styles.chipTextSelected,
+                  ]}>
+                  {'Buy'}
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
+          )
         )}
       </>
     );
@@ -418,131 +539,8 @@ const Chat = React.memo(({navigation}: any) => {
           minHeight: chatList.length > 0 ? 900 : 0,
           //  padding: 14,
         }}
-        ListHeaderComponent={
-          <>
-            {isSelectionMode ? (
-              <View
-                style={{
-                  zIndex: 99,
-                  backgroundColor: theme.colors.backgroundHome,
-                  padding: 10,
-                  borderRadius: 20,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                }}>
-                <TouchableOpacity
-                  style={{
-                    flexDirection: 'row',
-                  }}
-                  onPress={() => {
-                    clearSelection();
-                  }}>
-                  <MaterialCommunityIcons
-                    name="close"
-                    color={theme.colors.text}
-                    size={20}
-                  />
-                  <Text
-                    style={{
-                      fontFamily: Fonts.REGULAR,
-                      fontSize: 16,
-                      color: theme.colors.text,
-                    }}>
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-                {selectedChats.length > 0 && (
-                  <TouchableOpacity
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}
-                    onPress={() => {
-                      deleteChats();
-                    }}>
-                    <MaterialCommunityIcons
-                      name="delete"
-                      size={20}
-                      color={theme.colors.text}
-                    />
-                    <Text
-                      style={{
-                        fontFamily: Fonts.REGULAR,
-                        fontSize: 16,
-                        color: theme.colors.text,
-                      }}>
-                      Delete All
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            ) : (
-              chatList.length > 0 && (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={{
-                    flexDirection: 'row',
-                    padding: 10,
-                    backgroundColor: theme.colors.backgroundHome,
-                  }}>
-                  <TouchableOpacity
-                    style={[styles.chip, !filterBy && styles.chipSelected]}
-                    onPress={() => {
-                      setFilterBy(null);
-                    }}>
-                    <Text
-                      style={[
-                        styles.chipText,
-                        {color: theme.colors.text},
-                        !filterBy && styles.chipTextSelected,
-                      ]}>
-                      {'All'}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.chip,
-                      filterBy === 'sell' && styles.chipSelected,
-                    ]}
-                    onPress={() => {
-                      setFilterBy('sell');
-                    }}>
-                    <Text
-                      style={[
-                        styles.chipText,
-                        {color: theme.colors.text},
-                        filterBy === 'sell' && styles.chipTextSelected,
-                      ]}>
-                      {'Sell'}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    // key={index}
-                    style={[
-                      styles.chip,
-                      filterBy === 'buy' && styles.chipSelected,
-                    ]}
-                    onPress={() => {
-                      setFilterBy('buy');
-                    }}>
-                    <Text
-                      style={[
-                        styles.chipText,
-                        {color: theme.colors.text},
-                        filterBy === 'buy' && styles.chipTextSelected,
-                      ]}>
-                      {'Buy'}
-                    </Text>
-                  </TouchableOpacity>
-                </ScrollView>
-              )
-            )}
-          </>
-        }
-        ListHeaderComponentStyle={{
-          padding: 0,
-        }}
+        ListHeaderComponent={listHeader}
+        ListHeaderComponentStyle={styles.listHeaderComponentStyle}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -582,6 +580,9 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
     borderBottomWidth: 1,
     position: 'relative',
+  },
+  listHeaderComponentStyle: {
+    padding: 0,
   },
   textContainer: {
     flex: 1,

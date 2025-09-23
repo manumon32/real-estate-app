@@ -56,7 +56,7 @@ export function startCheckoutPromise(params: any): Promise<void> {
           currency: order.currency,
           name: 'Hotplotz',
           description: '',
-          image: 'https://i.imgur.com/3g7nmJC.png',
+          image: 'https://portal.hotplotz.com/static/media/logo.1bbb2dbc0fc247838c30.jpg',
           prefill: {email: email, contact: phone},
           // method: {upi: true, card: true, netbanking: true, wallet: true, paylater: true},
           theme: {color: '#F37254'},

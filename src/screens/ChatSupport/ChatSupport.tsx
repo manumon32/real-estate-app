@@ -66,7 +66,7 @@ const ChatSupport: React.FC<Props> = ({ data, theme }) => {
           </TouchableOpacity>
         ))
       ) : (
-        <Text style={[styles.answer, {color:theme.colors.text}]}></Text>
+        <Text style={[styles.answer, {color:theme.colors.text}]} />
       )}
     </ScrollView>
   );

@@ -26,20 +26,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Custom scheme deep link -->
-            <intent-filter>
+           <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="myapp" android:host="app" />
-            </intent-filter>
 
-            <!-- Universal link (HTTPS) -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="hotplotz.com" android:pathPrefix="/details" />
+                <!-- hotplotz.com -->
+                <data android:scheme="https"
+                    android:host="hotplotz.com"
+                    android:pathPrefix="/details" />
+
+                <!-- www.hotplotz.com -->
+                <data android:scheme="https"
+                    android:host="www.hotplotz.com"
+                    android:pathPrefix="/details" />
             </intent-filter>
 
         </activity>
