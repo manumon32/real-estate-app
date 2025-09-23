@@ -24,8 +24,6 @@ const formatDate = (arg: string | number | Date) => {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
     hour12: true,
   });
 };
@@ -62,7 +60,7 @@ const ListingCard = ({item, theme, navigation}: any) => {
           {/* Info */}
           <View style={styles.info}>
             <View style={styles.headerRow}>
-              <Text style={[styles.title, {color: theme.colors.text}]}>
+              <Text numberOfLines={1} style={[styles.title, {color: theme.colors.text}]}>
                 {property?.title || plan?.name}
               </Text>
             </View>
@@ -70,15 +68,22 @@ const ListingCard = ({item, theme, navigation}: any) => {
             <Text style={[styles.price, {color: theme.colors.text}]}>
               ₹{plan?.price}
             </Text>
-            {property.isFeatured && (
+            {property.isFeatured ? (
               <View style={[styles.badge]}>
                 <Text numberOfLines={2} style={[styles.badgeText]}>
                   {'featured'}
                 </Text>
               </View>
+            ) : (
+              <View style={[styles.badgeExpired]}>
+                <Text numberOfLines={2} style={[styles.badgeText]}>
+                  {'Plan Expired'}
+                </Text>
+              </View>
             )}
             <Text style={styles.subText}>
-              Valid till: {formatDate(item.endDate)}
+              {property.isFeatured ? ' Valid till' : 'Expired on'}:{' '}
+              {formatDate(item.endDate)}
             </Text>
           </View>
         </View>
@@ -184,6 +189,13 @@ const styles = StyleSheet.create({
   },
   badge: {
     backgroundColor: '#3ed493ff',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  badgeExpired: {
+    backgroundColor: '#ef6060ff',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,

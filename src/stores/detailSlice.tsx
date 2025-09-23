@@ -3,6 +3,7 @@ import {fetchDetailsAPI} from '@api/services';
 // Types
 
 export interface Detail {
+  soldDate: any;
   _id: string;
   location: GeoLocation;
   propertyTypeId: NamedEntity;

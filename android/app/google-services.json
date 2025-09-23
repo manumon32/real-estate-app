@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "1069084103649-g07qphe5um5j5n5dsg2tin9k2msq1md0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hotplotz",
+            "certificate_hash": "f2a058e3ba5e4f7eb4feddabdea8604f9a0a1dd3"
+          }
+        },
+        {
           "client_id": "1069084103649-jqdq6edof2qn3dt9d3v39h70c8e0p1e6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -460,7 +460,6 @@ const PostAdContainer = (props: any) => {
       setFields([]);
     } catch (error) {
       console.error('Post Ad Error:', error);
-    } finally {
       setLoading(false);
     }
   }, [
@@ -553,7 +552,7 @@ const PostAdContainer = (props: any) => {
         iconColor={paymentStatus ? '#00C851' : 'orange'}
         message={
           values.id
-            ? 'Your Udaptes are saved.'
+            ? 'Your changes to the ad are now live.'
             : paymentStatus
             ? 'Your ad has been submitted for review. Once approved, it will be visible on your profile. If any issues arise during the review process, we will notify you. You can also track the status of your ad directly from your profile.'
             : 'Payment Failed but still Your listing will go live after the review, you can try payment again later.'

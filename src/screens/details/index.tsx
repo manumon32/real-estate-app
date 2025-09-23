@@ -510,12 +510,19 @@ const PropertyDetails = React.memo(() => {
                 iconColor={'#171717'}
                 iconName={'currency-inr'}
               /> */}
-                Posted on{' '}
-                {new Date(items?.createdAt).toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                })}
+                {property?.adStatus === 'sold'
+                  ? 'Sold on ' +
+                    new Date(items?.soldDate).toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })
+                  : 'Posted on ' +
+                    new Date(items?.createdAt).toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
               </Text>
             </View>
           </View>
@@ -635,7 +642,10 @@ const PropertyDetails = React.memo(() => {
             {!isOwner && details?.adStatus === 'active' && bearerToken && (
               <Pressable
                 onPress={() => {
-                  if (details?.appointmentStatus === 'active') {
+                  if (
+                    details?.appointmentStatus === 'active' ||
+                    details?.appointmentStatus === 'rejected'
+                  ) {
                     setShowModal(true);
                   } else {
                     // @ts-ignore
@@ -1193,6 +1203,13 @@ const PropertyDetails = React.memo(() => {
                 />
               </View>
               <View>
+                <Text
+                  style={{
+                    color: theme.colors.text,
+                    fontSize: 10,
+                  }}>
+                  {'posted by'}
+                </Text>
                 <Text
                   style={{
                     color: theme.colors.text,

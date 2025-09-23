@@ -264,7 +264,7 @@ const Chat = React.memo(({navigation}: any) => {
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
   const {theme} = useTheme();
   const [bottomModalVisible, setBottomModalVisible] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [selectedChat, setSelectedChat] = useState(null);
   const toggleSelectChat = useCallback((id: string) => {
     console.log('Toggling selection for chat ID:', id);
     setSelectedChats(prev =>
@@ -277,11 +277,10 @@ const Chat = React.memo(({navigation}: any) => {
     setSelectedChats([]);
   };
 
-  const deleteChats = async () => {
+  const deleteChats = async (ids = null) => {
     const body = {
-      roomIds: selectedChats,
+      roomIds: ids ? ids : selectedChats,
     };
-    console.log('Deleting chats with IDs:', body);
     try {
       await deleteChatListAPI(body, {
         token: token,
@@ -557,14 +556,18 @@ const Chat = React.memo(({navigation}: any) => {
         visible={bottomModalVisible}
         onClose={() => setBottomModalVisible(false)}
         handleDelete={() => {
-          setSelectedChats([selectedChat]);
-          deleteChats();
+          console.log(selectedChat);
+          // @ts-ignore
+          deleteChats([selectedChat]);
           setBottomModalVisible(false);
         }}
         selectMultiple={() => {
           setBottomModalVisible(false);
-          setIsSelectionMode(true);
-          setSelectedChats([selectedChat]);
+          setTimeout(() => {
+            setIsSelectionMode(true);
+            // @ts-ignore
+            setSelectedChats([selectedChat]);
+          }, 300);
         }}
       />
     </SafeAreaView>

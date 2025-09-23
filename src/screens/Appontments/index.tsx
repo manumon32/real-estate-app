@@ -27,6 +27,7 @@ import {Fonts} from '@constants/font';
 import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 import NoChats from '@components/NoChatFound';
 import Toast from 'react-native-toast-message';
+import RejectReasonModal from './RejectReasonModal';
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -42,6 +43,8 @@ interface ListingCardProps {
   filterBy: any;
 
   updateStatus: any;
+  setIsReportVisible: any;
+  setSelectedItem: any;
 }
 
 const FormattedDate = (arg: string | number | Date) => {
@@ -56,7 +59,7 @@ const FormattedDate = (arg: string | number | Date) => {
     hour12: true,
   };
 
-  const FormattedDate = `Scheduled on ${date
+  const FormattedDate = `${date
     .toLocaleString('en-US', options)
     .replace(':', '.')}`;
   return FormattedDate;
@@ -72,6 +75,8 @@ const ListingCard: React.FC<ListingCardProps> = ({
   theme,
   filterBy,
   updateStatus,
+  setIsReportVisible,
+  setSelectedItem,
 }) => {
   const isDarkMode = useColorScheme() === 'dark';
   const {label, backgroundColor, textColor} = useMemo(() => {
@@ -91,8 +96,8 @@ const ListingCard: React.FC<ListingCardProps> = ({
       case 'scheduled':
         return {
           label: 'Scheduled',
-          backgroundColor: '#FCE3E0',
-          textColor: '#C14B43',
+          backgroundColor: '#2A9D8F',
+          textColor: '#fff',
         };
       default:
         return {
@@ -128,7 +133,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
           />
           <View style={styles.info}>
             <View style={styles.headerRow}>
-              <Text style={[styles.title, {color: theme.colors.text}]}>
+              <Text
+                numberOfLines={2}
+                style={[styles.title, {color: theme.colors.text}]}>
                 {title}
               </Text>
               <View style={[styles.badge, {backgroundColor}]}>
@@ -155,24 +162,49 @@ const ListingCard: React.FC<ListingCardProps> = ({
 
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
-            <Icon name="clock-outline" size={16} color="#888" />
-            <Text style={[styles.metaText, {color: theme.colors.text}]}>
-              {FormattedDate(date)}
-            </Text>
+            {status === 'rejected' ? (
+              items.notes && (
+                <View>
+                  <Text
+                    style={{
+                      fontFamily: Fonts.MEDIUM,
+                      fontSize: 14,
+                      fontWeight: 500,
+                    }}>
+                    Rejected Reason
+                  </Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text
+                      style={[
+                        styles.metaText,
+                        {color: theme.colors.text, padding: 5, width: '100%'},
+                      ]}>
+                      {items.notes}
+                    </Text>
+                  </View>
+                </View>
+              )
+            ) : (
+              <>
+                <Icon name="clock-outline" size={16} color="#888" />
+                <Text style={[styles.metaText, {color: theme.colors.text}]}>
+                  {status === 'pending'
+                    ? 'Appointment requested for '
+                    : 'Scheduled on'}
+                  {FormattedDate(date)}
+                </Text>
+              </>
+            )}
           </View>
         </View>
       </TouchableOpacity>
       {filterBy === 'myAppointments' && status === 'pending' && (
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            onPress={() =>
-              updateStatus({
-                status: 'rejected',
-                propertyId: items.propertyId._id,
-                appointmentId: items._id,
-                note: '',
-              })
-            }
+            onPress={() => {
+              setSelectedItem(items);
+              setIsReportVisible(true);
+            }}
             style={styles.outlinedButton}>
             <Text style={[styles.buttonText, {color: theme.colors.text}]}>
               Reject
@@ -207,6 +239,8 @@ const Appointments = () => {
   const items: any = route?.params?.items;
 
   const [filterBy, setFilterBy] = useState<string>('myAppointments');
+  const [isReportVisible, setIsReportVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>({});
 
   const navigation = useNavigation();
   const {theme} = useTheme();
@@ -254,6 +288,8 @@ const Appointments = () => {
           name={items.item?.ownerId.name || ''}
           filterBy={filterBy}
           updateStatus={updateStatus}
+          setIsReportVisible={setIsReportVisible}
+          setSelectedItem={setSelectedItem}
         />
       );
     },
@@ -368,6 +404,20 @@ const Appointments = () => {
         }
         ListFooterComponent={listFooter}
       />
+
+      <RejectReasonModal
+        visible={isReportVisible}
+        onClose={() => setIsReportVisible(false)}
+        onSubmit={(note: any) => {
+          selectedItem?.propertyId &&
+            updateStatus({
+              status: 'rejected',
+              propertyId: selectedItem?.propertyId?._id,
+              appointmentId: selectedItem?._id,
+              notes: note,
+            });
+        }}
+      />
     </SafeAreaView>
   );
 };
@@ -448,6 +498,7 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 12,
     color: '#888',
+    fontFamily: Fonts.REGULAR,
   },
   buttonRow: {
     flexDirection: 'row',

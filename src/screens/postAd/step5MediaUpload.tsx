@@ -244,19 +244,29 @@ const Step5MediaUpload = (props: any) => {
           <View
             style={[
               styles.popupContainer,
-              {backgroundColor: theme.colors.text},
+              {backgroundColor: theme.colors.background},
             ]}>
-            <Text style={[styles.popupTitle, {color: theme.colors.background}]}>
+            <Text style={[styles.popupTitle, {color: theme.colors.text}]}>
               Feature Your Ad
             </Text>
-            <Text
-              style={[styles.popupAmount, {color: theme.colors.background}]}>
+            <Text style={[styles.popupAmount, {color: theme.colors.text}]}>
               Amount: ₹{price ?? 'N/A'}
             </Text>
+            {/* @ts-ignore */}
+            {managePlansList?.[0].duration && (
+              <Text
+                style={[
+                  styles.popupAmount,
+                  {color: theme.colors.text, fontSize: 12},
+                ]}>
+                {/* @ts-ignore */}
+                Package Avaliability: {managePlansList?.[0].duration} Days
+              </Text>
+            )}
             <Text
               style={[
                 [styles.popupBenefits, {marginBottom: 5}],
-                {color: theme.colors.background},
+                {color: theme.colors.text},
               ]}>
               Benefits:
             </Text>
@@ -269,10 +279,7 @@ const Step5MediaUpload = (props: any) => {
               {benifits.map(items => (
                 <Text
                   key={items}
-                  style={[
-                    styles.popupBenefits,
-                    {color: theme.colors.background},
-                  ]}>
+                  style={[styles.popupBenefits, {color: theme.colors.text}]}>
                   {'  '}• {items}
                 </Text>
               ))}
@@ -318,11 +325,11 @@ const styles = StyleSheet.create({
     right: 50,
     top: 0,
     bottom: 0,
-    display:'none',
+    display: 'none',
     width: 8, // 🔹 track width
     backgroundColor: 'rgba(0,0,0,0.1)',
     borderRadius: 4,
-    height:50
+    height: 50,
   },
   scrollBarThumb: {
     width: 8, // 🔹 indicator width
@@ -401,7 +408,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     elevation: 5,
-    borderWidth: 2,
+    borderWidth: 1,
+    borderColor: 'teal',
   },
   popupTitle: {
     fontSize: 20,

@@ -31,7 +31,7 @@ import {
   uploadImages,
 } from '@api/services';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -91,6 +91,7 @@ const Verification = ({navigation}: any) => {
   const route = useRoute();
   const {
     fetchverificationDetails,
+    fetchverificationsData,
     verificationDetails,
     resetverificationDetails,
     updateVerificationDetails,
@@ -98,6 +99,7 @@ const Verification = ({navigation}: any) => {
     clientId,
     bearerToken,
     detailsBackUp,
+    verification_data,
   } = useBoundStore();
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = React.useState(false);
@@ -107,6 +109,7 @@ const Verification = ({navigation}: any) => {
   useFocusEffect(
     React.useCallback(() => {
       items?._id && fetchverificationDetails(items?._id);
+      items?._id && fetchverificationsData(items?._id);
       return () => {
         resetverificationDetails();
       };
@@ -214,8 +217,7 @@ const Verification = ({navigation}: any) => {
       sendFIles(imageUrls);
     } catch (error) {
       return [];
-    }finally{
-
+    } finally {
       setImageUploading(false); // start loader
     }
   };
@@ -277,13 +279,12 @@ const Verification = ({navigation}: any) => {
         title={items?.user?.name ?? 'Verify Listing'}
         textColor="#171717"
       />
-     <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={{flex: 1}}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
-            {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
-            <View style={{flex: 1}}>
-        {!detailsBackUp?.isVerified && (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{flex: 1}}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
+        {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+        <View style={{flex: 1}}>
           <TouchableRipple
             onPress={() => {}}
             rippleColor="rgba(0, 0, 0, .1)"
@@ -301,10 +302,24 @@ const Verification = ({navigation}: any) => {
                   style={styles.icon}
                 />
                 <View style={styles.textWrapper}>
-                  <Text style={[styles.text, {color: theme.colors.text}]}>
-                    Your listing is currently under review. You can still upload
-                    any documents you have for it.
-                  </Text>
+                  {verification_data.status === 'verified' && (
+                    <Text style={[styles.text, {color: theme.colors.text}]}>
+                      Your listing is Verified
+                    </Text>
+                  )}
+                  {(verification_data.status === 'pending' ||
+                    verification_data.status === 'pickedup') && (
+                    <Text style={[styles.text, {color: theme.colors.text}]}>
+                      Your listing is currently under review. You can still
+                      upload any documents you have for it.
+                    </Text>
+                  )}
+                  {!verification_data.status && (
+                    <Text style={[styles.text, {color: theme.colors.text}]}>
+                      we will asiign an agent for the further proceedings, You
+                      can still upload any documents you have for it.
+                    </Text>
+                  )}
                 </View>
                 <MaterialCommunityIcons
                   name="file-upload-outline"
@@ -315,52 +330,25 @@ const Verification = ({navigation}: any) => {
               </View>
             </Surface>
           </TouchableRipple>
-        )}
-        {detailsBackUp?.isVerified && (
-          <TouchableRipple
-            onPress={() => {}}
-            rippleColor="rgba(0, 0, 0, .1)"
-            style={styles.rippleContainer}>
-            <Surface
-              style={[
-                styles.surface,
-                {backgroundColor: theme.colors.background},
-              ]}>
-              <View style={styles.row}>
-                <MaterialCommunityIcons
-                  name="check"
-                  size={20}
-                  color={'green'}
-                  style={styles.icon}
-                />
-                <View style={styles.textWrapper}>
-                  <Text style={[styles.text, {color: theme.colors.text}]}>
-                    Your listing is Verified
-                  </Text>
-                </View>
-              </View>
-            </Surface>
-          </TouchableRipple>
-        )}
-        <FlatList
-          inverted
-          data={[...verificationDetails].reverse()}
-          renderItem={renderAdItem}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            backgroundColor: theme.colors.background,
-            paddingBottom: 24,
-            flexGrow: 1,
-            minHeight: '90%',
-          }}
-          ListHeaderComponentStyle={{
-            padding: 0,
-            backgroundColor: theme.colors.background,
-          }}
-          showsVerticalScrollIndicator={false}
-          ListFooterComponent={<></>}
-        />
-        {/* <SlideToRecordButton
+          <FlatList
+            inverted
+            data={[...verificationDetails].reverse()}
+            renderItem={renderAdItem}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{
+              backgroundColor: theme.colors.background,
+              paddingBottom: 24,
+              flexGrow: 1,
+              minHeight: '90%',
+            }}
+            ListHeaderComponentStyle={{
+              padding: 0,
+              backgroundColor: theme.colors.background,
+            }}
+            showsVerticalScrollIndicator={false}
+            ListFooterComponent={<></>}
+          />
+          {/* <SlideToRecordButton
           onSend={filePath => {
             console.log('📤 Sending audio file:', filePath);
 
@@ -370,36 +358,36 @@ const Verification = ({navigation}: any) => {
             // 3. Share or preview
           }}
         /> */}
-        {selectedImage && (
-          <View style={styles.imagePreviewContainer}>
-            {/* @ts-ignore */}
-            <Image source={{uri: selectedImage?.uri}} style={styles.image} />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => {
-                setImage(null);
-              }}>
-              <Icon name="close-circle" size={20} color="#ff3333" />
-            </TouchableOpacity>
-          </View>
-        )}
+          {selectedImage && (
+            <View style={styles.imagePreviewContainer}>
+              {/* @ts-ignore */}
+              <Image source={{uri: selectedImage?.uri}} style={styles.image} />
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => {
+                  setImage(null);
+                }}>
+                <Icon name="close-circle" size={20} color="#ff3333" />
+              </TouchableOpacity>
+            </View>
+          )}
 
-        {imageUploading && (
-          <View style={{padding: 10, alignItems: 'center'}}>
-            <ActivityIndicator size="small" color={theme.colors.text} />
-            <Text
-              style={{fontSize: 12, color: theme.colors.text, marginTop: 4}}>
-              Uploading ...
-            </Text>
-          </View>
-        )}
-        {!detailsBackUp?.isVerified && (
-          <ChatFooter
-            setAttachModalVisible={setAttachModalVisible}
-            handleSend={handleSend}
-            items={items}
-          />
-        )}
+          {imageUploading && (
+            <View style={{padding: 10, alignItems: 'center'}}>
+              <ActivityIndicator size="small" color={theme.colors.text} />
+              <Text
+                style={{fontSize: 12, color: theme.colors.text, marginTop: 4}}>
+                Uploading ...
+              </Text>
+            </View>
+          )}
+          {!detailsBackUp?.isVerified && (
+            <ChatFooter
+              setAttachModalVisible={setAttachModalVisible}
+              handleSend={handleSend}
+              items={items}
+            />
+          )}
         </View>
       </KeyboardAvoidingView>
 

@@ -137,7 +137,7 @@ const PropertyCard = React.memo(
 
           <Text
             style={[styles.title, {color: theme.colors.text}]}
-            numberOfLines={2}>
+            numberOfLines={arg?2:1}>
             {items.title}
           </Text>
 
@@ -156,7 +156,7 @@ const PropertyCard = React.memo(
           </View>
 
           {/* Distance */}
-          {distanceText && (
+          {distanceText &&  arg && (
             <View style={styles.infoRow}>
               <InfoItem
                 icon="vector-line"

@@ -30,6 +30,7 @@ interface ListingCardProps {
   imageUrl: string;
   navigation: any;
   items: any;
+  reason: string;
 }
 
 const FormattedDate = (arg: string | number | Date) => {
@@ -67,6 +68,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   date = '',
   imageUrl = '',
   navigation,
+  reason,
 }) => {
   return (
     <View style={styles.card}>
@@ -81,7 +83,10 @@ const ListingCard: React.FC<ListingCardProps> = ({
               <Text style={styles.title}>{title}</Text>
             </View>
             <Text style={styles.location} numberOfLines={1}>
-              {location}
+              {items.propertyId.address}
+            </Text>
+            <Text style={styles.location} numberOfLines={1}>
+              {reason}
             </Text>
           </View>
         </View>
@@ -112,6 +117,7 @@ const ReportAd = () => {
         <ListingCard
           title={items?.item?.propertyId?.title || ''}
           location={items?.item?.reason || ''}
+          reason={items?.item?.reason || ''}
           price={items?.item?.price}
           status={items?.item?.adStatus}
           date={items?.item?.createdAt}

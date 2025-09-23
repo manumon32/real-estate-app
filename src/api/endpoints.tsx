@@ -18,6 +18,7 @@ export const API = {
     GET_MYADS: '/property/my-ads',
     VERIFICATION: {
       GET: '/property-verify',
+      GET_BY_ID: (id: string | number) => `/property-verify/${id}`,
       GET_MESSAGES: '/property-verify-msg',
       VERIFY_LISTING: '/property-verify-msg',
     },

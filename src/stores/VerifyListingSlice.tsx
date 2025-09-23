@@ -1,4 +1,8 @@
-import {fetchverificationDetailsAPI, startVerificationAPI} from '@api/services';
+import {
+  fetchverificationDataAPI,
+  fetchverificationDetailsAPI,
+  startVerificationAPI,
+} from '@api/services';
 import {navigate} from '@navigation/RootNavigation';
 
 export interface Verificationlist {
@@ -18,11 +22,12 @@ export interface VerificationSlice {
   verification_loading: boolean;
   verificationError: string | null;
   verification_page: number;
+  verification_data: any;
   verification_hasMore: boolean;
   verification_totalpages: number;
   startVerification: (payload: any) => Promise<void>;
   updateVerificationDetails: (msg?: any) => Promise<any>;
-
+  fetchverificationsData: (msg?: any) => Promise<any>;
   fetchverificationDetails: (filters?: any, page?: number) => Promise<void>;
   resetverificationDetails: () => Promise<any>;
 }
@@ -36,6 +41,7 @@ export const createVerificationSlice = (
   verificationDetails: [],
   verification_page: 0,
   verification_hasMore: false,
+  verification_data: {},
   verification_totalpages: 0,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startVerification: async payload => {
@@ -57,7 +63,6 @@ export const createVerificationSlice = (
       set({verificationError: err.message, verification_loading: false});
     }
   },
-
   updateVerificationDetails: (msg: any) =>
     set((state: any) => ({
       verificationDetails: [...state.verificationDetails, msg],
@@ -78,6 +83,23 @@ export const createVerificationSlice = (
         verification_page: res.pageNum,
         verification_hasMore: res.pageNum < res.pages ? true : false,
         verification_totalpages: res.total,
+        verification_loading: false,
+      }));
+    } catch (err: any) {
+      set({verificationError: err.message, verification_loading: false});
+    }
+  },
+  fetchverificationsData: async (id: any) => {
+    set({verification_loading: true, verificationDetails: []});
+    try {
+      const res = await fetchverificationDataAPI(id, {
+        token: get().token,
+        clientId: get().clientId,
+        bearerToken: get().bearerToken,
+      });
+      console.log('fetchverificationsData', res)
+      set(() => ({
+        verification_data: res,
         verification_loading: false,
       }));
     } catch (err: any) {

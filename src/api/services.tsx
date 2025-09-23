@@ -487,6 +487,29 @@ export const fetchverificationDetailsAPI = async (
   }
 };
 
+
+
+//Update order
+
+export const fetchverificationDataAPI = async (
+  id: any,
+  configArg: any,
+): Promise<any> => {
+  try {
+   const headers = await getHeaders(configArg);
+    const apiConfig: any = {
+      method: 'get',
+      url: API.LISTINGS.VERIFICATION.GET_BY_ID(id),
+      params: {},
+      headers,
+    };
+    const response = await apiRequest(apiConfig);
+    return response.data;
+  } catch (error: any) {
+    throw new Error('Failed to fetch Details');
+  }
+};
+
 //Verify Listing
 
 // Bank list
@@ -657,7 +680,7 @@ export const fetchAppointMentsAPI = async (configArg: any): Promise<any> => {
       params: {
         noPagination: true,
         orderBy: 'createdAt',
-        orderByDir: 'desc',
+        orderByDir: 'asc',
         populate: 'propertyId',
       },
       headers,

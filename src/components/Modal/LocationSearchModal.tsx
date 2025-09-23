@@ -77,33 +77,42 @@ const CommonLocationModal: React.FC<Props> = ({
     let city: any = null;
     let district: any = null;
     let state: any = null;
-
     components.forEach(comp => {
-      if (comp.types.includes('locality') && !locality)
+      if (comp.types.includes('locality') && !locality) {
         locality = comp.long_name;
-      if (comp.types.includes('administrative_area_level_2') && !city)
+      }
+      if (comp.types.includes('sublocality_level_1') && !locality) {
+        locality = comp.long_name;
+      }
+      if (comp.types.includes('sublocality_level_2') && !locality) {
+        locality = comp.long_name;
+      }
+      if (comp.types.includes('administrative_area_level_2') && !city) {
         city = comp.long_name;
-      if (comp.types.includes('administrative_area_level_3') && !district)
+      }
+      if (comp.types.includes('administrative_area_level_3') && !district) {
         district = comp.long_name;
-      if (
-        (comp.types.includes('establishment') ||
-          comp.types.includes('natural_feature')) &&
-        !district &&
-        !city &&
-        !locality
-      )
-        locality = comp.long_name;
-      if (comp.types.includes('administrative_area_level_1') && !state)
+      }
+      if (comp.types.includes('administrative_area_level_1') && !state) {
         state = comp.long_name;
+      }
     });
-
+// console.log(locality,city, district, state )
     // Determine final parts according to OLX priority
     const parts: string[] = [];
 
-    if (locality) parts.push(locality);
-    if (!locality && city) parts.push(city); // fallback if locality missing
-    if (!city && district) parts.push(district); // fallback
-    if (!district && state) parts.push(state);
+    if (locality) {
+      parts.push(locality);
+    }
+    if (!locality && city) {
+      parts.push(city);
+    } // fallback if locality missing
+    if (!city && district) {
+      parts.push(district);
+    } // fallback
+    if (!district && state) {
+      parts.push(state);
+    }
     // Remove duplicates
     const uniqueParts = parts.filter(
       (item, index) => parts.indexOf(item) === index,

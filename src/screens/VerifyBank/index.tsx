@@ -297,7 +297,7 @@ const Verification = ({navigation}: any) => {
                     This property is eligible for loan from {items.name}.
                   </Text>
                 )}
-                {items.status === 'pending' && (
+                {(items.status === 'pending' || items.status === 'pickedup') && (
                   <Text style={[styles.text, {color: theme.colors.text}]}>
                     loan process is in progress, You can still upload any
                     documents you have for it.

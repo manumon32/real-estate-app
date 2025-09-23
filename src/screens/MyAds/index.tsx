@@ -54,7 +54,7 @@ const FormattedDate = (arg: string | number | Date) => {
     hour12: true,
   };
 
-  const FormattedDate = `Posted on ${date
+  const FormattedDate = `${date
     .toLocaleString('en-US', options)
     .replace(':', '.')}`;
   return FormattedDate;
@@ -64,9 +64,7 @@ const AdStatusEnum: any = {
   Pending: 'pending',
   Active: 'active',
   Rejected: 'rejected',
-  Expired: 'expired',
   Blocked: 'blocked',
-  Deactivated: 'deactivated',
   Sold: 'sold',
 };
 
@@ -178,7 +176,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
             {items.isFeatured && (
               <View style={[styles.badge]}>
                 <Text numberOfLines={2} style={[styles.badgeText]}>
-                  {'featured'}
+                  {'Featured'}
                 </Text>
               </View>
             )}
@@ -203,10 +201,22 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <View style={styles.metaItem}>
             <Icon name="clock-outline" size={16} color="#888" />
             <Text style={[styles.metaText, {color: theme.colors.text}]}>
-              {FormattedDate(date)}
+              {status === 'sold'
+                ? 'Sold on ' + FormattedDate(items.soldDate)
+                : 'Posted on ' + FormattedDate(date)}
             </Text>
           </View>
         </View>
+        {items.adStatusNote && (
+          <View style={styles.metaRow}>
+            <View style={styles.metaItem}>
+              <Icon name="information" size={16} color="#C14B43" />
+              <Text style={[styles.metaText, {color: '#C14B43'}]}>
+                {items.adStatusNote}
+              </Text>
+            </View>
+          </View>
+        )}
       </TouchableOpacity>
       <View style={styles.buttonRow}>
         {label !== 'Sold' && (
@@ -517,6 +527,14 @@ const MyAds = () => {
             <Text style={styles.popupAmount}>
               {/* @ts-ignore */}
               Amount: ₹{managePlansList?.[0]?.price ?? 'N/A'}
+            </Text>
+            <Text
+              style={[
+                styles.popupAmount,
+                {color: theme.colors.text, fontSize: 12},
+              ]}>
+              {/* @ts-ignore */}
+              Package Avaliability: {managePlansList?.[0].duration} Days
             </Text>
             <Text style={styles.popupBenefits}>
               Benefits:
