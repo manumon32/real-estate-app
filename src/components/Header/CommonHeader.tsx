@@ -29,7 +29,7 @@ interface CommonHeaderProps {
   rightButton?: boolean;
   rightButtonText?: string;
   rightButtonLoading?: boolean;
-  rightButtonDisabled?:boolean;
+  rightButtonDisabled?: boolean;
 }
 
 const CommonHeader: React.FC<CommonHeaderProps> = ({
@@ -45,7 +45,7 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
   rightText,
   rightButtonText,
   rightButtonLoading = false,
-  rightButtonDisabled=false
+  rightButtonDisabled = false,
 }) => {
   const navigation = useNavigation();
   const isDarkMode = useColorScheme() === 'dark';
@@ -142,6 +142,7 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({
         )}
         {rightButton ? (
           <Button
+            style={{backgroundColor: !rightButtonDisabled ? '#269669' : '#ccc'}}
             onPress={onRightPress}
             disabled={rightButtonDisabled}
             loading={rightButtonLoading}

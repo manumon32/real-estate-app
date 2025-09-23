@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
@@ -117,9 +118,9 @@ const OtpVerificationScreen = ({
   // Auto focus hidden input on iOS (shows suggestion bar)
   useEffect(() => {
     if (Platform.OS === 'ios') {
-      setTimeout(() => {
-        hiddenInputRef.current?.focus();
-      }, 500);
+    setTimeout(() => {
+      hiddenInputRef.current?.focus();
+    }, 500);
     } else {
     }
   }, []);
@@ -160,6 +161,8 @@ const OtpVerificationScreen = ({
           style={{position: 'absolute', opacity: 0, height: 0, width: 0}}
           keyboardType="number-pad"
           textContentType="oneTimeCode"
+          autoComplete="sms-otp"
+          importantForAutofill="yes"
           value={otp.join('')}
           onChangeText={handleOtpChange}
         />

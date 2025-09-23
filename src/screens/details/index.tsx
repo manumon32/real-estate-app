@@ -535,14 +535,6 @@ const PropertyDetails = React.memo(() => {
             </View>
           )}
         </View>
-        {/* <Tooltip
-          isVisible={showTip}
-          content={
-            <Text>This bank is verified and ready to offer a home loan</Text>
-          }
-          placement="bottom"
-          onClose={() => setShowTip(false)}>
-        </Tooltip> */}
         {!detailLoading && (
           <>
             {banks.filter((item: any) => item.status === 'verified').length >
@@ -714,7 +706,7 @@ const PropertyDetails = React.memo(() => {
               </Pressable>
             )}
             <View style={styles.row}>
-              {property?.numberOfBedrooms && (
+              {property?.numberOfBedrooms ? (
                 <View style={styles.iconsContainer}>
                   <IconButton
                     iconSize={20}
@@ -730,8 +722,10 @@ const PropertyDetails = React.memo(() => {
                     Bedroom
                   </Text>
                 </View>
+              ) : (
+                <></>
               )}
-              {property?.numberOfBathrooms && (
+              {property?.numberOfBathrooms ? (
                 <View style={styles.iconsContainer}>
                   <IconButton
                     iconSize={20}
@@ -747,22 +741,26 @@ const PropertyDetails = React.memo(() => {
                     Bathroom
                   </Text>
                 </View>
+              ) : (
+                <></>
               )}
-              <View style={styles.iconsContainer}>
-                <IconButton
-                  iconSize={20}
-                  iconColor={'#2F8D79'}
-                  iconName={'ruler-square'}
-                />
-                <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
-                  {property?.areaSize}
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  style={[styles.iconsTextStle, {color: '#171717'}]}>
-                  {'sq.ft'}
-                </Text>
-              </View>
+              {property?.areaSize && (
+                <View style={styles.iconsContainer}>
+                  <IconButton
+                    iconSize={20}
+                    iconColor={'#2F8D79'}
+                    iconName={'ruler-square'}
+                  />
+                  <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
+                    {property?.areaSize}
+                  </Text>
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.iconsTextStle, {color: '#171717'}]}>
+                    {'sq.ft'}
+                  </Text>
+                </View>
+              )}
               {property?.loanEligible && (
                 <View style={styles.iconsContainer}>
                   <IconButton
@@ -1050,7 +1048,6 @@ const PropertyDetails = React.memo(() => {
               </>
             }
 
-
             <View
               style={{
                 backgroundColor: '#EBEBEB',
@@ -1222,8 +1219,16 @@ const PropertyDetails = React.memo(() => {
         )}
         {property?.listingTypeId?._id || property?.propertyTypeId?._id ? (
           <>
-            <Text style={[styles.section, sectionColor, {marginBottom:10}]}>Similar Ads</Text>
-            <View style={[{backgroundColor: theme.colors.backgroundHome, paddingBottom:10}]}>
+            <Text style={[styles.section, sectionColor, {marginBottom: 10}]}>
+              Similar Ads
+            </Text>
+            <View
+              style={[
+                {
+                  backgroundColor: theme.colors.backgroundHome,
+                  paddingBottom: 10,
+                },
+              ]}>
               <SimilarAds
                 token={token}
                 clientId={clientId}

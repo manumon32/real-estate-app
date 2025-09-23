@@ -27,7 +27,7 @@ const FavAds = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      style={[styles.container, {backgroundColor: theme.colors.background, height: '100%'}]}>
       <FlatList
         data={favorites}
         numColumns={2}
@@ -39,12 +39,12 @@ const FavAds = () => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: 100,
+          // paddingBottom: 120,
           backgroundColor:
             favorites.length <= 0
               ? theme.colors.background
-              : theme.colors.backgroundHome,
-          minHeight: 900,
+              : theme.colors.background,
+          minHeight: 1000,
         }}
         refreshControl={
           <RefreshControl
@@ -63,9 +63,9 @@ const FavAds = () => {
                 navigation.navigate('Main');
               }}
               icon="alert-circle-outline"
-              title="Its quite here..."
-              body="Get out there to start finding great deals."
-              buttonText={'Explore now'}
+              title="No favourites yet"
+              body="Find items you love and add them here."
+              buttonText={'Explore'}
               iconName={'Fav'}
             />
           ) : (

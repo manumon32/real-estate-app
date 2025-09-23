@@ -14,22 +14,22 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import {useNavigation} from '@react-navigation/native';
+import {postAdAPI, uploadImages} from '@api/services';
+import {useTheme} from '@theme/ThemeProvider';
+import CommonHeader from '@components/Header/CommonHeader';
+import {RequestMethod} from '@api/request';
+import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
+import SuccessModal from '@components/Modal/SuccessModal';
+import useBoundStore from '@stores/index';
 import Step1BasicInfo from './step1BasicInfo';
 import Step2 from './step2PriceDetails';
 import Step3LocationDetails from './step3LocationDetails';
 import Step4PropertyDetails from './step4PropertyDetails';
 import Step5MediaUpload from './step5MediaUpload';
-import CommonHeader from '@components/Header/CommonHeader';
-import CommonSuccessModal from '@components/Modal/CommonSuccessModal';
-import useBoundStore from '@stores/index';
 import Preview from './preview';
-import {postAdAPI, uploadImages} from '@api/services';
-import {RequestMethod} from '@api/request';
-import {startCheckoutPromise} from '@screens/ManagePlan/checkout';
-import {useTheme} from '@theme/ThemeProvider';
 import {compressImage} from '../../helpers/ImageCompressor';
-import Toast from 'react-native-toast-message';
 
 interface FooterProps {
   currentStep: number;
@@ -545,7 +545,7 @@ const PostAdContainer = (props: any) => {
           values={values}
         />
       </KeyboardAvoidingView>
-      <CommonSuccessModal
+      <SuccessModal
         visible={visible}
         iconName={
           paymentStatus ? 'check-circle-outline' : 'alert-circle-outline'
@@ -555,13 +555,13 @@ const PostAdContainer = (props: any) => {
           values.id
             ? 'Your Udaptes are saved.'
             : paymentStatus
-            ? 'Your listing will go live after the review.'
+            ? 'Your ad has been submitted for review. Once approved, it will be visible on your profile. If any issues arise during the review process, we will notify you. You can also track the status of your ad directly from your profile.'
             : 'Payment Failed but still Your listing will go live after the review, you can try payment again later.'
         }
         onClose={() => {
-          setVisible(false);
           resetPostAd();
           setFields([]);
+          setVisible(false);
           navigation.reset({
             index: 0,
             routes: [

@@ -65,6 +65,7 @@ export default function NotificationListSwipe() {
     clientId,
     bearerToken,
     updateNotificationCount,
+    setFilters,
   } = useBoundStore();
   const {theme} = useThemes();
   const [refreshing, setRefreshing] = useState(false);
@@ -350,7 +351,10 @@ export default function NotificationListSwipe() {
           styles.container,
           {
             minHeight: notifications_List.length > 0 ? windowHeight : 0,
-            backgroundColor: theme.colors.background,
+            backgroundColor:
+              notifications_List.length > 0
+                ? theme.colors.backgroundHome
+                : theme.colors.background,
           },
         ]}
         refreshControl={
@@ -365,10 +369,29 @@ export default function NotificationListSwipe() {
               body="Get out there to start finding great deals."
               iconName="Notifications"
               onExplore={() => {
+                setFilters({page: 0});
                 // @ts-ignore
-                navigation.navigate('Main');
+                navigation.reset({
+                  index: 0,
+                  routes: [
+                    {
+                      // @ts-ignore
+                      name: 'Main',
+                      state: {
+                        index: 4, // 'MyAds' is the 4th tab (0-based index)
+                        routes: [
+                          {name: 'Home'},
+                          {name: 'Chat'},
+                          {name: 'AddPost'},
+                          {name: 'MyAds'},
+                          {name: 'filter'},
+                        ],
+                      },
+                    },
+                  ],
+                });
               }}
-              buttonText={'Explore now'}
+              buttonText={'Explore'}
             />
           ) : notifications_Loading ? (
             <ActivityIndicator color={theme.colors.text} />

@@ -361,9 +361,9 @@ const Appointments = () => {
                   //     ? 'You don’t have any pending requests'
                   //     : 'You don’t have any appointments yet.'
                   // }
-                  title="Its quite here..."
-                  body="Get out there to start finding great deals."
-                  buttonText={'Explore'}
+                  title="No Appointments yet."
+                  body="Book appointments to see them here"
+                  buttonText={'Book Appointment'}
                   iconName="Appointment"
                 />
               )}

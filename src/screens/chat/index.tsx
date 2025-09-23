@@ -257,6 +257,8 @@ const Chat = React.memo(({navigation}: any) => {
     bearerToken,
     token,
     clientId,
+    setFilters,
+    clearFilterList,
   } = useBoundStore();
   const [filterBy, setFilterBy] = useState<any>(null);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -363,6 +365,36 @@ const Chat = React.memo(({navigation}: any) => {
       user,
     ],
   );
+
+  const renderFooter = () => {
+    return (
+      <>
+        {chatListloading && chatList.length <= 0 && <ChatListSkeleton />}
+        {(filterBy
+          ? chatList.filter((items: any) =>
+              filterBy === 'sell'
+                ? items.property.customerId === user?._id
+                : items.property.customerId !== user?._id,
+            ).length <= 0
+          : chatList.length <= 0) && !chatListloading ? (
+          <NoChats
+            onExplore={() => {
+            setFilters({page:0});
+            // @ts-ignore
+            navigation.navigate('filter');
+            }}
+            buttonText={'Explore'}
+            icon="message-text-outline"
+            iconName={'Chat'}
+            title="Its quite here..."
+            body="Get out there to start finding great deals."
+          />
+        ) : (
+          <></>
+        )}
+      </>
+    );
+  };
 
   return (
     <SafeAreaView
@@ -521,25 +553,7 @@ const Chat = React.memo(({navigation}: any) => {
             colors={['#40DABE', '#40DABE', '#227465']}
           />
         }
-        ListFooterComponent={
-          <>
-            {chatListloading && chatList.length <= 0 && <ChatListSkeleton />}
-            {chatList.length <= 0 && !chatListloading ? (
-              <NoChats
-                onExplore={() => {
-                  navigation.navigate('filter');
-                }}
-                buttonText={'Explore now'}
-                icon="message-text-outline"
-                iconName={'Chat'}
-                title="Its quite here..."
-                body="Get out there to start finding great deals."
-              />
-            ) : (
-              <></>
-            )}
-          </>
-        }
+        ListFooterComponent={renderFooter}
       />
       <BottomModal
         visible={bottomModalVisible}

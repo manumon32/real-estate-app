@@ -390,7 +390,7 @@ function App(): React.JSX.Element {
         centerContent={true}
         contentContainerStyle={{
           paddingBottom: 100,
-          backgroundColor: theme.colors.backgroundHome,
+          backgroundColor: filter_listings.length >0 ? theme.colors.backgroundHome: theme.colors.background,
           minHeight: 800,
         }}
         showsVerticalScrollIndicator={false}
@@ -414,7 +414,7 @@ function App(): React.JSX.Element {
                 icon="message-text-outline"
                 // title="No Chat Found"
                 body="we cannot find anything on this search try again with diffrent options."
-                // buttonText={'Explore now'}
+                // buttonText={'Explore'}
               />
             </>
           ) : (

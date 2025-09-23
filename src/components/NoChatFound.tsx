@@ -78,7 +78,7 @@ const NoChats = (props: any) => {
           <MaterialCommunityIcons
             name={'arrow-right'}
             size={18}
-            color={'#219653'}
+            color={'#fff'}
             style={{
               margin: 2,
               marginLeft: 5,
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.REGULAR,
   },
   button: {
-    backgroundColor: '#DDFFE8',
+    backgroundColor:  '#269669',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     top: 2,
   },
   buttonText: {
-    color: '#219653',
+    color: '#fff',
     fontWeight: '600',
     fontSize: 16,
     fontFamily: Fonts.BOLD,

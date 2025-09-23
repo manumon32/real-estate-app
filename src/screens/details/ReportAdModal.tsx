@@ -44,10 +44,10 @@ const ReportAdModal = ({visible, onClose, onSubmit}: any) => {
       transparent>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.backdrop}>
-         <KeyboardAvoidingView
-        style={{flex: 1, justifyContent: 'flex-end'}}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+          <KeyboardAvoidingView
+            style={{flex: 1, justifyContent: 'flex-end'}}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
             <View style={styles.modal}>
               {/* Header */}
               <View style={styles.header}>
@@ -80,7 +80,9 @@ const ReportAdModal = ({visible, onClose, onSubmit}: any) => {
                       size={22}
                       color="#333"
                     />
-                    <Text style={styles.optionText}>{item.charAt(0).toUpperCase() + item.slice(1)}</Text>
+                    <Text style={styles.optionText}>
+                      {item.charAt(0).toUpperCase() + item.slice(1)}
+                    </Text>
                   </Pressable>
                 )}
                 scrollEnabled={false}

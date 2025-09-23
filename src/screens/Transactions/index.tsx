@@ -70,9 +70,13 @@ const ListingCard = ({item, theme, navigation}: any) => {
             <Text style={[styles.price, {color: theme.colors.text}]}>
               ₹{plan?.price}
             </Text>
-            <Text style={[styles.subText, {color: theme.colors.text}]}>
-              Featured
-            </Text>
+            {property.isFeatured && (
+              <View style={[styles.badge]}>
+                <Text numberOfLines={2} style={[styles.badgeText]}>
+                  {'featured'}
+                </Text>
+              </View>
+            )}
             <Text style={styles.subText}>
               Valid till: {formatDate(item.endDate)}
             </Text>
@@ -179,14 +183,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   badge: {
+    backgroundColor: '#3ed493ff',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
-    marginLeft: 8,
+    alignSelf: 'flex-start',
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '600',
+    color: '#fff',
   },
   price: {
     fontSize: 16,

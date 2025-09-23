@@ -253,7 +253,7 @@ const CommonLocationModal: React.FC<Props> = ({
         setLoading(false);
       },
       () => {
-        Alert.alert('Lat Long fetch failed');
+        // Alert.alert('Lat Long fetch failed');
         setLoading(false);
       },
       {

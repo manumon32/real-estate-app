@@ -137,7 +137,7 @@ const ReportAd = () => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingBottom: reportAdList.length > 0 ? 120 : 0,
-          backgroundColor: theme.colors.backgroundHome,
+          backgroundColor: theme.colors.background,
           minHeight: reportAdList.length > 0 ? 800 : 0,
           //  padding: 14,
         }}
@@ -177,7 +177,7 @@ const ReportAd = () => {
                 icon="message-text-outline"
                 title="Its quite here..."
                 body="Get out there to start finding great deals."
-                buttonText={'Explore now'}
+                buttonText={'Explore'}
                 iconName="ReportAd"
               />
             ) : (

@@ -278,13 +278,15 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           otp: null,
           otpLoading: false,
         });
-        Toast.show({
-          type: 'success',
-          text1: 'Login Successful',
-          text2: 'Welcome to the app!',
-          position: 'bottom',
-          visibilityTime: 1000,
-        });
+        setTimeout(() => {
+          Toast.show({
+            type: 'success',
+            text1: 'Login Successful',
+            text2: 'Welcome to the app!',
+            position: 'bottom',
+            visibilityTime: 1000,
+          });
+        }, 300);
       } else {
         set({
           loginError: true,
