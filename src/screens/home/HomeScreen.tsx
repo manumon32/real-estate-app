@@ -234,7 +234,7 @@ function HomeScreen({navigation}: any): React.JSX.Element {
         ListHeaderComponent={MemoHeader}
         contentContainerStyle={{
           paddingBottom: 100,
-          backgroundColor: theme.colors.backgroundHome,
+          backgroundColor: listings.length > 0 ? theme.colors.backgroundHome: theme.colors.background,
           minHeight: 900,
         }}
         showsVerticalScrollIndicator={false}
