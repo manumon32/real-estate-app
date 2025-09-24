@@ -54,7 +54,6 @@ const PropertyDetails = React.memo(() => {
   const route = useRoute();
   const {items, id}: any = route.params;
   const navigation = useNavigation();
-  const [error, setError] = useState(false);
   const [bankModalVisible, setBankModalVisible] = useState(false);
   const [selectedBank, setSelectedBank] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -510,19 +509,24 @@ const PropertyDetails = React.memo(() => {
                 iconColor={'#171717'}
                 iconName={'currency-inr'}
               /> */}
-                {property?.adStatus === 'sold'
-                  ? 'Sold on ' +
-                    new Date(items?.soldDate).toLocaleDateString('en-GB', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                    })
-                  : 'Posted on ' +
-                    new Date(items?.createdAt).toLocaleDateString('en-GB', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
+                {!detailLoading &&
+                  (property?.adStatus === 'sold'
+                    ? 'Sold on ' +
+                      new Date(property?.soldDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })
+                    : 'Posted on ' +
+                      // @ts-ignore
+                      new Date(property?.createdAt).toLocaleDateString(
+                        'en-GB',
+                        {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        },
+                      ))}
               </Text>
             </View>
           </View>
@@ -587,6 +591,45 @@ const PropertyDetails = React.memo(() => {
                 </View>
               </>
             )}
+            {isOwner &&
+              (details?.adStatus === 'blocked' ||
+                details?.adStatus === 'rejected') && (
+                <Pressable
+                  onPress={() => {
+                    verifyListing();
+                  }}
+                  style={{
+                    // top: 15,
+                    margin: 16,
+                    padding: 16,
+                    backgroundColor: '#f44a4aff',
+                    borderRadius: 10,
+                    height: 56,
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    borderWidth: 1,
+                    borderColor: '#ea860bff',
+                  }}>
+                  <View
+                    style={{
+                      width: '95%',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}>
+                    <Text
+                      style={{
+                        color: '#fff',
+                        fontSize: 14,
+                        fontFamily: Fonts.MEDIUM,
+                        fontWeight: '500',
+                      }}>
+                      {details?.adStatus === 'blocked'
+                        ? 'This Listing is Blocked'
+                        : 'This Listing Rejected'}
+                    </Text>
+                  </View>
+                </Pressable>
+              )}
             {isOwner && details?.adStatus === 'active' && (
               <Pressable
                 onPress={() => {
@@ -845,7 +888,7 @@ const PropertyDetails = React.memo(() => {
                 top: 15,
               }}
             />
-            {isOwner && details?.adStatus === 'active' && (
+            {isOwner && details?.adStatus === 'active' && details?.showLoanOffers && (
               <Pressable
                 onPress={async () => {
                   (await items?._id) && startBankVerification(items?._id);
@@ -896,7 +939,7 @@ const PropertyDetails = React.memo(() => {
             )}
             {!isOwner &&
               details?.adStatus === 'active' &&
-              details?.listingTypeId?._id === '684176d84eb67a1a216b94fd' && (
+              details?.showEmiCalculator && (
                 <Pressable
                   onPress={async () => {
                     // @ts-ignore
@@ -1190,14 +1233,12 @@ const PropertyDetails = React.memo(() => {
               <View style={{width: '20%'}}>
                 <Image
                   source={
-                    error || !property?.customerId?.profilePicture
+                    !property?.customerId?.profilePicture
                       ? require('@assets/images/images.jpeg')
                       : {
                           uri: property?.customerId?.profilePicture,
-                          cache: Image.cacheControl.immutable,
                         }
                   }
-                  onError={() => setError(true)}
                   resizeMode="cover"
                   style={{height: 52, width: 52, borderRadius: 50}}
                 />

@@ -355,7 +355,6 @@ const PostAdContainer = (props: any) => {
     setLoading(true);
 
     try {
-      console.log;
       // Filter local vs uploaded images
       const localImages = (
         await Promise.all(
@@ -490,7 +489,6 @@ const PostAdContainer = (props: any) => {
     setVisible(false);
     setPaymentStatus(true);
   }, [fetchPlans]);
-
   return (
     <React.Fragment>
       {loading && (
@@ -552,7 +550,7 @@ const PostAdContainer = (props: any) => {
         iconColor={paymentStatus ? '#00C851' : 'orange'}
         message={
           values.id
-            ? 'Your changes to the ad are now live.'
+            ? 'Your ad has been moved to pending status for review and will be reactivated once approved.'
             : paymentStatus
             ? 'Your ad has been submitted for review. Once approved, it will be visible on your profile. If any issues arise during the review process, we will notify you. You can also track the status of your ad directly from your profile.'
             : 'Payment Failed but still Your listing will go live after the review, you can try payment again later.'

@@ -92,13 +92,14 @@ const Verification = ({navigation}: any) => {
   const {
     fetchverificationDetails,
     fetchverificationsData,
-    verificationDetails,
     resetverificationDetails,
     updateVerificationDetails,
     token,
     clientId,
     bearerToken,
     detailsBackUp,
+    verificationDetails,
+    verification_loading,
     verification_data,
   } = useBoundStore();
   const {items}: any = route.params;
@@ -108,6 +109,7 @@ const Verification = ({navigation}: any) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      console.log('items?._id', items?._id);
       items?._id && fetchverificationDetails(items?._id);
       items?._id && fetchverificationsData(items?._id);
       return () => {
@@ -115,6 +117,7 @@ const Verification = ({navigation}: any) => {
       };
     }, [items]),
   );
+  console.log('verificationDetails', verificationDetails);
 
   const renderAdItem = useCallback(
     (items: any) => {
@@ -289,46 +292,52 @@ const Verification = ({navigation}: any) => {
             onPress={() => {}}
             rippleColor="rgba(0, 0, 0, .1)"
             style={styles.rippleContainer}>
-            <Surface
-              style={[
-                styles.surface,
-                {backgroundColor: theme.colors.background},
-              ]}>
-              <View style={styles.row}>
-                <MaterialCommunityIcons
-                  name="clock-alert-outline"
-                  size={24}
-                  color={theme.colors.primary}
-                  style={styles.icon}
-                />
-                <View style={styles.textWrapper}>
-                  {verification_data.status === 'verified' && (
-                    <Text style={[styles.text, {color: theme.colors.text}]}>
-                      Your listing is Verified
-                    </Text>
-                  )}
-                  {(verification_data.status === 'pending' ||
-                    verification_data.status === 'pickedup') && (
-                    <Text style={[styles.text, {color: theme.colors.text}]}>
-                      Your listing is currently under review. You can still
-                      upload any documents you have for it.
-                    </Text>
-                  )}
-                  {!verification_data.status && (
-                    <Text style={[styles.text, {color: theme.colors.text}]}>
-                      we will asiign an agent for the further proceedings, You
-                      can still upload any documents you have for it.
-                    </Text>
-                  )}
+            {!verification_loading ? (
+              <Surface
+                style={[
+                  styles.surface,
+                  {backgroundColor: theme.colors.background},
+                ]}>
+                <View style={styles.row}>
+                  <MaterialCommunityIcons
+                    name={
+                      verification_data?.status === 'verified'
+                        ? 'check'
+                        : 'check'
+                    }
+                    size={24}
+                    color={theme.colors.primary}
+                    style={styles.icon}
+                  />
+                  <View style={styles.textWrapper}>
+                    {verification_data?.status === 'verified' && (
+                      <Text style={[styles.text, {color: theme.colors.text}]}>
+                        Your listing is Verified
+                      </Text>
+                    )}
+                    {(verification_data?.status === 'pending' ||
+                      verification_data?.status === 'pickedup') && (
+                      <Text style={[styles.text, {color: theme.colors.text}]}>
+                        Your listing is currently under review. You can still
+                        upload any documents you have for it.
+                      </Text>
+                    )}
+                    {!verification_data?.status && (
+                      <Text style={[styles.text, {color: theme.colors.text}]}>
+                        we will asiign an agent for the further proceedings, You
+                        can still upload any documents you have for it.
+                      </Text>
+                    )}
+                  </View>
+                  <MaterialCommunityIcons
+                    name="file-upload-outline"
+                    size={22}
+                    color={theme.colors.primary}
+                    style={styles.iconRight}
+                  />
                 </View>
-                <MaterialCommunityIcons
-                  name="file-upload-outline"
-                  size={22}
-                  color={theme.colors.primary}
-                  style={styles.iconRight}
-                />
-              </View>
-            </Surface>
+              </Surface>
+            ):<></>}
           </TouchableRipple>
           <FlatList
             inverted

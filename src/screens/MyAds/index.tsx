@@ -93,49 +93,36 @@ const ListingCard: React.FC<ListingCardProps> = ({
   const isDarkMode = useColorScheme() === 'dark';
   const {label, backgroundColor, textColor} = useMemo(() => {
     switch (status) {
-      case 'pending':
+      case AdStatusEnum.Pending:
         return {
-          label: 'Pending Review',
+          label: 'In Review',
           backgroundColor: '#FFEAD5',
           textColor: '#AA5A00',
         };
-      case 'active':
+      case AdStatusEnum.Active:
         return {
           label: 'Active',
           backgroundColor: '#D4F4DD',
           textColor: '#147A31',
         };
-      case 'rejected':
+      case AdStatusEnum.Rejected:
         return {
           label: 'Rejected',
           backgroundColor: '#C14B43',
           textColor: '#FCE3E0',
         };
-      case 'sold':
+      case AdStatusEnum.Sold:
         return {
           label: 'Sold',
           backgroundColor: '#E8E8FF',
           textColor: '#4B4B9B',
         };
-      case 'expired':
-        return {
-          label: 'Expired',
-          backgroundColor: '#FCE3E0',
-          textColor: '#C14B43',
-        };
-      case 'blocked':
+      case AdStatusEnum.Blocked:
         return {
           label: 'Blocked',
           backgroundColor: '#FCE3E0',
           textColor: '#C14B43',
         };
-      case 'deactivated':
-        return {
-          label: 'Deactivated',
-          backgroundColor: '#E0E0E0',
-          textColor: '#555555',
-        };
-      case 'DRAFT':
       default:
         return {
           label: 'Draft',
@@ -207,16 +194,17 @@ const ListingCard: React.FC<ListingCardProps> = ({
             </Text>
           </View>
         </View>
-        {items.adStatusNote && (
-          <View style={styles.metaRow}>
-            <View style={styles.metaItem}>
-              <Icon name="information" size={16} color="#C14B43" />
-              <Text style={[styles.metaText, {color: '#C14B43'}]}>
-                {items.adStatusNote}
-              </Text>
+        {items.adStatusNote &&
+          (status === 'blocked' || status === 'rejected') && (
+            <View style={styles.metaRow}>
+              <View style={styles.metaItem}>
+                <Icon name="information" size={16} color="#C14B43" />
+                <Text style={[styles.metaText, {color: '#C14B43'}]}>
+                  {items.adStatusNote}
+                </Text>
+              </View>
             </View>
-          </View>
-        )}
+          )}
       </TouchableOpacity>
       <View style={styles.buttonRow}>
         {label !== 'Sold' && (

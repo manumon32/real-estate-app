@@ -62,7 +62,7 @@ const CommonLocationModal: React.FC<Props> = ({
       return;
     }
 
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_API_KEY}&language=en&components=country:in&types=(regions)`;
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_API_KEY}&language=en&components=country:in&types=geocode`;
     try {
       const res = await fetch(url);
       const json = await res.json();
@@ -77,8 +77,12 @@ const CommonLocationModal: React.FC<Props> = ({
     let city: any = null;
     let district: any = null;
     let state: any = null;
+    let country: any = null;
     components.forEach(comp => {
       if (comp.types.includes('locality') && !locality) {
+        locality = comp.long_name;
+      }
+      if (comp.types.includes('neighborhood') && !locality) {
         locality = comp.long_name;
       }
       if (comp.types.includes('sublocality_level_1') && !locality) {
@@ -96,8 +100,11 @@ const CommonLocationModal: React.FC<Props> = ({
       if (comp.types.includes('administrative_area_level_1') && !state) {
         state = comp.long_name;
       }
+      if (comp.types.includes('country') && !state) {
+        country = comp.long_name;
+      }
     });
-// console.log(locality,city, district, state )
+    // console.log(locality,city, district, state )
     // Determine final parts according to OLX priority
     const parts: string[] = [];
 
@@ -112,6 +119,9 @@ const CommonLocationModal: React.FC<Props> = ({
     } // fallback
     if (!district && state) {
       parts.push(state);
+    }
+    if (!district && !state) {
+      parts.push(country);
     }
     // Remove duplicates
     const uniqueParts = parts.filter(

@@ -3,6 +3,8 @@ import {fetchDetailsAPI} from '@api/services';
 // Types
 
 export interface Detail {
+  showEmiCalculator: boolean;
+  showLoanOffers: boolean;
   soldDate: any;
   _id: string;
   location: GeoLocation;

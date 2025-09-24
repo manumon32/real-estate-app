@@ -171,9 +171,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
                       fontSize: 14,
                       fontWeight: 500,
                     }}>
-                    Rejected Reason
-                  </Text>
-                  <View style={{flexDirection: 'row'}}>
+                    Rejected Reason :{' '}
                     <Text
                       style={[
                         styles.metaText,
@@ -181,7 +179,16 @@ const ListingCard: React.FC<ListingCardProps> = ({
                       ]}>
                       {items.notes}
                     </Text>
-                  </View>
+                  </Text>
+                  {/* <View style={{flexDirection: 'row'}}>
+                    <Text
+                      style={[
+                        styles.metaText,
+                        {color: theme.colors.text, padding: 5, width: '100%'},
+                      ]}>
+                      {items.notes}
+                    </Text>
+                  </View> */}
                 </View>
               )
             ) : (

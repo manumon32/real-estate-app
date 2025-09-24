@@ -44,6 +44,8 @@ const PostAd = () => {
     maintenanceCharge: 0,
     propertyTax: 0,
     loanEligible: false,
+    showLoanOffers:false,
+    showEmiCalculator:false,
     reraApproved: false,
     bachelorsAllowed: false,
     reraId: '',

@@ -131,6 +131,10 @@ const Step5MediaUpload = (props: any) => {
   //     return true;
   //   });
   // };
+  useEffect(() => {
+    setFieldValue('showLoanOffers', isStringInEitherArray('loanEligible'));
+    setFieldValue('showEmiCalculator', isStringInEitherArray('loanEligible'));
+  }, [isStringInEitherArray, setFieldValue]);
   const previews = useMemo(
     () => (
       <FlatList

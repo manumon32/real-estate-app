@@ -97,7 +97,6 @@ export const createVerificationSlice = (
         clientId: get().clientId,
         bearerToken: get().bearerToken,
       });
-      console.log('fetchverificationsData', res)
       set(() => ({
         verification_data: res,
         verification_loading: false,
@@ -113,6 +112,7 @@ export const createVerificationSlice = (
       verification_page: 0,
       verification_hasMore: false,
       verification_loading: false,
+      verification_data: {},
     }));
   },
 });
