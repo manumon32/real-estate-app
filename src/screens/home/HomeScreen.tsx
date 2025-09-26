@@ -27,6 +27,8 @@ import {
   navigateByNotification,
   requestUserPermission,
 } from '../../firebase/notificationService';
+// import * as RNIap from 'react-native-iap';
+// const itemSkus = ['com.hotplotz.featuredad10days'];
 
 // Lazy loaded components
 const Header = React.lazy(() => import('./Header/Header'));
@@ -56,6 +58,31 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   const backPressedOnce = useRef(false);
   const flatListRef = useRef<FlatList>(null);
   const onEndReachedCalled = useRef(false); // prevent multiple calls
+
+  // useEffect(() => {
+  //   async function init() {
+  //     try {
+  //       await RNIap.initConnection();
+  //       const items = await RNIap.getProducts({skus: itemSkus});
+  //       console.log('IAP', items);
+
+  //       // try {
+  //       //   const purchase = await RNIap.requestPurchase(itemSkus[0]);
+  //       //   console.log('IAP - purchase',purchase)
+  //       //   // ✅ unlock feature
+  //       // } catch (err) {
+  //       //   console.log('IAP - purchase',err);
+  //       // }
+  //     } catch (e) {
+  //       console.warn('IAP init error', e);
+  //     }
+  //   }
+  //   init();
+
+  //   return () => {
+  //     RNIap.endConnection();
+  //   };
+  // }, []);
 
   /** Double back press exit */
   useFocusEffect(

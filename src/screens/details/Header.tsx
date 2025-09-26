@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import Share from 'react-native-share';
 import RNFS from 'react-native-fs';
-import RNFetchBlob from 'rn-fetch-blob';
 import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
 import {useNavigation} from '@react-navigation/native';
@@ -22,7 +21,7 @@ import Carousel from 'react-native-reanimated-carousel';
 import FavoriteButton from '@components/FavoriteButton';
 import ImageViewerModal from '@components/Modal/ImageViewerModal';
 import useBoundStore from '@stores/index';
-
+import FastImage from 'react-native-fast-image';
 function Header(props: any): React.JSX.Element {
   const {details} = props;
   const {theme} = useTheme();
@@ -32,57 +31,52 @@ function Header(props: any): React.JSX.Element {
   const {width} = Dimensions.get('window');
   const [modalVisible, setModalVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const images = useMemo(() => {
-    return details?.imageUrls ?? [];
-  }, [details]);
-
-  const floorPlans = useMemo(() => {
-    return details?.floorPlanUrl ?? [];
-  }, [details]);
 
   const handleImagePress = useCallback(() => {
     setModalVisible(true);
   }, []);
 
-const shareProperty = async (details: any) => {
-  try {
-    const link = `https://hotplotz.com/details/${details._id}`;
-    const message = `I found this on Hotplotz: ${details.title}\n\nCheck out this property 👇\n${link}`;
+  const shareProperty = async (details: any) => {
+    try {
+      const link = `https://hotplotz.com/details/${details._id}`;
+      const message = `I found this on Hotplotz: ${details.title}\n\nCheck out this property 👇\n${link}`;
 
-    let imagePath: string | undefined;
+      let imagePath: string | undefined;
 
-    if (details?.imageUrls?.[0]) {
-      // ✅ Save into cache dir, not app-private dir
-      const destPath = `${RNFS.CachesDirectoryPath}/hotplotz_${Date.now()}.jpg`;
+      if (details?.imageUrls?.[0]) {
+        // ✅ Save into cache dir, not app-private dir
+        const destPath = `${
+          RNFS.CachesDirectoryPath
+        }/hotplotz_${Date.now()}.jpg`;
 
-      const download = await RNFS.downloadFile({
-        fromUrl: details.imageUrls[0],
-        toFile: destPath,
-      }).promise;
+        const download = await RNFS.downloadFile({
+          fromUrl: details.imageUrls[0],
+          toFile: destPath,
+        }).promise;
 
-      if (download.statusCode === 200) {
-        imagePath = `file://${destPath}`;
+        if (download.statusCode === 200) {
+          imagePath = `file://${destPath}`;
+        }
       }
+
+      const shareOptions: any = {
+        title: 'Hotplotz',
+        message,
+        failOnCancel: false,
+      };
+
+      if (imagePath) {
+        shareOptions.urls = [imagePath]; // ✅ use array
+        shareOptions.type = 'image/jpeg';
+      }
+
+      console.log('Final shareOptions =>', shareOptions);
+
+      await Share.open(shareOptions);
+    } catch (error) {
+      console.log('Share Error =>', error);
     }
-
-    const shareOptions: any = {
-      title: 'Hotplotz',
-      message,
-      failOnCancel: false,
-    };
-
-    if (imagePath) {
-      shareOptions.urls = [imagePath]; // ✅ use array
-      shareOptions.type = 'image/jpeg';
-    }
-
-    console.log('Final shareOptions =>', shareOptions);
-
-    await Share.open(shareOptions);
-  } catch (error) {
-    console.log('Share Error =>', error);
-  }
-};
+  };
 
   const renderItem = useCallback(
     ({item}: {item: string; index: number}) => (
@@ -96,6 +90,28 @@ const shareProperty = async (details: any) => {
     ),
     [handleImagePress],
   );
+
+  useEffect(() => {
+    // preload property images
+    if (details?.images?.length > 0) {
+      FastImage.preload(
+        details?.images.map((url: any) => ({
+          uri: url,
+          priority: FastImage.priority.high,
+        })),
+      );
+    }
+
+    // preload floor plan images
+    if (details?.floorPlanUrl?.length > 0) {
+      FastImage.preload(
+        details?.floorPlanUrl.map((url: any) => ({
+          uri: url,
+          priority: FastImage.priority.high,
+        })),
+      );
+    }
+  }, [details]);
 
   return (
     <>
@@ -166,7 +182,7 @@ const shareProperty = async (details: any) => {
           width={width}
           height={360}
           autoPlay={false}
-          data={images}
+          data={details?.imageUrls}
           scrollAnimationDuration={1000}
           onSnapToItem={index => {
             setCurrentIndex(index);
@@ -221,7 +237,7 @@ const shareProperty = async (details: any) => {
               <Text style={styles.icontextStyle}>3D Tour</Text>
             </View>
           </TouchableOpacity> */}
-          {floorPlans.length > 0 && (
+          {details?.floorPlanUrl?.length > 0 && (
             <TouchableOpacity onPress={() => setVisible(true)}>
               <View style={[styles.heartBootom]}>
                 <View style={styles.iconConainer}>
@@ -240,7 +256,7 @@ const shareProperty = async (details: any) => {
         </View>
         <View style={styles.paginationContainer}>
           <Text style={{fontSize: 14, fontFamily: Fonts.MEDIUM}}>
-            {currentIndex + 1 + '/' + images?.length}
+            {currentIndex + 1 + '/' + details?.imageUrls?.length}
           </Text>
         </View>
       </View>
@@ -253,14 +269,14 @@ const shareProperty = async (details: any) => {
       <ImageViewerModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        imageUrls={images}
+        imageUrls={details?.imageUrls ? details?.imageUrls : []}
         startIndex={currentIndex}
       />
 
       <ImageViewerModal
         visible={visible}
         onClose={() => setVisible(false)}
-        imageUrls={floorPlans}
+        imageUrls={details?.floorPlanUrl ? details?.floorPlanUrl : []}
       />
     </>
   );

@@ -113,7 +113,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
         };
       case AdStatusEnum.Sold:
         return {
-          label: 'Sold',
+          label: 'Closed',
           backgroundColor: '#E8E8FF',
           textColor: '#4B4B9B',
         };
@@ -138,7 +138,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
         {
           backgroundColor: theme.colors.background,
           borderColor: isDarkMode ? theme.colors.text : '',
-          borderWidth: isDarkMode ? 0.4 : 0,
+          borderWidth: isDarkMode ? 0.5 : 0,
         },
       ]}>
       <TouchableOpacity
@@ -235,7 +235,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
             }
             style={styles.outlinedButton}>
             <Text style={[styles.buttonText, {color: theme.colors.text}]}>
-              Mark as Sold
+              Mark as Closed
             </Text>
           </TouchableOpacity>
         )}

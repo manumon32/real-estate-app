@@ -114,7 +114,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
         {
           backgroundColor: theme.colors.background,
           borderColor: isDarkMode ? theme.colors.text : '',
-          borderWidth: isDarkMode ? 0.4 : 0,
+          borderWidth: isDarkMode ? 1 : 0,
         },
       ]}>
       <TouchableOpacity
@@ -170,6 +170,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
                       fontFamily: Fonts.MEDIUM,
                       fontSize: 14,
                       fontWeight: 500,
+                      color: theme.colors.text,
                     }}>
                     Rejected Reason :{' '}
                     <Text
@@ -197,7 +198,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
                 <Text style={[styles.metaText, {color: theme.colors.text}]}>
                   {status === 'pending'
                     ? 'Appointment requested for '
-                    : 'Scheduled on'}
+                    : 'Scheduled on '}
                   {FormattedDate(date)}
                 </Text>
               </>

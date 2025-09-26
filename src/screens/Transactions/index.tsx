@@ -13,7 +13,14 @@ import {
   FlatList,
   RefreshControl,
   Image,
+  Alert,
+  ActivityIndicator,
+  Platform,
+  PermissionsAndroid,
+  Linking,
 } from 'react-native';
+import RNFS from 'react-native-fs';
+import FileViewer from 'react-native-file-viewer';
 import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import NoChats from '@components/NoChatFound';
@@ -31,6 +38,67 @@ const formatDate = (arg: string | number | Date) => {
 const ListingCard = ({item, theme, navigation}: any) => {
   const plan = item?.subscriptionPlanId;
   const property = item?.propertyId;
+  const url = item.invoiceUrl;
+  const filename = 'invloice_' + property?._id + '.pdf';
+  const [loading, setLoading] = React.useState(false);
+  const requestStoragePermission = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission',
+          message: 'App needs access to your storage to save PDF',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true;
+  };
+
+  const openPdfLink = async () => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Error', 'No app available to open this link.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to open document.');
+      console.error(error);
+    }
+  };
+
+  const openPDF = async () => {
+    try {
+      await requestStoragePermission();
+      setLoading(true);
+      const localFile =
+        Platform.OS === 'android'
+          ? `${RNFS.DownloadDirectoryPath}/${filename}`
+          : `${RNFS.DocumentDirectoryPath}/${filename}`;
+
+      const options = {
+        fromUrl: url,
+        toFile: localFile,
+      };
+
+      const result = await RNFS.downloadFile(options).promise;
+
+      if (result.statusCode === 200) {
+        await FileViewer.open(localFile);
+      } else {
+        openPdfLink();
+      }
+    } catch (error) {
+      openPdfLink();
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View
@@ -60,7 +128,9 @@ const ListingCard = ({item, theme, navigation}: any) => {
           {/* Info */}
           <View style={styles.info}>
             <View style={styles.headerRow}>
-              <Text numberOfLines={1} style={[styles.title, {color: theme.colors.text}]}>
+              <Text
+                numberOfLines={1}
+                style={[styles.title, {color: theme.colors.text}]}>
                 {property?.title || plan?.name}
               </Text>
             </View>
@@ -81,10 +151,25 @@ const ListingCard = ({item, theme, navigation}: any) => {
                 </Text>
               </View>
             )}
-            <Text style={styles.subText}>
+            <Text style={[styles.subText, {color: theme.colors.text}]}>
               {property.isFeatured ? ' Valid till' : 'Expired on'}:{' '}
               {formatDate(item.endDate)}
             </Text>
+            {url && (
+              <TouchableOpacity
+                onPress={() => {
+                  openPDF();
+                }}>
+                {loading ? (
+                  <ActivityIndicator
+                    style={{alignItems: 'flex-start'}}
+                    color={theme.colors.text}
+                  />
+                ) : (
+                  <Text style={styles.invoiceText}>View Invoice</Text>
+                )}
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </TouchableOpacity>
@@ -168,8 +253,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   image: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
     borderRadius: 12,
     marginRight: 12,
   },
@@ -216,6 +301,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     marginTop: 2,
+  },
+  invoiceText: {
+    fontSize: 14,
+    color: '#676bebff',
+    marginTop: 4,
   },
 });
 

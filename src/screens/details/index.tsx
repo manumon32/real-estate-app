@@ -47,7 +47,7 @@ const AdStatusEnum: any = {
   expired: 'Expired',
   blocked: 'Blocked',
   deactivated: 'Deactivated',
-  sold: 'Sold',
+  sold: 'Closed',
 };
 
 const PropertyDetails = React.memo(() => {

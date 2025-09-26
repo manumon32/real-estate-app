@@ -59,6 +59,11 @@
 		<string>sms</string>
 		<string>whatsapp</string>
 	</array>
+  <key>UISupportedInterfaceOrientations</key>
+  <array>
+      <string>UIInterfaceOrientationPortrait</string>
+      <!-- Remove other orientations if present -->
+  </array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

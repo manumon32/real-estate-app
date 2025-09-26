@@ -28,6 +28,7 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {sendChat, uploadImages} from '@api/services';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ChatDetailSkeleton from '@components/SkeltonLoader/ChatDetailSkeleton';
+import {compressImage} from '../../helpers/ImageCompressor';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -92,17 +93,21 @@ const ChatFooter = React.memo(
               outlineColor="#F5F6FA"
               activeOutlineColor="#c1c1c1ff"
             />
-            <Icon
-              name="send"
-              size={30}
+            <TouchableOpacity
               onPress={() => {
-                setMessage(null);
-                handleSend(message);
-              }}
-              disabled={!message?.trim()}
-              color={theme.colors.text}
-              // iconColor={theme.colors.text}
-            />
+                if (message?.trim()) {
+                  setMessage(null);
+                  handleSend(message);
+                }
+              }}>
+              <Icon
+                name="send"
+                size={30}
+                disabled={!message?.trim()}
+                color={theme.colors.text}
+                // iconColor={theme.colors.text}
+              />
+            </TouchableOpacity>
           </>
         )}
         {/* <IconButton
@@ -146,7 +151,7 @@ const UploadImage = React.memo(({theme}: any) => {
     <View style={styles.uploadImageStyle}>
       <ActivityIndicator size="small" color={theme.colors.text} />
       <Text style={[styles.uploadImageText, {color: theme.colors.text}]}>
-        Uploading image...
+        Sending image...
       </Text>
     </View>
   );
@@ -210,7 +215,9 @@ const Chat = React.memo(({navigation}: any) => {
         quality: 0.8,
       },
       (response: any) => {
-        if (response.didCancel || response.errorCode) return;
+        if (response.didCancel || response.errorCode) {
+          return;
+        }
         upLoadImage(response.assets);
       },
     );
@@ -228,30 +235,65 @@ const Chat = React.memo(({navigation}: any) => {
         includeExtra: true, // provides exif info (orientation, etc.)
       },
       (response: any) => {
-        if (response.didCancel || response.errorCode) return;
+        if (response.didCancel || response.errorCode) {
+          return;
+        }
         console.log(response.assets[0].uri);
         upLoadImage(response.assets);
       },
     );
   }, []);
+  type ImageType = {
+    uri: string;
+    name?: string;
+    type?: string;
+  };
+  const upLoadImage = async (images: any) => {
+    if (!images?.length) {
+      return [];
+    }
 
-  const upLoadImage = async (Images: any) => {
+    setImageUploading(true); // start loader
+
     try {
-      let formData = new FormData();
-      setImageUploading(true); // start loader
-      Images.map((items: any, index: any) => {
+      // Compress images
+      const processedImages = (
+        await Promise.all(
+          images.map(async (img: any) => {
+            if (!img?.uri) {
+              return null;
+            }
+            const compressedUri = await compressImage(img.uri);
+            return compressedUri ? {...img, uri: compressedUri} : null;
+          }),
+        )
+      ).filter(Boolean) as ImageType[];
+
+      if (!processedImages.length) {
+        return [];
+      }
+
+      // Prepare form data
+      const formData = new FormData();
+      processedImages.forEach((img, index) => {
         formData.append('images', {
-          uri: items.uri, // local path or blob URL
-          name: `photo_${index}.jpg`, // ⬅ server sees this
-          type: 'image/jpeg',
+          uri: img.uri,
+          name: img.name || `photo_${index}.jpg`,
+          type: img.type || 'image/jpeg',
         } as any);
       });
-      const imageUrls: any = await uploadImages(formData, {
-        token: token,
-        clientId: clientId,
-        bearerToken: bearerToken,
+
+      // Upload to server
+      const uploadedUrls = await uploadImages(formData, {
+        token,
+        clientId,
+        bearerToken,
       });
-      sendImages(imageUrls);
+
+      // Call callback or handler with uploaded URLs
+      sendImages(uploadedUrls);
+
+      return uploadedUrls;
     } catch (error) {
       return [];
     } finally {

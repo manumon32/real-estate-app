@@ -27,6 +27,7 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import {uploadImages} from '@api/services';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@theme/ThemeProvider';
+import {compressImage} from '../../helpers/ImageCompressor';
 const EditProfile = () => {
   const {
     user,
@@ -36,7 +37,6 @@ const EditProfile = () => {
     fetchUserDetails,
     setUpdateSuccess,
     login,
-    updateCOntact,
     otp,
     clearOTP,
     otpLoading,
@@ -52,6 +52,7 @@ const EditProfile = () => {
     phoneOTPLoading,
   } = useBoundStore();
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [image, setImage] = useState<any>(
     user?.profilePicture ||
@@ -86,10 +87,10 @@ const EditProfile = () => {
     return regex.test(phone);
   };
 
-  const sendOTP = (arg: any, flag: any) => {
-    setLoginVar(flag);
-    login({[flag]: arg});
-  };
+  // const sendOTP = (arg: any, flag: any) => {
+  //   setLoginVar(flag);
+  //   login({[flag]: arg});
+  // };
 
   const handleSubmit = () => {
     login({[loginVar]: loginVar});
@@ -140,29 +141,38 @@ const EditProfile = () => {
             rightButtonText="Save"
             onRightPress={async () => {
               var imageUrls: any = '';
-              if (image.uri) {
-                let formData = new FormData();
-                formData.append('images', {
-                  uri: image.uri, // local path or blob URL
-                  name: `photo_.jpg`, // ⬅ server sees this
-                  type: 'image/jpeg',
-                } as any);
-                imageUrls = await uploadImages(formData, {
-                  token: token,
-                  clientId: clientId,
-                  bearerToken: bearerToken,
-                });
+              try {
+                if (image.uri) {
+                  setLoading(true);
+                  let formData = new FormData();
+                  const compressedUri = await compressImage(image.uri);
+                  formData.append('images', {
+                    uri: compressedUri, // local path or blob URL
+                    name: `photo_.jpg`, // ⬅ server sees this
+                    type: 'image/jpeg',
+                  } as any);
+                  imageUrls = await uploadImages(formData, {
+                    token: token,
+                    clientId: clientId,
+                    bearerToken: bearerToken,
+                  });
+                }
+                let payload: any = {
+                  name: name,
+                };
+                if (imageUrls?.length > 0) {
+                  payload.profilePicture = imageUrls[0];
+                }
+                setLoading(false);
+                updateuser(payload);
+              } catch (err) {
+                setLoading(false);
               }
-              let payload: any = {
-                name: name,
-              };
-              if (imageUrls?.length > 0) {
-                payload.profilePicture = imageUrls[0];
-              }
-              updateuser(payload);
             }}
-            rightButtonLoading={updateLoading}
-            rightButtonDisabled={!(name !== user.name  || image !== user.profilePicture ) }
+            rightButtonLoading={updateLoading || loading}
+            rightButtonDisabled={
+              !(name !== user.name || image !== user.profilePicture)
+            }
           />
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -181,7 +191,11 @@ const EditProfile = () => {
                   // paddingBottom: 24,
                   flexGrow: 1,
                 }}>
-                <Text style={[styles.label, {fontSize: 18}]}>
+                <Text
+                  style={[
+                    styles.label,
+                    {fontSize: 18, color: theme.colors.text},
+                  ]}>
                   Basic Informations
                 </Text>
                 <View
@@ -211,9 +225,7 @@ const EditProfile = () => {
                           alignItems: 'center',
                           zIndex: 10,
                         },
-                      ]}
-                      // onPress={onPress}
-                    >
+                      ]}>
                       <View
                         style={{
                           backgroundColor: '#000',
@@ -243,7 +255,11 @@ const EditProfile = () => {
                   </View>
                 </View>
 
-                <Text style={[styles.label, {fontSize: 18}]}>
+                <Text
+                  style={[
+                    styles.label,
+                    {fontSize: 18, color: theme.colors.text},
+                  ]}>
                   Contact Informations
                 </Text>
                 <View style={styles.inputContainer}>

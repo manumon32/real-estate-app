@@ -45,7 +45,7 @@ export const apiRequest = async ({
       error.config.url === '/auth/update-contact' ||
       error.config.url === '/auth/send-mobile-otp'
     ) {
-    console.log('Response Data:', error.response?.data?.msg);
+      console.log('Response Data:', error.response?.data?.msg);
       Toast.show({
         type: 'error',
         text1: error.response?.data?.msg
@@ -65,7 +65,7 @@ export const apiRequest = async ({
       });
       logoutAndRedirect();
     } else {
-       Toast.show({
+      Toast.show({
         type: 'error',
         text1: error.response?.data?.msg
           ? error.response?.data?.msg
@@ -74,6 +74,6 @@ export const apiRequest = async ({
       });
     }
     // return error.response?.data
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };

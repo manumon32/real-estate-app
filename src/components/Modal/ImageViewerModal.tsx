@@ -16,7 +16,7 @@ const ImageViewerModal: React.FC<Props> = ({
   imageUrls,
   startIndex = 0,
 }) => {
-  const images = imageUrls.map(url => ({url}));
+  const images = imageUrls?.map(url => ({url}));
 
   return (
     <Modal

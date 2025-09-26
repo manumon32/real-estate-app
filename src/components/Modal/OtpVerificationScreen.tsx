@@ -1,4 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
+import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
@@ -24,13 +25,13 @@ const OtpVerificationScreen = ({
   handleSubmit,
   loginVar,
   veryFyOTP,
-  otpValue,
   loginErrorMessage,
   otpLoading,
 }: any) => {
   const [otp, setOtp] = useState<string[]>(new Array(OTP_LENGTH).fill(''));
   const [timer, setTimer] = useState(72);
   const [error, setError] = useState(false);
+  const {clearErrorMessage} = useBoundStore();
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
   const hiddenInputRef = useRef<TextInput>(null);
@@ -46,6 +47,7 @@ const OtpVerificationScreen = ({
 
   const handleChange = useCallback(
     (text: string, index: number) => {
+      clearErrorMessage();
       const newOtp = [...otp];
       newOtp[index] = text;
       setOtp(newOtp);
@@ -57,7 +59,7 @@ const OtpVerificationScreen = ({
         inputRefs.current[index + 1]?.focus();
       }
     },
-    [otp, veryFyOTP],
+    [clearErrorMessage, otp, veryFyOTP],
   );
 
   const handleBackspace = useCallback(
@@ -86,12 +88,6 @@ const OtpVerificationScreen = ({
 
   // OTP listener (Android auto-read)
   useEffect(() => {
-    // getHash()
-    //   .then(hashArray => {
-    //     console.log('App hash:', hashArray[0]);
-    //   })
-    //   .catch(console.log);
-
     startOtpListener(message => {
       console.log('OTP message:', message);
 
@@ -118,10 +114,9 @@ const OtpVerificationScreen = ({
   // Auto focus hidden input on iOS (shows suggestion bar)
   useEffect(() => {
     if (Platform.OS === 'ios') {
-    setTimeout(() => {
-      hiddenInputRef.current?.focus();
-    }, 500);
-    } else {
+      setTimeout(() => {
+        hiddenInputRef.current?.focus();
+      }, 500);
     }
   }, []);
 
@@ -132,6 +127,7 @@ const OtpVerificationScreen = ({
         <TouchableOpacity
           onPress={() => {
             clearOTP();
+            clearErrorMessage();
           }}
           style={styles.backButton}>
           <MaterialCommunityIcons
@@ -172,6 +168,7 @@ const OtpVerificationScreen = ({
           {otp.map((digit, index) => (
             <TextInput
               key={index}
+              // @ts-ignore
               ref={ref => (inputRefs.current[index] = ref)}
               value={digit}
               onChangeText={text => {

@@ -7,11 +7,10 @@ import {useTheme} from '@theme/ThemeProvider';
 import React, {useCallback, useEffect, useState} from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {BlurView} from '@react-native-community/blur';
-
+import Image from 'react-native-fast-image';
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   RefreshControl,
   FlatList,
@@ -103,7 +102,8 @@ const MessageCard: React.FC<MessageCardProps> = ({
       )}
       <Image
         style={{height: 60, width: 60, borderRadius: 5}}
-        source={{uri: coverImage}}
+        source={{uri: coverImage, cache: Image.cacheControl.immutable}}
+        // @ts-ignore
         blurRadius={isActive ? 0 : 10} // Blur the image if the ad is not active
       />
       {avatarUrl && (
@@ -199,11 +199,12 @@ const MessageCard: React.FC<MessageCardProps> = ({
           )}
           {type === 'image' && isActive && (
             <View style={{flexDirection: 'row', width: '100%'}}>
-              <Icon name="camera-outline" size={16} color="#000" />
+              <Icon name="camera-outline" size={16} color={theme.colors.text} />
               <Text
                 numberOfLines={2}
                 style={[
                   styles.message,
+                  {color: theme.colors.text},
                   unreadCount <= 0 && {fontFamily: Fonts.REGULAR},
                 ]}>
                 {' Image'}
@@ -491,7 +492,7 @@ const Chat = React.memo(({navigation}: any) => {
                     {color: theme.colors.text},
                     filterBy === 'sell' && styles.chipTextSelected,
                   ]}>
-                  {'Sell'}
+                  {'My Listings'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -506,7 +507,7 @@ const Chat = React.memo(({navigation}: any) => {
                     {color: theme.colors.text},
                     filterBy === 'buy' && styles.chipTextSelected,
                   ]}>
-                  {'Buy'}
+                  {'My Enquiries'}
                 </Text>
               </TouchableOpacity>
             </ScrollView>

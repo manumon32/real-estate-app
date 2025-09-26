@@ -112,7 +112,7 @@ export const login = async (data: object, configArg: any): Promise<any> => {
     });
     return response?.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -133,8 +133,8 @@ export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
       return response;
     }
   } catch (error: any) {
-    console.log('error response in service', error);
-    throw new Error('Failed to fetch handshake token');
+    console.log('error response in service', error.response);
+    throw error
   }
 };
 
@@ -153,7 +153,7 @@ export const sendEmailOTP = async (
     });
     return response;
   } catch (error: any) {
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -178,7 +178,7 @@ export const verifyEmailOTP = async (
     }
   } catch (error: any) {
     console.log('error response in service', error);
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -197,7 +197,7 @@ export const sendPhoneOTP = async (
     });
     return response;
   } catch (error: any) {
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -222,7 +222,7 @@ export const verifyPhoneOTP = async (
     }
   } catch (error: any) {
     console.log('error response in service', error);
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -240,7 +240,7 @@ export const getHandshakeTokenApi = async (data: object): Promise<any> => {
     return response.data ? response.data : response;
   } catch (error: any) {
     return error;
-    // throw new Error('Failed to fetch handshake token');
+    // throw error;
   }
 };
 
@@ -261,7 +261,7 @@ export const updateUser = async (
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -280,7 +280,7 @@ export const submitRequestAPI = async (
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -299,7 +299,7 @@ export const logoutFromallDevicesAPI = async (
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -319,7 +319,7 @@ export const updateContact = async (
     });
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -338,7 +338,7 @@ export const getAppConfigData = async (configArg: object): Promise<any> => {
     return response;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -361,7 +361,7 @@ export const fetchListingsFromAPI = async (
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -382,7 +382,7 @@ export const fetchChatListingsAPI = async (
     console.log(response.data.data);
     return response?.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -402,7 +402,7 @@ export const deleteChatListAPI = async (
     const response = await apiRequest(apiConfig);
     return response?.data;
   } catch (error: any) {
-    throw new Error('Failed to Delete Chat');
+    throw error;
   }
 };
 
@@ -423,7 +423,7 @@ export const fetchChatDetailsAPI = async (
     console.log(response.data.data);
     return response?.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -443,7 +443,7 @@ export const deleteNotificationsAPI = async (
     const response = await apiRequest(apiConfig);
     return response?.data;
   } catch (error: any) {
-    throw new Error('Failed to Delete Chat');
+    throw error;
   }
 };
 
@@ -463,7 +463,7 @@ export const markAllReadNotificationsAPI = async (
     const response = await apiRequest(apiConfig);
     return response?.data;
   } catch (error: any) {
-    throw new Error('Failed to Delete Chat');
+    throw error;
   }
 };
 
@@ -483,7 +483,7 @@ export const fetchverificationDetailsAPI = async (
     const response = await apiRequest(apiConfig);
     return response?.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -506,7 +506,7 @@ export const fetchverificationDataAPI = async (
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -528,7 +528,7 @@ export const fetchBanksAPI = async (configArg: any): Promise<any> => {
     const response = await apiRequest(apiConfig);
     return response?.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -546,7 +546,7 @@ export const startBankVerificationAPI = async (
     });
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -566,7 +566,7 @@ export const fetchVerifiedBankAPI = async (
     const response = await apiRequest(apiConfig);
     return response?.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -586,7 +586,7 @@ export const fetchBankVerificationDetailsAPI = async (
     const response = await apiRequest(apiConfig);
     return response?.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch handshake token');
+    throw error;
   }
 };
 
@@ -606,7 +606,7 @@ export const startVerificationAPI = async (
     });
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -628,7 +628,7 @@ export const UpdateFavouritesAPI = async (
     return response.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -647,7 +647,7 @@ export const fetchFavoritessAPI = async (
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -667,7 +667,7 @@ export const fetchMyAdsAPI = async (configArg: any): Promise<any> => {
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -688,7 +688,7 @@ export const fetchAppointMentsAPI = async (configArg: any): Promise<any> => {
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -709,7 +709,7 @@ export const fetchTransactionsAPI = async (
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -728,7 +728,7 @@ export const fetchReportedAd = async (
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -749,7 +749,7 @@ export const fetchNotificationsAPI = async (configArg: any): Promise<any> => {
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -767,7 +767,7 @@ export const fetchSuggesionsAPI = async (configArg: any): Promise<any> => {
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -787,7 +787,7 @@ export const fetchPlans = async (configArg: any): Promise<any> => {
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -805,7 +805,7 @@ export const createOrder = async (data: any, configArg: any): Promise<any> => {
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -827,7 +827,7 @@ export const updateOrder = async (
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -846,7 +846,7 @@ export const reportAdsAPI = async (
     return response.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -865,7 +865,7 @@ export const fetchDetailsAPI = async (
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -881,7 +881,7 @@ export const fetchUserDetailsAPI = async (configArg: any): Promise<Details> => {
     const response = await apiRequest(apiConfig);
     return response.data;
   } catch (error: any) {
-    throw new Error('Failed to fetch Details');
+    throw error;
   }
 };
 
@@ -902,7 +902,7 @@ export const uploadImages = async (
     return response?.data?.rows;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -923,7 +923,7 @@ export const uploadDocuments = async (
     return response?.data?.rows;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 // postAd
@@ -945,7 +945,7 @@ export const postAdAPI = async (
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -968,7 +968,7 @@ export const saveAppointMent = async (
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -987,7 +987,7 @@ export const registerFCMToken = async (
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -1007,7 +1007,7 @@ export const createRoomAPI = async (
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -1024,7 +1024,7 @@ export const sendChat = async (data: any, configArg: any): Promise<any> => {
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -1044,7 +1044,7 @@ export const sendVerificationDetails = async (
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };
 
@@ -1064,6 +1064,6 @@ export const sendBankDetails = async (
     return response?.data;
   } catch (error: any) {
     console.log(error);
-    throw new Error('Failed to Do so');
+    throw error;
   }
 };

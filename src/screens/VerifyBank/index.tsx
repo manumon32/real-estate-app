@@ -29,6 +29,7 @@ import {sendBankDetails, uploadDocuments, uploadImages} from '@api/services';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {pick} from '@react-native-documents/picker';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {compressImage} from '../../helpers/ImageCompressor';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -103,7 +104,6 @@ const Verification = ({navigation}: any) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log(items?._id);
       items?._id && fetchBankVerificationDetails(items?._id);
       return () => {
         resetBankVerificationDetails();
@@ -154,7 +154,22 @@ const Verification = ({navigation}: any) => {
     try {
       setImageUploading(true); // start loader
       let formData = new FormData();
-      Images.map((items: any, index: any) => {
+      const processedImages = (
+        await Promise.all(
+          Images.map(async (img: any) => {
+            if (!img?.uri) {
+              return null;
+            }
+            const compressedUri = await compressImage(img.uri);
+            return compressedUri ? {...img, uri: compressedUri} : null;
+          }),
+        )
+      ).filter(Boolean);
+
+      if (!processedImages.length) {
+        return [];
+      }
+      processedImages.map((items: any, index: any) => {
         formData.append('images', {
           uri: items.uri, // local path or blob URL
           name: `photo_${index}.jpg`, // ⬅ server sees this
@@ -286,7 +301,9 @@ const Verification = ({navigation}: any) => {
             ]}>
             <View style={styles.row}>
               <MaterialCommunityIcons
-                name="clock-alert-outline"
+                name={
+                  items?.status === 'verified' ? 'check' : 'clock-alert-outline'
+                }
                 size={24}
                 color={theme.colors.primary}
                 style={styles.icon}
@@ -297,7 +314,8 @@ const Verification = ({navigation}: any) => {
                     This property is eligible for loan from {items.name}.
                   </Text>
                 )}
-                {(items.status === 'pending' || items.status === 'pickedup') && (
+                {(items.status === 'pending' ||
+                  items.status === 'pickedup') && (
                   <Text style={[styles.text, {color: theme.colors.text}]}>
                     loan process is in progress, You can still upload any
                     documents you have for it.

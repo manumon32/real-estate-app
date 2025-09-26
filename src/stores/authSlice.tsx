@@ -44,6 +44,7 @@ export interface AuthSlice {
   fetchUserDetails: (flag?: any) => Promise<void>;
   updateCOntact: (falg: any) => Promise<void>;
   submitRequest: (falg: any) => Promise<void>;
+  clearErrorMessage: () => Promise<void>;
 }
 
 export const createAuthSlice = (set: any, get: any): AuthSlice => ({
@@ -66,6 +67,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       set({
         emailOTPLoading: true,
         loginErrorMessage: '',
+        loginError: false,
       });
       const resp = await sendEmailOTP(payload, {
         token: get().token,
@@ -107,6 +109,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
     set({
       emailOTPLoading: true,
       loginErrorMessage: '',
+      loginError: false,
     });
     try {
       const resp = await verifyEmailOTP(payload, {
@@ -156,6 +159,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       set({
         phoneOTPLoading: true,
         loginErrorMessage: '',
+        loginError: false,
       });
       const resp = await sendPhoneOTP(payload, {
         token: get().token,
@@ -196,7 +200,8 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   verifyPhoneOTP: async payload => {
     set({
       phoneOTPLoading: true,
-      loginErrorMessage: '',
+      loginErrorMessage: null,
+      loginError: false,
     });
     try {
       const resp = await verifyPhoneOTP(payload, {
@@ -243,6 +248,8 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
     try {
       set({
         otpLoading: true,
+        loginErrorMessage: null,
+        loginError: false,
       });
       const resp = await login(payload, {
         token: get().token,
@@ -256,12 +263,21 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       } else {
         set({loginError: true, otp: false, otpLoading: false});
       }
-    } catch (error) {
-      set({loginError: true, otp: false, otpLoading: false});
+    } catch (error: any) {
+      console.log('errorerrorerrorerrorerrorerror', error);
+      set({
+        loginError: true,
+        otp: false,
+        otpLoading: false,
+        loginErrorMessage: error.response?.data?.msg
+          ? error.response?.data?.msg
+          : 'Something went wrong, please try again later.',
+      });
     }
   },
   verifyOTP: async payload => {
     set({
+      loginError: false,
       otpLoading: true,
       loginErrorMessage: null,
     });
@@ -282,11 +298,10 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           Toast.show({
             type: 'success',
             text1: 'Login Successful',
-            text2: 'Welcome to the app!',
             position: 'bottom',
             visibilityTime: 1000,
           });
-        }, 300);
+        }, 1000);
       } else {
         set({
           loginError: true,
@@ -305,17 +320,20 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
             position: 'bottom',
           });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.log('errorerrorerrorerror:', error);
       set({
         loginError: true,
         updateSuccess: false,
         otpLoading: false,
-        loginErrorMessage: payload.otp ? 'Invalid OTP' : 'Something went wrong',
+        loginErrorMessage: error.response?.data?.msg
+          ? error.response?.data?.msg
+          : 'Something went wrong, please try again later.',
       });
     }
   },
   fetchUserDetails: async (flag = false) => {
-    flag && set({userProfileloading: true});
+    flag && set({userProfileloading: true, loginErrorMessage: null});
     try {
       const res = await fetchUserDetailsAPI({
         token: get().token,
@@ -407,6 +425,9 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   },
   clearOTP: async () => {
     set({otp: null});
+  },
+  clearErrorMessage: async () => {
+    set({loginErrorMessage: null, loginError: false});
   },
   logout: async () => {
     set({
