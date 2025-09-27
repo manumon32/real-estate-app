@@ -15,11 +15,19 @@ export default function SafeFooter({children, style}: Props) {
   const {navigationMode} = useBoundStore();
   const isGestureMode = navigationMode === 'gesture';
   const androIdDeviceHeight =
-    navigationMode === 'gesture' ? 60 : navigationMode === '2_button' ? 75 : 100;
+    navigationMode === 'gesture'
+      ? 60
+      : navigationMode === '2_button'
+      ? 70
+      : insets.bottom < 40
+      ? 60
+      : 95;
   const bottomPadding =
-    navigationMode === '2_button'
-      ? Math.max(insets.bottom, 0)
-      : Math.max(insets.bottom, 12);
+    insets.bottom < 20
+      ? 0
+      : navigationMode === '2_button'
+      ? Math.max(insets.bottom, 10)
+      : 40;
 
   return (
     <View

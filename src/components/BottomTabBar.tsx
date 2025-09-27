@@ -22,6 +22,7 @@ import MyadsActiveIcon from '@assets/svg/new/myads_active.svg';
 
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
+import SafeFooter from './SafeFooter';
 
 const renderIcons = (routeName: string, isFocused: boolean) => {
   switch (routeName) {
@@ -42,7 +43,7 @@ const BottomTabBar = ({state, navigation}: any) => {
   const {theme} = useTheme();
   const {setVisible, bearerToken, unreadCount, setUnreadCount} =
     useBoundStore();
-
+  const styles = getStyles(theme);
   const ingoreRoutes = [
     'Settings',
     'Notifications',
@@ -53,13 +54,7 @@ const BottomTabBar = ({state, navigation}: any) => {
   ];
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.colors.background,
-        },
-      ]}>
+    <SafeFooter style={styles.container}>
       <View style={styles.tabBar}>
         {state.routes
           .filter((item: {name: string}) => !ingoreRoutes.includes(item.name))
@@ -131,66 +126,68 @@ const BottomTabBar = ({state, navigation}: any) => {
             );
           })}
       </View>
-    </View>
+    </SafeFooter>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    height: 60,
-    justifyContent: 'center',
-    borderTopWidth:0.2,
-    borderTopColor:'#ccc'
-  },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-  },
-  textFocusedStyle: {
-    fontSize: 12,
-    color: '#1BAF49',
-    fontFamily: Fonts.MEDIUM,
-  },
-  textStyle: {
-    fontSize: 12,
-    color: '#888',
-    fontFamily: Fonts.MEDIUM,
-  },
-  addButton: {
-    bottom: 25,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    elevation: 5,
-  },
-  button: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-    // bottom: 10,
-  },
-  badge: {
-    position: 'absolute',
-    top: 16,
-    right: 25,
-    minWidth: 16,
-    height: 16,
-    paddingHorizontal: 3,
-    borderRadius: 8,
-    backgroundColor: '#E53935',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  badgeText: {
-    color: 'white',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-});
+export const getStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      position: 'absolute',
+      bottom: 0,
+      width: '100%',
+      height: 60,
+      justifyContent: 'center',
+      borderTopWidth: 0.2,
+      borderTopColor: '#ccc',
+      backgroundColor: theme.colors.background,
+    },
+    tabBar: {
+      flexDirection: 'row',
+      backgroundColor: 'transparent',
+    },
+    textFocusedStyle: {
+      fontSize: 12,
+      color: '#1BAF49',
+      fontFamily: Fonts.MEDIUM,
+    },
+    textStyle: {
+      fontSize: 12,
+      color: '#888',
+      fontFamily: Fonts.MEDIUM,
+    },
+    addButton: {
+      bottom: 25,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+      elevation: 5,
+    },
+    button: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 10,
+      // bottom: 10,
+    },
+    badge: {
+      position: 'absolute',
+      top: 16,
+      right: 25,
+      minWidth: 16,
+      height: 16,
+      paddingHorizontal: 3,
+      borderRadius: 8,
+      backgroundColor: '#E53935',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1,
+    },
+    badgeText: {
+      color: 'white',
+      fontSize: 10,
+      fontWeight: 'bold',
+    },
+  });
 
 export default BottomTabBar;
