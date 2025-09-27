@@ -20,6 +20,7 @@ import CommonAmenityToggle from '@components/Input/amenityToggle';
 import {useTheme} from '@theme/ThemeProvider';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {GOOGLE_API_KEY} from '@constants/google';
+import SafeFooter from '@components/SafeFooter';
 
 const FilterModal = ({visible, onClose, onApply}: any) => {
   //
@@ -404,7 +405,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
               </>
             )}
           </ScrollView>
-          <View style={{flexDirection: 'row', bottom: 10}}>
+          <SafeFooter style={{flexDirection: 'row', bottom: 10}}>
             <TouchableOpacity
               style={styles.clearButton}
               onPress={() => {
@@ -417,7 +418,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
             <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
               <Text style={styles.applyText}>Apply</Text>
             </TouchableOpacity>
-          </View>
+          </SafeFooter>
         </View>
       </View>
     </Modal>
@@ -491,7 +492,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f4f4f4',
     width: '45%',
     padding: 15,
-    borderWidth: 0.5,
+    borderWidth: 1,
     marginRight: 5,
     marginLeft: 15,
     borderRadius: 10,

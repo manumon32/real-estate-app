@@ -27,6 +27,7 @@ import {connectSocket} from '@soket/index';
 import {deleteChatListAPI} from '@api/services';
 import Toast from 'react-native-toast-message';
 import BottomModal from '@components/Modal/BottomModal';
+import ReportUserModal from './ReportUserModal';
 
 interface MessageCardProps {
   name: string;
@@ -261,6 +262,8 @@ const Chat = React.memo(({navigation}: any) => {
     setFilters,
   } = useBoundStore();
   const [filterBy, setFilterBy] = useState<any>(null);
+  const [isReportVisible, setIsReportVisible] = useState(false);
+
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
   const {theme} = useTheme();
@@ -569,6 +572,19 @@ const Chat = React.memo(({navigation}: any) => {
             // @ts-ignore
             setSelectedChats([selectedChat]);
           }, 300);
+        }}
+        reportUser={() => {
+          setBottomModalVisible(false);
+          setTimeout(() => {
+            setIsReportVisible(true);
+          }, 300);
+        }}
+      />
+      <ReportUserModal
+        visible={isReportVisible}
+        onClose={() => setIsReportVisible(false)}
+        onSubmit={(note: any) => {
+          setIsReportVisible(false);
         }}
       />
     </SafeAreaView>

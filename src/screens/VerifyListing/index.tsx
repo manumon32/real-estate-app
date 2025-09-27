@@ -110,7 +110,6 @@ const Verification = ({navigation}: any) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log('items?._id', items?._id);
       items?._id && fetchverificationDetails(items?._id);
       items?._id && fetchverificationsData(items?._id);
       return () => {
@@ -118,7 +117,6 @@ const Verification = ({navigation}: any) => {
       };
     }, [items]),
   );
-  console.log('verificationDetails', verificationDetails);
 
   const renderAdItem = useCallback(
     (items: any) => {
@@ -149,7 +147,6 @@ const Verification = ({navigation}: any) => {
         keepLocalCopy: true,
       });
       upLoadDoc(results);
-      console.log('hi'); // Array of file metadata and URIs
     } catch (err: any) {
       if (err.isCancel) {
         console.log('User canceled');
@@ -260,6 +257,7 @@ const Verification = ({navigation}: any) => {
       senderType: 'user',
       message: null,
       files: [imageUrl],
+      createdAt: new Date().toISOString(),
     };
     updateVerificationDetails(payload);
     await sendVerificationDetails(payload, {
@@ -319,10 +317,14 @@ const Verification = ({navigation}: any) => {
                     name={
                       verification_data?.status === 'verified'
                         ? 'check'
-                        : 'check'
+                        : 'clock-alert-outline'
                     }
                     size={24}
-                    color={theme.colors.primary}
+                    color={
+                      verification_data?.status === 'verified'
+                        ? theme.colors.teal
+                        : theme.colors.primary
+                    }
                     style={styles.icon}
                   />
                   <View style={styles.textWrapper}>
@@ -348,7 +350,11 @@ const Verification = ({navigation}: any) => {
                   <MaterialCommunityIcons
                     name="file-upload-outline"
                     size={22}
-                    color={theme.colors.primary}
+                   color={
+                      verification_data?.status === 'verified'
+                        ? theme.colors.teal
+                        : theme.colors.primary
+                    }
                     style={styles.iconRight}
                   />
                 </View>

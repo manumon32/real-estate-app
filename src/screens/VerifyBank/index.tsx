@@ -198,18 +198,17 @@ const Verification = ({navigation}: any) => {
         keepLocalCopy: true,
       });
       upLoadDoc(results);
-      console.log('hi'); // Array of file metadata and URIs
     } catch (err: any) {
       if (err.isCancel) {
         console.log('User canceled');
       } else {
-        console.error(err);
+        console.log(err);
       }
     }
   };
 
   const upLoadDoc = async (docs: any) => {
-    try {
+    try {setImageUploading(true); // start loader
       let formData = new FormData();
       docs.map((items: any) => {
         formData.append('documents', {
@@ -223,6 +222,7 @@ const Verification = ({navigation}: any) => {
         clientId: clientId,
         bearerToken: bearerToken,
       });
+      setImageUploading(false);
       sendFIles(imageUrls);
     } catch (error) {
       return [];
@@ -239,7 +239,7 @@ const Verification = ({navigation}: any) => {
         return responses.map(res => res); // Extract actual response data
       })
       .catch(error => {
-        console.error('Upload error:', error);
+        console.log('Upload error:', error);
         throw error;
       });
   };
@@ -249,6 +249,7 @@ const Verification = ({navigation}: any) => {
       senderType: 'user',
       message: null,
       files: [imageUrl],
+      createdAt: new Date().toISOString(),
     };
     updateBankVerificationDetails(payload);
     await sendBankDetails(payload, {
@@ -336,7 +337,11 @@ const Verification = ({navigation}: any) => {
               <MaterialCommunityIcons
                 name="file-upload-outline"
                 size={22}
-                color={theme.colors.primary}
+                color={
+                  items?.status === 'verified'
+                    ? theme.colors.teal
+                    : theme.colors.primary
+                }
                 style={styles.iconRight}
               />
             </View>

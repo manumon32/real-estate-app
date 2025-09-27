@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import useBoundStore from '@stores/index';
+import SafeFooter from '@components/SafeFooter';
 
 interface BankSelectModalProps {
   visible: boolean;
@@ -104,28 +105,30 @@ const BankSelectModal = ({
               style={styles.input}
               left={<TextInput.Icon icon="magnify" />}
             />
-            <View style={{maxHeight:250}}>
-            <FlatList
-              data={filteredBanks}
-              keyExtractor={(item: any) => item?._id}
-              renderItem={renderItem}
-              keyboardShouldPersistTaps="handled"
-              ListFooterComponent={
-                <>
-                  {filteredBanks.length <= 0 && bankVerification_loading ? (
-                    <View style={styles.loadingContainer}>
-                      <ActivityIndicator size="large" />
-                    </View>
-                  ) : (
-                    <></>
-                  )}
-                </>
-              }
-            />
+            <View style={{maxHeight: 250}}>
+              <FlatList
+                data={filteredBanks}
+                keyExtractor={(item: any) => item?._id}
+                renderItem={renderItem}
+                keyboardShouldPersistTaps="handled"
+                ListFooterComponent={
+                  <>
+                    {filteredBanks.length <= 0 && bankVerification_loading ? (
+                      <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" />
+                      </View>
+                    ) : (
+                      <></>
+                    )}
+                  </>
+                }
+              />
             </View>
-            <Button onPress={onDismiss} style={styles.closeBtn}>
-              Cancel
-            </Button>
+            <SafeFooter>
+              <Button onPress={onDismiss} style={styles.closeBtn}>
+                Cancel
+              </Button>
+            </SafeFooter>
           </View>
         </View>
       </KeyboardAvoidingView>

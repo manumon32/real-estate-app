@@ -9,6 +9,7 @@ export const lightColors = {
   chatBubbleText: '#171717',
   backButtom: '#F5F6FA',
   homepageSafeArea: '#CAF3EA',
+  teal: 'teal',
 };
 
 export const darkColors = {

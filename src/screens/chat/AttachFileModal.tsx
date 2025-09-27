@@ -8,13 +8,14 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 interface AttachModalProps {
   visible: boolean;
   onClose: () => void;
   onPickCamera: () => void;
   onPickGallery: () => void;
-  onPickDocument: () => void;
+  onPickDocument?: () => void;
 }
 
 const AttachFileModal: React.FC<AttachModalProps> = ({
@@ -22,8 +23,10 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
   onClose,
   onPickCamera,
   onPickGallery,
-  //   onPickDocument,
+  // onPickDocument,
 }) => {
+  const insets = useSafeAreaInsets();
+
   return (
     <Modal
       visible={visible}
@@ -35,7 +38,11 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>
 
-      <View style={styles.modalContainer}>
+      <View
+        style={[
+          styles.modalContainer,
+          {paddingBottom: Math.max(insets.bottom, 16)}, // ✅ ensures space for 3-button nav
+        ]}>
         <Text style={styles.title}>Attach File</Text>
 
         <TouchableOpacity style={styles.option} onPress={onPickCamera}>
@@ -48,10 +55,12 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
           <Text style={styles.optionText}>Gallery</Text>
         </TouchableOpacity>
 
-        {/* <TouchableOpacity style={styles.option} onPress={onPickDocument}>
-          <Icon name="file-document" size={24} color="#2F8D79" />
-          <Text style={styles.optionText}>Document</Text>
-        </TouchableOpacity> */}
+        {/* {onPickDocument && (
+          <TouchableOpacity style={styles.option} onPress={onPickDocument}>
+            <Icon name="file-document" size={24} color="#2F8D79" />
+            <Text style={styles.optionText}>Document</Text>
+          </TouchableOpacity>
+        )} */}
       </View>
     </Modal>
   );
@@ -68,7 +77,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#fff',
-    paddingVertical: 20,
+    paddingTop: 20,
     paddingHorizontal: 24,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,

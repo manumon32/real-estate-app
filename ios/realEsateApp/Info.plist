@@ -44,9 +44,9 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>FacebookAppID</key>
-	<string>1911577602952822</string>
+	<string>2601847656850110</string>
 	<key>FacebookClientToken</key>
-	<string>9e987a715046c0ccbc57110cc1681144</string>
+	<string>e1db5ec19ad164986784fa653ea5c420</string>
 	<key>FacebookDisplayName</key>
 	<string>Hotplotz</string>
 	<key>LSApplicationQueriesSchemes</key>

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface AttachModalProps {
@@ -24,6 +25,7 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
   onPickGallery,
   onPickDocument,
 }) => {
+  const insets = useSafeAreaInsets();
   return (
     <Modal
       statusBarTranslucent
@@ -35,7 +37,11 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>
 
-      <View style={styles.modalContainer}>
+      <View
+        style={[
+          styles.modalContainer,
+          {paddingBottom: Math.max(insets.bottom, 16)}, // ✅ ensures space for 3-button nav
+        ]}>
         <Text style={styles.title}>Attach File</Text>
 
         <TouchableOpacity style={styles.option} onPress={onPickCamera}>

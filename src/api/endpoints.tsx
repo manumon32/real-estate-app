@@ -5,7 +5,8 @@ export const API = {
     REFRESH: '/auth/refresh',
     UPDATE_CONTACT: '/auth/update-contact',
     HAND_SHAKE: '/handshake/client-secret',
-    LOGOUT:'/auth/logout-all',
+    LOGOUT:'/auth/logout',
+    LOGOUT_FROM_ALL:'/auth/logout-all',
   },
   LISTINGS: {
     GET_ALL: '/property',
@@ -25,6 +26,7 @@ export const API = {
     BANK: {
       GET: '/bank',
       GET_MESSAGES: '/bank-verify-msg',
+      GET_BY_ID: (id: string | number) => `/property-verify/${id}`,
       VERIFY_LISTING: '/bank-verify',
     },
     APPOINTMENT:{

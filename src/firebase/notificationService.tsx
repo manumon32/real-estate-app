@@ -6,10 +6,22 @@ import {
 } from '@react-native-firebase/messaging';
 import {getApp} from '@react-native-firebase/app';
 import {navigationRef} from '@navigation/RootNavigation';
-import {INotification} from '@screens/home/HomeScreen';
 import useBoundStore from '@stores/index';
 import {markAllReadNotificationsAPI, registerFCMToken} from '@api/services';
 import {PermissionsAndroid, Platform} from 'react-native';
+
+export interface INotification {
+  userId: string;
+  type: 'message' | 'system' | 'property' | 'alert' | 'reminder';
+  title: string;
+  message: string;
+  notificationId:string;
+  entityId?: string;
+  entityType?: 'chatRoom' | 'property' | 'user' | 'transaction';
+  read: boolean;
+  createdAt: Date;
+  metadata?: Record<string, any>;
+}
 
 let isReady = false;
 let pendingNotification: INotification | null = null;

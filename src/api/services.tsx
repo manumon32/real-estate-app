@@ -284,7 +284,7 @@ export const submitRequestAPI = async (
   }
 };
 
-export const logoutFromallDevicesAPI = async (
+export const logoutAPI = async (
   data: object,
   configArg: any,
 ): Promise<any> => {
@@ -293,6 +293,25 @@ export const logoutFromallDevicesAPI = async (
     const response = await apiRequest({
       method: 'post',
       url: API.AUTH.LOGOUT,
+      data,
+      headers,
+    });
+    return response?.data;
+  } catch (error: any) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const logoutFromallDevicesAPI = async (
+  data: object,
+  configArg: any,
+): Promise<any> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.AUTH.LOGOUT_FROM_ALL,
       data,
       headers,
     });

@@ -5,13 +5,19 @@ import {ThemeProvider} from '@theme/ThemeProvider';
 import RootNavigator from '@navigation/RootNavigator';
 import CommonLocationModal from '@components/Modal/LocationSearchModal';
 import useBoundStore from '@stores/index';
+import {getMessaging, onMessage} from '@react-native-firebase/messaging';
 import Toast from 'react-native-toast-message';
 import {ToastConfig} from './src/config/ToastConfig';
 import NetworkStatus from '@components/NetworkStatus';
 import {navigationRef} from '@navigation/RootNavigation';
-import {onNavigationReady} from './src/firebase/notificationService';
+import {
+  navigateByNotification,
+  onNavigationReady,
+  requestUserPermission,
+} from './src/firebase/notificationService';
 import GlobalSearchModal from '@components/Modal/GlobalSearchModal';
 import LoginModal from '@components/Modal/LoginModal';
+import {getNavigationMode} from 'react-native-navigation-mode';
 
 export default function App() {
   const {
@@ -23,15 +29,12 @@ export default function App() {
     locationHistory,
     visible,
     setVisible,
+    setNavigationMode,
   } = useBoundStore();
 
   // ✅ Linking configuration
   const linking = {
-    prefixes: [
-      'myapp://',
-      'https://hotplotz.com',
-      'hotplotz://',
-    ],
+    prefixes: ['myapp://', 'https://hotplotz.com', 'hotplotz://'],
     config: {
       screens: {
         Root: {
@@ -44,9 +47,17 @@ export default function App() {
     },
   };
 
+  useEffect(() => {
+    const fetchNavigationMode = async () => {
+      const navInfo = await getNavigationMode();
+      setNavigationMode(navInfo.type);
+    };
+
+    fetchNavigationMode();
+  }, [setNavigationMode]); // no dependencies → runs only once on mount
   // ✅ Ensure we handle links if NavigationContainer misses it
   useEffect(() => {
-    const handleDeepLink = (event: { url: string }) => {
+    const handleDeepLink = (event: {url: string}) => {
       console.log('🔗 Incoming link:', event.url);
     };
 
@@ -60,6 +71,28 @@ export default function App() {
     return () => subscription.remove();
   }, []);
 
+  useEffect(() => {
+    requestUserPermission();
+    const messaging = getMessaging();
+
+    const unsubscribeForeground = onMessage(messaging, remoteMessage => {
+      const data = remoteMessage?.data;
+      if (data?.type) {
+        Toast.show({
+          type: 'info',
+          text1: data?.title ? String(data.title) : 'Notification',
+          text2: data?.message ? String(data.message) : '',
+          position: 'top',
+          onPress: () => navigateByNotification(data as any),
+        });
+      }
+    });
+
+    return () => {
+      unsubscribeForeground();
+    };
+  }, []);
+
   return (
     <ThemeProvider>
       <NavigationContainer
@@ -69,6 +102,7 @@ export default function App() {
         onReady={onNavigationReady}>
         <RootNavigator />
 
+        <Toast config={ToastConfig} />
         {/* Modals */}
         <CommonLocationModal
           visible={locationModalvisible}
@@ -85,7 +119,6 @@ export default function App() {
         />
 
         <LoginModal visible={visible} onClose={() => setVisible()} />
-        <Toast config={ToastConfig} />
         <NetworkStatus />
       </NavigationContainer>
     </ThemeProvider>

@@ -27,6 +27,7 @@ import {
   navigateByNotification,
   requestUserPermission,
 } from '../../firebase/notificationService';
+
 // import * as RNIap from 'react-native-iap';
 // const itemSkus = ['com.hotplotz.featuredad10days'];
 
@@ -51,6 +52,7 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     bearerToken,
     fetchChatListings,
   } = useBoundStore();
+  // const {navigationMode, error} = useNavigationMode();
 
   const {theme} = useTheme();
   const isDarkMode = useColorScheme() === 'dark';
@@ -83,6 +85,8 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   //     RNIap.endConnection();
   //   };
   // }, []);
+
+
 
   /** Double back press exit */
   useFocusEffect(

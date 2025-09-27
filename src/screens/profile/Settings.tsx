@@ -13,14 +13,13 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
-import {logoutAndRedirect} from '../../utils/logoutAndRedirect';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import DeviceInfo from 'react-native-device-info';
 import {useTheme} from '@theme/ThemeProvider';
 
 const Settings = () => {
   const navigation = useNavigation();
-  const {logoutLoading, fetchUserDetails, userProfileloading, logoutFromAllDevice} =
+  const {logoutLoading, fetchUserDetails, userProfileloading,logoutUser, logoutFromAllDevice} =
     useBoundStore();
   const version = DeviceInfo.getVersion(); // versionName (e.g. 1.0.3)
   const buildNumber = DeviceInfo.getBuildNumber(); // versionCode (e.g. 12)
@@ -129,9 +128,7 @@ const Settings = () => {
                   {
                     text: 'Log out',
                     onPress: async () => {
-                      await logoutAndRedirect();
-                      // @ts-ignore
-                      navigation.reset({index: 0, routes: [{name: 'Main'}]});
+                      logoutUser();
                     },
                   },
                 ],

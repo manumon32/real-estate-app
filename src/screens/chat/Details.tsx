@@ -4,7 +4,7 @@
 import CommonHeader from '@components/Header/CommonHeader';
 import {Fonts} from '@constants/font';
 import {useTheme} from '@theme/ThemeProvider';
-import React, {useCallback, useEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import uuid from 'react-native-uuid';
 import {TextInput} from 'react-native-paper';
 import {
@@ -29,6 +29,7 @@ import {sendChat, uploadImages} from '@api/services';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ChatDetailSkeleton from '@components/SkeltonLoader/ChatDetailSkeleton';
 import {compressImage} from '../../helpers/ImageCompressor';
+import ReportUserModal from './ReportUserModal';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -62,13 +63,7 @@ const ChatFooter = React.memo(
           {backgroundColor: theme.colors.background},
         ]}>
         {!isActive && (
-          <Text
-            style={{
-              color: 'red',
-              fontFamily: Fonts.BOLD,
-              textAlign: 'center',
-              width: '100%',
-            }}>
+          <Text style={styles.disabledtext}>
             This ad is disabled by the owner.
           </Text>
         )}
@@ -105,20 +100,10 @@ const ChatFooter = React.memo(
                 size={30}
                 disabled={!message?.trim()}
                 color={theme.colors.text}
-                // iconColor={theme.colors.text}
               />
             </TouchableOpacity>
           </>
         )}
-        {/* <IconButton
-        icon="microphone"
-        size={20}
-        onPress={() => {
-          setMessage(null);
-          handleSend(message);
-        }}
-        iconColor="#696969"
-      /> */}
       </View>
     );
   },
@@ -188,10 +173,10 @@ const Chat = React.memo(({navigation}: any) => {
     updateChatUnreadCount,
   } = useBoundStore();
   const {items}: any = route.params;
-  console.log('items', items);
-  const [attachModalVisible, setAttachModalVisible] = React.useState(false);
-  const [selectedImage, setImage] = React.useState(null);
-  const [imageUploading, setImageUploading] = React.useState(false);
+  const [attachModalVisible, setAttachModalVisible] = useState(false);
+  const [selectedImage, setImage] = useState(null);
+  const [isReportVisible, setIsReportVisible] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -363,6 +348,10 @@ const Chat = React.memo(({navigation}: any) => {
         onlineStatus={onlineUsers.includes(items.user?._id)}
         title={items.user?.name ?? 'Chats'}
         textColor="#171717"
+        rightIcon="flag-outline"
+        onRightPress={() => {
+          setIsReportVisible(true);
+        }}
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
@@ -426,6 +415,14 @@ const Chat = React.memo(({navigation}: any) => {
           setAttachModalVisible(false);
         }}
       />
+
+      <ReportUserModal
+        visible={isReportVisible}
+        onClose={() => setIsReportVisible(false)}
+        onSubmit={(note: any) => {
+          setIsReportVisible(false);
+        }}
+      />
     </SafeAreaView>
   );
 });
@@ -472,6 +469,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 0.5,
     borderTopColor: '#6A6A6A40',
+  },
+  disabledtext: {
+    color: 'red',
+    fontFamily: Fonts.BOLD,
+    textAlign: 'center',
+    width: '100%',
   },
   input: {
     flex: 1,

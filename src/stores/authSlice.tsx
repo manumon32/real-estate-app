@@ -1,6 +1,7 @@
 import {
   fetchUserDetailsAPI,
   login,
+  logoutAPI,
   logoutFromallDevicesAPI,
   sendEmailOTP,
   sendPhoneOTP,
@@ -30,12 +31,15 @@ export interface AuthSlice {
   login: (falg: any) => Promise<void>;
   emailOTPLoading: boolean;
   phoneOTPLoading: boolean;
+  navigationMode: any;
+  setNavigationMode: (falg: any) => Promise<void>;
   sentEmailOTP: (falg: any) => Promise<void>;
   verifyEmailOTP: (falg: any) => Promise<void>;
   sentPhoneOTP: (falg: any) => Promise<void>;
   verifyPhoneOTP: (falg: any) => Promise<void>;
   setVisible: () => Promise<void>;
   logout: () => Promise<void>;
+  logoutUser: () => Promise<void>;
   logoutFromAllDevice: () => Promise<void>;
   setUpdateSuccess: () => Promise<void>;
   clearOTP: () => Promise<void>;
@@ -62,6 +66,12 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
   logoutLoading: false,
   emailOTPLoading: false,
   phoneOTPLoading: false,
+  navigationMode: null,
+  setNavigationMode: flag => {
+    return set({
+      navigationMode: flag,
+    });
+  },
   sentEmailOTP: async payload => {
     try {
       set({
@@ -443,6 +453,38 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
       updateSuccess: false,
       userProfileloading: false,
     });
+  },
+  logoutUser: async () => {
+    try {
+      set({logoutLoading: true});
+      const resp = await logoutAPI(
+        {},
+        {
+          token: get().token,
+          clientId: get().clientId,
+          bearerToken: get().bearerToken,
+        },
+      );
+      set({logoutLoading: false});
+      if (resp) {
+        logoutAndRedirect();
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Something went wrong',
+          position: 'bottom',
+          visibilityTime: 1000,
+        });
+      }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong',
+        position: 'bottom',
+        visibilityTime: 1000,
+      });
+      set({logoutLoading: false});
+    }
   },
   logoutFromAllDevice: async () => {
     try {

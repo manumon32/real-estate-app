@@ -159,6 +159,7 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
       navigate('Main');
     } catch (err: any) {
       set({error: err.message, loading: false});
+      navigate('Main');
     }
   },
   setTriggerRefresh: () =>

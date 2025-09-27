@@ -19,6 +19,10 @@ export const getTimeAgo = (timestamp: number) => {
   return `${Math.floor(diff / 86400)}d ago`;
 };
 
+function getFileNameFromUrl(url: string): string {
+  return url.split('/').pop() || '';
+}
+
 async function openRemoteFile(url: string) {
   try {
     // Get filename from URL
@@ -105,21 +109,23 @@ export default function ChatBubble(props: any) {
                       }}
                     />
                   ) : (
-                    <>
-                      <Icon name="file" size={50} color="#e74c3c" />
-                      {/* <Text
-                        numberOfLines={3}
-                        style={[
-                          styles.messageText,
-                          {
-                            width: 120,
-                            color: 'blue',
-                            textDecorationLine: 'underline',
-                          },
-                        ]}>
-                        {items.files?.[0]}
-                      </Text> */}
-                    </>
+                    items.files?.[0] && (
+                      <>
+                        <Icon name="file" size={50} color="#e74c3c" />
+                        <Text
+                          numberOfLines={3}
+                          style={[
+                            styles.messageText,
+                            {
+                              width: 120,
+                              color: 'blue',
+                              textDecorationLine: 'underline',
+                            },
+                          ]}>
+                          {getFileNameFromUrl(items.files?.[0])}
+                        </Text>
+                      </>
+                    )
                   )}
                 </TouchableOpacity>
               )}

@@ -45,6 +45,8 @@ import useBoundStore from '@stores/index';
 import OtpVerificationScreen from './OtpVerificationScreen';
 import LinearGradient from 'react-native-linear-gradient';
 import Toast from 'react-native-toast-message';
+import {WEB_CLIENT_ID} from '@constants/google';
+import { Fonts } from '@constants/font';
 
 type Props = {
   visible: boolean;
@@ -145,8 +147,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId:
-        '1069084103649-ehn40vvlrdqqdd2qg3n25558uneph9sp.apps.googleusercontent.com',
+      webClientId: WEB_CLIENT_ID,
       offlineAccess: true, // if using with Firebase or for getting refresh tokens
     });
   }, []);
@@ -371,10 +372,14 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
                       {(message || loginError) && (
                         <Text
                           style={{
-                            fontSize: 12,
+                            fontSize: 13,
                             color: '#ff4d4f',
-                            margin: 5,
-                            marginTop: -5,
+                            marginHorizontal: 8,
+                            margin:4,
+                            marginTop: -10,
+                            lineHeight: 18,
+                            fontWeight: '500',
+                            fontFamily:Fonts.REGULAR,
                           }}>
                           {loginErrorMessage
                             ? loginErrorMessage

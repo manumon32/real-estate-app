@@ -1,3 +1,5 @@
+/* eslint-disable react-native/no-inline-styles */
+import SafeFooter from '@components/SafeFooter';
 import React, {useState} from 'react';
 import {
   Modal,
@@ -13,7 +15,6 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -99,18 +100,20 @@ const ReportAdModal = ({visible, onClose, onSubmit}: any) => {
               />
 
               {/* Send Button */}
-              <TouchableOpacity
-                style={[
-                  styles.sendBtn,
-                  {
-                    backgroundColor:
-                      selectedReason && comment ? '#2f8f72' : '#ccc',
-                  },
-                ]}
-                disabled={!(selectedReason && comment)}
-                onPress={handleSend}>
-                <Text style={styles.sendBtnText}>Send</Text>
-              </TouchableOpacity>
+              <SafeFooter>
+                <TouchableOpacity
+                  style={[
+                    styles.sendBtn,
+                    {
+                      backgroundColor:
+                        selectedReason && comment ? '#2f8f72' : '#ccc',
+                    },
+                  ]}
+                  disabled={!(selectedReason && comment)}
+                  onPress={handleSend}>
+                  <Text style={styles.sendBtnText}>Send</Text>
+                </TouchableOpacity>
+              </SafeFooter>
             </View>
           </KeyboardAvoidingView>
         </View>

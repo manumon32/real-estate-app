@@ -53,10 +53,10 @@
         <!-- Facebook SDK -->
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
-            android:value="1911577602952822"/>
+            android:value="2601847656850110"/>
         <meta-data
             android:name="com.facebook.sdk.ClientToken"
-            android:value="9e987a715046c0ccbc57110cc1681144" />
+            android:value="e1db5ec19ad164986784fa653ea5c420" />
 
     </application>
 

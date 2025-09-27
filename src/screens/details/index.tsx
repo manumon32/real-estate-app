@@ -81,10 +81,12 @@ const PropertyDetails = React.memo(() => {
   const [isReportVisible, setIsReportVisible] = useState(false);
   const {theme} = useTheme();
   const isOwner = details?.customerId?._id === user?._id;
+  const isDarkMode = useColorScheme() === 'dark';
+  const sectionColor = {color: theme.colors.text};
 
-  const markasSold = async (id: string) => {
+  const markasSold = async (adId: string) => {
     let payload = {
-      id: id,
+      id: adId,
       adStatus: 'sold',
     };
     try {
@@ -253,6 +255,98 @@ const PropertyDetails = React.memo(() => {
     });
   };
 
+  useEffect(() => {
+    console.log('DEtails Pages', items);
+    if (items?._id && !id) {
+      bearerToken && fetchBanks(items?._id ?? id);
+    }
+  }, [bearerToken, fetchBanks, id, items, navigation]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!items?._id && !id) {
+        // @ts-ignore
+        navigation.navigate('Main');
+      } else {
+        fetchDetails(items?._id ?? id);
+      }
+      return () => {
+        setProperty(null);
+        clearDetails();
+      };
+    }, [clearDetails, fetchDetails, id, items?._id, navigation]),
+  );
+
+  useEffect(() => {
+    if (detailsError) {
+      navigation.goBack();
+    }
+    setProperty(details);
+  }, [details, detailsError, navigation]);
+
+  const verifyListing = () => {
+    let payload = {
+      propertyId: property?._id,
+      propertyLocation: {
+        type: 'Point',
+        coordinates: [
+          property?.location?.coordinates[0],
+          property?.location?.coordinates[1],
+        ],
+      },
+    };
+    startVerification(payload);
+  };
+
+  const submitReportAd = (data: any) => {
+    let payload = {
+      propertyId: details?._id,
+      reason: data.reason,
+      comment: data.comment,
+    };
+    reportAd(payload);
+  };
+
+  const onBankSelectDismis = () => {
+    setBankModalVisible(false);
+    setSelectedBank('');
+  };
+  const onBankSelect = (data: any) => {
+    setSelectedBank(data);
+    setBankModalVisible(false);
+    navigate('VerifyBankList', {items: {...data, _id: data?._id}});
+  };
+
+  const saveAppointMents = async (date: Date) => {
+    let payload = {
+      propertyId: details?._id,
+      scheduledAt: date,
+    };
+    try {
+      await saveAppointMent(
+        payload,
+        {
+          token,
+          clientId,
+          bearerToken,
+        },
+        'post',
+      );
+      Toast.show({
+        type: 'success',
+        text1: 'Appointment Request Sent',
+        position: 'bottom',
+      });
+      property?._id && fetchDetails(property?._id);
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong.',
+        position: 'bottom',
+      });
+    }
+  };
+
   const Footer = ({details, bearerToken, createRoom, setVisible}: any) => {
     return (
       !detailLoading && (
@@ -339,97 +433,680 @@ const PropertyDetails = React.memo(() => {
     );
   };
 
-  useEffect(() => {
-    console.log('DEtails Pages', items);
-    if (items?._id && !id) {
-      bearerToken && fetchBanks(items?._id ?? id);
-    }
-  }, [bearerToken, fetchBanks, id, items, navigation]);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      if (!items?._id && !id) {
-        // @ts-ignore
-        navigation.navigate('Main');
-      } else {
-        fetchDetails(items?._id ?? id);
-      }
-      return () => {
-        setProperty(null);
-        clearDetails();
-      };
-    }, [clearDetails, fetchDetails, id, items?._id, navigation]),
-  );
-
-  React.useEffect(() => {
-    if (detailsError) {
-      navigation.goBack();
-    }
-    setProperty(details);
-  }, [details, detailsError, navigation]);
-
-  const verifyListing = () => {
-    let payload = {
-      propertyId: property?._id,
-      propertyLocation: {
-        type: 'Point',
-        coordinates: [
-          property?.location?.coordinates[0],
-          property?.location?.coordinates[1],
-        ],
-      },
-    };
-    startVerification(payload);
+  const SimilarAdContainer = () => {
+    return property?.listingTypeId?._id || property?.propertyTypeId?._id ? (
+      <>
+        <Text style={[styles.section, sectionColor, {marginBottom: 10}]}>
+          Similar Ads
+        </Text>
+        <View
+          style={[
+            {
+              backgroundColor: theme.colors.backgroundHome,
+              paddingBottom: 10,
+            },
+          ]}>
+          <SimilarAds
+            token={token}
+            clientId={clientId}
+            listingTypeId={property?.listingTypeId?._id}
+            propertyTypeId={property?.propertyTypeId?._id}
+            location={location}
+            propertyId={details?._id}
+          />
+        </View>
+      </>
+    ) : (
+      <></>
+    );
   };
 
-  const isDarkMode = useColorScheme() === 'dark';
-  const sectionColor = {color: theme.colors.text};
+  const TitleContainer = () => {
+    return (
+      (items?.title || property?.title) && (
+        <View
+          style={[
+            styles.header,
+            isDarkMode && {
+              ...styles.darkHeader,
+              backgroundColor: theme.colors.background,
+            },
+          ]}>
+          <Text style={[styles.title, {color: theme.colors.text}]}>
+            {property?.title ? property?.title : items?.title}
+          </Text>
 
-  // const renderAdItem = useCallback(
-  //   (items: any) => {
-  //     return <PropertyCard items={items.item} navigation={navigation} />;
-  //   },
-  //   [navigation],
-  // );
+          <View style={styles.priceContainer}>
+            <Text
+              style={[
+                styles.price,
+                {color: theme.colors.text, marginRight: 5},
+              ]}>
+              {property?.price
+                ? formatINR(property?.price)
+                : formatINR(items?.price)}
+            </Text>
+            <Text style={[styles.squrft, {color: theme.colors.text}]}>
+              ({property?.areaSize}/ sq.ft)
+            </Text>
+            <View style={styles.nogotiable}>
+              <Text style={styles.nogotiableText}>Negotiable</Text>
+            </View>
+          </View>
+          <Text
+            style={[
+              styles.locationTitle,
+              {color: theme.colors.text, ...styles.locationContainer},
+            ]}>
+            <IconButton
+              iconSize={16}
+              iconColor={theme.colors.text}
+              iconName={'map-marker'}
+            />
+            {property?.address ? property?.address : items?.address}
+          </Text>
 
-  // const products = useMemo(() => {
-  //   return Array.from({length: 2}, (_, i) => ({
-  //     id: i.toString(),
-  //     title: `Property available in ${i + 1}`,
-  //     price: `$${(i + 1) * 100}`,
-  //     image: 'https://via.placeholder.com/150',
-  //     featured: i === 0 || i === 1, // Only first two are featured
-  //   }));
-  // }, []);
+          <View style={styles.locationContainerFooter}>
+            <Text
+              style={[
+                styles.locationTitle,
+                {color: theme.colors.text, marginRight: 5},
+              ]}>
+              {!detailLoading &&
+                (property?.adStatus === 'sold'
+                  ? 'Sold on ' +
+                    new Date(property?.soldDate).toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })
+                  : 'Posted on ' +
+                    // @ts-ignore
+                    new Date(property?.createdAt).toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    }))}
+            </Text>
+          </View>
+        </View>
+      )
+    );
+  };
 
-  const saveAppointMentS = async (date: Date) => {
-    let payload = {
-      propertyId: details?._id,
-      scheduledAt: date,
-    };
-    try {
-      await saveAppointMent(
-        payload,
+  const LoaderContainer = () => {
+    return (
+      <View style={styles.flexRow}>
+        {detailLoading && <CustomDummyLoader />}
+        {details?.isVerified && (
+          <View style={styles.verifiedBadge}>
+            <Text style={styles.verifiedText}>✅ Verified</Text>
+          </View>
+        )}
+        {details?.reraApproved && (
+          <View style={[styles.verifiedBadge, {right: 15}]}>
+            <Text style={styles.verifiedText}>
+              ✅ Rera Approved {details?.reraId ? ': ' + details?.reraId : ''}
+            </Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const DetailPageContainer = () => {
+    return !detailLoading ? (
+      <>
+        {banks.filter((item: any) => item.status === 'verified').length > 0 && (
+          <>
+            <Text style={[styles.section, sectionColor]}>Loan available</Text>
+            <View style={styles.bankContainer}>
+              <View style={styles.bankcontentStyle}>
+                {banks.map(
+                  (item: any, index: number) =>
+                    item.status === 'verified' && (
+                      <View key={index} style={styles.bankBadge}>
+                        {item?.bankId?.name ? (
+                          <Image
+                            source={{
+                              uri: item.bankId.logoUrl,
+                              priority: Image.priority.normal,
+                              cache: Image.cacheControl.immutable,
+                            }}
+                            resizeMode="contain"
+                            style={styles.bankLogoStyle}
+                          />
+                        ) : (
+                          '🏦'
+                        )}
+                        <Text style={styles.bankBadgeText}>
+                          {item.bankId.name}
+                        </Text>
+                      </View>
+                    ),
+                )}
+              </View>
+            </View>
+          </>
+        )}
+        {isOwner &&
+          (details?.adStatus === 'blocked' ||
+            details?.adStatus === 'rejected') && (
+            <Pressable
+              onPress={() => {
+                verifyListing();
+              }}
+              style={styles.adStatusContainerStyle}>
+              <View style={styles.adStatusContainer}>
+                <Text style={styles.adStatusTextSyle}>
+                  {details?.adStatus === 'blocked'
+                    ? 'This Listing is Blocked'
+                    : 'This Listing Rejected'}
+                </Text>
+              </View>
+            </Pressable>
+          )}
+        {isOwner && details?.adStatus === 'active' && (
+          <Pressable
+            onPress={() => {
+              verifyListing();
+            }}
+            style={styles.adStatusContainerStylePending}>
+            <View style={styles.adStatusContainer}>
+              <Text style={styles.statusVerifiedStyle}>
+                {details?.isVerified
+                  ? 'Your listing is verified'
+                  : details?.isVerificationStarted
+                  ? 'Check your verification status'
+                  : 'Verify your listing to get more offers.'}
+              </Text>
+            </View>
+            <View style={styles.flexRow}>
+              {!verification_loading && (
+                <IconButton
+                  iconSize={24}
+                  iconColor={'#fff'}
+                  iconName={'arrow-right'}
+                />
+              )}
+
+              {verification_loading && (
+                <ActivityIndicator size={'small'} color={'#fff'} />
+              )}
+            </View>
+          </Pressable>
+        )}
+        {!isOwner && details?.adStatus === 'active' && bearerToken && (
+          <Pressable
+            onPress={() => {
+              if (
+                details?.appointmentStatus === 'active' ||
+                details?.appointmentStatus === 'rejected'
+              ) {
+                setShowModal(true);
+              } else {
+                // @ts-ignore
+                navigation.navigate('Appointments', {
+                  items: {type: 'requestedAppointments'},
+                });
+              }
+            }}
+            style={{
+              ...styles.visitContainer,
+              backgroundColor:
+                property?.appointmentStatus === 'pending'
+                  ? '#ea860bff'
+                  : '#2F8D79',
+              borderColor:
+                property?.appointmentStatus === 'pending'
+                  ? '#ea860bff'
+                  : '#2F8D79',
+            }}>
+            <IconButton
+              iconSize={24}
+              iconColor={'#ffffffff'}
+              iconName={'calendar'}
+              style={{marginRight: 10}}
+            />
+            <View style={styles.planvisitTextContainer}>
+              <Text style={styles.planVisitTextStyle}>
+                {property?.appointmentStatus === 'active'
+                  ? 'Plan a Site Visit'
+                  : property?.appointmentStatus === 'pending'
+                  ? 'Your Visit request is pending'
+                  : property?.appointmentStatus === 'scheduled'
+                  ? 'Your Visit is Scheduled'
+                  : 'Plan a Site Visit'}
+              </Text>
+            </View>
+            <View style={styles.flexRow}>
+              {!verification_loading && (
+                <IconButton
+                  iconSize={24}
+                  iconColor={'#fff'}
+                  iconName={'arrow-right'}
+                />
+              )}
+
+              {verification_loading && (
+                <ActivityIndicator size={'small'} color={'#fff'} />
+              )}
+            </View>
+          </Pressable>
+        )}
+        <View style={styles.row}>
+          {property?.numberOfBedrooms ? (
+            <View style={styles.iconsContainer}>
+              <IconButton
+                iconSize={20}
+                iconColor={'#2F8D79'}
+                iconName={'bed'}
+              />
+              <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
+                {property?.numberOfBedrooms}
+              </Text>
+              <Text
+                numberOfLines={1}
+                style={[styles.iconsTextStle, {color: '#171717'}]}>
+                Bedroom
+              </Text>
+            </View>
+          ) : (
+            <></>
+          )}
+          {property?.numberOfBathrooms ? (
+            <View style={styles.iconsContainer}>
+              <IconButton
+                iconSize={20}
+                iconColor={'#2F8D79'}
+                iconName={'bathtub'}
+              />
+              <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
+                {property?.numberOfBathrooms}
+              </Text>
+              <Text
+                numberOfLines={1}
+                style={[styles.iconsTextStle, {color: '#171717'}]}>
+                Bathroom
+              </Text>
+            </View>
+          ) : (
+            <></>
+          )}
+          {property?.areaSize && (
+            <View style={styles.iconsContainer}>
+              <IconButton
+                iconSize={20}
+                iconColor={'#2F8D79'}
+                iconName={'ruler-square'}
+              />
+              <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
+                {property?.areaSize}
+              </Text>
+              <Text
+                numberOfLines={1}
+                style={[styles.iconsTextStle, {color: '#171717'}]}>
+                {'sq.ft'}
+              </Text>
+            </View>
+          )}
+          {property?.loanEligible && (
+            <View style={styles.iconsContainer}>
+              <IconButton
+                iconSize={20}
+                iconColor={'#2F8D79'}
+                iconName={'bank'}
+              />
+              <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
+                Loan Eligible
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.row}>
+          <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
+            {property?.furnishingStatusId?.name && (
+              <Button
+                style={styles.furnishedButtonStyle}
+                label={property?.furnishingStatusId?.name}
+                onPress={() => {}}
+              />
+            )}
+            {property?.availabilityStatusId?.name && (
+              <Button
+                style={styles.furnishedButtonStyle}
+                label={property?.availabilityStatusId?.name}
+                onPress={() => {}}
+              />
+            )}
+
+            {property?.bachelorsAllowed && (
+              <Button
+                style={styles.furnishedButtonStyle}
+                label={'Bachelors allowed'}
+                onPress={() => {}}
+              />
+            )}
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        <Text style={[styles.section, sectionColor]}>Details</Text>
+        <View style={styles.bankContainer}>
+          <Text
+            style={[
+              styles.detailsTextStyle,
+              {
+                color: theme.colors.text,
+              },
+            ]}>
+            {property?.description}
+          </Text>
+        </View>
+
+        <View style={styles.divider} />
+        {isOwner &&
+          details?.adStatus === 'active' &&
+          details?.showLoanOffers && (
+            <Pressable
+              onPress={async () => {
+                (await items?._id) && startBankVerification(items?._id);
+                setBankModalVisible(true);
+              }}
+              style={styles.loanOfferContainer}>
+              <View style={styles.adStatusContainer}>
+                <IconButton
+                  iconSize={24}
+                  iconColor={'#2F8D79'}
+                  iconName={'finance'}
+                  style={{marginRight: 10}}
+                />
+                <Text style={styles.emiCalculatorText}>
+                  Check your loan offers.
+                </Text>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <IconButton
+                  iconSize={24}
+                  iconColor={'#2F8D79'}
+                  iconName={'arrow-right'}
+                />
+              </View>
+            </Pressable>
+          )}
+        {!isOwner &&
+          details?.adStatus === 'active' &&
+          details?.showEmiCalculator && (
+            <Pressable
+              onPress={async () => {
+                // @ts-ignore
+                navigation.navigate('LoanCalculator', {
+                  price: property?.price ? property?.price : items?.price,
+                });
+              }}
+              style={styles.loanOfferContainer}>
+              <View style={styles.adStatusContainer}>
+                <IconButton
+                  iconSize={24}
+                  iconColor={'#2F8D79'}
+                  iconName={'calculator'}
+                  style={{marginRight: 10}}
+                />
+                <Text style={styles.emiCalculatorText}>Emi Calculator</Text>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <IconButton
+                  iconSize={24}
+                  iconColor={'#2F8D79'}
+                  iconName={'arrow-right'}
+                />
+              </View>
+            </Pressable>
+          )}
+
         {
-          token,
-          clientId,
-          bearerToken,
-        },
-        'post',
-      );
-      Toast.show({
-        type: 'success',
-        text1: 'Appointment Request Sent',
-        position: 'bottom',
-      });
-      property?._id && fetchDetails(property?._id);
-    } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Something went wrong.',
-        position: 'bottom',
-      });
-    }
+          <>
+            <Text style={[styles.section, sectionColor]}>
+              Additional Details
+            </Text>
+            <View
+              style={[
+                styles.additionalDetailsContainer,
+                {backgroundColor: theme.colors.background},
+              ]}>
+              {property?.propertyTypeId?.name && (
+                <View style={styles.adittionalDetailsRow}>
+                  <Text style={[styles.label, sectionColor]}>{'Type'}</Text>
+                  <Text style={[styles.value, sectionColor]}>
+                    {property?.propertyTypeId?.name}
+                  </Text>
+                </View>
+              )}
+              {property?.ownershipTypeId?.name && (
+                <View style={styles.adittionalDetailsRow}>
+                  <Text style={[styles.label, sectionColor]}>
+                    {'Ownership'}
+                  </Text>
+                  <Text style={[styles.value, sectionColor]}>
+                    {property?.ownershipTypeId?.name}
+                  </Text>
+                </View>
+              )}
+              {property?.areaSize ? (
+                <View style={styles.adittionalDetailsRow}>
+                  <Text style={[styles.label, sectionColor]}>
+                    {'Area Size'}
+                  </Text>
+                  <Text style={[styles.value, sectionColor]}>
+                    {property?.areaSize} /{'sq.ft'}
+                  </Text>
+                </View>
+              ) : (
+                <></>
+              )}
+              {property?.carpetArea ? (
+                <View style={styles.adittionalDetailsRow}>
+                  <Text style={[styles.label, sectionColor]}>
+                    {'Carpet Area'}
+                  </Text>
+                  <Text style={[styles.value, sectionColor]}>
+                    {property?.carpetArea} /
+                    {property?.carpetAreaUnitId?.name
+                      ? property?.carpetAreaUnitId?.name
+                      : 'sq.ft'}
+                  </Text>
+                </View>
+              ) : (
+                <></>
+              )}
+              {property?.builtUpArea ? (
+                <View style={styles.adittionalDetailsRow}>
+                  <Text style={[styles.label, sectionColor]}>
+                    {'BuiltUp Area'}
+                  </Text>
+                  <Text style={[styles.value, sectionColor]}>
+                    {property?.builtUpArea} /
+                    {property?.builtUpAreaUnitId?.name
+                      ? property?.builtUpAreaUnitId?.name
+                      : 'sq.ft'}
+                  </Text>
+                </View>
+              ) : (
+                <></>
+              )}
+              {property?.superBuiltUpArea ? (
+                <View style={styles.adittionalDetailsRow}>
+                  <Text style={[styles.label, sectionColor]}>
+                    {'Super BuiltUp Area'}
+                  </Text>
+                  <Text style={[styles.value, sectionColor]}>
+                    {property?.superBuiltUpArea} /
+                    {property?.superBuiltAreaUnitId?.name
+                      ? property?.superBuiltAreaUnitId?.name
+                      : 'sq.ft'}
+                  </Text>
+                </View>
+              ) : (
+                <></>
+              )}
+
+              {property?.facingDirectionId?.name && (
+                <View style={styles.adittionalDetailsRow}>
+                  <Text style={[styles.label, sectionColor]}>{'Facing'}</Text>
+                  <Text style={[styles.value, sectionColor]}>
+                    {property?.facingDirectionId?.name}
+                  </Text>
+                </View>
+              )}
+              {property?.listedById?.name && (
+                <View style={styles.adittionalDetailsRow}>
+                  <Text style={[styles.label, sectionColor]}>
+                    {'Listed By'}
+                  </Text>
+                  <Text style={[styles.value, sectionColor]}>
+                    {property?.listedById?.name}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </>
+        }
+
+        <View style={styles.divider} />
+        {property?.amenityIds && property?.amenityIds?.length > 0 && (
+          <>
+            <Text style={[styles.section, sectionColor]}>Amenities</Text>
+            <View style={styles.amenities}>
+              {property?.amenityIds?.map(renderAmenity)}
+            </View>
+          </>
+        )}
+
+        <View style={styles.divider} />
+        {/* @ts-ignore */}
+        {property?.nearbyLandmarks?.length > 0 && (
+          <>
+            <Text style={[styles.section, sectionColor]}>Nearby</Text>
+            <View style={styles.nearby}>
+              {property?.nearbyLandmarks?.map(renderNearby)}
+            </View>
+          </>
+        )}
+
+        {!isOwner && (
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={[styles.section, sectionColor]}>Location</Text>
+            <Pressable
+              onPress={() => {
+                bearerToken ? setIsReportVisible(true) : setVisible();
+              }}>
+              <Text
+                style={[
+                  [styles.section, sectionColor],
+                  {
+                    right: 10,
+                    color: 'blue',
+                    textDecorationLine: 'underline',
+                    textDecorationStyle: 'solid',
+                    margin: 5,
+                    fontFamily: Fonts.BOLD,
+                  },
+                ]}>
+                Report this Ad
+              </Text>
+            </Pressable>
+          </View>
+        )}
+        <TouchableOpacity
+          onPress={() => {
+            openMap(
+              property?.location?.coordinates[1],
+              property?.location?.coordinates[0],
+            );
+          }}>
+          {Platform.OS === 'android' &&
+            isValidLatLng(
+              property?.location?.coordinates[1],
+              property?.location?.coordinates[0],
+            ) && (
+              <MapView
+                provider={PROVIDER_GOOGLE}
+                style={styles.map}
+                region={{
+                  latitude: Number(property?.location?.coordinates[1]),
+                  longitude: Number(property?.location?.coordinates[0]),
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}>
+                <Marker
+                  coordinate={{
+                    latitude: Number(property?.location?.coordinates[1]),
+                    longitude: Number(property?.location?.coordinates[0]),
+                  }}
+                />
+              </MapView>
+            )}
+
+          {Platform.OS !== 'android' && (
+            <MapView
+              style={styles.map}
+              region={{
+                latitude: Number(property?.location?.coordinates[1]),
+                longitude: Number(property?.location?.coordinates[0]),
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}>
+              <Marker
+                coordinate={{
+                  latitude: Number(property?.location?.coordinates[1]),
+                  longitude: Number(property?.location?.coordinates[0]),
+                }}
+              />
+            </MapView>
+          )}
+        </TouchableOpacity>
+
+        <View style={styles.divider} />
+        <View style={styles.userContainer}>
+          <View style={styles.unserContainerWidth}>
+            <Image
+              source={
+                !property?.customerId?.profilePicture
+                  ? require('@assets/images/images.jpeg')
+                  : {
+                      uri: property?.customerId?.profilePicture,
+                    }
+              }
+              resizeMode="cover"
+              style={styles.userImageStyle}
+            />
+          </View>
+          <View>
+            <Text
+              style={{
+                color: theme.colors.text,
+                fontFamily: Fonts.REGULAR,
+              }}>
+              {'Posted by'}
+            </Text>
+            <Text style={[styles.userNameStyle, {color: theme.colors.text}]}>
+              {property?.customerId?.name}
+            </Text>
+          </View>
+        </View>
+
+        <View
+          style={{
+            ...styles.divider,
+            top: 0,
+          }}
+        />
+      </>
+    ) : (
+      <></>
+    );
   };
 
   return (
@@ -446,878 +1123,24 @@ const PropertyDetails = React.memo(() => {
         style={{paddingBottom: 120}}>
         <Header details={property ? property : items} />
 
-        {(items?.title || property?.title) && (
-          <View
-            style={[
-              styles.header,
-              isDarkMode && {
-                backgroundColor: theme.colors.background,
-                borderTopWidth: 1,
-                borderColor: '#fff',
-                borderTopRightRadius: 0,
-                borderTopLeftRadius: 0,
-              },
-            ]}>
-            <Text style={[styles.title, {color: theme.colors.text}]}>
-              {property?.title ? property?.title : items?.title}
-            </Text>
+        <TitleContainer />
 
-            <View style={{flexDirection: 'row', alignContent: 'center'}}>
-              <Text
-                style={[
-                  styles.price,
-                  {color: theme.colors.text, marginRight: 5},
-                ]}>
-                {/* <IconButton
-                iconSize={18}
-                iconColor={'#171717'}
-                iconName={'currency-inr'}
-              /> */}
-                {property?.price
-                  ? formatINR(property?.price)
-                  : formatINR(items?.price)}
-              </Text>
-              <Text style={[styles.squrft, {color: theme.colors.text}]}>
-                ({property?.areaSize}/ sq.ft)
-              </Text>
-              <View style={styles.nogotiable}>
-                <Text style={styles.nogotiableText}>Negotiable</Text>
-              </View>
-            </View>
-            <Text
-              style={[
-                styles.locationTitle,
-                {color: theme.colors.text, left: -2, top: 8},
-              ]}>
-              <IconButton
-                iconSize={16}
-                iconColor={theme.colors.text}
-                iconName={'map-marker'}
-              />
-              {property?.address ? property?.address : items?.address}
-            </Text>
+        <LoaderContainer />
 
-            <View
-              style={{flexDirection: 'row', alignContent: 'center', top: 15}}>
-              <Text
-                style={[
-                  styles.locationTitle,
-                  {color: theme.colors.text, marginRight: 5},
-                ]}>
-                {/* <IconButton
-                iconSize={18}
-                iconColor={'#171717'}
-                iconName={'currency-inr'}
-              /> */}
-                {!detailLoading &&
-                  (property?.adStatus === 'sold'
-                    ? 'Sold on ' +
-                      new Date(property?.soldDate).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                      })
-                    : 'Posted on ' +
-                      // @ts-ignore
-                      new Date(property?.createdAt).toLocaleDateString(
-                        'en-GB',
-                        {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                        },
-                      ))}
-              </Text>
-            </View>
-          </View>
-        )}
-        <View style={{flexDirection: 'row'}}>
-          {detailLoading && <CustomDummyLoader />}
-          {details?.isVerified && (
-            <View style={styles.verifiedBadge}>
-              <Text style={styles.verifiedText}>✅ Verified</Text>
-            </View>
-          )}
-          {details?.reraApproved && (
-            <View style={[styles.verifiedBadge, {right: 15}]}>
-              <Text style={styles.verifiedText}>
-                ✅ Rera Approved {details?.reraId ? ': ' + details?.reraId : ''}
-              </Text>
-            </View>
-          )}
-        </View>
-        {!detailLoading && (
-          <>
-            {banks.filter((item: any) => item.status === 'verified').length >
-              0 && (
-              <>
-                <Text style={[styles.section, sectionColor]}>
-                  Loan available
-                </Text>
-                <View
-                  style={{
-                    paddingHorizontal: 16,
-                  }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      flexWrap: 'wrap',
-                      marginTop: 8,
-                    }}>
-                    {banks.map(
-                      (item: any, index: number) =>
-                        item.status === 'verified' && (
-                          <View key={index} style={styles.bankBadge}>
-                            {item?.bankId?.name ? (
-                              <Image
-                                source={{
-                                  uri: item.bankId.logoUrl,
-                                  priority: Image.priority.normal,
-                                  cache: Image.cacheControl.immutable,
-                                }}
-                                resizeMode="contain"
-                                style={{height: 20, width: 20, margin: 2}}
-                              />
-                            ) : (
-                              '🏦'
-                            )}
-                            <Text style={styles.bankBadgeText}>
-                              {item.bankId.name}
-                            </Text>
-                          </View>
-                        ),
-                    )}
-                  </View>
-                </View>
-              </>
-            )}
-            {isOwner &&
-              (details?.adStatus === 'blocked' ||
-                details?.adStatus === 'rejected') && (
-                <Pressable
-                  onPress={() => {
-                    verifyListing();
-                  }}
-                  style={{
-                    // top: 15,
-                    margin: 16,
-                    padding: 16,
-                    backgroundColor: '#f44a4aff',
-                    borderRadius: 10,
-                    height: 56,
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                    borderWidth: 1,
-                    borderColor: '#ea860bff',
-                  }}>
-                  <View
-                    style={{
-                      width: '95%',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}>
-                    <Text
-                      style={{
-                        color: '#fff',
-                        fontSize: 14,
-                        fontFamily: Fonts.MEDIUM,
-                        fontWeight: '500',
-                      }}>
-                      {details?.adStatus === 'blocked'
-                        ? 'This Listing is Blocked'
-                        : 'This Listing Rejected'}
-                    </Text>
-                  </View>
-                </Pressable>
-              )}
-            {isOwner && details?.adStatus === 'active' && (
-              <Pressable
-                onPress={() => {
-                  verifyListing();
-                }}
-                style={{
-                  // top: 15,
-                  margin: 16,
-                  padding: 16,
-                  backgroundColor: '#2F8D79',
-                  borderRadius: 10,
-                  height: 56,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  borderWidth: 1,
-                  borderColor: '#88E4CF',
-                }}>
-                <View
-                  style={{
-                    width: '95%',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}>
-                  <Text
-                    style={{
-                      color: '#fff',
-                      fontSize: 14,
-                      fontFamily: Fonts.MEDIUM,
-                      fontWeight: '500',
-                    }}>
-                    {details?.isVerified
-                      ? 'Your listing is verified'
-                      : details?.isVerificationStarted
-                      ? 'Check your verification status'
-                      : 'Verify your listing to get more offers.'}
-                  </Text>
-                </View>
-                <View style={{flexDirection: 'row'}}>
-                  {!verification_loading && (
-                    <IconButton
-                      iconSize={24}
-                      iconColor={'#fff'}
-                      iconName={'arrow-right'}
-                    />
-                  )}
+        <DetailPageContainer />
 
-                  {verification_loading && (
-                    <ActivityIndicator size={'small'} color={'#fff'} />
-                  )}
-                </View>
-              </Pressable>
-            )}
-            {!isOwner && details?.adStatus === 'active' && bearerToken && (
-              <Pressable
-                onPress={() => {
-                  if (
-                    details?.appointmentStatus === 'active' ||
-                    details?.appointmentStatus === 'rejected'
-                  ) {
-                    setShowModal(true);
-                  } else {
-                    // @ts-ignore
-                    navigation.navigate('Appointments', {
-                      items: {type: 'requestedAppointments'},
-                    });
-                  }
-                }}
-                style={{
-                  // top: 15,
-                  margin: 16,
-                  padding: 16,
-                  backgroundColor:
-                    property?.appointmentStatus === 'pending'
-                      ? '#ea860bff'
-                      : '#2F8D79',
-                  borderRadius: 10,
-                  height: 56,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  borderWidth: 1,
-                  borderColor:
-                    property?.appointmentStatus === 'pending'
-                      ? '#ea860bff'
-                      : '#2F8D79',
-                }}>
-                <IconButton
-                  iconSize={24}
-                  iconColor={'#ffffffff'}
-                  iconName={'calendar'}
-                  style={{marginRight: 10}}
-                />
-                <View
-                  style={{
-                    width: '85%',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}>
-                  <Text
-                    style={{
-                      color: '#fff',
-                      fontSize: 14,
-                      fontFamily: Fonts.MEDIUM,
-                      fontWeight: '500',
-                    }}>
-                    {property?.appointmentStatus === 'active'
-                      ? 'Plan a Site Visit'
-                      : property?.appointmentStatus === 'pending'
-                      ? 'Your Visit request is pending'
-                      : property?.appointmentStatus === 'scheduled'
-                      ? 'Your Visit is Scheduled'
-                      : 'Plan a Site Visit'}
-                  </Text>
-                </View>
-                <View style={{flexDirection: 'row'}}>
-                  {!verification_loading && (
-                    <IconButton
-                      iconSize={24}
-                      iconColor={'#fff'}
-                      iconName={'arrow-right'}
-                    />
-                  )}
+        <SimilarAdContainer />
 
-                  {verification_loading && (
-                    <ActivityIndicator size={'small'} color={'#fff'} />
-                  )}
-                </View>
-              </Pressable>
-            )}
-            <View style={styles.row}>
-              {property?.numberOfBedrooms ? (
-                <View style={styles.iconsContainer}>
-                  <IconButton
-                    iconSize={20}
-                    iconColor={'#2F8D79'}
-                    iconName={'bed'}
-                  />
-                  <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
-                    {property?.numberOfBedrooms}
-                  </Text>
-                  <Text
-                    numberOfLines={1}
-                    style={[styles.iconsTextStle, {color: '#171717'}]}>
-                    Bedroom
-                  </Text>
-                </View>
-              ) : (
-                <></>
-              )}
-              {property?.numberOfBathrooms ? (
-                <View style={styles.iconsContainer}>
-                  <IconButton
-                    iconSize={20}
-                    iconColor={'#2F8D79'}
-                    iconName={'bathtub'}
-                  />
-                  <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
-                    {property?.numberOfBathrooms}
-                  </Text>
-                  <Text
-                    numberOfLines={1}
-                    style={[styles.iconsTextStle, {color: '#171717'}]}>
-                    Bathroom
-                  </Text>
-                </View>
-              ) : (
-                <></>
-              )}
-              {property?.areaSize && (
-                <View style={styles.iconsContainer}>
-                  <IconButton
-                    iconSize={20}
-                    iconColor={'#2F8D79'}
-                    iconName={'ruler-square'}
-                  />
-                  <Text style={[styles.iconsTextStle, {color: '#2F8D79'}]}>
-                    {property?.areaSize}
-                  </Text>
-                  <Text
-                    numberOfLines={1}
-                    style={[styles.iconsTextStle, {color: '#171717'}]}>
-                    {'sq.ft'}
-                  </Text>
-                </View>
-              )}
-              {property?.loanEligible && (
-                <View style={styles.iconsContainer}>
-                  <IconButton
-                    iconSize={20}
-                    iconColor={'#2F8D79'}
-                    iconName={'bank'}
-                  />
-                  <Text style={[styles.iconsTextStle, {color: '#171717'}]}>
-                    Loan Eligible
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            <View style={styles.row}>
-              <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
-                {property?.furnishingStatusId?.name && (
-                  <Button
-                    style={{margin: 5}}
-                    label={property?.furnishingStatusId?.name}
-                    onPress={() => {}}
-                  />
-                )}
-                {property?.availabilityStatusId?.name && (
-                  <Button
-                    style={{margin: 5}}
-                    label={property?.availabilityStatusId?.name}
-                    onPress={() => {}}
-                  />
-                )}
-
-                {property?.bachelorsAllowed && (
-                  <Button
-                    style={{margin: 5}}
-                    label={'Bachelors allowed'}
-                    onPress={() => {}}
-                  />
-                )}
-              </View>
-            </View>
-
-            <View
-              style={{
-                backgroundColor: '#EBEBEB',
-                borderWidth: 1,
-                borderColor: '#EBEBEB',
-                width: '100%',
-                top: 15,
-              }}
-            />
-
-            <Text style={[styles.section, sectionColor]}>Details</Text>
-            <View style={{paddingHorizontal: 16}}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: 400,
-                  color: theme.colors.text,
-                  margin: 0,
-                  marginTop: 20,
-                }}>
-                {property?.description}
-              </Text>
-            </View>
-
-            <View
-              style={{
-                backgroundColor: '#EBEBEB',
-                borderWidth: 1,
-                borderColor: '#EBEBEB',
-                width: '100%',
-                top: 15,
-              }}
-            />
-            {isOwner && details?.adStatus === 'active' && details?.showLoanOffers && (
-              <Pressable
-                onPress={async () => {
-                  (await items?._id) && startBankVerification(items?._id);
-                  setBankModalVisible(true);
-                }}
-                style={{
-                  top: 15,
-                  margin: 16,
-                  padding: 16,
-                  backgroundColor: '#E3FFF8',
-                  borderRadius: 10,
-                  height: 56,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  borderWidth: 1,
-                  borderColor: '#88E4CF',
-                }}>
-                <View
-                  style={{
-                    width: '95%',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}>
-                  <IconButton
-                    iconSize={24}
-                    iconColor={'#2F8D79'}
-                    iconName={'finance'}
-                    style={{marginRight: 10}}
-                  />
-                  <Text
-                    style={{
-                      color: '#2F8D79',
-                      fontSize: 14,
-                      fontFamily: Fonts.MEDIUM,
-                      fontWeight: '500',
-                    }}>
-                    Check your loan offers.
-                  </Text>
-                </View>
-                <View style={{flexDirection: 'row'}}>
-                  <IconButton
-                    iconSize={24}
-                    iconColor={'#2F8D79'}
-                    iconName={'arrow-right'}
-                  />
-                </View>
-              </Pressable>
-            )}
-            {!isOwner &&
-              details?.adStatus === 'active' &&
-              details?.showEmiCalculator && (
-                <Pressable
-                  onPress={async () => {
-                    // @ts-ignore
-                    navigation.navigate('LoanCalculator', {
-                      price: property?.price ? property?.price : items?.price,
-                    });
-                  }}
-                  style={{
-                    top: 15,
-                    margin: 16,
-                    padding: 16,
-                    backgroundColor: '#E3FFF8',
-                    borderRadius: 10,
-                    height: 56,
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                    borderWidth: 1,
-                    borderColor: '#88E4CF',
-                  }}>
-                  <View
-                    style={{
-                      width: '95%',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}>
-                    <IconButton
-                      iconSize={24}
-                      iconColor={'#2F8D79'}
-                      iconName={'calculator'}
-                      style={{marginRight: 10}}
-                    />
-                    <Text
-                      style={{
-                        color: '#2F8D79',
-                        fontSize: 14,
-                        fontFamily: Fonts.MEDIUM,
-                        fontWeight: '500',
-                      }}>
-                      Emi Calculator
-                    </Text>
-                  </View>
-                  <View style={{flexDirection: 'row'}}>
-                    <IconButton
-                      iconSize={24}
-                      iconColor={'#2F8D79'}
-                      iconName={'arrow-right'}
-                    />
-                  </View>
-                </Pressable>
-              )}
-
-            {
-              <>
-                <Text style={[styles.section, sectionColor]}>
-                  Additional Details
-                </Text>
-                <View
-                  style={[
-                    styles.additionalDetailsContainer,
-                    {backgroundColor: theme.colors.background},
-                  ]}>
-                  {property?.propertyTypeId?.name && (
-                    <View style={styles.adittionalDetailsRow}>
-                      <Text style={[styles.label, sectionColor]}>{'Type'}</Text>
-                      <Text style={[styles.value, sectionColor]}>
-                        {property?.propertyTypeId?.name}
-                      </Text>
-                    </View>
-                  )}
-                  {property?.ownershipTypeId?.name && (
-                    <View style={styles.adittionalDetailsRow}>
-                      <Text style={[styles.label, sectionColor]}>
-                        {'Ownership'}
-                      </Text>
-                      <Text style={[styles.value, sectionColor]}>
-                        {property?.ownershipTypeId?.name}
-                      </Text>
-                    </View>
-                  )}
-                  {property?.areaSize ? (
-                    <View style={styles.adittionalDetailsRow}>
-                      <Text style={[styles.label, sectionColor]}>
-                        {'Area Size'}
-                      </Text>
-                      <Text style={[styles.value, sectionColor]}>
-                        {property?.areaSize} /{'sq.ft'}
-                      </Text>
-                    </View>
-                  ) : (
-                    <></>
-                  )}
-                  {property?.carpetArea ? (
-                    <View style={styles.adittionalDetailsRow}>
-                      <Text style={[styles.label, sectionColor]}>
-                        {'Carpet Area'}
-                      </Text>
-                      <Text style={[styles.value, sectionColor]}>
-                        {property?.carpetArea} /
-                        {property?.carpetAreaUnitId?.name
-                          ? property?.carpetAreaUnitId?.name
-                          : 'sq.ft'}
-                      </Text>
-                    </View>
-                  ) : (
-                    <></>
-                  )}
-                  {property?.builtUpArea ? (
-                    <View style={styles.adittionalDetailsRow}>
-                      <Text style={[styles.label, sectionColor]}>
-                        {'BuiltUp Area'}
-                      </Text>
-                      <Text style={[styles.value, sectionColor]}>
-                        {property?.builtUpArea} /
-                        {property?.builtUpAreaUnitId?.name
-                          ? property?.builtUpAreaUnitId?.name
-                          : 'sq.ft'}
-                      </Text>
-                    </View>
-                  ) : (
-                    <></>
-                  )}
-                  {property?.superBuiltUpArea ? (
-                    <View style={styles.adittionalDetailsRow}>
-                      <Text style={[styles.label, sectionColor]}>
-                        {'Super BuiltUp Area'}
-                      </Text>
-                      <Text style={[styles.value, sectionColor]}>
-                        {property?.superBuiltUpArea} /
-                        {property?.superBuiltAreaUnitId?.name
-                          ? property?.superBuiltAreaUnitId?.name
-                          : 'sq.ft'}
-                      </Text>
-                    </View>
-                  ) : (
-                    <></>
-                  )}
-
-                  {property?.facingDirectionId?.name && (
-                    <View style={styles.adittionalDetailsRow}>
-                      <Text style={[styles.label, sectionColor]}>
-                        {'Facing'}
-                      </Text>
-                      <Text style={[styles.value, sectionColor]}>
-                        {property?.facingDirectionId?.name}
-                      </Text>
-                    </View>
-                  )}
-                  {property?.listedById?.name && (
-                    <View style={styles.adittionalDetailsRow}>
-                      <Text style={[styles.label, sectionColor]}>
-                        {'Listed By'}
-                      </Text>
-                      <Text style={[styles.value, sectionColor]}>
-                        {property?.listedById?.name}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </>
-            }
-
-            <View
-              style={{
-                backgroundColor: '#EBEBEB',
-                borderWidth: 1,
-                borderColor: '#EBEBEB',
-                width: '100%',
-                top: 15,
-              }}
-            />
-            {property?.amenityIds && property?.amenityIds?.length > 0 && (
-              <>
-                <Text style={[styles.section, sectionColor]}>Amenities</Text>
-                <View style={styles.amenities}>
-                  {property?.amenityIds?.map(renderAmenity)}
-                </View>
-              </>
-            )}
-
-            <View
-              style={{
-                backgroundColor: '#EBEBEB',
-                borderWidth: 1,
-                borderColor: '#EBEBEB',
-                width: '100%',
-                top: 15,
-              }}
-            />
-            {/* @ts-ignore */}
-            {property?.nearbyLandmarks?.length > 0 && (
-              <>
-                <Text style={[styles.section, sectionColor]}>Nearby</Text>
-                <View style={styles.nearby}>
-                  {property?.nearbyLandmarks?.map(renderNearby)}
-                </View>
-              </>
-            )}
-
-            {!isOwner && (
-              <View
-                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text style={[styles.section, sectionColor]}>Location</Text>
-                <Pressable
-                  onPress={() => {
-                    bearerToken ? setIsReportVisible(true) : setVisible();
-                  }}>
-                  <Text
-                    style={[
-                      [styles.section, sectionColor],
-                      {
-                        right: 10,
-                        color: 'blue',
-                        textDecorationLine: 'underline',
-                        textDecorationStyle: 'solid',
-                        margin: 5,
-                        fontFamily: Fonts.BOLD,
-                      },
-                    ]}>
-                    Report this Ad
-                  </Text>
-                </Pressable>
-              </View>
-            )}
-            <TouchableOpacity
-              onPress={() => {
-                openMap(
-                  property?.location?.coordinates[1],
-                  property?.location?.coordinates[0],
-                );
-              }}>
-              {Platform.OS === 'android' &&
-                isValidLatLng(
-                  property?.location?.coordinates[1],
-                  property?.location?.coordinates[0],
-                ) && (
-                  <MapView
-                    provider={PROVIDER_GOOGLE}
-                    style={styles.map}
-                    region={{
-                      latitude: Number(property?.location?.coordinates[1]),
-                      longitude: Number(property?.location?.coordinates[0]),
-                      latitudeDelta: 0.01,
-                      longitudeDelta: 0.01,
-                    }}>
-                    <Marker
-                      coordinate={{
-                        latitude: Number(property?.location?.coordinates[1]),
-                        longitude: Number(property?.location?.coordinates[0]),
-                      }}
-                    />
-                  </MapView>
-                )}
-
-              {Platform.OS !== 'android' && (
-                <MapView
-                  style={styles.map}
-                  region={{
-                    latitude: Number(property?.location?.coordinates[1]),
-                    longitude: Number(property?.location?.coordinates[0]),
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }}>
-                  <Marker
-                    coordinate={{
-                      latitude: Number(property?.location?.coordinates[1]),
-                      longitude: Number(property?.location?.coordinates[0]),
-                    }}
-                  />
-                </MapView>
-              )}
-            </TouchableOpacity>
-
-            <View
-              style={{
-                backgroundColor: '#EBEBEB',
-                borderWidth: 1,
-                borderColor: '#EBEBEB',
-                width: '100%',
-                top: 15,
-              }}
-            />
-            <View
-              style={{
-                top: 10,
-                flexDirection: 'row',
-                padding: 16,
-                paddingLeft: 22,
-                height: 100,
-                justifyContent: 'flex-start',
-              }}>
-              <View style={{width: '20%'}}>
-                <Image
-                  source={
-                    !property?.customerId?.profilePicture
-                      ? require('@assets/images/images.jpeg')
-                      : {
-                          uri: property?.customerId?.profilePicture,
-                        }
-                  }
-                  resizeMode="cover"
-                  style={{height: 52, width: 52, borderRadius: 50}}
-                />
-              </View>
-              <View>
-                <Text
-                  style={{
-                    color: theme.colors.text,
-                    fontSize: 10,
-                  }}>
-                  {'posted by'}
-                </Text>
-                <Text
-                  style={{
-                    color: theme.colors.text,
-                    fontSize: 18,
-                    fontWeight: 500,
-                    marginTop: 10,
-                    letterSpacing: 1,
-                  }}>
-                  {property?.customerId?.name}
-                </Text>
-              </View>
-            </View>
-
-            <View
-              style={{
-                backgroundColor: '#EBEBEB',
-                borderWidth: 1,
-                borderColor: '#EBEBEB',
-                width: '100%',
-                // top: 15,
-              }}
-            />
-          </>
-        )}
-        {property?.listingTypeId?._id || property?.propertyTypeId?._id ? (
-          <>
-            <Text style={[styles.section, sectionColor, {marginBottom: 10}]}>
-              Similar Ads
-            </Text>
-            <View
-              style={[
-                {
-                  backgroundColor: theme.colors.backgroundHome,
-                  paddingBottom: 10,
-                },
-              ]}>
-              <SimilarAds
-                token={token}
-                clientId={clientId}
-                listingTypeId={property?.listingTypeId?._id}
-                propertyTypeId={property?.propertyTypeId?._id}
-                location={location}
-                propertyId={details?._id}
-              />
-            </View>
-          </>
-        ) : null}
         <ReportAdModal
           visible={isReportVisible}
           onClose={() => setIsReportVisible(false)}
-          onSubmit={(data: any) => {
-            let payload = {
-              propertyId: details?._id,
-              reason: data.reason,
-              comment: data.comment,
-            };
-            reportAd(payload);
-          }}
+          onSubmit={submitReportAd}
         />
 
         <DateTimeModal
           visible={showModal}
           onClose={() => setShowModal(false)}
-          onConfirm={date => {
-            console.log('Selected Visit Date:', date);
-            saveAppointMentS(date);
-          }}
+          onConfirm={saveAppointMents}
         />
       </ScrollView>
 
@@ -1331,15 +1154,8 @@ const PropertyDetails = React.memo(() => {
 
       <BankSelectModal
         visible={bankModalVisible}
-        onDismiss={() => {
-          setBankModalVisible(false);
-          setSelectedBank('');
-        }}
-        onSelect={(data: any) => {
-          setSelectedBank(data);
-          setBankModalVisible(false);
-          navigate('VerifyBankList', {items: {...data, _id: data?._id}});
-        }}
+        onDismiss={onBankSelectDismis}
+        onSelect={onBankSelect}
         selectedBank={selectedBank}
       />
     </SafeAreaView>
@@ -1350,7 +1166,14 @@ const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#fff', borderRadius: 20},
   header: {padding: 16, borderRadius: 20, backgroundColor: '#fff', bottom: 10},
   title: {fontSize: 20, fontFamily: 'DMSans-Medium', marginBottom: 5},
+  locationContainer: {left: -2, top: 8},
+  locationContainerFooter: {
+    flexDirection: 'row',
+    alignContent: 'center',
+    top: 15,
+  },
   locationTitle: {fontSize: 14, fontFamily: Fonts.MEDIUM},
+  priceContainer: {flexDirection: 'row', alignContent: 'center'},
   price: {fontSize: 20, fontFamily: 'DMSans-Medium'},
   squrft: {fontSize: 14, top: 3, marginRight: 5, fontFamily: Fonts.MEDIUM},
   iconsTextStle: {
@@ -1376,6 +1199,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignContent: 'center',
   },
+  darkHeader: {
+    borderTopWidth: 1,
+    borderColor: '#fff',
+    borderTopRightRadius: 0,
+    borderTopLeftRadius: 0,
+  },
   nogotiableText: {
     color: '#2F8D79',
     fontSize: 12,
@@ -1385,6 +1214,22 @@ const styles = StyleSheet.create({
   amenities: {flexDirection: 'row', flexWrap: 'wrap', padding: 8},
   amenity: {flexDirection: 'row', alignItems: 'center', margin: 2},
   amenityText: {marginLeft: 6},
+  flexRow: {flexDirection: 'row'},
+  bankContainer: {
+    paddingHorizontal: 16,
+  },
+  detailsTextStyle: {
+    fontSize: 12,
+    fontWeight: 400,
+    margin: 0,
+    marginTop: 20,
+  },
+  bankcontentStyle: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+  },
+  bankLogoStyle: {height: 20, width: 20, margin: 2},
   section: {fontSize: 16, fontWeight: '600', marginLeft: 12, marginTop: 20},
   nearby: {padding: 16, flexDirection: 'row', flexWrap: 'wrap'},
   map: {height: 150, margin: 16, borderRadius: 10},
@@ -1404,6 +1249,42 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderColor: '#eee',
+  },
+  furnishedButtonStyle: {margin: 5},
+  divider: {
+    backgroundColor: '#EBEBEB',
+    borderWidth: 1,
+    borderColor: '#EBEBEB',
+    width: '100%',
+    top: 15,
+  },
+  userContainer: {
+    top: 10,
+    flexDirection: 'row',
+    padding: 16,
+    paddingLeft: 22,
+    height: 100,
+    justifyContent: 'flex-start',
+  },
+  unserContainerWidth: {width: '20%'},
+  userImageStyle: {height: 52, width: 52, borderRadius: 50},
+  userNameStyle: {
+    fontSize: 18,
+    fontWeight: 500,
+    marginTop: 10,
+    letterSpacing: 1,
+  },
+  loanOfferContainer: {
+    top: 15,
+    margin: 16,
+    padding: 16,
+    backgroundColor: '#E3FFF8',
+    borderRadius: 10,
+    height: 56,
+    alignItems: 'center',
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#88E4CF',
   },
   chatButton: {
     flexDirection: 'row',
@@ -1505,6 +1386,72 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 12,
     textAlign: 'center',
+  },
+  adStatusContainerStylePending: {
+    // top: 15,
+    margin: 16,
+    padding: 16,
+    backgroundColor: '#2F8D79',
+    borderRadius: 10,
+    height: 56,
+    alignItems: 'center',
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#88E4CF',
+  },
+  adStatusContainerStyle: {
+    margin: 16,
+    padding: 16,
+    backgroundColor: '#f44a4aff',
+    borderRadius: 10,
+    height: 56,
+    alignItems: 'center',
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#ea860bff',
+  },
+  adStatusContainer: {
+    width: '95%',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  emiCalculatorText: {
+    color: '#2F8D79',
+    fontSize: 14,
+    fontFamily: Fonts.MEDIUM,
+    fontWeight: '500',
+  },
+  visitContainer: {
+    margin: 16,
+    padding: 16,
+    borderRadius: 10,
+    height: 56,
+    alignItems: 'center',
+    flexDirection: 'row',
+    borderWidth: 1,
+  },
+  planvisitTextContainer: {
+    width: '85%',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  planVisitTextStyle: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: Fonts.MEDIUM,
+    fontWeight: '500',
+  },
+  statusVerifiedStyle: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: Fonts.MEDIUM,
+    fontWeight: '500',
+  },
+  adStatusTextSyle: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: Fonts.MEDIUM,
+    fontWeight: '500',
   },
   verifiedBadge: {
     backgroundColor: '#E6F9EC', // light green background

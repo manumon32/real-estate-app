@@ -1,4 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
+import SafeFooter from '@components/SafeFooter';
 import React, {useState} from 'react';
 import {
   Modal,
@@ -62,17 +63,19 @@ const RejectReasonModal = ({visible, onClose, onSubmit}: any) => {
               />
 
               {/* Send Button */}
-              <TouchableOpacity
-                style={[
-                  styles.sendBtn,
-                  {
-                    backgroundColor: comment ? '#2f8f72' : '#ccc',
-                  },
-                ]}
-                disabled={!comment}
-                onPress={handleSend}>
-                <Text style={styles.sendBtnText}>Send</Text>
-              </TouchableOpacity>
+              <SafeFooter>
+                <TouchableOpacity
+                  style={[
+                    styles.sendBtn,
+                    {
+                      backgroundColor: comment ? '#2f8f72' : '#ccc',
+                    },
+                  ]}
+                  disabled={!comment}
+                  onPress={handleSend}>
+                  <Text style={styles.sendBtnText}>Send</Text>
+                </TouchableOpacity>
+              </SafeFooter>
             </View>
           </KeyboardAvoidingView>
         </View>

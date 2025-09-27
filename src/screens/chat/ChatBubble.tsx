@@ -49,7 +49,10 @@ export default function ChatBubble(props: any) {
             {/* <Text style={styles.name}>Arnold Schurli</Text> */}
 
             <View
-              style={[styles.bubbleleft, {backgroundColor: theme.colors.chatBubbleLeft}]}>
+              style={[
+                styles.bubbleleft,
+                {backgroundColor: theme.colors.chatBubbleLeft},
+              ]}>
               {items.type == 'image' && (
                 <TouchableOpacity onPress={() => setVisible(true)}>
                   <Image
@@ -58,11 +61,7 @@ export default function ChatBubble(props: any) {
                         items.body ??
                         'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_items_boosted&w=740',
                     }}
-                    style={{
-                      width: 200,
-                      height: 200,
-                      borderRadius: 20,
-                    }}
+                    style={styles.imageStyle}
                   />
                 </TouchableOpacity>
               )}
@@ -91,11 +90,7 @@ export default function ChatBubble(props: any) {
                   source={{
                     uri: items.body,
                   }}
-                  style={{
-                    width: 200,
-                    height: 200,
-                    borderRadius: 20,
-                  }}
+                  style={styles.imageStyle}
                 />
               </TouchableOpacity>
             )}
@@ -104,12 +99,7 @@ export default function ChatBubble(props: any) {
                 <Text style={[styles.messageTextRight]}>{items?.body}</Text>
               </View>
             )}
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-              }}>
+            <View style={styles.recieveContainer}>
               <MaterialCommunityIcons
                 name={items.status === 'sent' ? 'check' : 'check-all'}
                 size={16}
@@ -117,7 +107,11 @@ export default function ChatBubble(props: any) {
                 style={{marginRight: 5}}
               />
 
-              <Text style={[styles.timestamp, {textAlign: 'right', color:theme.colors.text}]}>
+              <Text
+                style={[
+                  styles.timestamp,
+                  {textAlign: 'right', color: theme.colors.text},
+                ]}>
                 {getTimeAgo(new Date(items?.createdAt)?.getTime())}
               </Text>
             </View>
@@ -164,6 +158,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 20,
   },
+  recieveContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
   bubble: {
     backgroundColor: '#2F8D79',
     paddingVertical: 8,
@@ -174,6 +173,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#fff',
     fontFamily: Fonts.MEDIUM,
+  },
+  imageStyle: {
+    width: 200,
+    height: 200,
+    borderRadius: 20,
   },
   messageText: {
     fontSize: 14,

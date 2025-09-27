@@ -189,7 +189,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
             <Icon name="clock-outline" size={16} color="#888" />
             <Text style={[styles.metaText, {color: theme.colors.text}]}>
               {status === 'sold'
-                ? 'Sold on ' + FormattedDate(items.soldDate)
+                ? 'Closed on ' + FormattedDate(items.soldDate)
                 : 'Posted on ' + FormattedDate(date)}
             </Text>
           </View>
@@ -207,7 +207,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
           )}
       </TouchableOpacity>
       <View style={styles.buttonRow}>
-        {label !== 'Sold' && (
+        {label !== 'Closed' && (
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('PostAd', {items});
@@ -222,12 +222,12 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <TouchableOpacity
             onPress={() =>
               Alert.alert(
-                'Mark as Sold?',
-                'Are you sure you want to mark this listing as sold? This action cannot be undone.',
+                'Mark as Closed?',
+                'Are you sure you want to mark this listing as Closed? This action cannot be undone.',
                 [
                   {text: 'Cancel', style: 'cancel'},
                   {
-                    text: 'Mark as sold',
+                    text: 'Mark as Closed',
                     onPress: () => markasSold(items?._id),
                   },
                 ],
@@ -296,7 +296,7 @@ const MyAds = () => {
       );
       Toast.show({
         type: 'success',
-        text1: 'Your lising is successfully marked as sold .',
+        text1: 'Your lising is successfully marked as Closed .',
         position: 'bottom',
       });
       fetchMyAds();
@@ -522,7 +522,7 @@ const MyAds = () => {
                 {color: theme.colors.text, fontSize: 12},
               ]}>
               {/* @ts-ignore */}
-              Package Avaliability: {managePlansList?.[0].duration} Days
+              Package Availability: {managePlansList?.[0].duration} Days
             </Text>
             <Text style={styles.popupBenefits}>
               Benefits:

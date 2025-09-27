@@ -166,7 +166,7 @@ export const ToastConfig = {
       activeOpacity={0.8}
       onPress={props.onPress} // <-- handle toast press
       style={{
-        backgroundColor: '#1976D2',
+        backgroundColor: 'teal',
         borderRadius: 8,
         paddingVertical: 12,
         paddingHorizontal: 16,

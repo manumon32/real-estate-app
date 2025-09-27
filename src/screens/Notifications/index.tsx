@@ -23,9 +23,9 @@ import {
   markAllReadNotificationsAPI,
 } from '@api/services';
 import {useTheme as useThemes} from '@theme/ThemeProvider';
-import {INotification} from '@screens/home/HomeScreen';
-import {navigateByNotification} from '../../firebase/notificationService';
+import {INotification, navigateByNotification} from '../../firebase/notificationService';
 import NoChats from '@components/NoChatFound';
+
 
 type NotificationType = 'message' | 'offer' | 'listing' | 'system';
 
