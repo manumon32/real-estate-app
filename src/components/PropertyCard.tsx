@@ -24,6 +24,7 @@ interface PropertyCardProps {
   navigation: any;
   arg?: boolean;
   horizontal?: boolean;
+  showLocation?:boolean
 }
 
 const InfoItem = React.memo(
@@ -38,7 +39,7 @@ const InfoItem = React.memo(
 );
 
 const PropertyCard = React.memo(
-  ({items, navigation, arg, horizontal}: PropertyCardProps) => {
+  ({items, navigation, arg, horizontal, showLocation = false}: PropertyCardProps) => {
     const {theme} = useTheme();
     const isDarkMode = useColorScheme() === 'dark';
     const {user} = useBoundStore();
@@ -156,7 +157,7 @@ const PropertyCard = React.memo(
           </View>
 
           {/* Distance */}
-          {distanceText &&  arg && (
+          {distanceText &&  showLocation && (
             <View style={styles.infoRow}>
               <InfoItem
                 icon="vector-line"

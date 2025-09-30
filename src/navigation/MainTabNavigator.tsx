@@ -32,6 +32,7 @@ const MainTabNavigator = () => {
     <Tab.Navigator
       // eslint-disable-next-line react/no-unstable-nested-components
       tabBar={props => <BottomTabBar {...props} />}
+      backBehavior='initialRoute'
       screenOptions={{headerShown: false}}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen

@@ -9,7 +9,9 @@ import {
   ScrollView,
   useColorScheme,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
+
 import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
@@ -21,13 +23,24 @@ import CommonAmenityToggle from '@components/Input/amenityToggle';
 import {useTheme} from '@theme/ThemeProvider';
 import {useRoute} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {compressImage} from '../../helpers/ImageCompressor';
+import {uploadImages} from '@api/services';
 
 const Step5MediaUpload = (props: any) => {
   const route = useRoute();
   // @ts-ignore
   const items = route?.params?.items || null;
-  const {setImages, setFloorPlans, images, floorPlans, managePlansList} =
-    useBoundStore();
+  const {
+    setImages,
+    setFloorPlans,
+    images,
+    floorPlans,
+    managePlansList,
+    token,
+    clientId,
+    bearerToken,
+    setImageUploadLoading,
+  } = useBoundStore();
   const [assets, setAssets] = useState<any[]>(images || []);
   const [floorPlan, setFloorPlan] = useState<any[]>(floorPlans || []);
   const [showBoostPopup, setShowBoostPopup] = useState(false);
@@ -46,17 +59,24 @@ const Step5MediaUpload = (props: any) => {
 
   const [price, setPrice] = useState(null);
   const [benifits, setBenifits] = useState([]);
-  console.log('managePlansList', managePlansList);
+  // Keep track of loading per image
+  const [loadingState, setLoadingState] = useState<{[key: string]: boolean}>(
+    {},
+  );
 
   const removeAsset = useCallback((uri: string | undefined) => {
-    if (!uri) return;
+    if (!uri) {
+      return;
+    }
     setAssets(prev =>
       prev.filter(item => (item.uri ? item.uri !== uri : item !== uri)),
     );
   }, []);
 
   const removeFloor = useCallback((uri: string | undefined) => {
-    if (!uri) return;
+    if (!uri) {
+      return;
+    }
     setFloorPlan(prev =>
       prev.filter(item => (item.uri ? item.uri !== uri : item !== uri)),
     );
@@ -73,42 +93,89 @@ const Step5MediaUpload = (props: any) => {
   }, [managePlansList]);
 
   const renderItem = useCallback(
-    ({item}: {item: any}) => (
-      <View style={styles.previewContainer}>
-        <Image
-          source={{uri: item?.uri || item, cache: Image.cacheControl.immutable}}
-          style={styles.preview}
-          resizeMode="cover"
-        />
-        <Pressable
-          style={styles.removeBtn}
-          onPress={() => removeAsset(item?.uri || item)}>
-          <Text style={styles.removeText}>✕</Text>
-        </Pressable>
-      </View>
-    ),
-    [removeAsset],
+    ({item}: {item: any}) => {
+      const isLoading = loadingState[item?.uri || item];
+      const isFailed = item.status
+        ? item.status === 'falied'
+          ? true
+          : false
+        : false;
+      return (
+        <View style={styles.previewContainer}>
+          <Image
+            source={{
+              uri: item?.uri || item,
+              cache: Image.cacheControl.immutable,
+            }}
+            style={styles.preview}
+            resizeMode="cover"
+          />
+          {isLoading && (
+            <View style={styles.overlay}>
+              <ActivityIndicator color={'#ffff'} />
+            </View>
+          )}
+          {!isLoading && (
+            <Pressable
+              style={styles.removeBtn}
+              onPress={() => removeAsset(item?.uri || item)}>
+              <Text style={styles.removeText}>✕</Text>
+            </Pressable>
+          )}
+          {isFailed && !isLoading && (
+            // <View style={styles.overlay}>
+            <Pressable
+              style={{
+                backgroundColor: 'red',
+                padding: 5,
+                borderRadius: 10,
+                bottom: 30,
+              }}
+              onPress={() => retryUpload(item)}>
+              <Text style={[styles.removeText, {textAlign: 'center'}]}>
+                Retry
+              </Text>
+            </Pressable>
+            // </View>
+          )}
+        </View>
+      );
+    },
+    // @ts-ignore
+    [loadingState, removeAsset, retryUpload],
   );
+
   const renderItemFloor = useCallback(
-    ({item}: {item: any}) => (
-      <View style={styles.previewContainer}>
-        <Image
-          source={{
-            uri: item?.uri || item,
-            cache: Image.cacheControl.immutable,
-          }}
-          style={styles.preview}
-          resizeMode="cover"
-        />
-        <Pressable
-          style={styles.removeBtn}
-          onPress={() => removeFloor(item?.uri || item)}>
-          <Text style={styles.removeText}>✕</Text>
-        </Pressable>
-      </View>
-    ),
-    [removeFloor],
+    ({item}: {item: any}) => {
+      const isLoading = loadingState[item?.uri || item];
+      return (
+        <View style={styles.previewContainer}>
+          <Image
+            source={{
+              uri: item?.uri || item,
+              cache: Image.cacheControl.immutable,
+            }}
+            style={styles.preview}
+            resizeMode="cover"
+          />
+          {isLoading && (
+            <View style={styles.overlay}>
+              <ActivityIndicator color={'#ffff'} />
+            </View>
+          )}
+          {!isLoading && (
+            <Pressable
+              style={styles.removeBtn}
+              onPress={() => removeFloor(item?.uri || item)}>
+              <Text style={styles.removeText}>✕</Text>
+            </Pressable>
+          )}
+        </View>
+      );
+    },
+    [loadingState, removeFloor],
   );
+
   useEffect(() => {
     setImages(assets);
     setFieldValue('imageUrls', assets);
@@ -117,20 +184,12 @@ const Step5MediaUpload = (props: any) => {
   useEffect(() => {
     setFloorPlans(floorPlan);
     setFieldValue('floorPlanUrl', floorPlan);
-  }, [assets, floorPlan, setFieldValue, setFloorPlans]);
+  }, [floorPlan, setFieldValue, setFloorPlans]);
 
   const keyExtractor = useCallback(
     (item: any) => item.uri ?? item.fileName ?? Math.random().toString(),
     [],
   );
-  // const dedupByUri = (arr: any[]) => {
-  //   const seen = new Set<string>();
-  //   return arr.filter(item => {
-  //     if (!item?.uri || seen.has(item.uri)) return false;
-  //     seen.add(item.uri);
-  //     return true;
-  //   });
-  // };
   useEffect(() => {
     setFieldValue('showLoanOffers', isStringInEitherArray('loanEligible'));
     setFieldValue('showEmiCalculator', isStringInEitherArray('loanEligible'));
@@ -148,6 +207,162 @@ const Step5MediaUpload = (props: any) => {
     ),
     [assets, keyExtractor, renderItem],
   );
+
+  const uploadImagesLocal = async (images: any[], retry = false) => {
+    setImageUploadLoading(true);
+
+    // 1️⃣ Add selected images to state for immediate preview
+    const assetsWithId = images.map(img => ({
+      ...img,
+      id: img.uri,
+      uploadedUrl: null,
+      status: 'queued', // status: queued | uploading | success | failed
+    }));
+    !retry &&
+      setAssets(prev => [
+        ...prev.filter(item => !images.some(img => img.uri === item.uri)),
+        ...assetsWithId,
+      ]);
+
+    // 2️⃣ Show loader for all images
+    const initialLoading: {[key: string]: boolean} = {};
+    assetsWithId.forEach(img => (initialLoading[img.id] = true));
+    setLoadingState(prev => ({...prev, ...initialLoading}));
+
+    const uploadParams = {token, clientId, bearerToken};
+
+    // 3️⃣ Upload all images in parallel using Promise.allSettled
+    const uploadResults = await Promise.allSettled(
+      assetsWithId.map(async img => {
+        try {
+          // Mark as uploading
+          setAssets(prev =>
+            prev.map(item =>
+              item.id === img.id ? {...item, status: 'uploading'} : item,
+            ),
+          );
+
+          // Compress image
+          const compressedUri = await compressImage(img.uri);
+          if (!compressedUri) {
+            throw new Error('Compression failed');
+          }
+
+          // Prepare FormData
+          const formData = new FormData();
+          formData.append('images', {
+            uri: compressedUri,
+            name: `image_${img.id}.jpg`,
+            type: 'image/jpeg',
+          } as any);
+
+          // Upload
+          const uploadedUrl: any = await uploadImages(formData, uploadParams);
+
+          if (!uploadedUrl?.length) {
+            throw new Error('Empty upload response');
+          }
+
+          // Update asset with uploaded URL
+          setAssets(prev =>
+            prev.map(item =>
+              item.id === img.id
+                ? {
+                    ...item,
+                    uploadedUrl: uploadedUrl[0],
+                    status: 'success',
+                  }
+                : item,
+            ),
+          );
+
+          return {id: img.id, success: true};
+        } catch (err) {
+          console.log('Upload failed for', img.uri, err);
+          setAssets(prev =>
+            prev.map(item =>
+              item.id === img.id ? {...item, status: 'failed'} : item,
+            ),
+          );
+          return {id: img.id, success: false, error: err};
+        } finally {
+          // Hide loader for this image
+          setLoadingState(prev => ({...prev, [img.id]: false}));
+
+          setImageUploadLoading(false);
+        }
+      }),
+    );
+
+    console.log('All upload results:', uploadResults);
+  };
+
+  const uploadFloorPlanLocal = async (plans: any[]) => {
+    setImageUploadLoading(true);
+    // Add selected images to state immediately for preview
+    const assetsWithId = plans.map(img => ({
+      ...img,
+      id: img.uri,
+      uploadedUrl: null,
+    }));
+    setFloorPlan(prev => [...prev, ...assetsWithId]);
+
+    // Show loader for all images immediately
+    const initialLoading: {[key: string]: boolean} = {};
+    assetsWithId.forEach(img => (initialLoading[img.id] = true));
+    setLoadingState(prev => ({...prev, ...initialLoading}));
+
+    const uploadParams = {token, clientId, bearerToken};
+
+    // Upload all images in parallel
+    const uploadPromises = assetsWithId.map(async img => {
+      try {
+        // Compress
+        const compressedUri = await compressImage(img.uri);
+
+        if (!compressedUri) {
+          return;
+        }
+
+        // Prepare FormData
+        const formData = new FormData();
+        formData.append('images', {
+          uri: compressedUri,
+          name: `floor_${img.id}.jpg`,
+          type: 'image/jpeg',
+        } as any);
+
+        // Upload
+        const uploadedUrl: any = await uploadImages(formData, uploadParams);
+
+        if (uploadedUrl?.length) {
+          // Update asset with uploaded URL immediately
+          setFloorPlan(prev =>
+            prev.map(item =>
+              item.id === img.id
+                ? {...item, uploadedUrl: uploadedUrl[0]}
+                : item,
+            ),
+          );
+        }
+      } catch (err) {
+        console.log('Upload failed for', img.uri, err);
+      } finally {
+        // Hide loader for this image
+        setLoadingState(prev => ({...prev, [img.id]: false}));
+      }
+    });
+
+    // Wait for all uploads to complete
+    await Promise.all(uploadPromises);
+
+    setImageUploadLoading(false);
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const retryUpload = async (img: any) => {
+    await uploadImagesLocal([img], true);
+  };
 
   const previewsFloorPlan = useMemo(
     () => (
@@ -183,9 +398,9 @@ const Step5MediaUpload = (props: any) => {
       </Text>
       <View style={styles.inputContainer}>
         <CommonImageUploader
-          onUpload={uri => setAssets(prev => [...prev, ...(uri ?? [])])}
+          onUpload={uploadImagesLocal}
+          limit={assets.length >= 15 ? 0 : 15 - assets.length}
           label="Upload Property Images"
-          // handleOnpress={()=> setModalVisible(true)}
         />
         {touched?.imageUrls && errors?.imageUrls && (
           <Text style={styles.error}>{errors?.imageUrls}</Text>
@@ -206,7 +421,9 @@ const Step5MediaUpload = (props: any) => {
         <View style={styles.inputContainer}>
           <CommonImageUploader
             label="Upload Floor Plan"
-            onUpload={uri => setFloorPlan(prev => [...prev, ...(uri ?? [])])}
+            // uri => setFloorPlan(prev => [...prev, ...(uri ?? [])])
+            onUpload={uploadFloorPlanLocal}
+            limit={floorPlan.length >= 10 ? 0 : 10 - floorPlan.length}
           />
           {previewsFloorPlan}
         </View>
@@ -373,8 +590,8 @@ const styles = StyleSheet.create({
   },
   removeBtn: {
     position: 'absolute',
-    top: -2,
-    right: -2,
+    top: -1,
+    right: -1,
     backgroundColor: 'rgba(0,0,0,0.6)',
     width: 24,
     height: 24,
@@ -449,6 +666,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     backgroundColor: '#2A9D8F',
+    borderRadius: 8,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
     borderRadius: 8,
   },
   continueButtonText: {

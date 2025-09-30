@@ -4,11 +4,13 @@ export interface PostAdSlice {
   postAd: any;
   images: [];
   floorPlans: [];
+  imageUploadLoading: boolean;
   setPostAd: (updates: Partial<any>) => void;
   submitPostAd: (updates: Partial<any>) => void;
   resetPostAd: () => void;
   setImages: (images: any) => void;
   setFloorPlans: (images: any) => void;
+  setImageUploadLoading:(falg: any) => void;
   postAdloading: boolean;
   postAdError: boolean;
 }
@@ -21,6 +23,11 @@ export const createPostAdSlice = (set: any, get: any): PostAdSlice => ({
   floorPlans: [],
   postAdloading: false,
   postAdError: false,
+  imageUploadLoading: false,
+  setImageUploadLoading: (flag: any) =>
+    set(() => ({
+      imageUploadLoading: flag,
+    })),
   setPostAd: updates =>
     set((state: any) => ({
       postAd: {...state.postAd, ...updates},

@@ -28,9 +28,6 @@ import {
   requestUserPermission,
 } from '../../firebase/notificationService';
 
-// import * as RNIap from 'react-native-iap';
-// const itemSkus = ['com.hotplotz.featuredad10days'];
-
 // Lazy loaded components
 const Header = React.lazy(() => import('./Header/Header'));
 const PropertyCard = React.lazy(() => import('@components/PropertyCard'));
@@ -52,7 +49,6 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     bearerToken,
     fetchChatListings,
   } = useBoundStore();
-  // const {navigationMode, error} = useNavigationMode();
 
   const {theme} = useTheme();
   const isDarkMode = useColorScheme() === 'dark';
@@ -60,32 +56,6 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   const backPressedOnce = useRef(false);
   const flatListRef = useRef<FlatList>(null);
   const onEndReachedCalled = useRef(false); // prevent multiple calls
-
-  // useEffect(() => {
-  //   async function init() {
-  //     try {
-  //       await RNIap.initConnection();
-  //       const items = await RNIap.getProducts({skus: itemSkus});
-  //       console.log('IAP', items);
-
-  //       // try {
-  //       //   const purchase = await RNIap.requestPurchase(itemSkus[0]);
-  //       //   console.log('IAP - purchase',purchase)
-  //       //   // ✅ unlock feature
-  //       // } catch (err) {
-  //       //   console.log('IAP - purchase',err);
-  //       // }
-  //     } catch (e) {
-  //       console.warn('IAP init error', e);
-  //     }
-  //   }
-  //   init();
-
-  //   return () => {
-  //     RNIap.endConnection();
-  //   };
-  // }, []);
-
 
 
   /** Double back press exit */
@@ -235,7 +205,7 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   /** Memoized render item */
   const renderAdItem = useCallback(
     ({item}: any) => (
-      <PropertyCard items={item} navigation={navigation} arg={true} />
+      <PropertyCard items={item} navigation={navigation} arg={true} showLocation />
     ),
     [navigation],
   );

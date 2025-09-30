@@ -4,6 +4,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
+  BackHandler,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -15,8 +16,8 @@ import {
   View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
-import {useNavigation} from '@react-navigation/native';
-import {postAdAPI, uploadImages} from '@api/services';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {postAdAPI} from '@api/services';
 import {useTheme} from '@theme/ThemeProvider';
 import CommonHeader from '@components/Header/CommonHeader';
 import {RequestMethod} from '@api/request';
@@ -29,7 +30,6 @@ import Step3LocationDetails from './step3LocationDetails';
 import Step4PropertyDetails from './step4PropertyDetails';
 import Step5MediaUpload from './step5MediaUpload';
 import Preview from './preview';
-import {compressImage} from '../../helpers/ImageCompressor';
 
 interface FooterProps {
   currentStep: number;
@@ -126,6 +126,7 @@ const PostAdContainer = (props: any) => {
   const [paymentStatus, setPaymentStatus] = useState(true);
   const [preview, setPreview] = useState(false);
   const prevCountRef = useRef<number | null>(null);
+
   const {
     setPostAd,
     resetPostAd,
@@ -137,6 +138,7 @@ const PostAdContainer = (props: any) => {
     locationForAdpost,
     floorPlans,
     managePlansList,
+    imageUploadLoading,
     fetchPlans,
     user,
     setImages,
@@ -324,7 +326,7 @@ const PostAdContainer = (props: any) => {
     }
   };
 
-  const onBackPress = () => {
+  const onBackPress: any = useCallback(() => {
     Alert.alert('Quit without saving?', 'You will lose your progress.', [
       {text: 'Cancel', style: 'cancel'},
       {
@@ -338,67 +340,49 @@ const PostAdContainer = (props: any) => {
         },
       },
     ]);
-  };
+    return false;
+  }, [navigation, resetPostAd, setFields, setFloorPlans, setImages]);
+
+  /** Double back press exit */
+  useFocusEffect(
+    useCallback(() => {
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        onBackPress,
+      );
+      return () => backHandler.remove();
+    }, [onBackPress]),
+  );
 
   const submitPostAd = useCallback(async () => {
-    if (Object.keys(errors).length > 0 || images.length === 0) {
-      if (images.length === 0) {
+    if (
+      Object.keys(errors).length > 0 ||
+      images.length === 0 ||
+      imageUploadLoading
+    ) {
+      if (images.length === 0 || images.length > 10) {
         Toast.show({
           type: 'error',
-          text1: 'Please select at least one image.',
+          text1:
+            images.length === 0
+              ? 'Please select at least one image.'
+              : 'You can only select up to 10 images',
+          position: 'bottom',
+        });
+      }else if (imageUploadLoading) {
+        Toast.show({
+          type: 'info',
+          text1: 'Please wait images are being uploaded',
           position: 'bottom',
         });
       }
       return;
     }
-
     setLoading(true);
 
     try {
-      // Filter local vs uploaded images
-      const localImages = (
-        await Promise.all(
-          images.map(async (img: any) => {
-            if (!img?.uri) return null;
-
-            const compressed = await compressImage(img.uri);
-            return compressed ? {...img, uri: compressed} : null;
-          }),
-        )
-      ).filter(Boolean);
-      console.log('localImages', localImages);
-      const existingImageUrls = images.filter((img: any) => !img.uri);
-
-      const localFloorPlans = floorPlans.filter((fp: any) => fp?.uri);
-      const existingFloorPlanUrls = floorPlans.filter((fp: any) => !fp.uri);
-
-      // Create FormData
-      const createFormData = (items: any[], prefix = 'photo') => {
-        const formData = new FormData();
-        items.forEach((item, index) => {
-          formData.append('images', {
-            uri: item.uri,
-            name: `${prefix}_${index}.jpg`,
-            type: 'image/jpeg',
-          } as any);
-        });
-        return formData;
-      };
-
-      const imageFormData = createFormData(localImages, 'image');
-      const floorPlanFormData = createFormData(localFloorPlans, 'floor');
-
-      // Upload images
       const uploadParams = {token, clientId, bearerToken};
 
-      const [imageUrls, floorPlanUrls]: any = await Promise.all([
-        localImages.length ? uploadImages(imageFormData, uploadParams) : [],
-        localFloorPlans.length
-          ? uploadImages(floorPlanFormData, uploadParams)
-          : [],
-      ]);
-
-      // Merge location data
       const finalLocation = {
         latitude: locationForAdpost.lat,
         longitude: locationForAdpost.lng,
@@ -408,13 +392,21 @@ const PostAdContainer = (props: any) => {
         district: locationForAdpost.district,
         city: locationForAdpost.city,
       };
+      const imageURLs = images
+        .map((img: any) => (img.uploadedUrl ? img.uploadedUrl : img))
+        .filter((url): url is string => !!url);
 
+      const floorPlansURL = floorPlans
+        .map((plans: any) => (plans.uploadedUrl ? plans.uploadedUrl : plans))
+        .filter((url): url is string => !!url);
+      console.log(images);
+      console.log(floorPlans);
       // Prepare full payload
       const payload = {
         ...values,
         ...finalLocation,
-        imageUrls: [...imageUrls, ...existingImageUrls],
-        floorPlanUrl: [...floorPlanUrls, ...existingFloorPlanUrls],
+        imageUrls: imageURLs, //[...imageUrls, ...existingImageUrls],
+        floorPlanUrl: floorPlansURL, //[...floorPlanUrls, ...existingFloorPlanUrls],
       };
 
       const method: RequestMethod = values.id ? 'put' : 'post';
@@ -437,8 +429,8 @@ const PostAdContainer = (props: any) => {
               purchaseType: 'ads',
               purchaseTypeId: postAdRes?.id,
               ...uploadParams,
-              phone: user.phone ?? '',
-              email: user.email ?? '',
+              phone: user?.phone ?? '',
+              email: user?.email ?? '',
             };
             await startCheckoutPromise(paymentPayload);
           }
@@ -464,7 +456,7 @@ const PostAdContainer = (props: any) => {
   }, [
     errors,
     images,
-    floorPlans,
+    imageUploadLoading,
     token,
     clientId,
     bearerToken,
@@ -476,12 +468,13 @@ const PostAdContainer = (props: any) => {
     locationForAdpost.district,
     locationForAdpost.city,
     values,
+    floorPlans,
     setImages,
     setFloorPlans,
     setFields,
     managePlansList,
-    user.phone,
-    user.email,
+    user?.phone,
+    user?.email,
   ]);
 
   useEffect(() => {
@@ -489,6 +482,7 @@ const PostAdContainer = (props: any) => {
     setVisible(false);
     setPaymentStatus(true);
   }, [fetchPlans]);
+
   return (
     <React.Fragment>
       {loading && (

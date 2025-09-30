@@ -4,5 +4,5 @@ import { resetAllZustandStores } from '@stores/resetAllStores';
 
 export const logoutAndRedirect = () => {
   resetAllZustandStores();
-  navigate('Main'); // or your actual login route
+  navigate('Main');
 };

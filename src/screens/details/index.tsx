@@ -1003,17 +1003,7 @@ const PropertyDetails = React.memo(() => {
                 bearerToken ? setIsReportVisible(true) : setVisible();
               }}>
               <Text
-                style={[
-                  [styles.section, sectionColor],
-                  {
-                    right: 10,
-                    color: 'blue',
-                    textDecorationLine: 'underline',
-                    textDecorationStyle: 'solid',
-                    margin: 5,
-                    fontFamily: Fonts.BOLD,
-                  },
-                ]}>
+                style={[[styles.section, sectionColor], styles.reportAdStyle]}>
                 Report this Ad
               </Text>
             </Pressable>
@@ -1120,7 +1110,7 @@ const PropertyDetails = React.memo(() => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        style={{paddingBottom: 120}}>
+        style={styles.paddingStyle}>
         <Header details={property ? property : items} />
 
         <TitleContainer />
@@ -1167,6 +1157,15 @@ const styles = StyleSheet.create({
   header: {padding: 16, borderRadius: 20, backgroundColor: '#fff', bottom: 10},
   title: {fontSize: 20, fontFamily: 'DMSans-Medium', marginBottom: 5},
   locationContainer: {left: -2, top: 8},
+  paddingStyle: {paddingBottom: 120},
+  reportAdStyle: {
+    right: 10,
+    color: 'blue',
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'solid',
+    margin: 5,
+    fontFamily: Fonts.BOLD,
+  },
   locationContainerFooter: {
     flexDirection: 'row',
     alignContent: 'center',

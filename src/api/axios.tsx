@@ -1,23 +1,25 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid';
+import Toast from 'react-native-toast-message';
 import {createHmacSignature, createBodyHash} from './handshake';
+import {API_URL} from '@constants/api';
 
-const API_BASE_URL = 'https://api.hotplotz.com';
+const API_BASE_URL = API_URL;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000, // 15 seconds
+  timeout: 240000, // 2 min
 });
 
-// Retry failed requests (timeouts, network errors)
+// Retry failed requests
 axiosRetry(api, {
   retries: 3,
-  retryDelay: (retryCount: any) => retryCount * 1000, // 1s, 2s, 3s
-  retryCondition: (error: any) => {
-    // retry on network errors or 5xx
+  retryDelay: retryCount => retryCount * 1000, // 1s, 2s, 3s
+  retryCondition: error => {
     return (
       axiosRetry.isNetworkError(error) || axiosRetry.isRetryableError(error)
     );
@@ -29,11 +31,27 @@ const offlineQueue: Array<{config: any}> = [];
 
 // Check network status
 let isConnected = true;
+var isWeakNetwork = false;
+
 NetInfo.addEventListener(state => {
   isConnected = state.isConnected ?? false;
 
+  // Mark weak if on 2G/3G
+  const gen = (state.details as any)?.cellularGeneration;
+  if (gen === '2g' || gen === '3g') {
+    isWeakNetwork = true;
+    Toast.show({
+      type: 'error',
+      text1: 'Internet is weak',
+      text2: 'Please wait...',
+      visibilityTime: 3000,
+      position: 'bottom',
+    });
+  } else {
+    isWeakNetwork = false;
+  }
+
   if (isConnected && offlineQueue.length > 0) {
-    // Retry queued requests
     offlineQueue.forEach(async item => {
       try {
         await api(item.config);
@@ -41,22 +59,35 @@ NetInfo.addEventListener(state => {
         console.log('Retry failed for queued request', e);
       }
     });
-    offlineQueue.length = 0; // clear queue
+    offlineQueue.length = 0;
   }
 });
 
-// Request interceptor: HMAC signing & offline handling
+// Request interceptor
 api.interceptors.request.use(
   async (config: any) => {
-    // Check network before sending request
     if (!isConnected) {
       console.log('Offline: Queuing request', config.url);
       offlineQueue.push({config});
-      // Reject now to prevent axios error
       return Promise.reject({message: 'No Internet Connection', config});
     }
 
-    // Only sign requests with X-TOKEN
+    // Timer for "Please wait" message
+    const toastTimer = setTimeout(() => {
+      if (config.method === 'post' && config.url === '/property') {
+        Toast.show({
+          type: 'info',
+          text1: 'Please wait...',
+          visibilityTime: 3000,
+          position: 'bottom',
+        });
+      }
+    }, 5000); // 5 sec
+
+    // Save timer on config so we can clear it later
+    (config as any)._toastTimer = toastTimer;
+
+    // Signing requests
     if (config.headers['X-TOKEN']) {
       const timestamp = Math.floor(Date.now() / 1000).toString();
       const bodyHash =
@@ -96,10 +127,14 @@ api.interceptors.request.use(
   error => Promise.reject(error),
 );
 
-// Response interceptor: handle errors & cache GET responses
+// Response interceptor
 api.interceptors.response.use(
   async response => {
-    // Cache GET responses
+    // Clear toast timer
+    if ((response.config as any)._toastTimer) {
+      clearTimeout((response.config as any)._toastTimer);
+    }
+
     if (response.config.method === 'get') {
       const key = `CACHE:${response.config.url}`;
       await AsyncStorage.setItem(key, JSON.stringify(response.data));
@@ -107,20 +142,21 @@ api.interceptors.response.use(
     return response;
   },
   async error => {
+    if ((error.config as any)?._toastTimer) {
+      clearTimeout((error.config as any)._toastTimer);
+    }
+
     const status = error?.response?.status;
 
     if (!error.response) {
-      // Network error
       console.log('Network Error:', error.message);
       return Promise.reject(error);
     }
 
-    // Handle 401 / 403
     if ([401, 403].includes(status)) {
       // logoutAndRedirect();
     }
 
-    // Try returning cached GET response if offline
     if (error.config?.method === 'get') {
       const key = `CACHE:${error.config.url}`;
       const cached = await AsyncStorage.getItem(key);

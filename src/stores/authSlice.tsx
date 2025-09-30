@@ -224,7 +224,7 @@ export const createAuthSlice = (set: any, get: any): AuthSlice => ({
           visible: false,
           otp: null,
           otpLoading: false,
-          user: {...get().user, phone: payload.phone, isPhoneVerified: true},
+          user: {...get().user, phone: payload?.phone, isPhoneVerified: true},
           phoneOTPLoading: false,
         });
         Toast.show({

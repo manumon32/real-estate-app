@@ -122,8 +122,8 @@ const ManagePlans = () => {
         bearerToken,
         token,
         clientId,
-        phone: user.phone ?? null,
-        email: user.phone ?? null,
+        phone: user?.phone ?? null,
+        email: user?.email ?? null,
       };
       await startCheckoutPromise(payload);
       fetchUserDetails();

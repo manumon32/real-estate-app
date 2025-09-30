@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import TextInput from '@components/Input/textInput';
 // import SelectInput, {SelectOption} from '@components/Input/selectInput';
@@ -6,7 +6,7 @@ import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
 import CommonAmenityToggle from '@components/Input/amenityToggle';
 import CommonDistanceInput from '@components/Input/distanceInput';
-import { useTheme } from '@theme/ThemeProvider';
+import {useTheme} from '@theme/ThemeProvider';
 
 const Step2BasicInfo = (props: any) => {
   const {
@@ -19,6 +19,8 @@ const Step2BasicInfo = (props: any) => {
     isStringInEitherArray,
   } = props;
   const [priceInput, setPriceInput] = useState('');
+
+  const valueInputRef = useRef(null);
 
   const formatINR = (value: string | number) => {
     const num =
@@ -36,13 +38,23 @@ const Step2BasicInfo = (props: any) => {
   useEffect(() => {
     setPriceInput(values?.price?.toString() || '');
   }, [values?.price]);
+  useEffect(() => {
+    if (touched?.price && errors?.price && valueInputRef.current) {
+      // @ts-ignore
+      valueInputRef.current?.focus();
+    }
+  }, [errors?.price, touched?.price]);
 
-    const {theme} = useTheme();
+  const {theme} = useTheme();
   return (
     <SlideInView direction={currentStep === 1 ? 'right' : 'left'}>
-      <Text style={[styles.headingText, {color: theme.colors.text}]}>Price Details</Text>
+      <Text style={[styles.headingText, {color: theme.colors.text}]}>
+        Price Details
+      </Text>
       <View style={styles.inputContainer}>
         <TextInput
+          // @ts-ignore
+          ref={valueInputRef}
           onChangeText={text => {
             // Allow only numbers
             const numeric = text.replace(/\D/g, '');

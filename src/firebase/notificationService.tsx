@@ -158,7 +158,6 @@ export const navigateByNotification = async (notification: INotification) => {
       );
     }
   } catch (err) {
-    console.warn('Unexpected error:', err);
     navigationRef.navigate('Main' as never);
   }
 };

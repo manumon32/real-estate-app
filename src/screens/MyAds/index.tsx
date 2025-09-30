@@ -323,8 +323,8 @@ const MyAds = () => {
             purchaseType: 'ads',
             purchaseTypeId: id,
             ...uploadParams,
-            phone: user.phone ?? '',
-            email: user.email ?? '',
+            phone: user?.phone ?? '',
+            email: user?.email ?? '',
           };
           console.log(paymentPayload);
           // await payWithApplePay();

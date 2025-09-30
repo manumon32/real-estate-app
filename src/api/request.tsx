@@ -65,13 +65,24 @@ export const apiRequest = async ({
       });
       logoutAndRedirect();
     } else {
-      Toast.show({
-        type: 'error',
-        text1: error.response?.data?.msg
-          ? error.response?.data?.msg
-          : 'Something went wrong, please try again later.',
-        position: 'bottom',
-      });
+      if (
+        error.config.url === '/files/upload-images' ||
+        error.config.url === '/files/upload-images'
+      ) {
+        Toast.show({
+          type: 'error',
+          text1: 'Some images failed to upload. Please retry.',
+          position: 'bottom',
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: error.response?.data?.msg
+            ? error.response?.data?.msg
+            : 'Something went wrong, please try again later.',
+          position: 'bottom',
+        });
+      }
     }
     // return error.response?.data
     throw error;

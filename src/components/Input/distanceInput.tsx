@@ -1,5 +1,5 @@
 import {Fonts} from '@constants/font';
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 import {View, Text, TextInput, StyleSheet} from 'react-native';
 
 interface CommonDistanceInputProps {
@@ -31,26 +31,26 @@ const CommonDistanceInput: React.FC<CommonDistanceInputProps> = ({
   onChangeUnit,
   onChangeText,
 }) => {
+  const valueInputRef = useRef<TextInput>(null);
+  useEffect(() => {
+    if (error && valueInputRef.current) {
+      valueInputRef.current.focus();
+    }
+  }, [error]);
   return (
-    <View
-      style={[
-        styles.container,
-        error && {
-          borderWidth: 1,
-          borderColor: 'red',
-        },
-      ]}>
+    <View style={[styles.container]}>
       {!editable && (
         <>
           <Text style={styles.label}>{label}</Text>
-          <View style={styles.inputBox}>
+          <View style={[styles.inputBox, error && styles.errorStyle]}>
             <TextInput
+              ref={valueInputRef}
               value={value}
               onChangeText={onChange}
               placeholder={placeholder}
               placeholderTextColor="#ccc"
               style={styles.input}
-              keyboardType='decimal-pad'
+              keyboardType="decimal-pad"
             />
             <Text style={styles.unit}>{unit}</Text>
           </View>
@@ -106,6 +106,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#171717',
     fontFamily: Fonts.REGULAR,
+  },
+  errorStyle: {
+    borderWidth: 1,
+    borderColor: 'red',
   },
   inputBox: {
     flexDirection: 'row',
