@@ -43,6 +43,7 @@ interface FooterProps {
   loading?: boolean;
   values: any;
   imageUploadLoading: boolean;
+  isSkeletonLoading: boolean;
 }
 
 const Footer: React.FC<FooterProps> = ({
@@ -57,6 +58,7 @@ const Footer: React.FC<FooterProps> = ({
   loading = false,
   values,
   imageUploadLoading,
+  isSkeletonLoading,
 }) => {
   const handleCancel = () => {
     if (onCancel) {
@@ -70,6 +72,11 @@ const Footer: React.FC<FooterProps> = ({
   };
 
   const handleNext = () => {
+    // Only prevent final submission if images are uploading, allow navigation between steps
+    if (currentStep === 5 && (imageUploadLoading || isSkeletonLoading)) {
+      return;
+    }
+
     if (currentStep === 5) {
       !imageUploadLoading &&
         setTimeout(() => {
@@ -98,15 +105,33 @@ const Footer: React.FC<FooterProps> = ({
         onPress={handleNext}
         style={[
           styles.buyButton,
-          imageUploadLoading && currentStep === 5 && styles.buyButtonDisabled,
+          currentStep === 5 &&
+            (imageUploadLoading || isSkeletonLoading) &&
+            styles.buyButtonDisabled,
         ]}
         accessibilityRole="button"
-        disabled={isLastStep}>
+        disabled={
+          isLastStep ||
+          (currentStep === 5 && (imageUploadLoading || isSkeletonLoading))
+        }>
         <Text style={styles.buyText}>
-          {currentStep === 5 && (loading || imageUploadLoading) && (
+          {(loading ||
+            (currentStep === 5 &&
+              (imageUploadLoading || isSkeletonLoading))) && (
             <ActivityIndicator size={'small'} color={'#fff'} />
           )}
-          {currentStep === 5 ? (values.id ? 'Update' : 'Post Now') : 'Next'}
+          {!loading &&
+          !(currentStep === 5 && (imageUploadLoading || isSkeletonLoading))
+            ? currentStep == 5
+              ? values.id
+                ? 'Update'
+                : 'Post Now'
+              : 'Next'
+            : isSkeletonLoading
+            ? 'Processing...'
+            : imageUploadLoading
+            ? 'Uploading...'
+            : ''}
         </Text>
       </TouchableOpacity>
     </View>
@@ -129,6 +154,7 @@ const PostAdContainer = (props: any) => {
   const [visible, setVisible] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(true);
   const [preview, setPreview] = useState(false);
+  const [isSkeletonLoading, setIsSkeletonLoading] = useState(false);
   const prevCountRef = useRef<number | null>(null);
 
   const {
@@ -150,6 +176,10 @@ const PostAdContainer = (props: any) => {
   } = useBoundStore();
   const prevStep = prevCountRef.current;
   const {theme} = useTheme();
+
+  const handleSkeletonStateChange = useCallback((isLoading: boolean) => {
+    setIsSkeletonLoading(isLoading);
+  }, []);
 
   const getMergedFields = useCallback(
     (id: any, argFields: string[]) => {
@@ -322,6 +352,7 @@ const PostAdContainer = (props: any) => {
             getMergedFields={getMergedFields}
             toggleItem={toggleItem}
             renderChips={renderChips}
+            onSkeletonStateChange={handleSkeletonStateChange}
             {...props}
           />
         );
@@ -397,6 +428,25 @@ const PostAdContainer = (props: any) => {
         district: locationForAdpost.district,
         city: locationForAdpost.city,
       };
+
+      //  const imageURLs = images
+      //         .map(
+      //           (img: any) =>
+      //             typeof img === 'string'
+      //               ? img // already a URL string
+      //               : img.uploadedUrl || null, // pick uploadedUrl if available
+      //         )
+      //         .filter((url): url is string => !!url);
+
+      //       const floorPlansURL = floorPlans
+      //         .map(
+      //           (img: any) =>
+      //             typeof img === 'string'
+      //               ? img // already a URL string
+      //               : img.uploadedUrl || null, // pick uploadedUrl if available
+      //         )
+      //         .filter((url): url is string => !!url);
+
       const imageURLs = images
         .map((img: any) => (img.uploadedUrl ? img.uploadedUrl : img))
         .filter((url): url is string => !!url);
@@ -538,6 +588,7 @@ const PostAdContainer = (props: any) => {
           onBackPress={onBackPress}
           submitPostAd={submitPostAd}
           imageUploadLoading={imageUploadLoading}
+          isSkeletonLoading={isSkeletonLoading}
           loading={loading}
           values={values}
         />
