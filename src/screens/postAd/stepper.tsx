@@ -42,6 +42,7 @@ interface FooterProps {
   submitPostAd?: any;
   loading?: boolean;
   values: any;
+  imageUploadLoading: boolean;
 }
 
 const Footer: React.FC<FooterProps> = ({
@@ -55,6 +56,7 @@ const Footer: React.FC<FooterProps> = ({
   submitPostAd,
   loading = false,
   values,
+  imageUploadLoading,
 }) => {
   const handleCancel = () => {
     if (onCancel) {
@@ -69,7 +71,10 @@ const Footer: React.FC<FooterProps> = ({
 
   const handleNext = () => {
     if (currentStep === 5) {
-      submitPostAd();
+      !imageUploadLoading &&
+        setTimeout(() => {
+          submitPostAd();
+        }, 300);
     }
     if (onNext) {
       onNext();
@@ -91,7 +96,10 @@ const Footer: React.FC<FooterProps> = ({
 
       <TouchableOpacity
         onPress={handleNext}
-        style={styles.buyButton}
+        style={[
+          styles.buyButton,
+          imageUploadLoading && styles.buyButtonDisabled,
+        ]}
         accessibilityRole="button"
         disabled={isLastStep}>
         <Text style={styles.buyText}>
@@ -337,10 +345,11 @@ const PostAdContainer = (props: any) => {
           setImages([]);
           setFloorPlans([]);
           navigation.goBack();
+          return false;
         },
       },
     ]);
-    return false;
+    return true;
   }, [navigation, resetPostAd, setFields, setFloorPlans, setImages]);
 
   /** Double back press exit */
@@ -369,7 +378,7 @@ const PostAdContainer = (props: any) => {
               : 'You can only select up to 10 images',
           position: 'bottom',
         });
-      }else if (imageUploadLoading) {
+      } else if (imageUploadLoading) {
         Toast.show({
           type: 'info',
           text1: 'Please wait images are being uploaded',
@@ -532,6 +541,7 @@ const PostAdContainer = (props: any) => {
           onNext={checkErrors}
           onBackPress={onBackPress}
           submitPostAd={submitPostAd}
+          imageUploadLoading={imageUploadLoading}
           loading={loading}
           values={values}
         />
@@ -637,6 +647,13 @@ const styles = StyleSheet.create({
   },
   buyButton: {
     backgroundColor: '#2f8f72',
+    alignItems: 'center',
+    borderRadius: 10,
+    width: '40%',
+    justifyContent: 'center',
+  },
+  buyButtonDisabled: {
+    backgroundColor: '#c9ffefff',
     alignItems: 'center',
     borderRadius: 10,
     width: '40%',

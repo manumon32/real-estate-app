@@ -1,7 +1,7 @@
 import RazorpayCheckout, {CheckoutOptions} from 'react-native-razorpay';
 import { PaymentRequest } from '@rnw-community/react-native-payments';
 // @ts-ignore
-import { PaymentMethodNameEnum, SupportedNetworkEnum } from '@rnw-community/react-native-payments/src';
+// import { PaymentMethodNameEnum, SupportedNetworkEnum } from '@rnw-community/react-native-payments/src';
 
 
 import axios from 'axios';
@@ -125,10 +125,11 @@ export function startCheckoutPromise(params: any): Promise<void> {
 export async function payWithApplePay() {
   const methodData = [
   {
-    supportedMethods: [PaymentMethodNameEnum.ApplePay],
+    // PaymentMethodNameEnum.ApplePay
+    supportedMethods: [],
     data: {
       merchantIdentifier: 'merchant.com.yourapp.id',      // your merchant ID
-      supportedNetworks: [SupportedNetworkEnum.Visa, SupportedNetworkEnum.Mastercard],
+      supportedNetworks: [],//[SupportedNetworkEnum.Visa, SupportedNetworkEnum.Mastercard],
       countryCode: 'IN',       // your country ISO
       currencyCode: 'INR',      // currency you charge in
       // optional: you can also provide applicationData (metadata)

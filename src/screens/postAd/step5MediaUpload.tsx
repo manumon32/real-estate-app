@@ -24,7 +24,10 @@ import {useTheme} from '@theme/ThemeProvider';
 import {useRoute} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {compressImage} from '../../helpers/ImageCompressor';
+import RNFS from 'react-native-fs';
+
 import {uploadImages} from '@api/services';
+import Toast from 'react-native-toast-message';
 
 const Step5MediaUpload = (props: any) => {
   const route = useRoute();
@@ -95,11 +98,6 @@ const Step5MediaUpload = (props: any) => {
   const renderItem = useCallback(
     ({item}: {item: any}) => {
       const isLoading = loadingState[item?.uri || item];
-      const isFailed = item.status
-        ? item.status === 'falied'
-          ? true
-          : false
-        : false;
       return (
         <View style={styles.previewContainer}>
           <Image
@@ -122,27 +120,11 @@ const Step5MediaUpload = (props: any) => {
               <Text style={styles.removeText}>✕</Text>
             </Pressable>
           )}
-          {isFailed && !isLoading && (
-            // <View style={styles.overlay}>
-            <Pressable
-              style={{
-                backgroundColor: 'red',
-                padding: 5,
-                borderRadius: 10,
-                bottom: 30,
-              }}
-              onPress={() => retryUpload(item)}>
-              <Text style={[styles.removeText, {textAlign: 'center'}]}>
-                Retry
-              </Text>
-            </Pressable>
-            // </View>
-          )}
         </View>
       );
     },
     // @ts-ignore
-    [loadingState, removeAsset, retryUpload],
+    [loadingState, removeAsset],
   );
 
   const renderItemFloor = useCallback(
@@ -208,7 +190,7 @@ const Step5MediaUpload = (props: any) => {
     [assets, keyExtractor, renderItem],
   );
 
-  const uploadImagesLocal = async (images: any[], retry = false) => {
+  const uploadImagesLocal = async (images: any[]) => {
     setImageUploadLoading(true);
 
     // 1️⃣ Add selected images to state for immediate preview
@@ -218,11 +200,10 @@ const Step5MediaUpload = (props: any) => {
       uploadedUrl: null,
       status: 'queued', // status: queued | uploading | success | failed
     }));
-    !retry &&
-      setAssets(prev => [
-        ...prev.filter(item => !images.some(img => img.uri === item.uri)),
-        ...assetsWithId,
-      ]);
+    setAssets(prev => [
+      ...prev.filter(item => !images.some(img => img.uri === item.uri)),
+      ...assetsWithId,
+    ]);
 
     // 2️⃣ Show loader for all images
     const initialLoading: {[key: string]: boolean} = {};
@@ -235,6 +216,10 @@ const Step5MediaUpload = (props: any) => {
     const uploadResults = await Promise.allSettled(
       assetsWithId.map(async img => {
         try {
+          const statsdata = await RNFS.stat(img.uri);
+          const sizeInMBData = Number(statsdata.size) / (1024 * 1024);
+
+          console.log(`Real size: ${sizeInMBData.toFixed(2)} MB`);
           // Mark as uploading
           setAssets(prev =>
             prev.map(item =>
@@ -244,7 +229,22 @@ const Step5MediaUpload = (props: any) => {
 
           // Compress image
           const compressedUri = await compressImage(img.uri);
+          const stats = await RNFS.stat(compressedUri);
+          const sizeInMB = Number(stats.size) / (1024 * 1024);
+
+          console.log(`Compressed size: ${sizeInMB.toFixed(2)} MB`);
           if (!compressedUri) {
+            setImageUploadLoading(false);
+            throw new Error('Compression failed');
+          }
+
+          if (sizeInMB > 3) {
+            Toast.show({
+              type: 'info',
+              text1: 'Some images are not supported',
+              position: 'bottom',
+            });
+            setImageUploadLoading(false);
             throw new Error('Compression failed');
           }
 
@@ -278,7 +278,6 @@ const Step5MediaUpload = (props: any) => {
 
           return {id: img.id, success: true};
         } catch (err) {
-          console.log('Upload failed for', img.uri, err);
           setAssets(prev =>
             prev.map(item =>
               item.id === img.id ? {...item, status: 'failed'} : item,
@@ -288,7 +287,6 @@ const Step5MediaUpload = (props: any) => {
         } finally {
           // Hide loader for this image
           setLoadingState(prev => ({...prev, [img.id]: false}));
-
           setImageUploadLoading(false);
         }
       }),
@@ -360,9 +358,9 @@ const Step5MediaUpload = (props: any) => {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const retryUpload = async (img: any) => {
-    await uploadImagesLocal([img], true);
-  };
+  // const retryUpload = async (img: any) => {
+  //   await uploadImagesLocal([img]);
+  // };
 
   const previewsFloorPlan = useMemo(
     () => (
@@ -400,6 +398,7 @@ const Step5MediaUpload = (props: any) => {
         <CommonImageUploader
           onUpload={uploadImagesLocal}
           limit={assets.length >= 15 ? 0 : 15 - assets.length}
+          totalLimit={15}
           label="Upload Property Images"
         />
         {touched?.imageUrls && errors?.imageUrls && (

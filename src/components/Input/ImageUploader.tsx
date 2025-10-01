@@ -9,6 +9,7 @@ interface CommonImageUploaderProps {
   label: string;
   handleOnpress?: any;
   limit?: number;
+  totalLimit?: number;
 }
 
 const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
@@ -16,17 +17,17 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
   label,
   handleOnpress,
   limit = 10,
+  totalLimit = 10,
 }) => {
   const handlePickImage = async () => {
-    if (limit == 0) {
+    if (limit === 0) {
       Toast.show({
         type: 'error',
-        text1: 'Limit reached, You can only select up to 10 images.',
+        text1: `Limit reached, You can only select up to ${totalLimit} images.`,
         position: 'bottom',
       });
       return;
     }
-
     const response = await ImagePicker.launchImageLibrary({
       mediaType: 'photo',
       quality: 0.7,
@@ -38,9 +39,37 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
       console.log('Picker Error:', response.errorMessage);
     } else if (response.assets) {
       // @ts-ignore
-      const imageAssets = response.assets.filter((asset: {type: string}) =>
-        asset.type?.startsWith('image/'),
-      );
+      const skippedFiles: string[] = [];
+
+      const imageAssets =
+        response.assets?.filter(asset => {
+          const mime = asset.type?.toLowerCase() || '';
+          const ext = asset.fileName?.split('.').pop()?.toLowerCase();
+
+          const isValid =
+            mime === 'image/jpeg' ||
+            mime === 'image/png' ||
+            ext === 'jpg' ||
+            ext === 'jpeg' ||
+            ext === 'png';
+
+          if (!isValid) {
+            skippedFiles.push(asset.fileName || 'Unknown file');
+          }
+
+          return isValid;
+        }) || [];
+
+      if (skippedFiles.length > 0) {
+        Toast.show({
+          type: 'info',
+          text1: 'Some images are not supported',
+          text2: skippedFiles.join(', '), // 👈 show filenames
+          position: 'bottom',
+        });
+
+        console.log('❌ Skipped unsupported files:', skippedFiles);
+      }
       onUpload(imageAssets);
       // Use array of URIs as needed
     }
@@ -86,7 +115,7 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
             size={40}
             color="#219E93"
             onPress={handleOnpress ? handleOnpress : handlePickImage}
-            style={{width: '100%', marginRight: 20}}
+            style={styles.uploadIcon}
           />
         </TouchableOpacity>
         <MaterialCommunityIcons
@@ -113,6 +142,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F8FC',
     marginVertical: 10,
   },
+  uploadIcon: {width: '100%', marginRight: 20},
   label: {
     marginTop: 10,
     color: '#219E93',
