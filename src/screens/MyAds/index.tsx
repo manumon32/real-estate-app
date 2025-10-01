@@ -4,12 +4,13 @@ import CommonHeader from '@components/Header/CommonHeader';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 import React, {useCallback, useMemo, useState} from 'react';
+import Image from 'react-native-fast-image';
+
 import {useTheme} from '@theme/ThemeProvider';
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   FlatList,
   RefreshControl,
@@ -131,6 +132,8 @@ const ListingCard: React.FC<ListingCardProps> = ({
         };
     }
   }, [status]);
+  const [loaded, setImageLoaded] = useState(false);
+  console.log(loaded);
   return (
     <View
       style={[
@@ -146,7 +149,15 @@ const ListingCard: React.FC<ListingCardProps> = ({
           navigation.navigate('Details', {items});
         }}>
         <View style={styles.row}>
-          <Image source={{uri: imageUrl}} style={styles.image} />
+          <Image
+            source={{
+              uri: imageUrl,
+              cache: Image.cacheControl.immutable,
+              priority: Image.priority.normal,
+            }}
+            style={styles.image}
+            onLoadEnd={() => setImageLoaded(true)}
+          />
           <View style={styles.info}>
             <View style={styles.headerRow}>
               <Text style={[styles.title, {color: theme.colors.text}]}>

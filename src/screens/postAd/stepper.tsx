@@ -30,6 +30,7 @@ import Step3LocationDetails from './step3LocationDetails';
 import Step4PropertyDetails from './step4PropertyDetails';
 import Step5MediaUpload from './step5MediaUpload';
 import Preview from './preview';
+import Step2MediaUpload from './step2MediaUpload';
 
 interface FooterProps {
   currentStep: number;
@@ -45,6 +46,8 @@ interface FooterProps {
   imageUploadLoading: boolean;
   isSkeletonLoading: boolean;
 }
+
+const LAST_STEP = 6;
 
 const Footer: React.FC<FooterProps> = ({
   currentStep,
@@ -73,11 +76,14 @@ const Footer: React.FC<FooterProps> = ({
 
   const handleNext = () => {
     // Only prevent final submission if images are uploading, allow navigation between steps
-    if (currentStep === 5 && (imageUploadLoading || isSkeletonLoading)) {
+    if (
+      currentStep === LAST_STEP &&
+      (imageUploadLoading || isSkeletonLoading)
+    ) {
       return;
     }
 
-    if (currentStep === 5) {
+    if (currentStep === LAST_STEP) {
       !imageUploadLoading &&
         setTimeout(() => {
           submitPostAd();
@@ -86,7 +92,7 @@ const Footer: React.FC<FooterProps> = ({
     if (onNext) {
       onNext();
     } else {
-      currentStep !== 5 && setCurrentStep(prev => prev + 1);
+      currentStep !== LAST_STEP && setCurrentStep(prev => prev + 1);
     }
   };
 
@@ -105,24 +111,28 @@ const Footer: React.FC<FooterProps> = ({
         onPress={handleNext}
         style={[
           styles.buyButton,
-          currentStep === 5 &&
+          currentStep === LAST_STEP &&
             (imageUploadLoading || isSkeletonLoading) &&
             styles.buyButtonDisabled,
         ]}
         accessibilityRole="button"
         disabled={
           isLastStep ||
-          (currentStep === 5 && (imageUploadLoading || isSkeletonLoading))
+          (currentStep === LAST_STEP &&
+            (imageUploadLoading || isSkeletonLoading))
         }>
         <Text style={styles.buyText}>
           {(loading ||
-            (currentStep === 5 &&
+            (currentStep === LAST_STEP &&
               (imageUploadLoading || isSkeletonLoading))) && (
             <ActivityIndicator size={'small'} color={'#fff'} />
           )}
           {!loading &&
-          !(currentStep === 5 && (imageUploadLoading || isSkeletonLoading))
-            ? currentStep == 5
+          !(
+            currentStep === LAST_STEP &&
+            (imageUploadLoading || isSkeletonLoading)
+          )
+            ? currentStep == LAST_STEP
               ? values.id
                 ? 'Update'
                 : 'Post Now'
@@ -130,7 +140,7 @@ const Footer: React.FC<FooterProps> = ({
             : isSkeletonLoading
             ? 'Processing...'
             : imageUploadLoading
-            ? 'Uploading...'
+            ? 'Uploading'
             : ''}
         </Text>
       </TouchableOpacity>
@@ -266,13 +276,18 @@ const PostAdContainer = (props: any) => {
     [postAd, theme, getMergedFields, toggleItem],
   );
 
+  useEffect(() => {
+    setFieldValue('imageUrls', images);
+  }, [images, setFieldValue]);
+
   const checkErrors = async () => {
     const requiredFields = {
       1: ['title', 'description', 'propertyTypeId', 'listingTypeId'],
-      2: ['price'],
-      3: ['areaSize'],
-      4: [],
+      2: ['imageUrls'],
+      3: ['price'],
+      4: ['areaSize'],
       5: [],
+      6: [],
     };
 
     // Mark fields as touched
@@ -296,7 +311,7 @@ const PostAdContainer = (props: any) => {
     );
 
     if (!hasErrors) {
-      currentStep < 5 && setCurrentStep(prev => prev + 1);
+      currentStep < LAST_STEP && setCurrentStep(prev => prev + 1);
     }
   };
 
@@ -313,7 +328,20 @@ const PostAdContainer = (props: any) => {
             {...props}
           />
         );
+
       case 2:
+        return (
+          <Step2MediaUpload
+            currentStep={prevStep}
+            isStringInEitherArray={isStringInEitherArray}
+            getMergedFields={getMergedFields}
+            toggleItem={toggleItem}
+            renderChips={renderChips}
+            onSkeletonStateChange={handleSkeletonStateChange}
+            {...props}
+          />
+        );
+      case 3:
         return (
           <Step2
             currentStep={prevStep}
@@ -324,7 +352,7 @@ const PostAdContainer = (props: any) => {
             {...props}
           />
         );
-      case 3:
+      case 4:
         return (
           <Step3LocationDetails
             currentStep={prevStep}
@@ -335,7 +363,7 @@ const PostAdContainer = (props: any) => {
             {...props}
           />
         );
-      case 4:
+      case 5:
         return (
           <Step4PropertyDetails
             currentStep={prevStep}
@@ -344,7 +372,7 @@ const PostAdContainer = (props: any) => {
             {...props}
           />
         );
-      case 5:
+      case 6:
         return (
           <Step5MediaUpload
             currentStep={prevStep}
@@ -429,30 +457,22 @@ const PostAdContainer = (props: any) => {
         city: locationForAdpost.city,
       };
 
-      //  const imageURLs = images
-      //         .map(
-      //           (img: any) =>
-      //             typeof img === 'string'
-      //               ? img // already a URL string
-      //               : img.uploadedUrl || null, // pick uploadedUrl if available
-      //         )
-      //         .filter((url): url is string => !!url);
-
-      //       const floorPlansURL = floorPlans
-      //         .map(
-      //           (img: any) =>
-      //             typeof img === 'string'
-      //               ? img // already a URL string
-      //               : img.uploadedUrl || null, // pick uploadedUrl if available
-      //         )
-      //         .filter((url): url is string => !!url);
-
       const imageURLs = images
-        .map((img: any) => (img.uploadedUrl ? img.uploadedUrl : img))
+        .map(
+          (img: any) =>
+            typeof img === 'string'
+              ? img // already a URL string
+              : img.uploadedUrl || null, // pick uploadedUrl if available
+        )
         .filter((url): url is string => !!url);
 
       const floorPlansURL = floorPlans
-        .map((plans: any) => (plans.uploadedUrl ? plans.uploadedUrl : plans))
+        .map(
+          (img: any) =>
+            typeof img === 'string'
+              ? img // already a URL string
+              : img.uploadedUrl || null, // pick uploadedUrl if available
+        )
         .filter((url): url is string => !!url);
       console.log(images);
       console.log(floorPlans);
@@ -555,7 +575,7 @@ const PostAdContainer = (props: any) => {
           styles.stepperContainer,
           {backgroundColor: theme.colors.background},
         ]}>
-        <Stepper totalSteps={5} currentStep={currentStep} />
+        <Stepper totalSteps={6} currentStep={currentStep} />
       </View>
       {/* <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}

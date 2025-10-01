@@ -47,7 +47,7 @@ const Step2BasicInfo = (props: any) => {
 
   const {theme} = useTheme();
   return (
-    <SlideInView direction={currentStep === 1 ? 'right' : 'left'}>
+    <SlideInView direction={currentStep === 2 ? 'right' : 'left'}>
       <Text style={[styles.headingText, {color: theme.colors.text}]}>
         Price Details
       </Text>

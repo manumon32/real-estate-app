@@ -1,29 +1,16 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  Pressable,
-  TouchableOpacity,
-  ScrollView,
-  useColorScheme,
-  Dimensions,
-  ActivityIndicator,
-} from 'react-native';
+import {StyleSheet, View, Text, FlatList, Pressable} from 'react-native';
 
 import Image from 'react-native-fast-image';
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
-import TextInput from '@components/Input/textInput';
 import CommonImageUploader from '@components/Input/ImageUploader';
 import ImagePickerModal from '@components/Modal/ImagePickerModal';
 import ImageUploadSkeleton from '@components/SkeltonLoader/ImageUploadSkeleton';
 import useBoundStore from '@stores/index';
-import CommonAmenityToggle from '@components/Input/amenityToggle';
+// import CommonAmenityToggle from '@components/Input/amenityToggle';
 import {useTheme} from '@theme/ThemeProvider';
-import {useRoute} from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+// import {useRoute} from '@react-navigation/native';
 import {compressImage} from '../../helpers/ImageCompressor';
 import RNFS from 'react-native-fs';
 
@@ -31,39 +18,34 @@ import {uploadImages} from '@api/services';
 import Toast from 'react-native-toast-message';
 
 const Step5MediaUpload = (props: any) => {
-  const route = useRoute();
-  // @ts-ignore
-  const items = route?.params?.items || null;
+  // const route = useRoute();
+  // // @ts-ignore
+  // const items = route?.params?.items || null;
   const {
     setImages,
     setFloorPlans,
     images,
     floorPlans,
-    managePlansList,
     token,
     clientId,
     bearerToken,
     setImageUploadLoading,
-    loadingStates,
     setLoadingState,
     removeLoadingState,
     updateImageStatus,
     updateFloorPlanStatus,
+    isProcessingImages,
+    setIsProcessingImages,
+    isProcessingFloorPlan,
+    setIsProcessingFloorPlan,
+    isUploadingImages,
+    setIsUploadingImages,
+    isUploadingFloorPlans,
+    setIsUploadingFloorPlans,
   } = useBoundStore();
-  const [showBoostPopup, setShowBoostPopup] = useState(false);
-  const [isProcessingImages, setIsProcessingImages] = useState(false);
-  const [isProcessingFloorPlan, setIsProcessingFloorPlan] = useState(false);
-  const [listKey, setListKey] = useState(0); // Simple counter for FlatList key
 
-  // Separate upload loading states
-  const [isUploadingImages, setIsUploadingImages] = useState(false);
-  const [isUploadingFloorPlans, setIsUploadingFloorPlans] = useState(false);
-
-  // Simple function to trigger FlatList re-render
-  const triggerUpdate = useCallback(() => {
-    console.log('🔄 Triggering FlatList update');
-    setListKey(prev => prev + 1);
-  }, []);
+  // // Separate upload loading states
+  // const [] = useState(false);
 
   // Use ref to avoid dependency cycles
   // const triggerUpdateRef = useRef(triggerUpdate);
@@ -82,14 +64,10 @@ const Step5MediaUpload = (props: any) => {
     // handleSubmit,
     errors,
     touched,
-    values,
     // setTouched,
     setFieldValue,
     isStringInEitherArray,
   } = props;
-
-  const [price, setPrice] = useState(null);
-  const [benifits, setBenifits] = useState([]);
   // Use global loading states from store instead of local state
 
   // Update global imageUploadLoading based on both upload states
@@ -132,147 +110,15 @@ const Step5MediaUpload = (props: any) => {
     [floorPlans, setFloorPlans],
   );
 
-  useEffect(() => {
-    // @ts-ignore
-    if (managePlansList?.[0].price) {
-      // @ts-ignore
-      setPrice(managePlansList?.[0].price);
-      // @ts-ignore
-      setBenifits(managePlansList?.[0].benifits);
-    }
-  }, [managePlansList]);
-
-  // Move retryUpload before renderItem to fix declaration order
-  const retryUpload = useCallback(
-    async (failedItem: any) => {
-      // Set individual loading state
-      setLoadingState(failedItem.id, true);
-
-      // Check if this is the only upload in progress, if so enable global loading
-      const hasOtherUploading = images.some(
-        item =>
-          item.id !== failedItem.id &&
-          (item.status === 'uploading' || loadingStates[item.id]),
-      );
-
-      if (!hasOtherUploading && !isUploadingFloorPlans) {
-        setIsUploadingImages(true);
-      }
-
-      try {
-        // Mark as uploading
-        // setAssets(prev =>
-        //   prev.map(item =>
-        //     item.id === failedItem.id ? {...item, status: 'uploading'} : item,
-        //   ),
-        // );
-
-        const compressedUri = await compressImage(failedItem.uri);
-        if (!compressedUri) {
-          throw new Error('Compression failed');
-        }
-
-        const formData = new FormData();
-        formData.append('images', {
-          uri: compressedUri,
-          name: `image_${failedItem.id}.jpg`,
-          type: 'image/jpeg',
-        } as any);
-
-        const uploadParams = {token, clientId, bearerToken};
-        const uploadedUrl: any = await uploadImages(formData, uploadParams);
-
-        if (uploadedUrl?.length) {
-          // Update asset with uploaded URL and mark as success
-          // setAssets(prev =>
-          //   prev.map(item =>
-          //     item.id === failedItem.id
-          //       ? {
-          //           ...item,
-          //           uploadedUrl: uploadedUrl[0],
-          //           status: 'success',
-          //         }
-          //       : item,
-          //   ),
-          // );
-
-          // Also update global store immediately
-          updateImageStatus(failedItem.id, 'success', uploadedUrl[0]);
-
-          // Trigger UI update to show success tick immediately
-          triggerUpdate();
-
-          removeLoadingState(failedItem.id);
-        } else {
-          throw new Error('Empty upload response');
-        }
-      } catch (err) {
-        console.log('Retry upload failed:', err);
-        // Mark as failed
-        // setAssets(prev =>
-        //   prev.map(item =>
-        //     item.id === failedItem.id ? {...item, status: 'failed'} : item,
-        //   ),
-        // );
-
-        // Also update global store immediately
-        updateImageStatus(failedItem.id, 'failed');
-
-        // Trigger UI update to show error state immediately
-        triggerUpdate();
-
-        removeLoadingState(failedItem.id);
-      } finally {
-        // Check if this was the last upload in progress
-        const stillUploading = images.some(
-          item =>
-            item.id !== failedItem.id &&
-            (item.status === 'uploading' || loadingStates[item.id]),
-        );
-
-        if (!stillUploading) {
-          setIsUploadingImages(false);
-        }
-      }
-    },
-    [
-      setLoadingState,
-      images,
-      isUploadingFloorPlans,
-      loadingStates,
-      token,
-      clientId,
-      bearerToken,
-      updateImageStatus,
-      triggerUpdate,
-      removeLoadingState,
-    ],
-  );
-
   const renderItem = useCallback(
     ({item}: {item: any}) => {
-      const itemKey = item?.id || item?.uri || item;
-      const isLoading = loadingStates[itemKey];
-      const hasError = item?.status === 'failed';
-      const isSuccess = item?.status === 'success';
-
-      // Debug logging - only log occasionally to avoid spam
-      if (Math.random() < 0.1) {
-        // Log ~10% of renders
-        console.log('🎨 Rendering item:', {
-          itemKey: itemKey?.substring(itemKey.length - 20), // Last 20 chars
-          isLoading,
-          hasError,
-          isSuccess,
-          status: item?.status,
-          hasUploadedUrl: !!item?.uploadedUrl,
-        });
-      }
+      // const itemKey = item?.id || item?.uri || item;
+      // const isLoading = loadingStates[itemKey];
+      // const hasError = item?.status === 'failed';
+      // const isSuccess = item?.status === 'success';
 
       return (
-        <Pressable
-          style={styles.previewContainer}
-          onPress={hasError ? () => retryUpload(item) : undefined}>
+        <Pressable style={styles.previewContainer}>
           <Image
             source={{
               uri: item?.uri || item,
@@ -284,164 +130,24 @@ const Step5MediaUpload = (props: any) => {
               console.log('Image failed to load:', item?.uri || item);
             }}
           />
-          {isLoading && (
-            <View style={styles.overlay}>
-              <ActivityIndicator color={'#ffff'} size="small" />
-            </View>
-          )}
-          {hasError && (
-            <View style={[styles.overlay, styles.errorOverlay]}>
-              <MaterialCommunityIcons
-                name="refresh"
-                size={24}
-                color="#ff4444"
-              />
-              <Text style={styles.retryText}>Tap to retry</Text>
-            </View>
-          )}
-          {isSuccess && (
-            <View style={styles.successBadge}>
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={16}
-                color="#4CAF50"
-              />
-            </View>
-          )}
-          {!isLoading && (
-            <Pressable
-              style={styles.removeBtn}
-              onPress={() => removeAsset(item?.uri || item)}>
-              <Text style={styles.removeText}>✕</Text>
-            </Pressable>
-          )}
+          <Pressable
+            style={styles.removeBtn}
+            onPress={() => removeAsset(item?.uri || item)}>
+            <Text style={styles.removeText}>✕</Text>
+          </Pressable>
         </Pressable>
       );
     },
-    [loadingStates, removeAsset, retryUpload],
-  );
-
-  // Retry function for failed floor plan uploads
-  const retryFloorPlanUpload = useCallback(
-    async (failedItem: any) => {
-      setLoadingState(failedItem.id, true);
-
-      // Check if this is the only floor plan upload in progress
-      const hasOtherUploading = floorPlans.some(
-        item =>
-          item.id !== failedItem.id &&
-          (item.status === 'uploading' || loadingStates[item.id]),
-      );
-
-      if (!hasOtherUploading && !isUploadingImages) {
-        setIsUploadingFloorPlans(true);
-      }
-
-      try {
-        // Mark as uploading
-        // setFloorPlan(prev =>
-        //   prev.map(item =>
-        //     item.id === failedItem.id ? {...item, status: 'uploading'} : item,
-        //   ),
-        // );
-
-        const compressedUri = await compressImage(failedItem.uri);
-        if (!compressedUri) {
-          throw new Error('Compression failed');
-        }
-
-        const formData = new FormData();
-        formData.append('images', {
-          uri: compressedUri,
-          name: `floor_${failedItem.id}.jpg`,
-          type: 'image/jpeg',
-        } as any);
-
-        const uploadParams = {token, clientId, bearerToken};
-        const uploadedUrl: any = await uploadImages(formData, uploadParams);
-
-        if (uploadedUrl?.length) {
-          // Update with uploaded URL and mark as success
-          // setFloorPlan(prev =>
-          //   prev.map(item =>
-          //     item.id === failedItem.id
-          //       ? {
-          //           ...item,
-          //           uploadedUrl: uploadedUrl[0],
-          //           status: 'success',
-          //         }
-          //       : item,
-          //   ),
-          // );
-
-          // Also update global store immediately
-          updateFloorPlanStatus(failedItem.id, 'success', uploadedUrl[0]);
-
-          // Trigger UI update to show success tick immediately
-          triggerUpdate();
-        } else {
-          throw new Error('Upload failed - no URL returned');
-        }
-      } catch (error) {
-        console.error('Retry upload failed:', error);
-        // Mark as failed again
-        // setFloorPlan(prev =>
-        //   prev.map(item =>
-        //     item.id === failedItem.id ? {...item, status: 'failed'} : item,
-        //   ),
-        // );
-
-        // Also update global store immediately
-        updateFloorPlanStatus(failedItem.id, 'failed');
-
-        // Trigger UI update to show error state immediately
-        triggerUpdate();
-
-        Toast.show({
-          type: 'error',
-          text1: 'Retry failed',
-          text2: 'Please try again',
-          position: 'bottom',
-        });
-      } finally {
-        removeLoadingState(failedItem.id);
-
-        // Check if all floor plan uploads are complete
-        const stillUploading = floorPlans.some(
-          item =>
-            item.id !== failedItem.id &&
-            (item.status === 'uploading' || loadingStates[item.id]),
-        );
-
-        if (!stillUploading) {
-          setIsUploadingFloorPlans(false);
-        }
-      }
-    },
-    [
-      setLoadingState,
-      floorPlans,
-      isUploadingImages,
-      loadingStates,
-      token,
-      clientId,
-      bearerToken,
-      updateFloorPlanStatus,
-      triggerUpdate,
-      removeLoadingState,
-    ],
+    [removeAsset],
   );
 
   const renderItemFloor = useCallback(
     ({item}: {item: any}) => {
-      const isLoading = loadingStates[item?.uri || item];
-      const hasError = item.status === 'failed';
-      const isSuccess = item.status === 'success' && item.uploadedUrl;
+      // const isLoading = loadingStates[item?.uri || item];
+      // const isSuccess = item.status === 'success' && item.uploadedUrl;
 
       return (
-        <Pressable
-          style={styles.previewContainer}
-          onPress={hasError ? () => retryFloorPlanUpload(item) : undefined}>
+        <Pressable style={styles.previewContainer}>
           <Image
             source={{
               uri: item?.uri || item,
@@ -450,22 +156,7 @@ const Step5MediaUpload = (props: any) => {
             style={styles.preview}
             resizeMode="cover"
           />
-          {isLoading && (
-            <View style={styles.overlay}>
-              <ActivityIndicator color={'#ffff'} size="small" />
-            </View>
-          )}
-          {hasError && (
-            <View style={[styles.overlay, styles.errorOverlay]}>
-              <MaterialCommunityIcons
-                name="refresh"
-                size={24}
-                color="#ff4444"
-              />
-              <Text style={styles.retryText}>Tap to retry</Text>
-            </View>
-          )}
-          {isSuccess && (
+          {/* {isSuccess && (
             <View style={styles.successBadge}>
               <MaterialCommunityIcons
                 name="check-circle"
@@ -473,18 +164,18 @@ const Step5MediaUpload = (props: any) => {
                 color="#4CAF50"
               />
             </View>
-          )}
-          {!isLoading && (
-            <Pressable
-              style={styles.removeBtn}
-              onPress={() => removeFloor(item?.uri || item)}>
-              <Text style={styles.removeText}>✕</Text>
-            </Pressable>
-          )}
+          )} */}
+          {/* {!isLoading && ( */}
+          <Pressable
+            style={styles.removeBtn}
+            onPress={() => removeFloor(item?.uri || item)}>
+            <Text style={styles.removeText}>✕</Text>
+          </Pressable>
+          {/* )} */}
         </Pressable>
       );
     },
-    [loadingStates, removeFloor, retryFloorPlanUpload],
+    [removeFloor],
   );
 
   const keyExtractor = useCallback(
@@ -500,17 +191,16 @@ const Step5MediaUpload = (props: any) => {
   // Handle picker opening - show skeleton immediately
   const handlePickerOpen = useCallback(() => {
     setIsProcessingImages(true);
-  }, []);
+  }, [setIsProcessingImages]);
 
   // Handle picker closing without selection
   const handlePickerClose = useCallback(() => {
     setIsProcessingImages(false);
-  }, []);
+  }, [setIsProcessingImages]);
 
   const previews = useMemo(
     () => (
       <FlatList
-        key={listKey}
         data={images}
         keyExtractor={keyExtractor}
         horizontal
@@ -528,7 +218,7 @@ const Step5MediaUpload = (props: any) => {
         })}
       />
     ),
-    [listKey, images, keyExtractor, renderItem],
+    [images, keyExtractor, renderItem],
   );
 
   const uploadImagesLocal = async (imgs: any[]) => {
@@ -703,9 +393,6 @@ const Step5MediaUpload = (props: any) => {
           updateFloorPlanStatus(img.id, 'success', uploadedUrl[0]);
           console.log('📤 Updated global store for floor plan:', img.id);
 
-          // Trigger UI update to show success tick immediately
-          triggerUpdate();
-
           // Remove loading state on success
           removeLoadingState(img.id);
         } else {
@@ -721,9 +408,6 @@ const Step5MediaUpload = (props: any) => {
           // Also update global store immediately
           updateFloorPlanStatus(img.id, 'failed');
           console.log('📤 Updated global store for failed floor plan:', img.id);
-
-          // Trigger UI update to show error state immediately
-          triggerUpdate();
 
           // Remove loading state on failure
           removeLoadingState(img.id);
@@ -742,9 +426,6 @@ const Step5MediaUpload = (props: any) => {
         // Also update global store immediately
         updateFloorPlanStatus(img.id, 'failed');
         console.log('📤 Updated global store for error floor plan:', img.id);
-
-        // Trigger UI update to show error state immediately
-        triggerUpdate();
 
         // Remove loading state on error
         removeLoadingState(img.id);
@@ -766,7 +447,6 @@ const Step5MediaUpload = (props: any) => {
   const previewsFloorPlan = useMemo(
     () => (
       <FlatList
-        key={listKey}
         data={floorPlans}
         keyExtractor={keyExtractor}
         horizontal
@@ -784,24 +464,13 @@ const Step5MediaUpload = (props: any) => {
         })}
       />
     ),
-    [listKey, floorPlans, keyExtractor, renderItemFloor],
+    [floorPlans, keyExtractor, renderItemFloor],
   );
 
   const {theme} = useTheme();
-  const isDarkMode = useColorScheme() === 'dark';
-  const [scrollY, setScrollY] = useState(0);
-
-  const {height} = Dimensions.get('window');
-  const CONTENT_HEIGHT = 2000; // your scrollable content height
-  const visibleHeight = height;
-  const indicatorHeight = (visibleHeight / CONTENT_HEIGHT) * visibleHeight;
-
-  const scrollIndicatorPosition =
-    (scrollY / (CONTENT_HEIGHT - visibleHeight)) *
-    (visibleHeight - indicatorHeight);
 
   return (
-    <SlideInView direction={currentStep === 4 ? 'right' : 'left'}>
+    <SlideInView direction={currentStep === 1 ? 'right' : 'left'}>
       <Text style={[styles.headingText, {color: theme.colors.text}]}>
         Image Upload
       </Text>
@@ -824,134 +493,32 @@ const Step5MediaUpload = (props: any) => {
           previews
         )}
       </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={values?.videoUrl}
-          onChangeText={text => {
-            setFieldValue('videoUrl', text);
-          }}
-          placeholder="Video URL (YouTube)"
-        />
-      </View>
 
       {isStringInEitherArray('floorPlanUrls') && (
-        <View style={styles.inputContainer}>
-          <CommonImageUploader
-            label="Upload Floor Plan"
-            onUpload={uploadFloorPlanLocal}
-            onPickerOpen={() => {
-              setIsProcessingFloorPlan(true);
-            }}
-            onPickerClose={() => {
-              setIsProcessingFloorPlan(false);
-            }}
-            maxFileSize={30}
-            limit={floorPlans.length >= 10 ? 0 : 10 - floorPlans.length}
-          />
-          {isProcessingFloorPlan && floorPlans.length <= 0 ? (
-            <ImageUploadSkeleton count={4} horizontal />
-          ) : (
-            previewsFloorPlan
-          )}
-        </View>
-      )}
-
-      {!items?._id && (
-        <View style={[styles.inputContainer, styles.featuredContainer]}>
-          <View style={styles.featuredToggleContainer}>
-            <CommonAmenityToggle
-              label={
-                // @ts-ignore
-                String(price)
-                  ? // @ts-ignore
-                    'Featured Property (₹' + String(price) + ')'
-                  : 'Featured Property '
-              }
-              selected={values.featured}
-              onToggle={() => setFieldValue('featured', !values.featured)}
+        <>
+          <Text style={[styles.headingText, {color: theme.colors.text}]}>
+            Floor plan Upload
+          </Text>
+          <View style={styles.inputContainer}>
+            <CommonImageUploader
+              label="Upload Floor Plan"
+              onUpload={uploadFloorPlanLocal}
+              onPickerOpen={() => {
+                setIsProcessingFloorPlan(true);
+              }}
+              onPickerClose={() => {
+                setIsProcessingFloorPlan(false);
+              }}
+              maxFileSize={30}
+              limit={floorPlans.length >= 10 ? 0 : 10 - floorPlans.length}
             />
-          </View>
-          <TouchableOpacity
-            onPress={() => setShowBoostPopup(true)}
-            style={styles.infoButton}>
-            <MaterialCommunityIcons
-              name="information"
-              size={30}
-              color="#3d94ffff"
-            />
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {showBoostPopup && (
-        <View style={styles.popupOverlay}>
-          <View
-            style={[
-              styles.popupContainer,
-              {backgroundColor: theme.colors.background},
-            ]}>
-            <Text style={[styles.popupTitle, {color: theme.colors.text}]}>
-              Feature Your Ad
-            </Text>
-            <Text style={[styles.popupAmount, {color: theme.colors.text}]}>
-              Amount: ₹{price ?? 'N/A'}
-            </Text>
-            {/* @ts-ignore */}
-            {managePlansList?.[0].duration && (
-              <Text
-                style={[
-                  styles.popupAmount,
-                  {color: theme.colors.text, fontSize: 12},
-                ]}>
-                {/* @ts-ignore */}
-                Package Availability: {managePlansList?.[0].duration} Days
-              </Text>
+            {isProcessingFloorPlan && floorPlans.length <= 0 ? (
+              <ImageUploadSkeleton count={4} horizontal />
+            ) : (
+              previewsFloorPlan
             )}
-            <Text
-              style={[
-                [styles.popupBenefits, {marginBottom: 5}],
-                {color: theme.colors.text},
-              ]}>
-              Benefits:
-            </Text>
-            <ScrollView
-              showsVerticalScrollIndicator={false} // hide native
-              onScroll={e => setScrollY(e.nativeEvent.contentOffset.y)}
-              scrollEventThrottle={16}
-              indicatorStyle={isDarkMode ? 'black' : 'white'}
-              style={styles.benefitsScrollView}>
-              {benifits.map(items => (
-                <Text
-                  key={items}
-                  style={[styles.popupBenefits, {color: theme.colors.text}]}>
-                  {'  '}• {items}
-                </Text>
-              ))}
-            </ScrollView>
-            {/* Custom Scroll Indicator */}
-            <View style={styles.scrollBarTrack}>
-              <View
-                style={[
-                  styles.scrollBarThumb,
-                  {
-                    height: 200,
-                    transform: [{translateY: scrollIndicatorPosition}],
-                  },
-                ]}
-              />
-            </View>
-            <View style={styles.popupActions}>
-              <TouchableOpacity
-                style={styles.continueButton}
-                onPress={() => {
-                  setShowBoostPopup(false);
-                  // makePayment(selectedAd._id);
-                }}>
-                <Text style={styles.continueButtonText}>Ok</Text>
-              </TouchableOpacity>
-            </View>
           </View>
-        </View>
+        </>
       )}
 
       <ImagePickerModal

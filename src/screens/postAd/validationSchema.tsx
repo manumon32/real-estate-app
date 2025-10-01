@@ -2,13 +2,17 @@ import * as Yup from 'yup';
 
 export const postAdValidationSchema = Yup.object().shape({
   title: Yup.string().required('Title is mandatory').min(10).max(70),
+  imageUrls: Yup.array().min(1, 'Please select images')
+    .required('Images are required'),
   description: Yup.string()
     .required('Description is mandatory')
     .min(10)
     .max(4000),
-  propertyTypeId: Yup.string().required('Type is mandatory')
+  propertyTypeId: Yup.string()
+    .required('Type is mandatory')
     .typeError('Type is mandatory'),
-  listingTypeId: Yup.string().required('Subtype is mandatory')
+  listingTypeId: Yup.string()
+    .required('Subtype is mandatory')
     .typeError('Subtype is mandatory'),
   price: Yup.number()
     .typeError('Price must be a number')
@@ -25,5 +29,4 @@ export const postAdValidationSchema = Yup.object().shape({
       unit: Yup.string().required('Unit is required'),
     }),
   ),
-  imageUrls: Yup.array().required('Please upload aleast 1 Image'),
 });
