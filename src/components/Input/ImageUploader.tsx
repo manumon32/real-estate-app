@@ -10,6 +10,9 @@ interface CommonImageUploaderProps {
   handleOnpress?: any;
   limit?: number;
   totalLimit?: number;
+  onPickerOpen?: () => void;
+  onPickerClose?: () => void;
+  maxFileSize?: number; // in MB
 }
 
 const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
@@ -18,6 +21,9 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
   handleOnpress,
   limit = 10,
   totalLimit = 10,
+  onPickerOpen,
+  onPickerClose,
+  maxFileSize = 30, // Default 30MB limit
 }) => {
   const handlePickImage = async () => {
     if (limit === 0) {
@@ -28,6 +34,10 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
       });
       return;
     }
+
+    // Trigger skeleton immediately before picker opens
+    onPickerOpen?.();
+
     const response = await ImagePicker.launchImageLibrary({
       mediaType: 'photo',
       quality: 0.7,
@@ -35,43 +45,80 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
     });
     if (response.didCancel) {
       console.log('User cancelled');
+      onPickerClose?.(); // Close skeleton when user cancels
     } else if (response.errorCode) {
       console.log('Picker Error:', response.errorMessage);
+      onPickerClose?.(); // Close skeleton on error
     } else if (response.assets) {
       // @ts-ignore
       const skippedFiles: string[] = [];
+      const oversizedFiles: string[] = [];
 
-      const imageAssets =
-        response.assets?.filter(asset => {
-          const mime = asset.type?.toLowerCase() || '';
-          const ext = asset.fileName?.split('.').pop()?.toLowerCase();
+      // Filter images by type and size
+      const validAssets = [];
 
-          const isValid =
-            mime === 'image/jpeg' ||
-            mime === 'image/png' ||
-            ext === 'jpg' ||
-            ext === 'jpeg' ||
-            ext === 'png';
+      for (const asset of response.assets) {
+        const mime = asset.type?.toLowerCase() || '';
+        const ext = asset.fileName?.split('.').pop()?.toLowerCase();
 
-          if (!isValid) {
-            skippedFiles.push(asset.fileName || 'Unknown file');
+        const isValidType =
+          mime === 'image/jpeg' ||
+          mime === 'image/png' ||
+          ext === 'jpg' ||
+          ext === 'jpeg' ||
+          ext === 'png';
+
+        if (!isValidType) {
+          skippedFiles.push(asset.fileName || 'Unknown file');
+          continue;
+        }
+
+        // Check file size using the fileSize property from ImagePicker
+        if (asset.fileSize) {
+          const sizeInMB = asset.fileSize / (1024 * 1024);
+
+          if (sizeInMB > maxFileSize) {
+            oversizedFiles.push(
+              `${asset.fileName || 'Unknown file'} (${sizeInMB.toFixed(1)}MB)`,
+            );
+            continue;
           }
+        }
 
-          return isValid;
-        }) || [];
+        validAssets.push(asset);
+      }
 
+      // Show toast for skipped files
       if (skippedFiles.length > 0) {
         Toast.show({
           type: 'info',
           text1: 'Some images are not supported',
-          text2: skippedFiles.join(', '), // 👈 show filenames
+          text2: skippedFiles.join(', '),
           position: 'bottom',
         });
-
-        console.log('❌ Skipped unsupported files:', skippedFiles);
       }
-      onUpload(imageAssets);
-      // Use array of URIs as needed
+
+      // Show toast for oversized files
+      if (oversizedFiles.length > 0) {
+        Toast.show({
+          type: 'warning',
+          text1: `Images larger than ${maxFileSize}MB were excluded`,
+          text2: oversizedFiles.join(', '),
+          position: 'bottom',
+          visibilityTime: 5000,
+        });
+      }
+
+      if (
+        validAssets.length === 0 &&
+        (skippedFiles.length > 0 || oversizedFiles.length > 0)
+      ) {
+        onPickerClose?.(); // Close skeleton if no valid images
+        return;
+      }
+
+      onUpload(validAssets);
+      // Don't call onPickerClose here as upload function will handle skeleton
     }
   };
 
@@ -84,6 +131,10 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
       });
       return;
     }
+
+    // Trigger skeleton immediately before camera opens
+    onPickerOpen?.();
+
     const response = await ImagePicker.launchCamera({
       mediaType: 'photo',
       includeBase64: false,
@@ -96,13 +147,50 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
     });
     if (response.didCancel) {
       console.log('User cancelled');
+      onPickerClose?.(); // Trigger close callback on cancel
     } else if (response.errorCode) {
       console.log('Picker Error:', response.errorMessage);
+      onPickerClose?.(); // Trigger close callback on error
     } else if (response.assets) {
-      const imageUris = response.assets.map(asset => asset.uri);
+      // Check file size for camera images too
+      const validAssets = [];
+      const oversizedFiles: string[] = [];
+
+      for (const asset of response.assets) {
+        // Check file size using the fileSize property from ImagePicker
+        if (asset.fileSize) {
+          const sizeInMB = asset.fileSize / (1024 * 1024);
+
+          if (sizeInMB > maxFileSize) {
+            oversizedFiles.push(
+              `${asset.fileName || 'Camera image'} (${sizeInMB.toFixed(1)}MB)`,
+            );
+            continue;
+          }
+        }
+
+        validAssets.push(asset);
+      }
+
+      if (oversizedFiles.length > 0) {
+        Toast.show({
+          type: 'warning',
+          text1: `Image larger than ${maxFileSize}MB`,
+          text2: oversizedFiles.join(', '),
+          position: 'bottom',
+          visibilityTime: 5000,
+        });
+      }
+
+      if (validAssets.length === 0 && oversizedFiles.length > 0) {
+        onPickerClose?.();
+        return;
+      }
+
+      const imageUris = validAssets.map(asset => asset.uri);
       console.log('Selected images:', imageUris);
-      onUpload(response.assets);
-      // Use array of URIs as needed
+      onUpload(validAssets);
+      // Don't call onPickerClose here as upload function will handle skeleton
     }
   };
 

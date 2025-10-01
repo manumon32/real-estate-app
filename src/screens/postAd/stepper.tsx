@@ -98,19 +98,15 @@ const Footer: React.FC<FooterProps> = ({
         onPress={handleNext}
         style={[
           styles.buyButton,
-          imageUploadLoading && styles.buyButtonDisabled,
+          imageUploadLoading && currentStep === 5 && styles.buyButtonDisabled,
         ]}
         accessibilityRole="button"
         disabled={isLastStep}>
         <Text style={styles.buyText}>
-          {loading && <ActivityIndicator size={'small'} color={'#fff'} />}
-          {!loading
-            ? currentStep == 5
-              ? values.id
-                ? 'Update'
-                : 'Post Now'
-              : 'Next'
-            : ''}
+          {currentStep === 5 && (loading || imageUploadLoading) && (
+            <ActivityIndicator size={'small'} color={'#fff'} />
+          )}
+          {currentStep === 5 ? (values.id ? 'Update' : 'Post Now') : 'Next'}
         </Text>
       </TouchableOpacity>
     </View>
