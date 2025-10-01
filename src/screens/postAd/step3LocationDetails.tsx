@@ -25,7 +25,7 @@ const Step3LocationDetails = (props: any) => {
 
   const {theme} = useTheme();
   return (
-    <SlideInView direction={currentStep === 2 ? 'right' : 'left'}>
+    <SlideInView direction={currentStep === 3 ? 'right' : 'left'}>
       <Text style={[styles.headingText, {color: theme.colors.text}]}>
         Location and Area Details
       </Text>

@@ -30,7 +30,7 @@ const Step4PropertyDetails = (props: any) => {
   const {theme} = useTheme();
   const AMENITIES = appConfigs?.amenities || [];
   return (
-    <SlideInView direction={currentStep === 3 ? 'right' : 'left'}>
+    <SlideInView direction={currentStep === 4 ? 'right' : 'left'}>
       {(isStringInEitherArray('kitchen') ||
         isStringInEitherArray('balcony') ||
         isStringInEitherArray('carParking')) && (

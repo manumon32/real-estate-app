@@ -13,7 +13,11 @@ export interface PostAdSlice {
   setImages: (images: any) => void;
   setFloorPlans: (images: any) => void;
   updateImageStatus: (id: string, status: string, uploadedUrl?: string) => void;
-  updateFloorPlanStatus: (id: string, status: string, uploadedUrl?: string) => void;
+  updateFloorPlanStatus: (
+    id: string,
+    status: string,
+    uploadedUrl?: string,
+  ) => void;
   setImageUploadLoading: (falg: any) => void;
   setImageSelectLoading: (falg: any) => void;
   setLoadingState: (id: string, loading: boolean) => void;
@@ -21,6 +25,15 @@ export interface PostAdSlice {
   clearAllLoadingStates: () => void;
   postAdloading: boolean;
   postAdError: boolean;
+  isProcessingImages: boolean;
+  setIsProcessingImages: (falg: any) => void;
+  isProcessingFloorPlan: boolean;
+  setIsProcessingFloorPlan: (falg: any) => void;
+  isUploadingImages: boolean;
+  setIsUploadingImages: (falg: any) => void;
+
+  isUploadingFloorPlans: boolean;
+  setIsUploadingFloorPlans: (falg: any) => void;
 }
 
 const defaultPostAd: any = {};
@@ -33,6 +46,29 @@ export const createPostAdSlice = (set: any, get: any): PostAdSlice => ({
   imageSelectLoading: false,
   postAdError: false,
   imageUploadLoading: false,
+  isProcessingImages: false,
+  isProcessingFloorPlan: false,
+  setIsProcessingImages: (flag: any) =>
+    set(() => ({
+      isProcessingImages: flag,
+    })),
+
+  isUploadingImages: false,
+  setIsUploadingImages: (flag: any) =>
+    set(() => ({
+      isUploadingImages: flag,
+    })),
+
+  isUploadingFloorPlans: false,
+  setIsUploadingFloorPlans: (flag: any) =>
+    set(() => ({
+      isUploadingImages: flag,
+    })),
+
+  setIsProcessingFloorPlan: (flag: any) =>
+    set(() => ({
+      isProcessingFloorPlan: flag,
+    })),
   loadingStates: {}, // Initialize empty loading states
   setImageUploadLoading: (flag: any) =>
     set(() => ({
@@ -73,23 +109,33 @@ export const createPostAdSlice = (set: any, get: any): PostAdSlice => ({
   },
 
   updateImageStatus: (id: string, status: string, uploadedUrl?: string) => {
-    console.log('🏪 updateImageStatus:', id, status, uploadedUrl ? 'with URL' : 'no URL');
+    console.log(
+      '🏪 updateImageStatus:',
+      id,
+      status,
+      uploadedUrl ? 'with URL' : 'no URL',
+    );
     set((state: any) => ({
-      images: state.images.map((img: any) => 
-        (img.id || img.uri || img) === id 
-          ? { ...img, status, ...(uploadedUrl && { uploadedUrl }) }
-          : img
+      images: state.images.map((img: any) =>
+        (img.id || img.uri || img) === id
+          ? {...img, status, ...(uploadedUrl && {uploadedUrl})}
+          : img,
       ),
     }));
   },
 
   updateFloorPlanStatus: (id: string, status: string, uploadedUrl?: string) => {
-    console.log('🏪 updateFloorPlanStatus:', id, status, uploadedUrl ? 'with URL' : 'no URL');
+    console.log(
+      '🏪 updateFloorPlanStatus:',
+      id,
+      status,
+      uploadedUrl ? 'with URL' : 'no URL',
+    );
     set((state: any) => ({
-      floorPlans: state.floorPlans.map((plan: any) => 
-        (plan.id || plan.uri || plan) === id 
-          ? { ...plan, status, ...(uploadedUrl && { uploadedUrl }) }
-          : plan
+      floorPlans: state.floorPlans.map((plan: any) =>
+        (plan.id || plan.uri || plan) === id
+          ? {...plan, status, ...(uploadedUrl && {uploadedUrl})}
+          : plan,
       ),
     }));
   },
