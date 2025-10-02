@@ -8,32 +8,13 @@ import CommonImageUploader from '@components/Input/ImageUploader';
 import ImagePickerModal from '@components/Modal/ImagePickerModal';
 import ImageUploadSkeleton from '@components/SkeltonLoader/ImageUploadSkeleton';
 import useBoundStore from '@stores/index';
-// import CommonAmenityToggle from '@components/Input/amenityToggle';
 import {useTheme} from '@theme/ThemeProvider';
-// import {useRoute} from '@react-navigation/native';
-import {compressImage} from '../../helpers/ImageCompressor';
-import RNFS from 'react-native-fs';
-
-import {uploadImages} from '@api/services';
-import Toast from 'react-native-toast-message';
 
 const Step5MediaUpload = (props: any) => {
-  // const route = useRoute();
-  // // @ts-ignore
-  // const items = route?.params?.items || null;
+  const {values} = props;
   const {
     setImages,
-    setFloorPlans,
-    images,
-    floorPlans,
-    token,
-    clientId,
-    bearerToken,
     setImageUploadLoading,
-    setLoadingState,
-    removeLoadingState,
-    updateImageStatus,
-    updateFloorPlanStatus,
     isProcessingImages,
     setIsProcessingImages,
     isProcessingFloorPlan,
@@ -41,22 +22,7 @@ const Step5MediaUpload = (props: any) => {
     isUploadingImages,
     setIsUploadingImages,
     isUploadingFloorPlans,
-    setIsUploadingFloorPlans,
   } = useBoundStore();
-
-  // // Separate upload loading states
-  // const [] = useState(false);
-
-  // Use ref to avoid dependency cycles
-  // const triggerUpdateRef = useRef(triggerUpdate);
-  // triggerUpdateRef.current = triggerUpdate;
-
-  // useEffect(() => {
-  //   const isSkeletonShowing = isProcessingImages || isProcessingFloorPlan;
-  //   if (props.onSkeletonStateChange) {
-  //     props.onSkeletonStateChange(isSkeletonShowing);
-  //   }
-  // }, [isProcessingImages, isProcessingFloorPlan, props]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const {
@@ -91,11 +57,17 @@ const Step5MediaUpload = (props: any) => {
       if (!uri) {
         return;
       }
-      setImages(
-        images.filter(item => (item.uri ? item.uri !== uri : item !== uri)),
+      setFieldValue(
+        'imageUrls',
+        values.imageUrls.filter((item: any) =>
+          item.uri ? item.uri !== uri : item !== uri,
+        ),
       );
+      // setImages(
+      //   images.filter(item => (item.uri ? item.uri !== uri : item !== uri)),
+      // );
     },
-    [images, setImages],
+    [setFieldValue, values.imageUrls],
   );
 
   const removeFloor = useCallback(
@@ -103,20 +75,18 @@ const Step5MediaUpload = (props: any) => {
       if (!uri) {
         return;
       }
-      setFloorPlans(
-        floorPlans.filter(item => (item.uri ? item.uri !== uri : item !== uri)),
+       setFieldValue(
+        'floorPlanUrl',
+        values.floorPlanUrl.filter((item: any) =>
+          item.uri ? item.uri !== uri : item !== uri,
+        ),
       );
     },
-    [floorPlans, setFloorPlans],
+    [setFieldValue, values.floorPlanUrl],
   );
 
   const renderItem = useCallback(
     ({item}: {item: any}) => {
-      // const itemKey = item?.id || item?.uri || item;
-      // const isLoading = loadingStates[itemKey];
-      // const hasError = item?.status === 'failed';
-      // const isSuccess = item?.status === 'success';
-
       return (
         <Pressable style={styles.previewContainer}>
           <Image
@@ -143,9 +113,6 @@ const Step5MediaUpload = (props: any) => {
 
   const renderItemFloor = useCallback(
     ({item}: {item: any}) => {
-      // const isLoading = loadingStates[item?.uri || item];
-      // const isSuccess = item.status === 'success' && item.uploadedUrl;
-
       return (
         <Pressable style={styles.previewContainer}>
           <Image
@@ -156,16 +123,6 @@ const Step5MediaUpload = (props: any) => {
             style={styles.preview}
             resizeMode="cover"
           />
-          {/* {isSuccess && (
-            <View style={styles.successBadge}>
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={16}
-                color="#4CAF50"
-              />
-            </View>
-          )} */}
-          {/* {!isLoading && ( */}
           <Pressable
             style={styles.removeBtn}
             onPress={() => removeFloor(item?.uri || item)}>
@@ -201,7 +158,7 @@ const Step5MediaUpload = (props: any) => {
   const previews = useMemo(
     () => (
       <FlatList
-        data={images}
+        data={values.imageUrls}
         keyExtractor={keyExtractor}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -218,7 +175,7 @@ const Step5MediaUpload = (props: any) => {
         })}
       />
     ),
-    [images, keyExtractor, renderItem],
+    [keyExtractor, renderItem, values],
   );
 
   const uploadImagesLocal = async (imgs: any[]) => {
@@ -226,94 +183,17 @@ const Step5MediaUpload = (props: any) => {
       setIsProcessingImages(false);
       return;
     }
-
     // Update processing count to actual number of images
     setIsUploadingImages(true); // Use separate state for images
-
-    try {
-      // 1️⃣ Add selected images to state for immediate preview after a brief delay
-      const assetsWithId = imgs.map(img => ({
-        ...img,
-        id: img.uri,
-        uploadedUrl: null,
-        status: 'queued', // status: queued | uploading | success | failed
-      }));
-
-      // Wait a bit to show skeleton, then show actual previews
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      // Stop skeleton and show actual previews
-      setIsProcessingImages(false);
-      setImages([...images, ...assetsWithId]);
-
-      // 2️⃣ Show loader for all images
-      assetsWithId.forEach(img => setLoadingState(img.id, true));
-
-      const uploadParams = {token, clientId, bearerToken};
-
-      // 3️⃣ Upload all images in parallel using Promise.allSettled
-      const uploadResults = await Promise.allSettled(
-        assetsWithId.map(async img => {
-          try {
-            const statsdata = await RNFS.stat(img.uri);
-            const sizeInMBData = Number(statsdata.size) / (1024 * 1024);
-
-            console.log(`Real size: ${sizeInMBData.toFixed(2)} MB`);
-            // Compress image
-            const compressedUri = await compressImage(img.uri);
-            const stats = await RNFS.stat(compressedUri);
-            const sizeInMB = Number(stats.size) / (1024 * 1024);
-
-            console.log(`Compressed size: ${sizeInMB.toFixed(2)} MB`);
-            if (!compressedUri) {
-              throw new Error('Compression failed');
-            }
-
-            // Note: File size is already checked at picker level (30MB limit)
-            // This compression is for optimization during upload
-
-            // Prepare FormData
-            const formData = new FormData();
-            formData.append('images', {
-              uri: compressedUri,
-              name: `image_${img.id}.jpg`,
-              type: 'image/jpeg',
-            } as any);
-
-            // Upload
-            const uploadedUrl: any = await uploadImages(formData, uploadParams);
-
-            if (!uploadedUrl?.length) {
-              throw new Error('Empty upload response');
-            }
-
-            updateImageStatus(img.id, 'success', uploadedUrl[0]);
-            removeLoadingState(img.id);
-
-            return {id: img.id, success: true};
-          } catch (err) {
-            updateImageStatus(img.id, 'failed');
-            removeLoadingState(img.id);
-            return {id: img.id, success: false, error: err};
-          }
-        }),
-      );
-
-      console.log('All upload results:', uploadResults);
-
-      // Set image upload loading to false after ALL image uploads are complete
-      setIsUploadingImages(false);
-    } catch (error) {
-      console.error('Upload error:', error);
-      setIsProcessingImages(false);
-      setIsUploadingImages(false); // Use separate state for images
-      Toast.show({
-        type: 'error',
-        text1: 'Upload failed',
-        text2: 'Please try again',
-        position: 'bottom',
-      });
-    }
+    const assetsWithId = imgs.map(img => ({
+      ...img,
+      id: img.uri,
+      uploadedUrl: null,
+      status: 'queued', // status: queued | uploading | success | failed
+    }));
+    setIsProcessingImages(false);
+    setFieldValue('imageUrls', [...values.imageUrls, ...assetsWithId]);
+    setIsUploadingImages(false);
   };
 
   const uploadFloorPlanLocal = async (plans: any[]) => {
@@ -321,15 +201,7 @@ const Step5MediaUpload = (props: any) => {
       setIsProcessingFloorPlan(false);
       return;
     }
-
-    // Show skeleton immediately when upload function is called
     setIsProcessingFloorPlan(true);
-    setIsUploadingFloorPlans(true); // Use separate state for floor plans
-
-    // Small delay to ensure skeleton is visible
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // Add selected images to state immediately for preview
     const assetsWithId = plans.map(img => ({
       ...img,
       id: img.uri,
@@ -338,116 +210,13 @@ const Step5MediaUpload = (props: any) => {
     }));
 
     setIsProcessingFloorPlan(false);
-    setFloorPlans([...floorPlans, ...assetsWithId]);
-    // Show loader for all images immediately
-    assetsWithId.forEach(img => setLoadingState(img.id, true));
-
-    const uploadParams = {token, clientId, bearerToken};
-
-    // Upload all images in parallel
-    const uploadPromises = assetsWithId.map(async img => {
-      try {
-        // Mark as uploading
-        // setFloorPlan(prev =>
-        //   prev.map(item =>
-        //     item.id === img.id ? {...item, status: 'uploading'} : item,
-        //   ),
-        // );
-
-        // Compress
-        const compressedUri = await compressImage(img.uri);
-
-        if (!compressedUri) {
-          updateFloorPlanStatus(img.id, 'failed');
-          return;
-        }
-
-        // Prepare FormData
-        const formData = new FormData();
-        formData.append('images', {
-          uri: compressedUri,
-          name: `floor_${img.id}.jpg`,
-          type: 'image/jpeg',
-        } as any);
-
-        // Upload
-        const uploadedUrl: any = await uploadImages(formData, uploadParams);
-
-        if (uploadedUrl?.length) {
-          // Update asset with uploaded URL and mark as success
-          // setFloorPlan(prev => {
-          //   const updatedPlans = prev.map(item =>
-          //     item.id === img.id
-          //       ? {
-          //           ...item,
-          //           uploadedUrl: uploadedUrl[0],
-          //           status: 'success',
-          //         }
-          //       : item,
-          //   );
-
-          //   return updatedPlans;
-          // });
-
-          // Also update global store immediately
-          updateFloorPlanStatus(img.id, 'success', uploadedUrl[0]);
-          console.log('📤 Updated global store for floor plan:', img.id);
-
-          // Remove loading state on success
-          removeLoadingState(img.id);
-        } else {
-          // Mark as failed if no URL returned
-          // setFloorPlan(prev => {
-          //   const updatedPlans = prev.map(item =>
-          //     item.id === img.id ? {...item, status: 'failed'} : item,
-          //   );
-
-          //   return updatedPlans;
-          // });
-
-          // Also update global store immediately
-          updateFloorPlanStatus(img.id, 'failed');
-          console.log('📤 Updated global store for failed floor plan:', img.id);
-
-          // Remove loading state on failure
-          removeLoadingState(img.id);
-        }
-      } catch (err) {
-        console.log('Upload failed for', img.uri, err);
-        // Mark as failed
-        // setFloorPlan(prev => {
-        //   const updatedPlans = prev.map(item =>
-        //     item.id === img.id ? {...item, status: 'failed'} : item,
-        //   );
-
-        //   return updatedPlans;
-        // });
-
-        // Also update global store immediately
-        updateFloorPlanStatus(img.id, 'failed');
-        console.log('📤 Updated global store for error floor plan:', img.id);
-
-        // Remove loading state on error
-        removeLoadingState(img.id);
-      }
-    });
-
-    // Wait for all uploads to complete
-    await Promise.all(uploadPromises);
-
-    setIsUploadingFloorPlans(false); // Use separate state for floor plans
-    setIsProcessingFloorPlan(false);
+    setFieldValue('floorPlanUrl', [...values.floorPlanUrl, ...assetsWithId]);
   };
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  // const retryUpload = async (img: any) => {
-  //   await uploadImagesLocal([img]);
-  // };
 
   const previewsFloorPlan = useMemo(
     () => (
       <FlatList
-        data={floorPlans}
+        data={values.floorPlanUrl}
         keyExtractor={keyExtractor}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -464,7 +233,7 @@ const Step5MediaUpload = (props: any) => {
         })}
       />
     ),
-    [floorPlans, keyExtractor, renderItemFloor],
+    [keyExtractor, renderItemFloor, values.floorPlanUrl],
   );
 
   const {theme} = useTheme();
@@ -477,20 +246,30 @@ const Step5MediaUpload = (props: any) => {
       <View style={styles.inputContainer}>
         <CommonImageUploader
           onUpload={uploadImagesLocal}
+          // handleOnpress={()=>setModalVisible(true)}
           onPickerOpen={handlePickerOpen}
           onPickerClose={handlePickerClose}
-          limit={images.length >= 15 ? 0 : 15 - images.length}
+          limit={
+            values.imageUrls.length >= 15 ? 0 : 15 - values.imageUrls.length
+          }
           totalLimit={15}
           maxFileSize={30}
           label="Upload Property Images"
         />
-        {touched?.imageUrls && errors?.imageUrls && (
+        {!isProcessingImages && touched?.imageUrls && errors?.imageUrls && (
           <Text style={styles.error}>{errors?.imageUrls}</Text>
         )}
-        {isProcessingImages && images.length <= 0 ? (
+        {isProcessingImages && values.imageUrls.length <= 0 ? (
           <ImageUploadSkeleton count={4} horizontal />
         ) : (
-          previews
+          <>
+            {values?.imageUrls?.length > 0 && (
+              <Text style={[styles.total, {color: theme.colors.text}]}>
+                Total Images ({values?.imageUrls?.length})
+              </Text>
+            )}
+            {previews}
+          </>
         )}
       </View>
 
@@ -510,12 +289,23 @@ const Step5MediaUpload = (props: any) => {
                 setIsProcessingFloorPlan(false);
               }}
               maxFileSize={30}
-              limit={floorPlans.length >= 10 ? 0 : 10 - floorPlans.length}
+              limit={
+                values?.floorPlanUrl.length >= 10
+                  ? 0
+                  : 10 - values?.floorPlanUrl.length
+              }
             />
-            {isProcessingFloorPlan && floorPlans.length <= 0 ? (
+            {isProcessingFloorPlan && values?.floorPlanUrl.length <= 0 ? (
               <ImageUploadSkeleton count={4} horizontal />
             ) : (
-              previewsFloorPlan
+              <>
+                {values?.floorPlanUrl?.length > 0 && (
+                  <Text style={[styles.total, {color: theme.colors.text}]}>
+                    Floor plans ({values?.floorPlanUrl?.length})
+                  </Text>
+                )}
+                {previewsFloorPlan}
+              </>
             )}
           </View>
         </>
@@ -618,6 +408,11 @@ const styles = StyleSheet.create({
     left: 10,
     fontSize: 12,
     fontFamily: Fonts.REGULAR,
+  },
+  total: {
+    fontSize: 12,
+    fontFamily: Fonts.MEDIUM,
+    marginBottom: 6,
   },
 
   popupOverlay: {

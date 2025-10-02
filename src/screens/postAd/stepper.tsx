@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {postAdAPI} from '@api/services';
+import {postAdAPI, uploadImages} from '@api/services';
 import {useTheme} from '@theme/ThemeProvider';
 import CommonHeader from '@components/Header/CommonHeader';
 import {RequestMethod} from '@api/request';
@@ -31,6 +31,7 @@ import Step4PropertyDetails from './step4PropertyDetails';
 import Step5MediaUpload from './step5MediaUpload';
 import Preview from './preview';
 import Step2MediaUpload from './step2MediaUpload';
+import {compressImage} from '../../helpers/ImageCompressor';
 
 interface FooterProps {
   currentStep: number;
@@ -165,28 +166,36 @@ const PostAdContainer = (props: any) => {
   const [paymentStatus, setPaymentStatus] = useState(true);
   const [preview, setPreview] = useState(false);
   const [isSkeletonLoading, setIsSkeletonLoading] = useState(false);
+  const [locationFlag, setLocationFlag] = useState(false);
   const prevCountRef = useRef<number | null>(null);
 
   const {
     setPostAd,
     resetPostAd,
-    images,
     postAd,
     token,
     clientId,
     bearerToken,
     locationForAdpost,
-    floorPlans,
     managePlansList,
     imageUploadLoading,
+    loadingStates,
+    loadingStatesfloor,
     fetchPlans,
     user,
     setImages,
+    setlocationModalVisible,
     setFloorPlans,
+    setIsProcessingImages,
+    setLoadingState,
+    setLoadingStateFloor,
+    setIsUploadingImages,
+    clearAllLoadingStates,
+    setIsProcessingFloorPlan,
+    setIsUploadingFloorPlans,
   } = useBoundStore();
   const prevStep = prevCountRef.current;
   const {theme} = useTheme();
-
   const handleSkeletonStateChange = useCallback((isLoading: boolean) => {
     setIsSkeletonLoading(isLoading);
   }, []);
@@ -276,10 +285,6 @@ const PostAdContainer = (props: any) => {
     [postAd, theme, getMergedFields, toggleItem],
   );
 
-  useEffect(() => {
-    setFieldValue('imageUrls', images);
-  }, [images, setFieldValue]);
-
   const checkErrors = async () => {
     const requiredFields = {
       1: ['title', 'description', 'propertyTypeId', 'listingTypeId'],
@@ -311,7 +316,31 @@ const PostAdContainer = (props: any) => {
     );
 
     if (!hasErrors) {
-      currentStep < LAST_STEP && setCurrentStep(prev => prev + 1);
+      if (currentStep === 4 && !locationFlag) {
+        Alert.alert('Selected Location is', values.address, [
+          {
+            text: 'Change',
+            onPress: () => {
+              setLocationFlag(true);
+              setTimeout(() => {
+                setlocationModalVisible();
+              }, 300);
+            },
+          },
+          {
+            text: 'Continue',
+            onPress: () => {
+              setLocationFlag(true);
+              currentStep < LAST_STEP && setCurrentStep(prev => prev + 1);
+              return false;
+            },
+          },
+        ]);
+      } else {
+        currentStep === 2 && uploadImagesLocal(values.imageUrls);
+        currentStep === 2 && uploadFloorPlanLocal(values.floorPlanUrl);
+        currentStep < LAST_STEP && setCurrentStep(prev => prev + 1);
+      }
     }
   };
 
@@ -381,6 +410,7 @@ const PostAdContainer = (props: any) => {
             toggleItem={toggleItem}
             renderChips={renderChips}
             onSkeletonStateChange={handleSkeletonStateChange}
+            updateImageStatus={updateImageStatus}
             {...props}
           />
         );
@@ -419,16 +449,18 @@ const PostAdContainer = (props: any) => {
   );
 
   const submitPostAd = useCallback(async () => {
+    let mediaImages = values.imageUrls;
+    let floorPlans = values.floorPlanUrl;
     if (
       Object.keys(errors).length > 0 ||
-      images.length === 0 ||
+      mediaImages.length === 0 ||
       imageUploadLoading
     ) {
-      if (images.length === 0 || images.length > 10) {
+      if (mediaImages.length === 0 || mediaImages.length > 10) {
         Toast.show({
           type: 'error',
           text1:
-            images.length === 0
+            mediaImages.length === 0
               ? 'Please select at least one image.'
               : 'You can only select up to 10 images',
           position: 'bottom',
@@ -457,24 +489,26 @@ const PostAdContainer = (props: any) => {
         city: locationForAdpost.city,
       };
 
-      const imageURLs = images
+      const imageURLs = mediaImages
         .map(
           (img: any) =>
             typeof img === 'string'
               ? img // already a URL string
-              : img.uploadedUrl || null, // pick uploadedUrl if available
+              : // @ts-ignore
+                loadingStates[img.id]?.uploadedUrl || null, // pick uploadedUrl if available
         )
-        .filter((url): url is string => !!url);
+        .filter((url: any): url is string => !!url);
 
       const floorPlansURL = floorPlans
         .map(
           (img: any) =>
             typeof img === 'string'
               ? img // already a URL string
-              : img.uploadedUrl || null, // pick uploadedUrl if available
+              : // @ts-ignore
+                loadingStatesfloor[img.id]?.uploadedUrl || null, // pick uploadedUrl if available
         )
-        .filter((url): url is string => !!url);
-      console.log(images);
+        .filter((url: any): url is string => !!url);
+      console.log(mediaImages);
       console.log(floorPlans);
       // Prepare full payload
       const payload = {
@@ -522,6 +556,7 @@ const PostAdContainer = (props: any) => {
 
       // Reset state only on success or cleanup
       setImages([]);
+      clearAllLoadingStates();
       setFloorPlans([]);
       setFields([]);
     } catch (error) {
@@ -529,8 +564,8 @@ const PostAdContainer = (props: any) => {
       setLoading(false);
     }
   }, [
+    values,
     errors,
-    images,
     imageUploadLoading,
     token,
     clientId,
@@ -542,11 +577,12 @@ const PostAdContainer = (props: any) => {
     locationForAdpost.country,
     locationForAdpost.district,
     locationForAdpost.city,
-    values,
-    floorPlans,
     setImages,
+    clearAllLoadingStates,
     setFloorPlans,
     setFields,
+    loadingStates,
+    loadingStatesfloor,
     managePlansList,
     user?.phone,
     user?.email,
@@ -557,6 +593,188 @@ const PostAdContainer = (props: any) => {
     setVisible(false);
     setPaymentStatus(true);
   }, [fetchPlans]);
+
+  const updateImageStatus = (
+    id: string,
+    status: string,
+    uploadedUrl?: string,
+  ) => {
+    setFieldValue('imageUrls', (prev: any[] = []) =>
+      prev.map(img => {
+        const imgId = typeof img === 'string' ? img : img.id ?? img.uri;
+        if (imgId === id) {
+          return {
+            ...(typeof img === 'string' ? {uri: img} : img),
+            status,
+            ...(uploadedUrl ? {uploadedUrl} : {}),
+          };
+        }
+        return img;
+      }),
+    );
+  };
+
+  const uploadImagesLocal = async (imgs: any[]) => {
+    if (!imgs || imgs.length === 0) {
+      setIsProcessingImages(false);
+      return;
+    }
+    setIsUploadingImages(true); // Use separate state for images
+
+    try {
+      // 1️⃣ Add selected images to state for immediate preview after a brief delay
+      const assetsWithId = imgs.filter(img => img.id && !loadingStates[img.id]);
+      assetsWithId.forEach(img =>
+        setLoadingState(img.id, {...img, loading: true}),
+      );
+
+      const uploadParams = {token, clientId, bearerToken};
+
+      // 3️⃣ Upload all images in parallel using Promise.allSettled
+      const uploadResults = await Promise.allSettled(
+        assetsWithId.map(async img => {
+          // updateImageStatus(img.id, 'uploading'); // immediately mark as uploading
+
+          try {
+            const compressedUri = await compressImage(img.uri);
+
+            if (!compressedUri) {
+              setLoadingState(img.id, {
+                ...img,
+                loading: false,
+                success: false,
+              });
+              return;
+            }
+
+            const formData = new FormData();
+            formData.append('images', {
+              uri: compressedUri,
+              name: `image_${img.id}.jpg`,
+              type: 'image/jpeg',
+            } as any);
+
+            const uploadedUrl: any = await uploadImages(formData, uploadParams);
+
+            if (!uploadedUrl?.length) {
+              throw new Error('Empty upload response');
+            }
+
+            // ✅ Safe update: uses latest Formik state
+            // updateImageStatus(img.id, 'success', uploadedUrl[0]);
+            setLoadingState(img.id, {
+              ...img,
+              loading: false,
+              success: true,
+              uploadedUrl: uploadedUrl[0],
+            });
+            // removeLoadingState(img.id);
+
+            return {id: img.id, success: true};
+          } catch (err) {
+            // updateImageStatus(img.id, 'failed'); // no snapshot array
+            setLoadingState(img.id, {...img, loading: false, success: false});
+
+            return {id: img.id, success: false, error: err};
+          }
+        }),
+      );
+
+      console.log('All upload results:', uploadResults);
+
+      // Set image upload loading to false after ALL image uploads are complete
+      setIsUploadingImages(false);
+    } catch (error) {
+      console.error('Upload error:', error);
+      setIsProcessingImages(false);
+      setIsUploadingImages(false); // Use separate state for images
+      Toast.show({
+        type: 'error',
+        text1: 'Upload failed',
+        text2: 'Please try again',
+        position: 'bottom',
+      });
+    }
+  };
+  console.log('plans loadingStatesfloor', loadingStatesfloor);
+
+  const uploadFloorPlanLocal = async (plans: any[]) => {
+    if (!plans || plans.length === 0) {
+      setIsProcessingFloorPlan(false);
+      return;
+    }
+
+    // Add selected images to state immediately for preview
+    console.log('plans', plans);
+    const assetsWithId = plans.filter(
+      img => img.id && !loadingStatesfloor[img.id],
+    );
+    console.log('plans', assetsWithId);
+    assetsWithId.forEach(img =>
+      setLoadingStateFloor(img.id, {...img, loading: true}),
+    );
+
+    const uploadParams = {token, clientId, bearerToken};
+
+    // Upload all images in parallel
+    const uploadPromises = assetsWithId.map(async img => {
+      try {
+        const compressedUri = await compressImage(img.uri);
+
+        if (!compressedUri) {
+          setLoadingStateFloor(img.id, {
+            ...img,
+            loading: false,
+            success: false,
+          });
+          return;
+        }
+
+        console.log('plans compressedUri', compressedUri);
+        // Prepare FormData
+        const formData = new FormData();
+        formData.append('images', {
+          uri: compressedUri,
+          name: `floor_${img.id}.jpg`,
+          type: 'image/jpeg',
+        } as any);
+
+        // Upload
+        const uploadedUrl: any = await uploadImages(formData, uploadParams);
+
+        console.log('plans uploadedUrl', uploadedUrl);
+        if (uploadedUrl?.length > 0) {
+          console.log('📤 Updated global store for floor plan:', img.id);
+          setLoadingStateFloor(img.id, {
+            ...img,
+            loading: false,
+            success: true,
+            uploadedUrl: uploadedUrl[0],
+          });
+        } else {
+          // updateFloorPlanStatus(img.id, 'failed');
+          setLoadingStateFloor(img.id, {
+            ...img,
+            loading: false,
+            success: false,
+          });
+          console.log('📤 Updated global store for failed floor plan:', img.id);
+
+          // Remove loading state on failure
+          // removeLoadingState(img.id);
+        }
+      } catch (err) {
+        setLoadingStateFloor(img.id, {...img, loading: false, success: false});
+        // removeLoadingState(img.id);
+      }
+    });
+
+    // Wait for all uploads to complete
+    await Promise.all(uploadPromises);
+
+    setIsUploadingFloorPlans(false); // Use separate state for floor plans
+    setIsProcessingFloorPlan(false);
+  };
 
   return (
     <React.Fragment>

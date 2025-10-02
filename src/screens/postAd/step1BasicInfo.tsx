@@ -131,7 +131,7 @@ const Step1BasicInfo = (props: any) => {
           </View>
         )}
 
-        {isStringInEitherArray('bedroom') && (
+        {isStringInEitherArray('propertyFeatures') && (
           <View style={styles.inputContainer}>
             <Text style={[styles.label, {color: theme.colors.text}]}>
               Bedrooms
@@ -147,7 +147,7 @@ const Step1BasicInfo = (props: any) => {
         /> */}
           </View>
         )}
-        {isStringInEitherArray('bathrooom') && (
+        {isStringInEitherArray('propertyFeatures') && (
           <View style={styles.inputContainer}>
             <Text style={[styles.label, {color: theme.colors.text}]}>
               Bathrooms
@@ -156,18 +156,19 @@ const Step1BasicInfo = (props: any) => {
           </View>
         )}
 
-        {FACING_DIRECTION.length > 0 && (
-          <View style={styles.inputContainer}>
-            {/* {isStringInEitherArray('ownershipTypeId') && ( */}
-            <>
-              <Text style={[styles.label, {color: theme.colors.text}]}>
-                Facing
-              </Text>
-              {renderChips(FACING_DIRECTION)}
-            </>
-            {/* )} */}
-          </View>
-        )}
+        {isStringInEitherArray('propertyFeatures') &&
+          FACING_DIRECTION.length > 0 && (
+            <View style={styles.inputContainer}>
+              {/* {isStringInEitherArray('ownershipTypeId') && ( */}
+              <>
+                <Text style={[styles.label, {color: theme.colors.text}]}>
+                  Facing
+                </Text>
+                {renderChips(FACING_DIRECTION)}
+              </>
+              {/* )} */}
+            </View>
+          )}
         {LISTED_BY.length > 0 && (
           <View style={styles.inputContainer}>
             {/* {isStringInEitherArray('ownershipTypeId') && ( */}
@@ -210,7 +211,9 @@ const Step1BasicInfo = (props: any) => {
               styles.label,
               {
                 color:
-                  touched?.description && errors?.description ? 'red' : theme.colors.text,
+                  touched?.description && errors?.description
+                    ? 'red'
+                    : theme.colors.text,
               },
             ]}>
             Additional information*

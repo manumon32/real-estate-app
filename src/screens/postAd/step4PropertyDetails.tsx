@@ -31,43 +31,41 @@ const Step4PropertyDetails = (props: any) => {
   const AMENITIES = appConfigs?.amenities || [];
   return (
     <SlideInView direction={currentStep === 4 ? 'right' : 'left'}>
-      {(isStringInEitherArray('kitchen') ||
-        isStringInEitherArray('balcony') ||
-        isStringInEitherArray('carParking')) && (
+      {isStringInEitherArray('"propertyFeatures"') && (
         <Text style={[styles.headingText, {color: theme.colors.text}]}>
           Property Features
         </Text>
       )}
 
-      {isStringInEitherArray('kitchen') && (
+      {isStringInEitherArray('propertyFeatures') && (
         <View style={styles.inputContainer}>
           <CommonStepperInput
             label="Kitchen"
             value={values.numberOfKitchens}
             onChange={value => {
-              setFieldValue(`numberOfKitchens`, value);
+              setFieldValue('numberOfKitchens', value);
             }}
           />
         </View>
       )}
-      {isStringInEitherArray('balcony') && (
+      {isStringInEitherArray('propertyFeatures') && (
         <View style={styles.inputContainer}>
           <CommonStepperInput
             label="Balconies"
             value={values.numberOfBalconies}
             onChange={value => {
-              setFieldValue(`numberOfBalconies`, value);
+              setFieldValue('numberOfBalconies', value);
             }}
           />
         </View>
       )}
-      {isStringInEitherArray('carParking') && (
+      {isStringInEitherArray('propertyFeatures') && (
         <View style={styles.inputContainer}>
           <CommonStepperInput
             label="Car Parking"
             value={values.carParking}
             onChange={value => {
-              setFieldValue(`carParking`, value);
+              setFieldValue('carParking', value);
             }}
           />
         </View>
