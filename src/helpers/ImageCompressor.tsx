@@ -12,8 +12,6 @@ export const compressImage = async (uri: string): Promise<string> => {
     const fileInfo = await RNFS.stat(uri);
     const sizeInMB = fileInfo.size / (1024 * 1024);
 
-    console.log('Original image size:', sizeInMB.toFixed(2), 'MB');
-
     // 2️⃣ Set compression parameters dynamically
     let compressionOptions: any = {
       compressionMethod: 'auto',
@@ -38,12 +36,12 @@ export const compressImage = async (uri: string): Promise<string> => {
     );
 
     // 4️⃣ Log new size
-    const compressedInfo = await RNFS.stat(compressedUri);
-    console.log(
-      'Compressed image size:',
-      (compressedInfo.size / (1024 * 1024)).toFixed(2),
-      'MB',
-    );
+    // const compressedInfo = await RNFS.stat(compressedUri);
+    // console.log(
+    //   'Compressed image size:',
+    //   (compressedInfo.size / (1024 * 1024)).toFixed(2),
+    //   'MB',
+    // );
 
     return compressedUri;
   } catch (error) {

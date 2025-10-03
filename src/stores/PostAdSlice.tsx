@@ -66,7 +66,7 @@ export const createPostAdSlice = (set: any, get: any): PostAdSlice => ({
   isUploadingFloorPlans: false,
   setIsUploadingFloorPlans: (flag: any) =>
     set(() => ({
-      isUploadingImages: flag,
+      isUploadingFloorPlans: flag,
     })),
 
   setIsProcessingFloorPlan: (flag: any) =>
@@ -86,7 +86,6 @@ export const createPostAdSlice = (set: any, get: any): PostAdSlice => ({
       loadingStates: {...state.loadingStates, [id]: loading},
     })),
   setLoadingStateFloor: (id: string, loading: any) => {
-    console.log('plans', id, loading);
     return set((state: any) => ({
       loadingStatesfloor: {...state.loadingStatesfloor, [id]: loading},
     }));

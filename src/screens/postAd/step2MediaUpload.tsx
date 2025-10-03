@@ -14,14 +14,12 @@ const Step5MediaUpload = (props: any) => {
   const {values} = props;
   const {
     setImages,
-    setImageUploadLoading,
     isProcessingImages,
     setIsProcessingImages,
     isProcessingFloorPlan,
     setIsProcessingFloorPlan,
-    isUploadingImages,
     setIsUploadingImages,
-    isUploadingFloorPlans,
+    setIsUploadingFloorPlans,
   } = useBoundStore();
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -36,21 +34,6 @@ const Step5MediaUpload = (props: any) => {
   } = props;
   // Use global loading states from store instead of local state
 
-  // Update global imageUploadLoading based on both upload states
-  useEffect(() => {
-    const isAnyUploading =
-      isUploadingImages ||
-      isUploadingFloorPlans ||
-      isProcessingImages ||
-      isProcessingFloorPlan;
-    setImageUploadLoading(isAnyUploading);
-  }, [
-    isUploadingImages,
-    isUploadingFloorPlans,
-    setImageUploadLoading,
-    isProcessingImages,
-    isProcessingFloorPlan,
-  ]); // Run when assets or global state changes
 
   const removeAsset = useCallback(
     (uri: string | undefined) => {
@@ -197,11 +180,11 @@ const Step5MediaUpload = (props: any) => {
   };
 
   const uploadFloorPlanLocal = async (plans: any[]) => {
-    if (!plans || plans.length === 0) {
       setIsProcessingFloorPlan(false);
+    if (!plans || plans.length === 0) {
       return;
     }
-    setIsProcessingFloorPlan(true);
+    setIsUploadingFloorPlans(true);
     const assetsWithId = plans.map(img => ({
       ...img,
       id: img.uri,
@@ -209,7 +192,7 @@ const Step5MediaUpload = (props: any) => {
       status: 'queued', // status: queued | uploading | success | failed
     }));
 
-    setIsProcessingFloorPlan(false);
+    setIsUploadingFloorPlans(false);
     setFieldValue('floorPlanUrl', [...values.floorPlanUrl, ...assetsWithId]);
   };
 
@@ -285,6 +268,7 @@ const Step5MediaUpload = (props: any) => {
               onPickerOpen={() => {
                 setIsProcessingFloorPlan(true);
               }}
+              totalLimit={10}
               onPickerClose={() => {
                 setIsProcessingFloorPlan(false);
               }}

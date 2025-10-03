@@ -57,7 +57,6 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   const flatListRef = useRef<FlatList>(null);
   const onEndReachedCalled = useRef(false); // prevent multiple calls
 
-
   /** Double back press exit */
   useFocusEffect(
     useCallback(() => {
@@ -205,7 +204,12 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   /** Memoized render item */
   const renderAdItem = useCallback(
     ({item}: any) => (
-      <PropertyCard items={item} navigation={navigation} arg={true} showLocation />
+      <PropertyCard
+        items={item}
+        navigation={navigation}
+        arg={true}
+        showLocation
+      />
     ),
     [navigation],
   );
@@ -259,6 +263,7 @@ function HomeScreen({navigation}: any): React.JSX.Element {
         renderItem={renderAdItem}
         keyExtractor={item => item._id}
         numColumns={2}
+        removeClippedSubviews
         ListHeaderComponent={MemoHeader}
         contentContainerStyle={{
           paddingBottom: 100,

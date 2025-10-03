@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -40,23 +40,18 @@ const Step5MediaPreview: React.FC<Props> = ({
 }) => {
   // let images = values.imageUrls;
   const {
-    // token,
-    // clientId,
-    // bearerToken,
-    // setIsUploadingFloorPlans,
-    setImageUploadLoading,
     loadingStates,
     loadingStatesfloor,
-    // setLoadingState,
-    // removeLoadingState,
-    isProcessingImages,
-    isProcessingFloorPlan,
-    isUploadingImages,
-    // updateFloorPlanStatus,
-    // setIsUploadingImages,
-    isUploadingFloorPlans,
   } = useBoundStore();
   const {theme} = useTheme();
+  const {imageUrls = [], floorPlanUrl = []} = values;
+
+  const totalImages = imageUrls.length;
+  const [imagesUplloadingCount, setImagesUplloadingCount] = useState(0);
+  const [floorUplloadingCount, setFloorUplloadingCount] = useState(0);
+
+  // Floor plans count
+  const totalFloorPlans = floorPlanUrl.length;
 
   const removeAsset = useCallback(
     (uri: string | undefined) => {
@@ -365,23 +360,18 @@ const Step5MediaPreview: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    const isAnyUploading =
-      isUploadingImages ||
-      isUploadingFloorPlans ||
-      isProcessingImages ||
-      isProcessingFloorPlan;
-    setImageUploadLoading(isAnyUploading);
-  }, [
-    isUploadingImages,
-    isUploadingFloorPlans,
-    isProcessingImages,
-    isProcessingFloorPlan,
-    setImageUploadLoading,
-  ]);
+    const uploadingImagesCount = imageUrls.filter(
+      // @ts-ignore
+      (img: any) => loadingStates[img.id || img.uri]?.loading,
+    ).length;
+    setImagesUplloadingCount(uploadingImagesCount);
 
-  useEffect(() => {
-    console.log('plans loadingStates', loadingStatesfloor);
-  }, [loadingStatesfloor]);
+    const uploadingFloorPlansCount = floorPlanUrl.filter(
+      // @ts-ignore
+      (img: any) => loadingStatesfloor[img.id || img.uri]?.loading,
+    ).length;
+    setFloorUplloadingCount(uploadingFloorPlansCount);
+  }, [floorPlanUrl, imageUrls, loadingStates, loadingStatesfloor]);
 
   const mediaList = useMemo(
     () => (
@@ -439,16 +429,23 @@ const Step5MediaPreview: React.FC<Props> = ({
       </View>
 
       <View style={[styles.card, {backgroundColor: theme.colors.background}]}>
-        <Text style={[styles.cardLabel, {color: theme.colors.text}]}>
-          Images ({values?.imageUrls?.length})
-        </Text>
+        {totalImages > 0 && (
+          <Text style={[styles.cardLabel, {color: theme.colors.text}]}>
+            Images ({totalImages - imagesUplloadingCount}/{totalImages})
+          </Text>
+        )}
 
         <>{mediaList}</>
       </View>
 
       {values?.floorPlanUrl?.length > 0 && (
         <View style={[styles.card, {backgroundColor: theme.colors.background}]}>
-          <Text style={styles.cardLabel}>Floor Plans</Text>
+          {totalFloorPlans > 0 && (
+            <Text style={[styles.cardLabel, {color: theme.colors.text}]}>
+              Floor Plans ({totalFloorPlans - floorUplloadingCount}/
+              {totalFloorPlans})
+            </Text>
+          )}
           {floorPlanList}
         </View>
       )}

@@ -20,7 +20,7 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
   label,
   handleOnpress,
   limit = 10,
-  totalLimit = 10,
+  totalLimit = 15,
   onPickerOpen,
   onPickerClose,
   maxFileSize = 30, // Default 30MB limit
@@ -39,9 +39,13 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
     onPickerOpen?.();
 
     const response = await ImagePicker.launchImageLibrary({
-      mediaType: 'photo',
-      quality: 0.7,
+      // mediaType: 'photo',
+      // quality: 0.7,
       selectionLimit: limit,
+      mediaType: 'photo',
+      // selectionLimit: 1,
+      includeBase64: false,
+      quality: 0.5, // Compress image (30% quality)
     });
     if (response.didCancel) {
       console.log('User cancelled');
@@ -76,6 +80,7 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
         // Check file size using the fileSize property from ImagePicker
         if (asset.fileSize) {
           const sizeInMB = asset.fileSize / (1024 * 1024);
+          console.log('sizeInMB',sizeInMB);
 
           if (sizeInMB > maxFileSize) {
             oversizedFiles.push(
@@ -139,11 +144,11 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
       mediaType: 'photo',
       includeBase64: false,
       saveToPhotos: true,
-      quality: 1,
+      quality: 0.3,
       cameraType: 'back',
       presentationStyle: 'fullScreen',
       // ✅ Important
-      includeExtra: true, // provides exif info (orientation, etc.)
+      // includeExtra: true, // provides exif info (orientation, etc.)
     });
     if (response.didCancel) {
       console.log('User cancelled');
