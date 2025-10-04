@@ -30,7 +30,7 @@ const ReportUserModal = ({visible, onClose, onSubmit}: any) => {
   const [comment, setComment] = useState('');
 
   const handleSend = () => {
-    onSubmit({reason: selectedReason, comment});
+    onSubmit({reason: selectedReason, description:comment});
     setSelectedReason('');
     setComment('');
     onClose();

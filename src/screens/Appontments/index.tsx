@@ -20,6 +20,7 @@ import {
   useColorScheme,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -78,6 +79,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   setIsReportVisible,
   setSelectedItem,
 }) => {
+  const [loading, setLoading] = useState(false);
   const isDarkMode = useColorScheme() === 'dark';
   const {label, backgroundColor, textColor} = useMemo(() => {
     switch (status) {
@@ -219,16 +221,23 @@ const ListingCard: React.FC<ListingCardProps> = ({
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() =>
+            onPress={() => {
+              setLoading(true);
               updateStatus({
                 status: 'scheduled',
                 propertyId: items.propertyId._id,
                 appointmentId: items._id,
                 note: '',
-              })
-            }
+              });
+            }}
             style={styles.boostButton}>
-            <Text style={[styles.boostButtonText]}>Accept</Text>
+            {loading && (
+              <ActivityIndicator
+                size={'small'}
+                color={theme.colors.background}
+              />
+            )}
+            {!loading && <Text style={[styles.boostButtonText]}>Accept</Text>}
           </TouchableOpacity>
         </View>
       )}

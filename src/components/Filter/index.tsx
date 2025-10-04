@@ -405,7 +405,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
               </>
             )}
           </ScrollView>
-          <SafeFooter style={{flexDirection: 'row', bottom: 10}}>
+          <SafeFooter style={{flexDirection: 'row', bottom: 10,}}>
             <TouchableOpacity
               style={styles.clearButton}
               onPress={() => {
@@ -491,9 +491,10 @@ const styles = StyleSheet.create({
   clearButton: {
     backgroundColor: '#f4f4f4',
     width: '45%',
-    padding: 15,
+    padding: 5,
     borderWidth: 1,
     marginRight: 5,
+    height:'60%',
     marginLeft: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -502,7 +503,8 @@ const styles = StyleSheet.create({
   applyButton: {
     width: '45%',
     backgroundColor: '#2A9D8F',
-    padding: 15,
+    padding: 5,
+    height:'60%',
     paddingRight: 15,
     borderRadius: 10,
     alignItems: 'center',

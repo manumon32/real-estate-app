@@ -103,7 +103,7 @@ export default function ChatBubble(props: any) {
               <MaterialCommunityIcons
                 name={items.status === 'sent' ? 'check' : 'check-all'}
                 size={16}
-                color={items.status === 'read' ? 'blue' : theme.colors.text}
+                color={items.status === 'read' ? '#307bfc' : theme.colors.text}
                 style={{marginRight: 5}}
               />
 

@@ -25,11 +25,12 @@ import {useRoute} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
 import AttachFileModal from './AttachFileModal';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import {sendChat, uploadImages} from '@api/services';
+import {reportUser, sendChat, uploadImages} from '@api/services';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ChatDetailSkeleton from '@components/SkeltonLoader/ChatDetailSkeleton';
 import {compressImage} from '../../helpers/ImageCompressor';
 import ReportUserModal from './ReportUserModal';
+import Toast from 'react-native-toast-message';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -171,6 +172,7 @@ const Chat = React.memo(({navigation}: any) => {
     bearerToken,
     onlineUsers,
     updateChatUnreadCount,
+    user,
   } = useBoundStore();
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = useState(false);
@@ -342,6 +344,30 @@ const Chat = React.memo(({navigation}: any) => {
     }
   };
 
+  const reportUsers = async (data: any) => {
+    const uploadParams = {token, clientId, bearerToken};
+    try {
+      let payload = {
+        reportedBy: user._id,
+        reportedUser: items.user._id,
+        status: 'pending',
+        ...data,
+      };
+      await reportUser(payload, uploadParams);
+      Toast.show({
+        type: 'success',
+        text1: 'Reported sucessfully',
+        position: 'bottom',
+      });
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong',
+        position: 'bottom',
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <CommonHeader
@@ -419,8 +445,9 @@ const Chat = React.memo(({navigation}: any) => {
       <ReportUserModal
         visible={isReportVisible}
         onClose={() => setIsReportVisible(false)}
-        onSubmit={(note: any) => {
+        onSubmit={(payload: any) => {
           setIsReportVisible(false);
+          reportUsers(payload);
         }}
       />
     </SafeAreaView>

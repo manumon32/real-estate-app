@@ -24,7 +24,7 @@ import ChatListSkeleton from '@components/SkeltonLoader/ChatListSkeleton';
 import NoChats from '@components/NoChatFound';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {connectSocket} from '@soket/index';
-import {deleteChatListAPI} from '@api/services';
+import {deleteChatListAPI, reportUser} from '@api/services';
 import Toast from 'react-native-toast-message';
 import BottomModal from '@components/Modal/BottomModal';
 import ReportUserModal from './ReportUserModal';
@@ -171,7 +171,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
             <MaterialCommunityIcons
               name={status === 'sent' ? 'check' : 'check-all'}
               size={16}
-              color={status === 'read' ? 'blue' : theme.colors.text}
+              color={status === 'read' ? '#307bfc' : theme.colors.text}
               style={{marginRight: 5}}
             />
           )}
@@ -520,6 +520,31 @@ const Chat = React.memo(({navigation}: any) => {
     );
   };
 
+  const reportUsers = async (data: any) => {
+    console.log(selectedChat);
+      const uploadParams = {token, clientId, bearerToken};
+      try {
+        let payload = {
+          reportedBy: user._id,
+          reportedUser: selectedChat,
+          status: 'pending',
+          ...data,
+        };
+        await reportUser(payload, uploadParams);
+        Toast.show({
+          type: 'success',
+          text1: 'Reported sucessfully',
+          position: 'bottom',
+        });
+      } catch (err) {
+        Toast.show({
+          type: 'error',
+          text1: 'Something went wrong',
+          position: 'bottom',
+        });
+      }
+    };
+
   return (
     <SafeAreaView
       style={{backgroundColor: theme.colors.background, height: '100%'}}>
@@ -585,6 +610,7 @@ const Chat = React.memo(({navigation}: any) => {
         onClose={() => setIsReportVisible(false)}
         onSubmit={(note: any) => {
           setIsReportVisible(false);
+          reportUsers(note);
         }}
       />
     </SafeAreaView>

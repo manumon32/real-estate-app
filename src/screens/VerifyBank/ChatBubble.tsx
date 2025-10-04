@@ -106,7 +106,7 @@ export default function ChatBubble(props: any) {
                   ) : (
                     <>
                       <Icon name="file" size={50} color="#e74c3c" />
-                      <Text numberOfLines={3} style={[styles.messageText, {width:120, color:'blue', textDecorationLine:'underline'}]}>
+                      <Text numberOfLines={3} style={[styles.messageText, {width:120, color:'#307bfc', textDecorationLine:'underline'}]}>
                         {getFileNameFromUrl(items.files?.[0])}
                       </Text>
                     </>

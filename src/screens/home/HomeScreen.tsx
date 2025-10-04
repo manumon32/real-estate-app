@@ -55,7 +55,11 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   const prevLocationRef = useRef<any>(null);
   const backPressedOnce = useRef(false);
   const flatListRef = useRef<FlatList>(null);
-  const onEndReachedCalled = useRef(false); // prevent multiple calls
+  // const onEndReachedCalled = useRef(false); // prevent multiple calls
+  const onEndReachedCalledDuringMomentum = useRef(false);
+
+  const pageRef = useRef(1);
+
 
   /** Double back press exit */
   useFocusEffect(
@@ -96,15 +100,22 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   }, [triggerRefresh]);
 
   /** Load more data for pagination */
-  const loadMore = useCallback(() => {
-    if (loading || !hasMore || onEndReachedCalled.current) {
-      return;
-    }
-    onEndReachedCalled.current = true;
-    fetchListings();
-    setTimeout(() => (onEndReachedCalled.current = false), 500); // small debounce
-  }, [loading, hasMore]);
+  // const loadMore = useCallback(() => {
+  //   if (loading || !hasMore || onEndReachedCalled.current) {
+  //     return;
+  //   }
+  //   onEndReachedCalled.current = true;
+  //   fetchListings();
+  //   setTimeout(() => (onEndReachedCalled.current = false), 500); // small debounce
+  // }, [loading, hasMore]);
 
+const loadMore = () => {
+  if (!onEndReachedCalledDuringMomentum.current && !loading && hasMore) {
+    fetchListings({ pageNum: pageRef.current + 1 });
+    pageRef.current += 1;
+    onEndReachedCalledDuringMomentum.current = true;
+  }
+};
   /** Handle location changes */
   useEffect(() => {
     const prevLat = prevLocationRef.current?.lat;
@@ -278,6 +289,10 @@ function HomeScreen({navigation}: any): React.JSX.Element {
         onEndReached={loadMore}
         refreshControl={refreshControl}
         ListFooterComponent={ListFooter}
+
+         onMomentumScrollBegin={() => {
+    onEndReachedCalledDuringMomentum.current = false;
+  }}
       />
     </SafeAreaView>
   );

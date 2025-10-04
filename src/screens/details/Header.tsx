@@ -254,11 +254,13 @@ function Header(props: any): React.JSX.Element {
             </TouchableOpacity>
           )}
         </View>
-        <View style={styles.paginationContainer}>
-          <Text style={{fontSize: 14, fontFamily: Fonts.MEDIUM}}>
-            {currentIndex + 1 + '/' + details?.imageUrls?.length}
-          </Text>
-        </View>
+        {details?.imageUrls?.length && (
+          <View style={styles.paginationContainer}>
+            <Text style={{fontSize: 14, fontFamily: Fonts.MEDIUM}}>
+              {currentIndex + 1 + '/' + details?.imageUrls?.length}
+            </Text>
+          </View>
+        )}
       </View>
       {/* <ImageCarouselModal
         visible={modalVisible}

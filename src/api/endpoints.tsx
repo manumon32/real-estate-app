@@ -37,6 +37,7 @@ export const API = {
   USER: {
     GET: '/user',
     PROFILE: '/user/details',
+    RPORT: '/user-report',
     UPDATE_PROFILE: '/user/update',
     REGISTER_TOKEN: '/user/fcmTokenRegister',
     SEND_EMAIL_OTP: '/user/send-email-otp',

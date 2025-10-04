@@ -134,7 +134,7 @@ export const verifyOTP = async (data: object, configArg: any): Promise<any> => {
     }
   } catch (error: any) {
     console.log('error response in service', error.response);
-    throw error
+    throw error;
   }
 };
 
@@ -284,10 +284,7 @@ export const submitRequestAPI = async (
   }
 };
 
-export const logoutAPI = async (
-  data: object,
-  configArg: any,
-): Promise<any> => {
+export const logoutAPI = async (data: object, configArg: any): Promise<any> => {
   try {
     const headers = await getHeaders(configArg);
     const response = await apiRequest({
@@ -506,8 +503,6 @@ export const fetchverificationDetailsAPI = async (
   }
 };
 
-
-
 //Update order
 
 export const fetchverificationDataAPI = async (
@@ -515,7 +510,7 @@ export const fetchverificationDataAPI = async (
   configArg: any,
 ): Promise<any> => {
   try {
-   const headers = await getHeaders(configArg);
+    const headers = await getHeaders(configArg);
     const apiConfig: any = {
       method: 'get',
       url: API.LISTINGS.VERIFICATION.GET_BY_ID(id),
@@ -958,6 +953,27 @@ export const postAdAPI = async (
       method,
       url:
         method === 'post' ? API.LISTINGS.CREATE : API.LISTINGS.UPDATE(data.id),
+      data,
+      headers,
+    });
+    return response?.data;
+  } catch (error: any) {
+    console.log(error);
+    throw error;
+  }
+};
+
+// postAd
+
+export const reportUser = async (
+  data: any,
+  configArg: any,
+): Promise<Listing> => {
+  try {
+    const headers = await getHeaders(configArg);
+    const response = await apiRequest({
+      method: 'post',
+      url: API.USER.RPORT,
       data,
       headers,
     });
