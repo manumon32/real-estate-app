@@ -47,6 +47,8 @@ interface FooterProps {
   values: any;
   imageUploadLoading: boolean;
   isSkeletonLoading: boolean;
+  isProcessingImages: boolean;
+  isProcessingFloorPlan: boolean;
 }
 
 const LAST_STEP = 6;
@@ -64,6 +66,8 @@ const Footer: React.FC<FooterProps> = ({
   values,
   imageUploadLoading,
   isSkeletonLoading,
+  isProcessingImages,
+  isProcessingFloorPlan,
 }) => {
   const handleCancel = () => {
     if (onCancel) {
@@ -116,12 +120,16 @@ const Footer: React.FC<FooterProps> = ({
           currentStep === LAST_STEP &&
             (imageUploadLoading || isSkeletonLoading) &&
             styles.buyButtonDisabled,
+          currentStep === 2 &&
+            (isProcessingImages || isProcessingFloorPlan) &&
+            styles.buyButtonDisabled,
         ]}
         accessibilityRole="button"
         disabled={
           isLastStep ||
           (currentStep === LAST_STEP &&
-            (imageUploadLoading || isSkeletonLoading))
+            (imageUploadLoading || isSkeletonLoading)) ||
+          (currentStep === 2 && (isProcessingImages || isProcessingFloorPlan))
         }>
         <Text style={styles.buyText}>
           {(loading ||
@@ -134,6 +142,9 @@ const Footer: React.FC<FooterProps> = ({
               ? values.id
                 ? 'Update'
                 : 'Post Now'
+              : currentStep === 2 &&
+                (isProcessingImages || isProcessingFloorPlan)
+              ? 'Loading..'
               : 'Next'
             : isSkeletonLoading
             ? 'Processing...'
@@ -155,6 +166,7 @@ const PostAdContainer = (props: any) => {
     fields,
     setFields,
     validateForm,
+    resetForm,
   } = props;
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
@@ -192,6 +204,8 @@ const PostAdContainer = (props: any) => {
     setIsUploadingFloorPlans,
     isUploadingImages,
     isUploadingFloorPlans,
+    isProcessingImages,
+    isProcessingFloorPlan,
     setImageUploadLoading,
   } = useBoundStore();
   const prevStep = prevCountRef.current;
@@ -217,9 +231,19 @@ const PostAdContainer = (props: any) => {
   };
 
   useEffect(() => {
-    const isAnyUploading = isUploadingImages || isUploadingFloorPlans;
+    const isAnyUploading =
+      isUploadingImages ||
+      isUploadingFloorPlans ||
+      isProcessingImages ||
+      isProcessingFloorPlan;
     setImageUploadLoading(isAnyUploading);
-  }, [isUploadingImages, isUploadingFloorPlans, setImageUploadLoading]);
+  }, [
+    isUploadingImages,
+    isUploadingFloorPlans,
+    setImageUploadLoading,
+    isProcessingImages,
+    isProcessingFloorPlan,
+  ]);
 
   const toggleItem = useCallback(
     (name: string, item: any, setSelectedList?: any) => {
@@ -559,6 +583,7 @@ const PostAdContainer = (props: any) => {
       }
 
       // Reset state only on success or cleanup
+      resetForm();
       setImages([]);
       clearAllLoadingStates();
       setFloorPlans([]);
@@ -581,6 +606,7 @@ const PostAdContainer = (props: any) => {
     locationForAdpost.country,
     locationForAdpost.district,
     locationForAdpost.city,
+    resetForm,
     setImages,
     clearAllLoadingStates,
     setFloorPlans,
@@ -799,6 +825,8 @@ const PostAdContainer = (props: any) => {
           isSkeletonLoading={isSkeletonLoading}
           loading={loading}
           values={values}
+          isProcessingImages={isProcessingImages}
+          isProcessingFloorPlan={isProcessingFloorPlan}
         />
       </KeyboardAvoidingView>
       <SuccessModal

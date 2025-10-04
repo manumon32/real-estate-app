@@ -2,6 +2,8 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {StyleSheet, View, Text, FlatList, Pressable} from 'react-native';
 
 import Image from 'react-native-fast-image';
+import {Image as ImageCompressor} from 'react-native-compressor';
+
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
 import CommonImageUploader from '@components/Input/ImageUploader';
@@ -9,20 +11,22 @@ import ImagePickerModal from '@components/Modal/ImagePickerModal';
 import ImageUploadSkeleton from '@components/SkeltonLoader/ImageUploadSkeleton';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
+import Toast from 'react-native-toast-message';
 
 const Step5MediaUpload = (props: any) => {
   const {values} = props;
   const {
     setImages,
     isProcessingImages,
-    setIsProcessingImages,
     isProcessingFloorPlan,
+    setIsProcessingImages,
     setIsProcessingFloorPlan,
     setIsUploadingImages,
     setIsUploadingFloorPlans,
   } = useBoundStore();
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const {
     currentStep,
     // handleSubmit,
@@ -33,7 +37,6 @@ const Step5MediaUpload = (props: any) => {
     isStringInEitherArray,
   } = props;
   // Use global loading states from store instead of local state
-
 
   const removeAsset = useCallback(
     (uri: string | undefined) => {
@@ -58,7 +61,7 @@ const Step5MediaUpload = (props: any) => {
       if (!uri) {
         return;
       }
-       setFieldValue(
+      setFieldValue(
         'floorPlanUrl',
         values.floorPlanUrl.filter((item: any) =>
           item.uri ? item.uri !== uri : item !== uri,
@@ -148,9 +151,9 @@ const Step5MediaUpload = (props: any) => {
         renderItem={renderItem}
         contentContainerStyle={styles.previewRow}
         removeClippedSubviews={true}
-        maxToRenderPerBatch={5}
+        maxToRenderPerBatch={4}
         windowSize={10}
-        initialNumToRender={5}
+        initialNumToRender={4}
         getItemLayout={(data, index) => ({
           length: 92, // 80 + 12 gap
           offset: 92 * index,
@@ -161,11 +164,85 @@ const Step5MediaUpload = (props: any) => {
     [keyExtractor, renderItem, values],
   );
 
-  const uploadImagesLocal = async (imgs: any[]) => {
-    if (!imgs || imgs.length === 0) {
+  const checkImageValidation = async (assets: any[]) => {
+    const MAX_FILE_SIZE_MB = 30;
+    const validAssets = [];
+    const skippedFiles: string[] = [];
+    const oversizedFiles: string[] = [];
+
+    for (const asset of assets) {
+      const fileName = asset?.fileName || 'Unknown file';
+      const mime = asset?.mime?.toLowerCase() ?? '';
+      const ext = fileName.includes('.')
+        ? fileName.split('.').pop()?.toLowerCase()
+        : '';
+      const sizeInMB = asset?.size ? asset.size / (1024 * 1024) : 0;
+
+      // Type check
+      const isValidType =
+        ['image/jpeg', 'image/png'].includes(mime) ||
+        ['jpg', 'jpeg', 'png'].includes(ext || '');
+      if (!isValidType) {
+        skippedFiles.push(fileName);
+        continue;
+      }
+
+      // Size check
+      if (sizeInMB > MAX_FILE_SIZE_MB) {
+        oversizedFiles.push(`${fileName} (${sizeInMB.toFixed(1)}MB)`);
+        continue;
+      }
+
+      // Optional compression (async, sequential)
+      let uri = asset.path;
+      if (sizeInMB > 2) {
+        try {
+          uri = await ImageCompressor.compress(asset.path, {quality: 0.5});
+        } catch (e) {
+          console.warn('Compression failed:', e);
+        }
+      }
+      validAssets.push({...asset, uri});
+    }
+
+    // Show toasts (shortened lists)
+    if (skippedFiles.length > 0) {
+      Toast.show({
+        type: 'info',
+        text1: 'Unsupported file(s) skipped',
+        text2:
+          skippedFiles.slice(0, 3).join(', ') +
+          (skippedFiles.length > 3 ? ` +${skippedFiles.length - 3} more` : ''),
+        position: 'bottom',
+      });
+    }
+
+    if (oversizedFiles.length > 0) {
+      Toast.show({
+        type: 'warning',
+        text1: `Images over ${MAX_FILE_SIZE_MB}MB were excluded`,
+        text2:
+          oversizedFiles.slice(0, 2).join(', ') +
+          (oversizedFiles.length > 2
+            ? ` +${oversizedFiles.length - 2} more`
+            : ''),
+        position: 'bottom',
+      });
+    }
+    return validAssets;
+  };
+
+  const uploadImagesLocal = async (images: any[]) => {
+    if (!images || images.length === 0) {
       setIsProcessingImages(false);
       return;
     }
+    setImageLoading(true);
+
+    let imgs = await checkImageValidation(images);
+    setImageLoading(false);
+    setIsProcessingImages(false);
+
     // Update processing count to actual number of images
     setIsUploadingImages(true); // Use separate state for images
     const assetsWithId = imgs.map(img => ({
@@ -179,11 +256,16 @@ const Step5MediaUpload = (props: any) => {
     setIsUploadingImages(false);
   };
 
-  const uploadFloorPlanLocal = async (plans: any[]) => {
+  const uploadFloorPlanLocal = async (plansArr: any[]) => {
+    if (!plansArr || plansArr.length === 0) {
       setIsProcessingFloorPlan(false);
-    if (!plans || plans.length === 0) {
       return;
     }
+
+    setImageLoading(true);
+    let plans = await checkImageValidation(plansArr);
+    setImageLoading(false);
+    setIsProcessingFloorPlan(false);
     setIsUploadingFloorPlans(true);
     const assetsWithId = plans.map(img => ({
       ...img,
@@ -231,7 +313,9 @@ const Step5MediaUpload = (props: any) => {
           onUpload={uploadImagesLocal}
           // handleOnpress={()=>setModalVisible(true)}
           onPickerOpen={handlePickerOpen}
+          uploadFlag={imageLoading}
           onPickerClose={handlePickerClose}
+          setImageLoading={setImageLoading}
           limit={
             values.imageUrls.length >= 15 ? 0 : 15 - values.imageUrls.length
           }
@@ -265,6 +349,7 @@ const Step5MediaUpload = (props: any) => {
             <CommonImageUploader
               label="Upload Floor Plan"
               onUpload={uploadFloorPlanLocal}
+              uploadFlag={imageLoading}
               onPickerOpen={() => {
                 setIsProcessingFloorPlan(true);
               }}
@@ -272,6 +357,7 @@ const Step5MediaUpload = (props: any) => {
               onPickerClose={() => {
                 setIsProcessingFloorPlan(false);
               }}
+              setImageLoading={setImageLoading}
               maxFileSize={30}
               limit={
                 values?.floorPlanUrl.length >= 10

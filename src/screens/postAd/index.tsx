@@ -192,6 +192,7 @@ const PostAd = () => {
             setTouched,
             handleChange,
             validateForm,
+            resetForm,
           }) => (
             <PostAdContainer
               values={values}
@@ -205,6 +206,7 @@ const PostAd = () => {
               fields={fields}
               setFields={setFields}
               validateForm={validateForm}
+              resetForm={resetForm}
             />
           )}
         </Formik>
