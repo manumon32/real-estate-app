@@ -39,10 +39,7 @@ const Step5MediaPreview: React.FC<Props> = ({
   // updateImageStatus,
 }) => {
   // let images = values.imageUrls;
-  const {
-    loadingStates,
-    loadingStatesfloor,
-  } = useBoundStore();
+  const {loadingStates, loadingStatesfloor} = useBoundStore();
   const {theme} = useTheme();
   const {imageUrls = [], floorPlanUrl = []} = values;
 
@@ -410,7 +407,14 @@ const Step5MediaPreview: React.FC<Props> = ({
           shadowColor: theme.colors.text,
         },
       ]}>
-      <View style={[styles.card, {backgroundColor: theme.colors.background}]}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.colors.background,
+            shadowColor: theme.colors.text,
+          },
+        ]}>
         <Text style={[styles.cardLabel, {color: theme.colors.text}]}>
           Ad Title
         </Text>
@@ -419,18 +423,40 @@ const Step5MediaPreview: React.FC<Props> = ({
         </Text>
       </View>
 
-      <View style={[styles.card, {backgroundColor: theme.colors.background}]}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.colors.background,
+            shadowColor: theme.colors.text,
+          },
+        ]}>
         <Text style={[styles.cardLabel, {color: theme.colors.text}]}>
           Description
         </Text>
-        <Text style={[styles.cardValue, {color: theme.colors.text}]}>
+        <Text
+          style={[
+            styles.cardValue,
+            {color: theme.colors.text, shadowColor: theme.colors.text},
+          ]}>
           {values.description}
         </Text>
       </View>
 
-      <View style={[styles.card, {backgroundColor: theme.colors.background}]}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.colors.background,
+            shadowColor: theme.colors.text,
+          },
+        ]}>
         {totalImages > 0 && (
-          <Text style={[styles.cardLabel, {color: theme.colors.text}]}>
+          <Text
+            style={[
+              styles.cardLabel,
+              {color: theme.colors.text, shadowColor: theme.colors.text},
+            ]}>
             Images ({totalImages - imagesUplloadingCount}/{totalImages})
           </Text>
         )}
@@ -439,7 +465,14 @@ const Step5MediaPreview: React.FC<Props> = ({
       </View>
 
       {values?.floorPlanUrl?.length > 0 && (
-        <View style={[styles.card, {backgroundColor: theme.colors.background}]}>
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.colors.background,
+              shadowColor: theme.colors.text,
+            },
+          ]}>
           {totalFloorPlans > 0 && (
             <Text style={[styles.cardLabel, {color: theme.colors.text}]}>
               Floor Plans ({totalFloorPlans - floorUplloadingCount}/

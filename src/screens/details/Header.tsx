@@ -377,8 +377,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 5,
-    height: 39,
-    width: 39,
   },
 
   headerIconContainer: {

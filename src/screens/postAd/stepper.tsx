@@ -193,6 +193,7 @@ const PostAdContainer = (props: any) => {
     fetchPlans,
     user,
     setImages,
+    setadPostModal,
     setlocationModalVisible,
     setFloorPlans,
     setIsProcessingImages,
@@ -352,6 +353,7 @@ const PostAdContainer = (props: any) => {
               text: 'Change',
               onPress: () => {
                 setLocationFlag(true);
+                setadPostModal();
                 setTimeout(() => {
                   setlocationModalVisible();
                 }, 300);

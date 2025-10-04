@@ -76,7 +76,7 @@ const ImagePickerModal: React.FC<Props> = ({
         {/* Selected Images Preview */}
         <FlatList
           data={selected}
-          horizontal
+          numColumns={4}
           keyExtractor={uri => uri}
           contentContainerStyle={{paddingHorizontal: 10}}
           renderItem={({item}) => (

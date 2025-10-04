@@ -42,6 +42,7 @@
     "react-native": "0.79.2",
     "react-native-compressor": "^1.12.0",
     "react-native-device-info": "^14.0.4",
+    "react-native-draggable-flatlist": "^4.0.3",
     "react-native-fast-image": "^8.6.3",
     "react-native-fbsdk-next": "^13.4.1",
     "react-native-file-viewer": "^2.1.5",

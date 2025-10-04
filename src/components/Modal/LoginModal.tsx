@@ -276,26 +276,24 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     <Modal
       visible={visible}
       transparent={true} // not overlay ‑> full sheet
-      presentationStyle={
-        Platform.OS === 'ios' ? 'overFullScreen' : 'overFullScreen'
-      }
       statusBarTranslucent
       animationType="fade"
       onRequestClose={handleClose}>
       <>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{flex: 1}}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+        style={{flex: 1, justifyContent: 'flex-end'}}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+          >
           {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
           <View style={{flex: 1}}>
             <ScrollView
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={[
                 styles.container,
-                {
-                  flexGrow: 1,
-                },
+                // {
+                //   flexGrow: 1,
+                // },
               ]}>
               {otpLoading && (
                 <View style={styles.overlay}>

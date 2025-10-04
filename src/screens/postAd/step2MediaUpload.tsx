@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {StyleSheet, View, Text, FlatList, Pressable} from 'react-native';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {StyleSheet, View, Text, FlatList, Pressable, Alert} from 'react-native';
 
 import Image from 'react-native-fast-image';
 import {Image as ImageCompressor} from 'react-native-compressor';
@@ -12,6 +12,14 @@ import ImageUploadSkeleton from '@components/SkeltonLoader/ImageUploadSkeleton';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
 import Toast from 'react-native-toast-message';
+import {Platform} from 'react-native';
+import {
+  PERMISSIONS,
+  check,
+  RESULTS,
+  request,
+  openSettings,
+} from 'react-native-permissions';
 
 const Step5MediaUpload = (props: any) => {
   const {values} = props;
@@ -27,6 +35,8 @@ const Step5MediaUpload = (props: any) => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
+  const flatListFloorRef = useRef<FlatList>(null);
   const {
     currentStep,
     // handleSubmit,
@@ -70,6 +80,61 @@ const Step5MediaUpload = (props: any) => {
     },
     [setFieldValue, values.floorPlanUrl],
   );
+
+  const requestPermission = useCallback(async () => {
+    if (Platform.OS === 'android') {
+      const permission = PERMISSIONS.ANDROID.CAMERA;
+
+      let status = await check(permission);
+
+      if (status === RESULTS.DENIED) {
+        status = await request(permission);
+      }
+
+      if (status === RESULTS.BLOCKED) {
+        Alert.alert(
+          'Permission Required',
+          'Please Camera permission in settings to continue.',
+          [
+            {text: 'Cancel', style: 'cancel'},
+            {text: 'Open Settings', onPress: () => openSettings()},
+          ],
+        );
+      }
+    }
+    return true; // iOS handled by CameraRoll automatically
+  }, []);
+
+  const scrollToEnd = (arg = false) => {
+    if (!arg && values.imageUrls.length > 0 && flatListRef.current) {
+      if (!flatListRef.current) return;
+      const index = values.imageUrls.length - 1;
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i > index) {
+          clearInterval(interval);
+          return;
+        }
+        flatListRef.current?.scrollToIndex({index: i, animated: true});
+        i++;
+      }, 50); // scroll one by one every 50ms
+    } else {
+      const index = values.floorPlanUrl.length - 1;
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i > index) {
+          clearInterval(interval);
+          return;
+        }
+        flatListFloorRef.current?.scrollToIndex({index: i, animated: true});
+        i++;
+      }, 50); // scroll one by one every 50ms
+    }
+  };
+
+  useEffect(() => {
+    requestPermission();
+  }, [requestPermission]);
 
   const renderItem = useCallback(
     ({item}: {item: any}) => {
@@ -139,11 +204,13 @@ const Step5MediaUpload = (props: any) => {
   // Handle picker closing without selection
   const handlePickerClose = useCallback(() => {
     setIsProcessingImages(false);
+    setImageLoading(false);
   }, [setIsProcessingImages]);
 
   const previews = useMemo(
     () => (
       <FlatList
+        ref={flatListRef}
         data={values.imageUrls}
         keyExtractor={keyExtractor}
         horizontal
@@ -169,7 +236,6 @@ const Step5MediaUpload = (props: any) => {
     const validAssets = [];
     const skippedFiles: string[] = [];
     const oversizedFiles: string[] = [];
-
     for (const asset of assets) {
       const fileName = asset?.fileName || 'Unknown file';
       const mime = asset?.mime?.toLowerCase() ?? '';
@@ -238,10 +304,10 @@ const Step5MediaUpload = (props: any) => {
       return;
     }
     setImageLoading(true);
+    setIsProcessingImages(true);
 
     let imgs = await checkImageValidation(images);
     setImageLoading(false);
-    setIsProcessingImages(false);
 
     // Update processing count to actual number of images
     setIsUploadingImages(true); // Use separate state for images
@@ -253,6 +319,10 @@ const Step5MediaUpload = (props: any) => {
     }));
     setIsProcessingImages(false);
     setFieldValue('imageUrls', [...values.imageUrls, ...assetsWithId]);
+    assetsWithId.length > 0 &&
+      setTimeout(() => {
+        scrollToEnd();
+      }, 300);
     setIsUploadingImages(false);
   };
 
@@ -263,6 +333,7 @@ const Step5MediaUpload = (props: any) => {
     }
 
     setImageLoading(true);
+    setIsProcessingFloorPlan(true);
     let plans = await checkImageValidation(plansArr);
     setImageLoading(false);
     setIsProcessingFloorPlan(false);
@@ -276,11 +347,16 @@ const Step5MediaUpload = (props: any) => {
 
     setIsUploadingFloorPlans(false);
     setFieldValue('floorPlanUrl', [...values.floorPlanUrl, ...assetsWithId]);
+    assetsWithId.length > 0 &&
+      setTimeout(() => {
+        scrollToEnd(true);
+      }, 300);
   };
 
   const previewsFloorPlan = useMemo(
     () => (
       <FlatList
+        ref={flatListFloorRef}
         data={values.floorPlanUrl}
         keyExtractor={keyExtractor}
         horizontal
@@ -323,10 +399,13 @@ const Step5MediaUpload = (props: any) => {
           maxFileSize={30}
           label="Upload Property Images"
         />
-        {!isProcessingImages && touched?.imageUrls && errors?.imageUrls && (
-          <Text style={styles.error}>{errors?.imageUrls}</Text>
-        )}
-        {isProcessingImages && values.imageUrls.length <= 0 ? (
+        {!isProcessingImages &&
+          values?.imageUrls?.length <= 0 &&
+          touched?.imageUrls &&
+          errors?.imageUrls && (
+            <Text style={styles.error}>{errors?.imageUrls}</Text>
+          )}
+        {isProcessingImages ? (
           <ImageUploadSkeleton count={4} horizontal />
         ) : (
           <>
@@ -356,6 +435,7 @@ const Step5MediaUpload = (props: any) => {
               totalLimit={10}
               onPickerClose={() => {
                 setIsProcessingFloorPlan(false);
+                setImageLoading(false);
               }}
               setImageLoading={setImageLoading}
               maxFileSize={30}
@@ -365,7 +445,7 @@ const Step5MediaUpload = (props: any) => {
                   : 10 - values?.floorPlanUrl.length
               }
             />
-            {isProcessingFloorPlan && values?.floorPlanUrl.length <= 0 ? (
+            {isProcessingFloorPlan ? (
               <ImageUploadSkeleton count={4} horizontal />
             ) : (
               <>

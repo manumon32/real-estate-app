@@ -34,7 +34,7 @@ const Step3LocationDetails = (props: any) => {
           setadPostModal();
           setTimeout(() => {
             setlocationModalVisible();
-          }, 200);
+          }, 300);
         }}
         style={[styles.inputContainer, {flexDirection: 'row'}]}>
         <View style={{width: '85%'}}>
