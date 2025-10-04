@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {postAdAPI} from '@api/services';
+import {postAdAPI, uploadImages} from '@api/services';
 import {useTheme} from '@theme/ThemeProvider';
 import CommonHeader from '@components/Header/CommonHeader';
 import {RequestMethod} from '@api/request';
@@ -31,6 +31,8 @@ import Step4PropertyDetails from './step4PropertyDetails';
 import Step5MediaUpload from './step5MediaUpload';
 import Preview from './preview';
 import Step2MediaUpload from './step2MediaUpload';
+import {compressImage} from '../../helpers/ImageCompressor';
+import {uploadWithQueue} from '../../helpers/apiHelper';
 
 interface FooterProps {
   currentStep: number;
@@ -45,6 +47,8 @@ interface FooterProps {
   values: any;
   imageUploadLoading: boolean;
   isSkeletonLoading: boolean;
+  isProcessingImages: boolean;
+  isProcessingFloorPlan: boolean;
 }
 
 const LAST_STEP = 6;
@@ -62,6 +66,8 @@ const Footer: React.FC<FooterProps> = ({
   values,
   imageUploadLoading,
   isSkeletonLoading,
+  isProcessingImages,
+  isProcessingFloorPlan,
 }) => {
   const handleCancel = () => {
     if (onCancel) {
@@ -114,12 +120,16 @@ const Footer: React.FC<FooterProps> = ({
           currentStep === LAST_STEP &&
             (imageUploadLoading || isSkeletonLoading) &&
             styles.buyButtonDisabled,
+          currentStep === 2 &&
+            (isProcessingImages || isProcessingFloorPlan) &&
+            styles.buyButtonDisabled,
         ]}
         accessibilityRole="button"
         disabled={
           isLastStep ||
           (currentStep === LAST_STEP &&
-            (imageUploadLoading || isSkeletonLoading))
+            (imageUploadLoading || isSkeletonLoading)) ||
+          (currentStep === 2 && (isProcessingImages || isProcessingFloorPlan))
         }>
         <Text style={styles.buyText}>
           {(loading ||
@@ -127,15 +137,14 @@ const Footer: React.FC<FooterProps> = ({
               (imageUploadLoading || isSkeletonLoading))) && (
             <ActivityIndicator size={'small'} color={'#fff'} />
           )}
-          {!loading &&
-          !(
-            currentStep === LAST_STEP &&
-            (imageUploadLoading || isSkeletonLoading)
-          )
-            ? currentStep == LAST_STEP
+          {!loading && !(currentStep === LAST_STEP && imageUploadLoading)
+            ? currentStep === LAST_STEP
               ? values.id
                 ? 'Update'
                 : 'Post Now'
+              : currentStep === 2 &&
+                (isProcessingImages || isProcessingFloorPlan)
+              ? 'Loading..'
               : 'Next'
             : isSkeletonLoading
             ? 'Processing...'
@@ -157,6 +166,7 @@ const PostAdContainer = (props: any) => {
     fields,
     setFields,
     validateForm,
+    resetForm,
   } = props;
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
@@ -165,28 +175,41 @@ const PostAdContainer = (props: any) => {
   const [paymentStatus, setPaymentStatus] = useState(true);
   const [preview, setPreview] = useState(false);
   const [isSkeletonLoading, setIsSkeletonLoading] = useState(false);
+  const [locationFlag, setLocationFlag] = useState(false);
   const prevCountRef = useRef<number | null>(null);
 
   const {
     setPostAd,
     resetPostAd,
-    images,
     postAd,
     token,
     clientId,
     bearerToken,
     locationForAdpost,
-    floorPlans,
     managePlansList,
     imageUploadLoading,
+    loadingStates,
+    loadingStatesfloor,
     fetchPlans,
     user,
     setImages,
+    setlocationModalVisible,
     setFloorPlans,
+    setIsProcessingImages,
+    setLoadingState,
+    setLoadingStateFloor,
+    setIsUploadingImages,
+    clearAllLoadingStates,
+    setIsProcessingFloorPlan,
+    setIsUploadingFloorPlans,
+    isUploadingImages,
+    isUploadingFloorPlans,
+    isProcessingImages,
+    isProcessingFloorPlan,
+    setImageUploadLoading,
   } = useBoundStore();
   const prevStep = prevCountRef.current;
   const {theme} = useTheme();
-
   const handleSkeletonStateChange = useCallback((isLoading: boolean) => {
     setIsSkeletonLoading(isLoading);
   }, []);
@@ -207,9 +230,23 @@ const PostAdContainer = (props: any) => {
     return mergedUnique.length <= 0 ? true : mergedUnique?.includes(value);
   };
 
+  useEffect(() => {
+    const isAnyUploading =
+      isUploadingImages ||
+      isUploadingFloorPlans ||
+      isProcessingImages ||
+      isProcessingFloorPlan;
+    setImageUploadLoading(isAnyUploading);
+  }, [
+    isUploadingImages,
+    isUploadingFloorPlans,
+    setImageUploadLoading,
+    isProcessingImages,
+    isProcessingFloorPlan,
+  ]);
+
   const toggleItem = useCallback(
     (name: string, item: any, setSelectedList?: any) => {
-      console.log(name);
       if (name) {
         if (postAd[name] && postAd[name][0] === item) {
           delete postAd[name];
@@ -255,7 +292,6 @@ const PostAdContainer = (props: any) => {
                     styles.chipSelected,
                 ]}
                 onPress={() => {
-                  console.log(item._id);
                   item.fields && getMergedFields(item.filterName, item.fields);
                   toggleItem(item.filterName, item._id, setSelected);
                 }}>
@@ -275,10 +311,6 @@ const PostAdContainer = (props: any) => {
     },
     [postAd, theme, getMergedFields, toggleItem],
   );
-
-  useEffect(() => {
-    setFieldValue('imageUrls', images);
-  }, [images, setFieldValue]);
 
   const checkErrors = async () => {
     const requiredFields = {
@@ -311,7 +343,35 @@ const PostAdContainer = (props: any) => {
     );
 
     if (!hasErrors) {
-      currentStep < LAST_STEP && setCurrentStep(prev => prev + 1);
+      if (currentStep === 4 && !locationFlag) {
+        Alert.alert(
+          'Selected Location is',
+          locationForAdpost?.name ?? values.address,
+          [
+            {
+              text: 'Change',
+              onPress: () => {
+                setLocationFlag(true);
+                setTimeout(() => {
+                  setlocationModalVisible();
+                }, 300);
+              },
+            },
+            {
+              text: 'Continue',
+              onPress: () => {
+                setLocationFlag(true);
+                currentStep < LAST_STEP && setCurrentStep(prev => prev + 1);
+                return false;
+              },
+            },
+          ],
+        );
+      } else {
+        currentStep === 2 && uploadImagesLocal(values.imageUrls);
+        currentStep === 2 && uploadFloorPlanLocal(values.floorPlanUrl);
+        currentStep < LAST_STEP && setCurrentStep(prev => prev + 1);
+      }
     }
   };
 
@@ -381,6 +441,7 @@ const PostAdContainer = (props: any) => {
             toggleItem={toggleItem}
             renderChips={renderChips}
             onSkeletonStateChange={handleSkeletonStateChange}
+            updateImageStatus={updateImageStatus}
             {...props}
           />
         );
@@ -419,16 +480,18 @@ const PostAdContainer = (props: any) => {
   );
 
   const submitPostAd = useCallback(async () => {
+    let mediaImages = values.imageUrls;
+    let floorPlans = values.floorPlanUrl;
     if (
       Object.keys(errors).length > 0 ||
-      images.length === 0 ||
+      mediaImages.length === 0 ||
       imageUploadLoading
     ) {
-      if (images.length === 0 || images.length > 10) {
+      if (mediaImages.length === 0 || mediaImages.length > 10) {
         Toast.show({
           type: 'error',
           text1:
-            images.length === 0
+            mediaImages.length === 0
               ? 'Please select at least one image.'
               : 'You can only select up to 10 images',
           position: 'bottom',
@@ -457,25 +520,25 @@ const PostAdContainer = (props: any) => {
         city: locationForAdpost.city,
       };
 
-      const imageURLs = images
+      const imageURLs = mediaImages
         .map(
           (img: any) =>
             typeof img === 'string'
               ? img // already a URL string
-              : img.uploadedUrl || null, // pick uploadedUrl if available
+              : // @ts-ignore
+                loadingStates[img.id]?.uploadedUrl || null, // pick uploadedUrl if available
         )
-        .filter((url): url is string => !!url);
+        .filter((url: any): url is string => !!url);
 
       const floorPlansURL = floorPlans
         .map(
           (img: any) =>
             typeof img === 'string'
               ? img // already a URL string
-              : img.uploadedUrl || null, // pick uploadedUrl if available
+              : // @ts-ignore
+                loadingStatesfloor[img.id]?.uploadedUrl || null, // pick uploadedUrl if available
         )
-        .filter((url): url is string => !!url);
-      console.log(images);
-      console.log(floorPlans);
+        .filter((url: any): url is string => !!url);
       // Prepare full payload
       const payload = {
         ...values,
@@ -485,7 +548,6 @@ const PostAdContainer = (props: any) => {
       };
 
       const method: RequestMethod = values.id ? 'put' : 'post';
-      console.log('Posting ad with payload:', payload);
 
       // API: Post Ad
       const postAdRes: any = await postAdAPI(payload, uploadParams, method);
@@ -521,7 +583,9 @@ const PostAdContainer = (props: any) => {
       }
 
       // Reset state only on success or cleanup
+      resetForm();
       setImages([]);
+      clearAllLoadingStates();
       setFloorPlans([]);
       setFields([]);
     } catch (error) {
@@ -529,8 +593,8 @@ const PostAdContainer = (props: any) => {
       setLoading(false);
     }
   }, [
+    values,
     errors,
-    images,
     imageUploadLoading,
     token,
     clientId,
@@ -542,11 +606,13 @@ const PostAdContainer = (props: any) => {
     locationForAdpost.country,
     locationForAdpost.district,
     locationForAdpost.city,
-    values,
-    floorPlans,
+    resetForm,
     setImages,
+    clearAllLoadingStates,
     setFloorPlans,
     setFields,
+    loadingStates,
+    loadingStatesfloor,
     managePlansList,
     user?.phone,
     user?.email,
@@ -557,6 +623,154 @@ const PostAdContainer = (props: any) => {
     setVisible(false);
     setPaymentStatus(true);
   }, [fetchPlans]);
+
+  const updateImageStatus = (
+    id: string,
+    status: string,
+    uploadedUrl?: string,
+  ) => {
+    setFieldValue('imageUrls', (prev: any[] = []) =>
+      prev.map(img => {
+        const imgId = typeof img === 'string' ? img : img.id ?? img.uri;
+        if (imgId === id) {
+          return {
+            ...(typeof img === 'string' ? {uri: img} : img),
+            status,
+            ...(uploadedUrl ? {uploadedUrl} : {}),
+          };
+        }
+        return img;
+      }),
+    );
+  };
+
+  const uploadImagesLocal = async (imgs: any[]) => {
+    if (!imgs || imgs.length === 0) {
+      setIsProcessingImages(false);
+      return;
+    }
+
+    setIsUploadingImages(true);
+
+    const assetsWithId = imgs.filter(img => img.id && !loadingStates[img.id]);
+    assetsWithId.forEach(img =>
+      setLoadingState(img.id, {...img, loading: true}),
+    );
+
+    const uploadParams = {token, clientId, bearerToken};
+
+    const tasks = assetsWithId.map(img => async () => {
+      try {
+        const compressedUri = await compressImage(img.uri);
+
+        if (!compressedUri) {
+          setLoadingState(img.id, {...img, loading: false, success: false});
+          return {id: img.id, success: false};
+        }
+
+        const formData = new FormData();
+        formData.append('images', {
+          uri: compressedUri,
+          name: `image_${img.id}.jpg`,
+          type: 'image/jpeg',
+        } as any);
+
+        const uploadedUrl: any = await uploadImages(formData, uploadParams);
+
+        if (!uploadedUrl?.length) {
+          throw new Error('Empty upload response');
+        }
+
+        setLoadingState(img.id, {
+          ...img,
+          loading: false,
+          success: true,
+          uploadedUrl: uploadedUrl[0],
+        });
+
+        return {id: img.id, success: true};
+      } catch (err) {
+        setLoadingState(img.id, {...img, loading: false, success: false});
+        return {id: img.id, success: false, error: err};
+      }
+    });
+
+    const results: any = await uploadWithQueue(tasks, 3); // 3 concurrent uploads
+    console.log('All upload results:', results);
+
+    setIsUploadingImages(false);
+  };
+
+  const uploadFloorPlanLocal = async (plans: any[]) => {
+    if (!plans || plans.length === 0) {
+      setIsProcessingFloorPlan(false);
+      return;
+    }
+
+    const assetsWithId = plans.filter(
+      img => img.id && !loadingStatesfloor[img.id],
+    );
+    assetsWithId.forEach(img =>
+      setLoadingStateFloor(img.id, {...img, loading: true}),
+    );
+
+    setIsUploadingFloorPlans(true);
+    const uploadParams = {token, clientId, bearerToken};
+
+    // Convert each floor plan into a task
+    const tasks = assetsWithId.map(img => async () => {
+      try {
+        const compressedUri = await compressImage(img.uri);
+
+        if (!compressedUri) {
+          setLoadingStateFloor(img.id, {
+            ...img,
+            loading: false,
+            success: false,
+          });
+          return {id: img.id, success: false};
+        }
+
+        const formData = new FormData();
+        formData.append('images', {
+          uri: compressedUri,
+          name: `floor_${img.id}.jpg`,
+          type: 'image/jpeg',
+        } as any);
+
+        const uploadedUrl: any = await uploadImages(formData, uploadParams);
+
+        if (!uploadedUrl?.length) {
+          setLoadingStateFloor(img.id, {
+            ...img,
+            loading: false,
+            success: false,
+          });
+          return {id: img.id, success: false};
+        }
+
+        setLoadingStateFloor(img.id, {
+          ...img,
+          loading: false,
+          success: true,
+          uploadedUrl: uploadedUrl[0],
+        });
+
+        return {id: img.id, success: true};
+      } catch (err) {
+        setLoadingStateFloor(img.id, {...img, loading: false, success: false});
+        return {id: img.id, success: false, error: err};
+      }
+    });
+
+    // Run with concurrency 3
+    const results: any = await uploadWithQueue(tasks, 3);
+
+    console.log('All floor plan upload results:', results);
+
+    setIsUploadingFloorPlans(false);
+    setIsProcessingFloorPlan(false);
+  };
 
   return (
     <React.Fragment>
@@ -611,6 +825,8 @@ const PostAdContainer = (props: any) => {
           isSkeletonLoading={isSkeletonLoading}
           loading={loading}
           values={values}
+          isProcessingImages={isProcessingImages}
+          isProcessingFloorPlan={isProcessingFloorPlan}
         />
       </KeyboardAvoidingView>
       <SuccessModal

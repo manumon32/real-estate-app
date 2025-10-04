@@ -7,6 +7,7 @@ export interface PostAdSlice {
   imageUploadLoading: boolean;
   imageSelectLoading: boolean;
   loadingStates: {[key: string]: boolean}; // Global loading states for individual items
+  loadingStatesfloor: {[key: string]: boolean}; // Global loading states for individual items
   setPostAd: (updates: Partial<any>) => void;
   submitPostAd: (updates: Partial<any>) => void;
   resetPostAd: () => void;
@@ -21,6 +22,7 @@ export interface PostAdSlice {
   setImageUploadLoading: (falg: any) => void;
   setImageSelectLoading: (falg: any) => void;
   setLoadingState: (id: string, loading: boolean) => void;
+  setLoadingStateFloor: (id: string, loading: boolean) => void;
   removeLoadingState: (id: string) => void;
   clearAllLoadingStates: () => void;
   postAdloading: boolean;
@@ -48,6 +50,8 @@ export const createPostAdSlice = (set: any, get: any): PostAdSlice => ({
   imageUploadLoading: false,
   isProcessingImages: false,
   isProcessingFloorPlan: false,
+  loadingStates: {}, // Initialize empty loading states
+  loadingStatesfloor: {},
   setIsProcessingImages: (flag: any) =>
     set(() => ({
       isProcessingImages: flag,
@@ -62,14 +66,13 @@ export const createPostAdSlice = (set: any, get: any): PostAdSlice => ({
   isUploadingFloorPlans: false,
   setIsUploadingFloorPlans: (flag: any) =>
     set(() => ({
-      isUploadingImages: flag,
+      isUploadingFloorPlans: flag,
     })),
 
   setIsProcessingFloorPlan: (flag: any) =>
     set(() => ({
       isProcessingFloorPlan: flag,
     })),
-  loadingStates: {}, // Initialize empty loading states
   setImageUploadLoading: (flag: any) =>
     set(() => ({
       imageUploadLoading: flag,
@@ -78,10 +81,15 @@ export const createPostAdSlice = (set: any, get: any): PostAdSlice => ({
     set(() => ({
       imageSelectLoading: flag,
     })),
-  setLoadingState: (id: string, loading: boolean) =>
+  setLoadingState: (id: string, loading: any) =>
     set((state: any) => ({
       loadingStates: {...state.loadingStates, [id]: loading},
     })),
+  setLoadingStateFloor: (id: string, loading: any) => {
+    return set((state: any) => ({
+      loadingStatesfloor: {...state.loadingStatesfloor, [id]: loading},
+    }));
+  },
   removeLoadingState: (id: string) =>
     set((state: any) => {
       const newStates = {...state.loadingStates};
@@ -91,6 +99,7 @@ export const createPostAdSlice = (set: any, get: any): PostAdSlice => ({
   clearAllLoadingStates: () =>
     set(() => ({
       loadingStates: {},
+      loadingStateFloor: {},
     })),
   setPostAd: updates =>
     set((state: any) => ({

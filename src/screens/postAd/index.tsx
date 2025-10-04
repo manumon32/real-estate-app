@@ -49,10 +49,10 @@ const PostAd = () => {
     reraApproved: false,
     bachelorsAllowed: false,
     reraId: '',
-    city: locationForAdpost?.city,
-    country: locationForAdpost?.country,
-    district: locationForAdpost?.district,
-    state: locationForAdpost?.state,
+    city: null,
+    country: null,
+    district: null,
+    state: null,
     areaSize: '',
     carpetArea: '',
     builtUpArea: '',
@@ -65,8 +65,8 @@ const PostAd = () => {
       },
     ],
     address: locationForAdpost?.name,
-    latitude: locationForAdpost?.lat,
-    longitude: locationForAdpost?.lng,
+    latitude: null,
+    longitude: null,
     numberOfBalconies: 0,
     numberOfKitchens: 0,
     facingDirectionId: null,
@@ -192,6 +192,7 @@ const PostAd = () => {
             setTouched,
             handleChange,
             validateForm,
+            resetForm,
           }) => (
             <PostAdContainer
               values={values}
@@ -205,6 +206,7 @@ const PostAd = () => {
               fields={fields}
               setFields={setFields}
               validateForm={validateForm}
+              resetForm={resetForm}
             />
           )}
         </Formik>

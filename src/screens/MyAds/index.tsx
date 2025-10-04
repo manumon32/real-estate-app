@@ -132,8 +132,6 @@ const ListingCard: React.FC<ListingCardProps> = ({
         };
     }
   }, [status]);
-  const [loaded, setImageLoaded] = useState(false);
-  console.log(loaded);
   return (
     <View
       style={[
@@ -156,7 +154,6 @@ const ListingCard: React.FC<ListingCardProps> = ({
               priority: Image.priority.normal,
             }}
             style={styles.image}
-            onLoadEnd={() => setImageLoaded(true)}
           />
           <View style={styles.info}>
             <View style={styles.headerRow}>
@@ -411,6 +408,8 @@ const MyAds = () => {
             : myAds
         }
         renderItem={renderAdItem}
+        removeClippedSubviews={true}
+        windowSize={5}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingBottom: 120,
