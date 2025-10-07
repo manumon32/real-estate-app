@@ -1,5 +1,5 @@
 import {fetchListingsFromAPI} from '@api/services';
-import {navigate} from '@navigation/RootNavigation';
+import {navigateandReset} from '@navigation/RootNavigation';
 
 // Types
 
@@ -156,10 +156,10 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
         hasMore: res.pageNum < res.pages ? true : false,
         loading: false,
       }));
-      navigate('Main');
+      navigateandReset();
     } catch (err: any) {
       set({error: err.message, loading: false});
-      navigate('Main');
+      navigateandReset();
     }
   },
   setTriggerRefresh: () =>
