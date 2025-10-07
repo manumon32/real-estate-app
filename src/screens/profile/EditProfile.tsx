@@ -55,9 +55,7 @@ const EditProfile = () => {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState(user?.name || '');
-  const [image, setImage] = useState<any>(
-    require('@assets/images/user-avatar.png'),
-  );
+  const [image, setImage] = useState<any>(user?.profilePicture);
   const [email, setEmail] = useState(user?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
   const [loginVar, setLoginVar] = useState('');
@@ -225,9 +223,11 @@ const EditProfile = () => {
                         width: 100,
                         borderRadius: 50,
                       }}
-                      source={{
-                        uri: image.uri ? image.uri : image,
-                      }}
+                      source={
+                        !image // local image
+                          ? require('@assets/images/user-avatar.png')
+                          : {uri: image.uri ? image.uri : image} // picked image
+                      }
                     />
                     <View
                       style={[

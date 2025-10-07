@@ -63,11 +63,13 @@ const Profile = () => {
         <View style={styles.container}>
           <Image
             style={{height: 72, width: 72, borderRadius: 50}}
-            source={{
-              uri:
-                user?.profilePicture ||
-                'https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes.png',
-            }}
+            source={
+              user?.profilePicture
+                ? {
+                    uri: user?.profilePicture,
+                  }
+                : require('@assets/images/user-avatar.png')
+            }
           />
           <View style={styles.info}>
             <Text style={[styles.name, {color: theme.colors.text}]}>
