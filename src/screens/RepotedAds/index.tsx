@@ -112,9 +112,10 @@ const ReportAd = () => {
 
   const renderAdItem = useCallback(
     (items: any) => {
-      const imageUrls = items.item?.thumbnailUrls
-        ? items.item?.thumbnailUrls[0]
-        : items.item?.imageUrls?.[0];
+      const imageUrls =
+        items?.item?.propertyId?.thumbnailUrls.length > 0
+          ? items?.item?.propertyId?.thumbnailUrls[0]
+          : items?.item?.propertyId?.imageUrls?.[0];
       return (
         <ListingCard
           title={items?.item?.propertyId?.title || ''}

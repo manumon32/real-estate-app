@@ -128,8 +128,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <Image
             source={{
               uri:
-                items.propertyId?.imageUrls?.[0] ||
-                'https://via.placeholder.com/80',
+                items?.thumbnailUrls?.length > 0
+                  ? items?.thumbnailUrls[0]
+                  : items.propertyId?.imageUrls?.[0],
             }}
             style={styles.image}
           />
