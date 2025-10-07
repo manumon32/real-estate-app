@@ -43,7 +43,7 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
     });
     let filters: any = {
       pageNum: get().page + 1,
-      pageSize: 6,
+      pageSize: 8,
     };
     if (get().location) {
       const {city, district, state, country, lat, lng} = get().location;

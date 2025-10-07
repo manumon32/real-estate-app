@@ -318,7 +318,7 @@ const PostAdContainer = (props: any) => {
       1: ['title', 'description', 'propertyTypeId', 'listingTypeId'],
       2: ['imageUrls'],
       3: ['price'],
-      4: ['areaSize'],
+      4: ['areaSize','nearbyLandmarks'],
       5: [],
       6: [],
     };

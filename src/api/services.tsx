@@ -177,7 +177,7 @@ export const verifyEmailOTP = async (
       return response;
     }
   } catch (error: any) {
-    console.log('error response in service', error);
+    console.log('error response in service', error.status);
     throw error;
   }
 };

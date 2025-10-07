@@ -28,9 +28,10 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {reportUser, sendChat, uploadImages} from '@api/services';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ChatDetailSkeleton from '@components/SkeltonLoader/ChatDetailSkeleton';
-import {compressImage} from '../../helpers/ImageCompressor';
 import ReportUserModal from './ReportUserModal';
 import Toast from 'react-native-toast-message';
+import {checkImageValidation} from '../../helpers/ImageCompressor';
+
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -43,7 +44,7 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
 };
 
 const ChatFooter = React.memo(
-  ({theme, setAttachModalVisible, handleSend, items}: any) => {
+  ({theme, setAttachModalVisible, handleSend, items, imageUploading}: any) => {
     const [message, setMessage] = React.useState<any>('');
     // @ts-ignore
     const inputRef = useRef<TextInput>(null);
@@ -70,10 +71,11 @@ const ChatFooter = React.memo(
         )}
         {isActive && (
           <>
-            <TouchableOpacity onPress={() => setAttachModalVisible(true)}>
+            <TouchableOpacity
+              onPress={() => !imageUploading && setAttachModalVisible(true)}>
               <Icon
                 name="plus"
-                onPress={() => setAttachModalVisible(true)}
+                onPress={() => !imageUploading && setAttachModalVisible(true)}
                 size={28}
                 color={theme.colors.text}
               />
@@ -137,7 +139,7 @@ const UploadImage = React.memo(({theme}: any) => {
     <View style={styles.uploadImageStyle}>
       <ActivityIndicator size="small" color={theme.colors.text} />
       <Text style={[styles.uploadImageText, {color: theme.colors.text}]}>
-        Sending image...
+        Sending images...
       </Text>
     </View>
   );
@@ -198,7 +200,7 @@ const Chat = React.memo(({navigation}: any) => {
     launchImageLibrary(
       {
         mediaType: 'photo',
-        selectionLimit: 1, // 0 = unlimited
+        selectionLimit: 10, // 0 = unlimited
         quality: 0.8,
       },
       (response: any) => {
@@ -230,11 +232,6 @@ const Chat = React.memo(({navigation}: any) => {
       },
     );
   }, []);
-  type ImageType = {
-    uri: string;
-    name?: string;
-    type?: string;
-  };
   const upLoadImage = async (images: any) => {
     if (!images?.length) {
       return [];
@@ -243,45 +240,39 @@ const Chat = React.memo(({navigation}: any) => {
     setImageUploading(true); // start loader
 
     try {
-      // Compress images
-      const processedImages = (
-        await Promise.all(
-          images.map(async (img: any) => {
-            if (!img?.uri) {
-              return null;
-            }
-            const compressedUri = await compressImage(img.uri);
-            return compressedUri ? {...img, uri: compressedUri} : null;
-          }),
-        )
-      ).filter(Boolean) as ImageType[];
+      const processedImages = await checkImageValidation(images);
 
       if (!processedImages.length) {
         return [];
       }
+      console.log(processedImages);
 
-      // Prepare form data
-      const formData = new FormData();
-      processedImages.forEach((img, index) => {
-        formData.append('images', {
-          uri: img.uri,
-          name: img.name || `photo_${index}.jpg`,
-          type: img.type || 'image/jpeg',
-        } as any);
-      });
+      // Prepare and upload inside Promise.all
+      const uploadedUrls = await Promise.allSettled(
+        processedImages.map(async (img, index) => {
+          const formData = new FormData();
+          formData.append('images', {
+            uri: img.uri,
+            name: img.name || `photo_${index}.jpg`,
+            type: img.type || 'image/jpeg',
+          } as any);
 
-      // Upload to server
-      const uploadedUrls = await uploadImages(formData, {
-        token,
-        clientId,
-        bearerToken,
-      });
+          // Upload to server
+          const newUploadedUrls = await uploadImages(formData, {
+            token,
+            clientId,
+            bearerToken,
+          });
 
-      // Call callback or handler with uploaded URLs
-      sendImages(uploadedUrls);
+          // Call callback or handler with uploaded URLs
+          sendImages(newUploadedUrls);
+          return newUploadedUrls;
+        }),
+      );
 
       return uploadedUrls;
     } catch (error) {
+      console.log('Upload error:', error);
       return [];
     } finally {
       setImageUploading(false); // stop loader
@@ -423,6 +414,7 @@ const Chat = React.memo(({navigation}: any) => {
           handleSend={handleSend}
           items={items}
           theme={theme}
+          imageUploading={imageUploading}
         />
       </KeyboardAvoidingView>
 

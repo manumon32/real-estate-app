@@ -56,10 +56,7 @@ function HomeScreen({navigation}: any): React.JSX.Element {
   const backPressedOnce = useRef(false);
   const flatListRef = useRef<FlatList>(null);
   // const onEndReachedCalled = useRef(false); // prevent multiple calls
-  const onEndReachedCalledDuringMomentum = useRef(false);
-
-  const pageRef = useRef(1);
-
+  const loadMoreRef = useRef<any>(null);
 
   /** Double back press exit */
   useFocusEffect(
@@ -99,23 +96,26 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     }
   }, [triggerRefresh]);
 
-  /** Load more data for pagination */
-  // const loadMore = useCallback(() => {
-  //   if (loading || !hasMore || onEndReachedCalled.current) {
-  //     return;
-  //   }
-  //   onEndReachedCalled.current = true;
-  //   fetchListings();
-  //   setTimeout(() => (onEndReachedCalled.current = false), 500); // small debounce
-  // }, [loading, hasMore]);
+  /** Load more data for pagination if onEndreached not triggered */
+  const onScroll = useCallback(
+    ({nativeEvent}: any) => {
+      const {layoutMeasurement, contentOffset, contentSize} = nativeEvent;
+      const isCloseToBottom =
+        layoutMeasurement.height + contentOffset.y >= contentSize.height - 100;
+      if (isCloseToBottom) {
+        console.log('CloseToBottom')
+        loadMore();
+      }
+    },
+    [loading, hasMore],
+  );
 
-const loadMore = () => {
-  if (!onEndReachedCalledDuringMomentum.current && !loading && hasMore) {
-    fetchListings({ pageNum: pageRef.current + 1 });
-    pageRef.current += 1;
-    onEndReachedCalledDuringMomentum.current = true;
-  }
-};
+  const loadMore = () => {
+    loadMoreRef.current = loadMoreRef.current ? loadMoreRef.current + 1 : 1;
+    if (!loading && hasMore) {
+      fetchListings();
+    }
+  };
   /** Handle location changes */
   useEffect(() => {
     const prevLat = prevLocationRef.current?.lat;
@@ -272,7 +272,7 @@ const loadMore = () => {
         ref={flatListRef}
         data={listings}
         renderItem={renderAdItem}
-        keyExtractor={item => item._id}
+        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
         numColumns={2}
         removeClippedSubviews
         ListHeaderComponent={MemoHeader}
@@ -286,13 +286,13 @@ const loadMore = () => {
         }}
         showsVerticalScrollIndicator={false}
         onEndReachedThreshold={0.5}
-        onEndReached={loadMore}
+        onEndReached={() => {
+          console.log('onEndReached');
+          loadMore();
+        }}
         refreshControl={refreshControl}
         ListFooterComponent={ListFooter}
-
-         onMomentumScrollBegin={() => {
-    onEndReachedCalledDuringMomentum.current = false;
-  }}
+        onScroll={onScroll}
       />
     </SafeAreaView>
   );

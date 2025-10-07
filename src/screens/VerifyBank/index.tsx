@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 // MessageCard.tsx
@@ -29,7 +30,10 @@ import {sendBankDetails, uploadDocuments, uploadImages} from '@api/services';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {pick} from '@react-native-documents/picker';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {compressImage} from '../../helpers/ImageCompressor';
+// import {compressImage} from '../../helpers/ImageCompressor';
+
+import Toast from 'react-native-toast-message';
+import {checkImageValidation} from '../../helpers/ImageCompressor';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -43,9 +47,14 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
 
 // const chats = [{id: 1}, {id: 2}, {id: 3}, {id: 4}];
 
-const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
+const ChatFooter = ({
+  setAttachModalVisible,
+  handleSend,
+  imageUploading,
+}: any) => {
   const [message, setMessage] = React.useState<any>('');
   const {theme} = useTheme();
+  console.log('imageUploading', imageUploading);
 
   return (
     <View
@@ -55,8 +64,8 @@ const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
       ]}>
       <Icon
         name="plus"
-        onPress={() => setAttachModalVisible(true)}
-        size={28}
+        onPress={() => !imageUploading && setAttachModalVisible(true)}
+        size={34}
         color={theme.colors.text}
       />
       <TextInput
@@ -103,7 +112,7 @@ const Verification = ({navigation}: any) => {
   const [imageUploading, setImageUploading] = React.useState(false);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       items?._id && fetchBankVerificationDetails(items?._id);
       return () => {
         resetBankVerificationDetails();
@@ -117,12 +126,13 @@ const Verification = ({navigation}: any) => {
     },
     [navigation],
   );
+
   const pickImageLibrary = useCallback(() => {
     launchImageLibrary(
       {
         mediaType: 'photo',
-        selectionLimit: 1, // 0 = unlimited
-        quality: 0.8,
+        selectionLimit: 10, // 0 = unlimited
+        quality: 0.5,
       },
       (response: any) => {
         if (response.didCancel || response.errorCode) return;
@@ -150,42 +160,50 @@ const Verification = ({navigation}: any) => {
     );
   }, []);
 
-  const upLoadImage = async (Images: any) => {
+  const upLoadImage = async (images: any) => {
+    if (!images?.length) {
+      return [];
+    }
+
+    setImageUploading(true); // start loader
+
     try {
-      setImageUploading(true); // start loader
-      let formData = new FormData();
-      const processedImages = (
-        await Promise.all(
-          Images.map(async (img: any) => {
-            if (!img?.uri) {
-              return null;
-            }
-            const compressedUri = await compressImage(img.uri);
-            return compressedUri ? {...img, uri: compressedUri} : null;
-          }),
-        )
-      ).filter(Boolean);
+      const processedImages = await checkImageValidation(images);
 
       if (!processedImages.length) {
         return [];
       }
-      processedImages.map((items: any, index: any) => {
-        formData.append('images', {
-          uri: items.uri, // local path or blob URL
-          name: `photo_${index}.jpg`, // ⬅ server sees this
-          type: 'image/jpeg',
-        } as any);
-      });
-      const imageUrls: any = await uploadImages(formData, {
-        token: token,
-        clientId: clientId,
-        bearerToken: bearerToken,
-      });
-      sendFIles(imageUrls, true);
+      console.log(processedImages);
+
+      // Prepare and upload inside Promise.all
+      const uploadedUrls = await Promise.allSettled(
+        processedImages.map(async (img, index) => {
+          const formData = new FormData();
+          formData.append('images', {
+            uri: img.uri,
+            name: img.name || `photo_${index}.jpg`,
+            type: img.type || 'image/jpeg',
+          } as any);
+
+          // Upload to server
+          const newUploadedUrls = await uploadImages(formData, {
+            token,
+            clientId,
+            bearerToken,
+          });
+
+          // Call callback or handler with uploaded URLs
+          sendFIles(newUploadedUrls, true);
+          return newUploadedUrls;
+        }),
+      );
+
+      return uploadedUrls;
     } catch (error) {
+      console.log('Upload error:', error);
       return [];
     } finally {
-      setImageUploading(false); // start loader
+      setImageUploading(false); // stop loader
     }
   };
 
@@ -208,24 +226,49 @@ const Verification = ({navigation}: any) => {
   };
 
   const upLoadDoc = async (docs: any) => {
-    try {setImageUploading(true); // start loader
+    try {
+      setImageUploading(true); // start loader
       let formData = new FormData();
+      const oversizedFiles: string[] = [];
+      let isEmpty = true;
       docs.map((items: any) => {
-        formData.append('documents', {
-          uri: items.uri,
-          name: items.name,
-          type: items.type,
-        } as any);
+        const sizeInMB = items?.fileSize ? items.fileSize / (1024 * 1024) : 0;
+        if (sizeInMB > 2) {
+          oversizedFiles.push(`${items.name} (${sizeInMB.toFixed(1)}MB)`);
+        } else {
+          isEmpty = false;
+          formData.append('documents', {
+            uri: items.uri,
+            name: items.name,
+            type: items.type,
+          } as any);
+        }
       });
+      if (oversizedFiles.length > 0) {
+        Toast.show({
+          type: 'warning',
+          text1: 'Ducments over 2MB were excluded',
+          text2:
+            oversizedFiles.slice(0, 2).join(', ') +
+            (oversizedFiles.length > 2
+              ? ` +${oversizedFiles.length - 2} more`
+              : ''),
+          position: 'bottom',
+        });
+      }
+      if (isEmpty) {
+        return;
+      }
       const imageUrls: any = await uploadDocuments(formData, {
         token: token,
         clientId: clientId,
         bearerToken: bearerToken,
       });
-      setImageUploading(false);
       sendFIles(imageUrls);
     } catch (error) {
       return [];
+    } finally {
+      setImageUploading(false); // start loader
     }
   };
 
@@ -243,6 +286,7 @@ const Verification = ({navigation}: any) => {
         throw error;
       });
   };
+
   const sendImageUrlToApi = async (imageUrl: string): Promise<any> => {
     let payload = {
       bankVerificationId: items?._id,
@@ -282,10 +326,11 @@ const Verification = ({navigation}: any) => {
       }
     }
   };
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <CommonHeader
-        title={items?.user?.name ?? 'Loan Offers'}
+        title={items?.user?.name ?? 'Loan Offers123'}
         textColor="#171717"
       />
       <KeyboardAvoidingView
@@ -405,6 +450,7 @@ const Verification = ({navigation}: any) => {
             setAttachModalVisible={setAttachModalVisible}
             handleSend={handleSend}
             items={items}
+            imageUploading={imageUploading}
           />
         )}
       </KeyboardAvoidingView>

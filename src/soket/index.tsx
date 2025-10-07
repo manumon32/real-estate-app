@@ -72,7 +72,7 @@ const updateChatList = (msg: any) => {
       //   text1: 'You have messages in other chats',
       //   position: 'top',
       // });
-    } else {
+    } else if (isFromOtherUser) {
       currentScreen !== 'ChatDetails' &&
         currentScreen !== 'Chat' &&
         setUnreadCount(unreadCount + 1);

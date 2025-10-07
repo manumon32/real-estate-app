@@ -365,6 +365,9 @@ const MyAds = () => {
 
   const renderAdItem = useCallback(
     (items: any) => {
+      const imageUrls = items.item?.thumbnailUrls
+        ? items.item?.thumbnailUrls[0]
+        : items.item?.imageUrls?.[0];
       return (
         <ListingCard
           title={items.item?.title || ''}
@@ -377,11 +380,7 @@ const MyAds = () => {
           items={items.item}
           makePayment={makePayment}
           theme={theme}
-          imageUrl={
-            items.item?.imageUrls[0]
-              ? items.item?.imageUrls[0]
-              : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM='
-          }
+          imageUrl={imageUrls}
           markasSold={markasSold}
           openBoostPopup={(ad: any) => {
             setSelectedAd(ad);

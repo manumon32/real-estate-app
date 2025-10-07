@@ -2,7 +2,6 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {StyleSheet, View, Text, FlatList, Pressable, Alert} from 'react-native';
 
 import Image from 'react-native-fast-image';
-import {Image as ImageCompressor} from 'react-native-compressor';
 
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
@@ -11,8 +10,8 @@ import ImagePickerModal from '@components/Modal/ImagePickerModal';
 import ImageUploadSkeleton from '@components/SkeltonLoader/ImageUploadSkeleton';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
-import Toast from 'react-native-toast-message';
 import {Platform} from 'react-native';
+
 import {
   PERMISSIONS,
   check,
@@ -20,6 +19,9 @@ import {
   request,
   openSettings,
 } from 'react-native-permissions';
+import { checkImageValidationCrop } from '../../helpers/ImageCompressor';
+
+// import {compressImage} from '../../helpers/ImageCompressor';
 
 const Step5MediaUpload = (props: any) => {
   const {values} = props;
@@ -118,7 +120,11 @@ const Step5MediaUpload = (props: any) => {
         flatListRef.current?.scrollToIndex({index: i, animated: true});
         i++;
       }, 50); // scroll one by one every 50ms
-    } else {
+    } else if (
+      arg &&
+      values.floorPlanUrl.length > 0 &&
+      flatListFloorRef.current
+    ) {
       const index = values.floorPlanUrl.length - 1;
       let i = 0;
       const interval = setInterval(() => {
@@ -199,6 +205,7 @@ const Step5MediaUpload = (props: any) => {
   // Handle picker opening - show skeleton immediately
   const handlePickerOpen = useCallback(() => {
     setIsProcessingImages(true);
+    setImageLoading(true);
   }, [setIsProcessingImages]);
 
   // Handle picker closing without selection
@@ -231,72 +238,6 @@ const Step5MediaUpload = (props: any) => {
     [keyExtractor, renderItem, values],
   );
 
-  const checkImageValidation = async (assets: any[]) => {
-    const MAX_FILE_SIZE_MB = 30;
-    const validAssets = [];
-    const skippedFiles: string[] = [];
-    const oversizedFiles: string[] = [];
-    for (const asset of assets) {
-      const fileName = asset?.fileName || 'Unknown file';
-      const mime = asset?.mime?.toLowerCase() ?? '';
-      const ext = fileName.includes('.')
-        ? fileName.split('.').pop()?.toLowerCase()
-        : '';
-      const sizeInMB = asset?.size ? asset.size / (1024 * 1024) : 0;
-
-      // Type check
-      const isValidType =
-        ['image/jpeg', 'image/png'].includes(mime) ||
-        ['jpg', 'jpeg', 'png'].includes(ext || '');
-      if (!isValidType) {
-        skippedFiles.push(fileName);
-        continue;
-      }
-
-      // Size check
-      if (sizeInMB > MAX_FILE_SIZE_MB) {
-        oversizedFiles.push(`${fileName} (${sizeInMB.toFixed(1)}MB)`);
-        continue;
-      }
-
-      // Optional compression (async, sequential)
-      let uri = asset.path;
-      if (sizeInMB > 2) {
-        try {
-          uri = await ImageCompressor.compress(asset.path, {quality: 0.5});
-        } catch (e) {
-          console.warn('Compression failed:', e);
-        }
-      }
-      validAssets.push({...asset, uri});
-    }
-
-    // Show toasts (shortened lists)
-    if (skippedFiles.length > 0) {
-      Toast.show({
-        type: 'info',
-        text1: 'Unsupported file(s) skipped',
-        text2:
-          skippedFiles.slice(0, 3).join(', ') +
-          (skippedFiles.length > 3 ? ` +${skippedFiles.length - 3} more` : ''),
-        position: 'bottom',
-      });
-    }
-
-    if (oversizedFiles.length > 0) {
-      Toast.show({
-        type: 'warning',
-        text1: `Images over ${MAX_FILE_SIZE_MB}MB were excluded`,
-        text2:
-          oversizedFiles.slice(0, 2).join(', ') +
-          (oversizedFiles.length > 2
-            ? ` +${oversizedFiles.length - 2} more`
-            : ''),
-        position: 'bottom',
-      });
-    }
-    return validAssets;
-  };
 
   const uploadImagesLocal = async (images: any[]) => {
     if (!images || images.length === 0) {
@@ -306,7 +247,7 @@ const Step5MediaUpload = (props: any) => {
     setImageLoading(true);
     setIsProcessingImages(true);
 
-    let imgs = await checkImageValidation(images);
+    let imgs = await checkImageValidationCrop(images);
     setImageLoading(false);
 
     // Update processing count to actual number of images
@@ -334,7 +275,7 @@ const Step5MediaUpload = (props: any) => {
 
     setImageLoading(true);
     setIsProcessingFloorPlan(true);
-    let plans = await checkImageValidation(plansArr);
+    let plans = await checkImageValidationCrop(plansArr);
     setImageLoading(false);
     setIsProcessingFloorPlan(false);
     setIsUploadingFloorPlans(true);

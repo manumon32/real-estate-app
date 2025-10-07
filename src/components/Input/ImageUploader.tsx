@@ -94,6 +94,7 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
       });
       return;
     }
+    onPickerOpen?.();
     if (Platform.OS === 'android') {
       openLibraryAndroid();
     } else {
@@ -130,7 +131,7 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
 
   const openCamera = async () => {
     if (uploadFlag) {
-       Toast.show({
+      Toast.show({
         type: 'info',
         text1: 'Please wait...',
         position: 'bottom',
@@ -146,8 +147,10 @@ const CommonImageUploader: React.FC<CommonImageUploaderProps> = ({
       return;
     }
     const ok = await requestPermission();
-    if (!ok) return;
-
+    if (!ok) {
+      return;
+    }
+    onPickerOpen?.();
     if (Platform.OS === 'android') {
       openCameraAndroid();
     } else {

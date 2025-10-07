@@ -64,7 +64,6 @@ export enum AdStatusEnum {
 const ListingCard: React.FC<ListingCardProps> = ({
   items,
   title = '',
-  location = '',
   date = '',
   imageUrl = '',
   navigation,
@@ -113,6 +112,9 @@ const ReportAd = () => {
 
   const renderAdItem = useCallback(
     (items: any) => {
+      const imageUrls = items.item?.thumbnailUrls
+        ? items.item?.thumbnailUrls[0]
+        : items.item?.imageUrls?.[0];
       return (
         <ListingCard
           title={items?.item?.propertyId?.title || ''}
@@ -124,10 +126,7 @@ const ReportAd = () => {
           views={200}
           navigation={navigation}
           items={items?.item}
-          imageUrl={
-            items?.item?.propertyId?.imageUrls?.[0] ??
-            'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612&w=0&k=20&c=_tGiix_HTQkJj2piTsilMuVef9v2nUwEkSC9Alo89BM='
-          }
+          imageUrl={imageUrls}
         />
       );
     },

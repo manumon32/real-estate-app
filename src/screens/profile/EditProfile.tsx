@@ -28,6 +28,7 @@ import {uploadImages} from '@api/services';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@theme/ThemeProvider';
 import {compressImage} from '../../helpers/ImageCompressor';
+import Toast from 'react-native-toast-message';
 const EditProfile = () => {
   const {
     user,
@@ -55,8 +56,7 @@ const EditProfile = () => {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [image, setImage] = useState<any>(
-    user?.profilePicture ||
-      'https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes.png',
+    require('@assets/images/user-avatar.png'),
   );
   const [email, setEmail] = useState(user?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
@@ -128,6 +128,48 @@ const EditProfile = () => {
       },
     );
   }, []);
+
+  const updateData = async () => {
+    var imageUrls: any = '';
+    try {
+      if (image.uri) {
+        setLoading(true);
+        let formData = new FormData();
+        const sizeInMB = image?.fileSize ? image.fileSize / (1024 * 1024) : 0;
+        if (sizeInMB > 30) {
+          Toast.show({
+            type: 'warning',
+            text1: 'Images larger than 30 MB cannot be uploaded.',
+            position: 'bottom',
+          });
+          return;
+        } else {
+          const compressedUri = await compressImage(image.uri);
+          formData.append('images', {
+            uri: compressedUri, // local path or blob URL
+            name: `photo_.jpg`, // ⬅ server sees this
+            type: 'image/jpeg',
+          } as any);
+          imageUrls = await uploadImages(formData, {
+            token: token,
+            clientId: clientId,
+            bearerToken: bearerToken,
+          });
+        }
+      }
+      let payload: any = {
+        name: name,
+      };
+      if (imageUrls?.length > 0) {
+        payload.profilePicture = imageUrls[0];
+      }
+      setLoading(false);
+      updateuser(payload);
+    } catch (err) {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
@@ -140,34 +182,7 @@ const EditProfile = () => {
             rightButton
             rightButtonText="Save"
             onRightPress={async () => {
-              var imageUrls: any = '';
-              try {
-                if (image.uri) {
-                  setLoading(true);
-                  let formData = new FormData();
-                  const compressedUri = await compressImage(image.uri);
-                  formData.append('images', {
-                    uri: compressedUri, // local path or blob URL
-                    name: `photo_.jpg`, // ⬅ server sees this
-                    type: 'image/jpeg',
-                  } as any);
-                  imageUrls = await uploadImages(formData, {
-                    token: token,
-                    clientId: clientId,
-                    bearerToken: bearerToken,
-                  });
-                }
-                let payload: any = {
-                  name: name,
-                };
-                if (imageUrls?.length > 0) {
-                  payload.profilePicture = imageUrls[0];
-                }
-                setLoading(false);
-                updateuser(payload);
-              } catch (err) {
-                setLoading(false);
-              }
+              updateData();
             }}
             rightButtonLoading={updateLoading || loading}
             rightButtonDisabled={

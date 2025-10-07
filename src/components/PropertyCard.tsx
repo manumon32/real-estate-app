@@ -24,7 +24,7 @@ interface PropertyCardProps {
   navigation: any;
   arg?: boolean;
   horizontal?: boolean;
-  showLocation?:boolean
+  showLocation?: boolean;
 }
 
 const InfoItem = React.memo(
@@ -39,7 +39,13 @@ const InfoItem = React.memo(
 );
 
 const PropertyCard = React.memo(
-  ({items, navigation, arg, horizontal, showLocation = false}: PropertyCardProps) => {
+  ({
+    items,
+    navigation,
+    arg,
+    horizontal,
+    showLocation = false,
+  }: PropertyCardProps) => {
     const {theme} = useTheme();
     const isDarkMode = useColorScheme() === 'dark';
     const {user} = useBoundStore();
@@ -78,6 +84,10 @@ const PropertyCard = React.memo(
       navigation.navigate('Details', {items});
     }, [navigation, items]);
 
+    const imageUrls = items?.thumbnailUrls
+      ? items?.thumbnailUrls[0]
+      : items?.imageUrls?.[0];
+
     return (
       <TouchableOpacity
         style={[
@@ -105,9 +115,7 @@ const PropertyCard = React.memo(
         <View style={styles.imageWrapper}>
           <Image
             source={{
-              uri: items.imageUrls?.[0]
-                ? items.imageUrls[0]
-                : 'https://media.istockphoto.com/id/1396856251/photo/colonial-house.jpg?s=612x612',
+              uri: imageUrls,
               priority: Image.priority.normal,
               cache: Image.cacheControl.immutable,
             }}
@@ -138,7 +146,7 @@ const PropertyCard = React.memo(
 
           <Text
             style={[styles.title, {color: theme.colors.text}]}
-            numberOfLines={arg?2:1}>
+            numberOfLines={arg ? 2 : 1}>
             {items.title}
           </Text>
 
@@ -157,7 +165,7 @@ const PropertyCard = React.memo(
           </View>
 
           {/* Distance */}
-          {distanceText &&  showLocation && (
+          {distanceText && showLocation && (
             <View style={styles.infoRow}>
               <InfoItem
                 icon="vector-line"

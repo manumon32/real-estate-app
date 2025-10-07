@@ -7,12 +7,17 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  TouchableOpacity,
+  Dimensions,
+  useColorScheme,
 } from 'react-native';
 import Image from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useTheme} from '@theme/ThemeProvider';
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
+import CommonAmenityToggle from '@components/Input/amenityToggle';
+import { useRoute } from '@react-navigation/native';
 // import {compressImage} from '../../helpers/ImageCompressor';
 // import {uploadImages} from '@api/services';
 // import Toast from 'react-native-toast-message';
@@ -39,13 +44,32 @@ const Step5MediaPreview: React.FC<Props> = ({
   // updateImageStatus,
 }) => {
   // let images = values.imageUrls;
-  const {loadingStates, loadingStatesfloor} = useBoundStore();
+  const {loadingStates, loadingStatesfloor, managePlansList} = useBoundStore();
   const {theme} = useTheme();
+  const route = useRoute();
+  // @ts-ignore
+  const items = route?.params?.items || null;
   const {imageUrls = [], floorPlanUrl = []} = values;
+  const [showBoostPopup, setShowBoostPopup] = useState(false);
+  const [price, setPrice] = useState(null);
+  const [benifits, setBenifits] = useState([]);
+  const [scrollY, setScrollY] = useState(0);
+
+  const {height} = Dimensions.get('window');
+  const CONTENT_HEIGHT = 2000; // your scrollable content height
+  const visibleHeight = height;
+  const indicatorHeight = (visibleHeight / CONTENT_HEIGHT) * visibleHeight;
+
+  const scrollIndicatorPosition =
+    (scrollY / (CONTENT_HEIGHT - visibleHeight)) *
+    (visibleHeight - indicatorHeight);
+
+  console.log('managePlansList', managePlansList);
 
   const totalImages = imageUrls.length;
   const [imagesUplloadingCount, setImagesUplloadingCount] = useState(0);
   const [floorUplloadingCount, setFloorUplloadingCount] = useState(0);
+  const isDarkMode = useColorScheme() === 'dark';
 
   // Floor plans count
   const totalFloorPlans = floorPlanUrl.length;
@@ -67,6 +91,16 @@ const Step5MediaPreview: React.FC<Props> = ({
     },
     [setFieldValue, values.imageUrls],
   );
+
+  useEffect(() => {
+    // @ts-ignore
+    if (managePlansList?.[0].price) {
+      // @ts-ignore
+      setPrice(managePlansList?.[0].price);
+      // @ts-ignore
+      setBenifits(managePlansList?.[0].benifits);
+    }
+  }, [managePlansList]);
 
   const removeFloor = useCallback(
     (uri: string | undefined) => {
@@ -482,6 +516,106 @@ const Step5MediaPreview: React.FC<Props> = ({
           {floorPlanList}
         </View>
       )}
+      {!items?._id && (
+        <View style={[styles.inputContainer, {flexDirection: 'row'}]}>
+          <View style={{width: '90%'}}>
+            <CommonAmenityToggle
+              label={
+                // @ts-ignore
+                String(price)
+                  ? // @ts-ignore
+                    'Featured Property (₹' + String(price) + ')'
+                  : 'Featured Property '
+              }
+              selected={values.featured}
+              onToggle={() => setFieldValue('featured', !values.featured)}
+            />
+          </View>
+          <TouchableOpacity
+            onPress={() => setShowBoostPopup(true)}
+            style={{
+              justifyContent: 'center',
+              alignContent: 'center',
+              margin: 10,
+            }}>
+            <MaterialCommunityIcons
+              name="information"
+              size={30}
+              color="#3d94ffff"
+            />
+          </TouchableOpacity>
+        </View>
+      )}
+      {showBoostPopup && (
+        <View style={styles.popupOverlay}>
+          <View
+            style={[
+              styles.popupContainer,
+              {backgroundColor: theme.colors.background},
+            ]}>
+            <Text style={[styles.popupTitle, {color: theme.colors.text}]}>
+              Feature Your Ad
+            </Text>
+            <Text style={[styles.popupAmount, {color: theme.colors.text}]}>
+              Amount: ₹{price ?? 'N/A'}
+            </Text>
+            {/* @ts-ignore */}
+            {managePlansList?.[0].duration && (
+              <Text
+                style={[
+                  styles.popupAmount,
+                  {color: theme.colors.text, fontSize: 12},
+                ]}>
+                {/* @ts-ignore */}
+                Package Avaliability: {managePlansList?.[0].duration} Days
+              </Text>
+            )}
+            <Text
+              style={[
+                [styles.popupBenefits, {marginBottom: 5}],
+                {color: theme.colors.text},
+              ]}>
+              Benefits:
+            </Text>
+            <ScrollView
+              showsVerticalScrollIndicator={false} // hide native
+              onScroll={e => setScrollY(e.nativeEvent.contentOffset.y)}
+              scrollEventThrottle={16}
+              indicatorStyle={isDarkMode ? 'black' : 'white'}
+              style={{maxHeight: 200, padding: 10}}>
+              {benifits.map(items => (
+                <Text
+                  key={items}
+                  style={[styles.popupBenefits, {color: theme.colors.text}]}>
+                  {'  '}• {items}
+                </Text>
+              ))}
+            </ScrollView>
+            {/* Custom Scroll Indicator */}
+            <View style={styles.scrollBarTrack}>
+              <View
+                style={[
+                  styles.scrollBarThumb,
+                  {
+                    height: 200,
+                    transform: [{translateY: scrollIndicatorPosition}],
+                  },
+                ]}
+              />
+            </View>
+            <View style={styles.popupActions}>
+              <TouchableOpacity
+                style={styles.continueButton}
+                onPress={() => {
+                  setShowBoostPopup(false);
+                  // makePayment(selectedAd._id);
+                }}>
+                <Text style={styles.continueButtonText}>Ok</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -563,6 +697,119 @@ const styles = StyleSheet.create({
   },
   removeText: {color: '#fff', fontWeight: 'bold', fontSize: 14},
   videoLink: {fontSize: 14, textDecorationLine: 'underline'},
+
+  scrollBarTrack: {
+    position: 'absolute',
+    right: 50,
+    top: 0,
+    bottom: 0,
+    display: 'none',
+    width: 8, // 🔹 track width
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 4,
+    height: 50,
+  },
+  scrollBarThumb: {
+    width: 8, // 🔹 indicator width
+    backgroundColor: '#40DABE',
+    borderRadius: 4,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+  },
+  priceInputContainer: {
+    padding: 5,
+    width: '70%',
+  },
+  priceUnitContainer: {
+    padding: 5,
+    width: '30%',
+  },
+  inputContainer: {
+    padding: 5,
+  },
+  headingText: {
+    color: '#171717',
+    fontFamily: Fonts.MEDIUM,
+    fontSize: 20,
+    margin: 10,
+    marginTop: 20,
+  },
+
+  previewRow: {gap: 12},
+  preview: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  error: {
+    color: 'red',
+    marginBottom: 2,
+    marginTop: 3,
+    left: 10,
+    fontSize: 12,
+    fontFamily: Fonts.REGULAR,
+  },
+
+  popupOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    // backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    zIndex: 999,
+    borderRadius: 20,
+  },
+  popupContainer: {
+    width: '90%',
+    backgroundColor: '#000',
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'teal',
+  },
+  popupTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  popupAmount: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  popupBenefits: {
+    fontSize: 13,
+    color: '#555',
+    marginBottom: 5,
+  },
+  popupActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  cancelButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#ddd',
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  continueButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#2A9D8F',
+    borderRadius: 8,
+  },
+  continueButtonText: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '600',
+  },
 });
 
 export default React.memo(Step5MediaPreview);

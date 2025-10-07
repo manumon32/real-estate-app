@@ -22,6 +22,7 @@ import {
 import ChatBubble from './ChatBubble';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 import useBoundStore from '@stores/index';
 import AttachFileModal from './AttachFileModal';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
@@ -30,9 +31,10 @@ import {
   uploadDocuments,
   uploadImages,
 } from '@api/services';
+// import {Image as ImageCompressor} from 'react-native-compressor';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {compressImage} from '../../helpers/ImageCompressor';
+import {checkImageValidation} from '../../helpers/ImageCompressor';
 
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -47,7 +49,11 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
 
 // const chats = [{id: 1}, {id: 2}, {id: 3}, {id: 4}];
 
-const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
+const ChatFooter = ({
+  setAttachModalVisible,
+  handleSend,
+  imageUploading,
+}: any) => {
   const [message, setMessage] = React.useState<any>('');
   const {theme} = useTheme();
 
@@ -59,7 +65,7 @@ const ChatFooter = ({setAttachModalVisible, handleSend}: any) => {
       ]}>
       <Icon
         name="plus"
-        onPress={() => setAttachModalVisible(true)}
+        onPress={() => !imageUploading && setAttachModalVisible(true)}
         size={28}
         color={theme.colors.text}
       />
@@ -128,8 +134,8 @@ const Verification = ({navigation}: any) => {
     launchImageLibrary(
       {
         mediaType: 'photo',
-        selectionLimit: 1, // 0 = unlimited
-        quality: 0.8,
+        selectionLimit: 10, // 0 = unlimited
+        quality: 0.5,
       },
       (response: any) => {
         if (response.didCancel || response.errorCode) return;
@@ -175,42 +181,50 @@ const Verification = ({navigation}: any) => {
     );
   }, []);
 
-  const upLoadImage = async (Images: any) => {
+  const upLoadImage = async (images: any) => {
+    if (!images?.length) {
+      return [];
+    }
+
+    setImageUploading(true); // start loader
+
     try {
-      setImageUploading(true); // start loader
-      let formData = new FormData();
-      const processedImages = (
-        await Promise.all(
-          Images.map(async (img: any) => {
-            if (!img?.uri) {
-              return null;
-            }
-            const compressedUri = await compressImage(img.uri);
-            return compressedUri ? {...img, uri: compressedUri} : null;
-          }),
-        )
-      ).filter(Boolean);
+      const processedImages = await checkImageValidation(images);
 
       if (!processedImages.length) {
         return [];
       }
-      processedImages.map((items: any, index: any) => {
-        formData.append('images', {
-          uri: items.uri, // local path or blob URL
-          name: `photo_${index}.jpg`, // ⬅ server sees this
-          type: 'image/jpeg',
-        } as any);
-      });
-      const imageUrls: any = await uploadImages(formData, {
-        token: token,
-        clientId: clientId,
-        bearerToken: bearerToken,
-      });
-      sendFIles(imageUrls, true);
+      console.log(processedImages);
+
+      // Prepare and upload inside Promise.all
+      const uploadedUrls = await Promise.allSettled(
+        processedImages.map(async (img, index) => {
+          const formData = new FormData();
+          formData.append('images', {
+            uri: img.uri,
+            name: img.name || `photo_${index}.jpg`,
+            type: img.type || 'image/jpeg',
+          } as any);
+
+          // Upload to server
+          const newUploadedUrls = await uploadImages(formData, {
+            token,
+            clientId,
+            bearerToken,
+          });
+
+          // Call callback or handler with uploaded URLs
+          sendFIles(newUploadedUrls, true);
+          return newUploadedUrls;
+        }),
+      );
+
+      return uploadedUrls;
     } catch (error) {
+      console.log('Upload error:', error);
       return [];
     } finally {
-      setImageUploading(false); // start loader
+      setImageUploading(false); // stop loader
     }
   };
 
@@ -218,13 +232,36 @@ const Verification = ({navigation}: any) => {
     try {
       setImageUploading(true); // start loader
       let formData = new FormData();
+      const oversizedFiles: string[] = [];
+      let isEmpty = true;
       docs.map((items: any) => {
-        formData.append('documents', {
-          uri: items.uri,
-          name: items.name,
-          type: items.type,
-        } as any);
+        const sizeInMB = items?.fileSize ? items.fileSize / (1024 * 1024) : 0;
+        if (sizeInMB > 2) {
+          oversizedFiles.push(`${items.name} (${sizeInMB.toFixed(1)}MB)`);
+        } else {
+          isEmpty = false;
+          formData.append('documents', {
+            uri: items.uri,
+            name: items.name,
+            type: items.type,
+          } as any);
+        }
       });
+      if (oversizedFiles.length > 0) {
+        Toast.show({
+          type: 'warning',
+          text1: 'Ducments over 2MB were excluded',
+          text2:
+            oversizedFiles.slice(0, 2).join(', ') +
+            (oversizedFiles.length > 2
+              ? ` +${oversizedFiles.length - 2} more`
+              : ''),
+          position: 'bottom',
+        });
+      }
+      if (isEmpty) {
+        return;
+      }
       const imageUrls: any = await uploadDocuments(formData, {
         token: token,
         clientId: clientId,
@@ -350,7 +387,7 @@ const Verification = ({navigation}: any) => {
                   <MaterialCommunityIcons
                     name="file-upload-outline"
                     size={22}
-                   color={
+                    color={
                       verification_data?.status === 'verified'
                         ? theme.colors.teal
                         : theme.colors.primary
@@ -419,6 +456,7 @@ const Verification = ({navigation}: any) => {
               setAttachModalVisible={setAttachModalVisible}
               handleSend={handleSend}
               items={items}
+              imageUploading={imageUploading}
             />
           )}
         </View>

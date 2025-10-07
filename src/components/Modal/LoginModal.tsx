@@ -22,6 +22,8 @@ import {
   ScrollView,
   useColorScheme,
   KeyboardAvoidingView,
+  Button,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import auth, {AppleAuthProvider} from '@react-native-firebase/auth';
@@ -46,7 +48,7 @@ import OtpVerificationScreen from './OtpVerificationScreen';
 import LinearGradient from 'react-native-linear-gradient';
 import Toast from 'react-native-toast-message';
 import {WEB_CLIENT_ID} from '@constants/google';
-import { Fonts } from '@constants/font';
+import {Fonts} from '@constants/font';
 
 type Props = {
   visible: boolean;
@@ -63,9 +65,11 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     otpLoading,
     loginErrorMessage,
     clearErrorMessage,
+    errorStatus,
   } = useBoundStore();
   const [loginVar, setLoginVar] = useState('');
   const [socialLoading, setSocialLoading] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -77,6 +81,10 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     Settings.initializeSDK();
     clearErrorMessage();
   }, [clearErrorMessage]);
+
+  useEffect(() => {
+    setShowPopup(errorStatus);
+  }, [errorStatus]);
   const isValidEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
@@ -143,6 +151,25 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
     }
     console.log('payload:', payload);
     verifyOTP(payload);
+  };
+
+  const openEmail = () => {
+    const email = 'contact@hotplotz.com';
+    const subject = 'Support Request';
+    const body = 'Hello, I need help with my account...';
+    const url = `mailto:${email}?subject=${encodeURIComponent(
+      subject,
+    )}&body=${encodeURIComponent(body)}`;
+
+    Linking.canOpenURL(url)
+      .then(supported => {
+        if (supported) {
+          Linking.openURL(url);
+        } else {
+          console.log("Can't handle email link");
+        }
+      })
+      .catch(err => console.error('An error occurred', err));
   };
 
   useEffect(() => {
@@ -281,10 +308,9 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
       onRequestClose={handleClose}>
       <>
         <KeyboardAvoidingView
-        style={{flex: 1, justifyContent: 'flex-end'}}
+          style={{flex: 1, justifyContent: 'flex-end'}}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-          >
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
           {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
           <View style={{flex: 1}}>
             <ScrollView
@@ -367,17 +393,17 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
                         placeholderTextColor={'#ccc'}
                         style={styles.input}
                       />
-                      {(message || loginError) && (
+                      {(message || loginError) && !errorStatus && (
                         <Text
                           style={{
                             fontSize: 13,
                             color: '#ff4d4f',
                             marginHorizontal: 8,
-                            margin:4,
+                            margin: 4,
                             marginTop: -10,
                             lineHeight: 18,
                             fontWeight: '500',
-                            fontFamily:Fonts.REGULAR,
+                            fontFamily: Fonts.REGULAR,
                           }}>
                           {loginErrorMessage
                             ? loginErrorMessage
@@ -449,6 +475,68 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
                   loginErrorMessage={loginErrorMessage}
                 />
               )}
+
+              {showPopup && (
+                <View
+                  style={{
+                    ...StyleSheet.absoluteFillObject,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 999,
+                    elevation: 10,
+                  }}>
+                  <View
+                    style={{
+                      width: '85%',
+                      backgroundColor: '#fff',
+                      borderRadius: 12,
+                      paddingVertical: 24,
+                      paddingHorizontal: 20,
+                      alignItems: 'center',
+                      shadowColor: '#000',
+                      shadowOpacity: 0.25,
+                      shadowRadius: 6,
+                      shadowOffset: {width: 0, height: 3},
+                    }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: '#333',
+                        textAlign: 'center',
+                        marginBottom: 20,
+                        lineHeight: 22,
+                      }}>
+                      {loginErrorMessage}
+                      {/* <Text
+                        style={{color: '#007bff', fontWeight: '600'}}
+                        onPress={openEmail}>
+                        contact@hotplotz.com
+                      </Text> */}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        clearErrorMessage();
+                        setShowPopup(false);
+                      }}
+                      style={{
+                        backgroundColor: '#007bff',
+                        borderRadius: 8,
+                        paddingVertical: 8,
+                        paddingHorizontal: 20,
+                      }}>
+                      <Text
+                        style={{
+                          color: '#fff',
+                          fontSize: 14,
+                          fontWeight: '600',
+                        }}>
+                        Close
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
@@ -463,6 +551,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#15937c',
     // alignItems: 'center',
     // justifyContent: 'center',
+  },
+
+  popupContainer: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject, // fills the screen
