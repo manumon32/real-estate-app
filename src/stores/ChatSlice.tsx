@@ -36,6 +36,8 @@ export interface ChatSlice {
   chat_triggerRefresh: boolean;
   chat_totalpages: number;
   filter_roomId: string;
+  imageUploading: any;
+  setImageUploading: (msg?: any) => Promise<any>;
   fetchChatListings: (filters?: any, page?: number) => Promise<void>;
   setUnreadCount: (count: number) => Promise<void>;
   setChatList: (arg: any) => Promise<void>;
@@ -61,6 +63,9 @@ export const createChatSlice = (set: any, get: any): ChatSlice => ({
   chat_error: null,
   chat_totalpages: 0,
   filter_roomId: '',
+  imageUploading: {},
+  setImageUploading: (payload: any) =>
+    set({imageUploading: {...get().imageUploading, ...payload}}),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchChatListings: async () => {
     set({chatListloading: true, chat_page: 0, filter_roomId: null});

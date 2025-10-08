@@ -281,6 +281,8 @@ const Verification = ({navigation}: any) => {
 
     return Promise.all(uploadPromises)
       .then(responses => {
+        items?._id && fetchverificationDetails(items?._id);
+        items?._id && fetchverificationsData(items?._id);
         return responses.map(res => res); // Extract actual response data
       })
       .catch(error => {

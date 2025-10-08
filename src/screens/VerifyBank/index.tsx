@@ -279,6 +279,7 @@ const Verification = ({navigation}: any) => {
 
     return Promise.all(uploadPromises)
       .then(responses => {
+        items?._id && fetchBankVerificationDetails(items?._id);
         return responses.map(res => res); // Extract actual response data
       })
       .catch(error => {

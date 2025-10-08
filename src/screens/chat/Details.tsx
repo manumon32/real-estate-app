@@ -32,6 +32,10 @@ import ReportUserModal from './ReportUserModal';
 import Toast from 'react-native-toast-message';
 import {checkImageValidation} from '../../helpers/ImageCompressor';
 import ChatMessageSuggestions from './ChatMessageSuggestions';
+import {
+  requestCameraPermission,
+  requestImageLibraryPermission,
+} from '../../helpers/CommonHelper';
 
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -92,10 +96,16 @@ const ChatFooter = React.memo(
           {isActive && (
             <>
               <TouchableOpacity
-                onPress={() => !imageUploading && setAttachModalVisible(true)}>
+                onPress={() =>
+                  !imageUploading?.[items.propertyId] &&
+                  setAttachModalVisible(true)
+                }>
                 <Icon
                   name="plus"
-                  onPress={() => !imageUploading && setAttachModalVisible(true)}
+                  onPress={() =>
+                    !imageUploading?.[items.propertyId] &&
+                    setAttachModalVisible(true)
+                  }
                   size={28}
                   color={theme.colors.text}
                 />
@@ -186,6 +196,7 @@ const Chat = React.memo(({navigation}: any) => {
   const {theme} = useTheme();
   const route = useRoute();
   const {
+    fetchChatListings,
     fetchChatDetails,
     chatDetails,
     chat_loading,
@@ -196,12 +207,14 @@ const Chat = React.memo(({navigation}: any) => {
     onlineUsers,
     updateChatUnreadCount,
     user,
+    imageUploading,
+    setImageUploading,
   } = useBoundStore();
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = useState(false);
   const [selectedImage, setImage] = useState(null);
   const [isReportVisible, setIsReportVisible] = useState(false);
-  const [imageUploading, setImageUploading] = useState(false);
+  // const [imageUploading, setImageUploading] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -210,7 +223,7 @@ const Chat = React.memo(({navigation}: any) => {
     updateChatUnreadCount(items.propertyId, 0);
   }, [items.propertyId]);
 
-  const handleLocationSelected = (location: { mapLink: any; }) => {
+  const handleLocationSelected = (location: {mapLink: any}) => {
     handleSendLocation(location.mapLink);
   };
 
@@ -221,7 +234,11 @@ const Chat = React.memo(({navigation}: any) => {
     [navigation],
   );
 
-  const pickImageLibrary = useCallback(() => {
+  const pickImageLibrary = useCallback(async () => {
+    const hasPermission = await requestImageLibraryPermission();
+    if (!hasPermission) {
+      return;
+    }
     launchImageLibrary(
       {
         mediaType: 'photo',
@@ -237,7 +254,11 @@ const Chat = React.memo(({navigation}: any) => {
     );
   }, []);
 
-  const pickCamera = useCallback(() => {
+  const pickCamera = useCallback(async () => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) {
+      return;
+    }
     launchCamera(
       {
         mediaType: 'photo',
@@ -262,7 +283,7 @@ const Chat = React.memo(({navigation}: any) => {
       return [];
     }
 
-    setImageUploading(true); // start loader
+    setImageUploading({[items.propertyId]: true}); // start loader
 
     try {
       const processedImages = await checkImageValidation(images);
@@ -270,7 +291,6 @@ const Chat = React.memo(({navigation}: any) => {
       if (!processedImages.length) {
         return [];
       }
-      console.log(processedImages);
 
       // Prepare and upload inside Promise.all
       const uploadedUrls = await Promise.allSettled(
@@ -300,7 +320,7 @@ const Chat = React.memo(({navigation}: any) => {
       console.log('Upload error:', error);
       return [];
     } finally {
-      setImageUploading(false); // stop loader
+      setImageUploading({[items.propertyId]: false}); // stop loader
     }
   };
 
@@ -309,9 +329,11 @@ const Chat = React.memo(({navigation}: any) => {
       sendImageUrlToApi(url),
     );
 
-    return Promise.all(uploadPromises)
+    return Promise.allSettled(uploadPromises)
       .then(responses => {
-        return responses.map(res => res.data); // Extract actual response data
+        fetchChatDetails(items.propertyId);
+        fetchChatListings();
+        return responses.map(res => res); // Extract actual response data
       })
       .catch(error => {
         console.error('Upload error:', error);
@@ -335,27 +357,27 @@ const Chat = React.memo(({navigation}: any) => {
       bearerToken,
     });
   };
-   const handleSendLocation = async (message: string) => {
-      let payload = {
-        roomId: items.propertyId,
-        type: 'location',
-        status: 'sent',
-        // @ts-ignore
-        body: message?.join(),
-        createdAt: new Date().toISOString(),
-        messageId: uuid.v4(),
-      };
-      updateChat(payload);
-      try {
-        const res = sendChat(payload, {
-          token,
-          clientId,
-          bearerToken,
-        });
-        console.log(res);
-      } catch (error) {
-        console.log(error);
-      }
+  const handleSendLocation = async (message: string) => {
+    let payload = {
+      roomId: items.propertyId,
+      type: 'location',
+      status: 'sent',
+      // @ts-ignore
+      body: message?.join(),
+      createdAt: new Date().toISOString(),
+      messageId: uuid.v4(),
+    };
+    updateChat(payload);
+    try {
+      const res = sendChat(payload, {
+        token,
+        clientId,
+        bearerToken,
+      });
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleSend = async (message: string) => {
@@ -454,7 +476,9 @@ const Chat = React.memo(({navigation}: any) => {
           <LoadImage selectedImage={selectedImage} setImage={setImage} />
         )}
 
-        {imageUploading && <UploadImage theme={theme} />}
+        {imageUploading?.[items.propertyId] === true && (
+          <UploadImage theme={theme} />
+        )}
 
         <ChatFooter
           setAttachModalVisible={setAttachModalVisible}

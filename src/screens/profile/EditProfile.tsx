@@ -29,6 +29,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@theme/ThemeProvider';
 import {compressImage} from '../../helpers/ImageCompressor';
 import Toast from 'react-native-toast-message';
+import {requestImageLibraryPermission} from '../../helpers/CommonHelper';
 const EditProfile = () => {
   const {
     user,
@@ -113,7 +114,11 @@ const EditProfile = () => {
       // updateCOntact({[updateVar.name]: updateVar.val, otp: arg});
     }
   };
-  const pick = useCallback(() => {
+  const pick = useCallback(async () => {
+    const hasPermission = await requestImageLibraryPermission();
+    if (!hasPermission) {
+      return;
+    }
     launchImageLibrary(
       {
         mediaType: 'photo',

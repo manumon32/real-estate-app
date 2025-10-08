@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {StyleSheet, View, Text, FlatList, Pressable, Alert} from 'react-native';
+import {StyleSheet, View, Text, FlatList, Pressable} from 'react-native';
 
 import Image from 'react-native-fast-image';
 
@@ -10,16 +10,8 @@ import ImagePickerModal from '@components/Modal/ImagePickerModal';
 import ImageUploadSkeleton from '@components/SkeltonLoader/ImageUploadSkeleton';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
-import {Platform} from 'react-native';
-
-import {
-  PERMISSIONS,
-  check,
-  RESULTS,
-  request,
-  openSettings,
-} from 'react-native-permissions';
 import { checkImageValidationCrop } from '../../helpers/ImageCompressor';
+import { requestCameraPermission } from '../../helpers/CommonHelper';
 
 // import {compressImage} from '../../helpers/ImageCompressor';
 
@@ -83,29 +75,6 @@ const Step5MediaUpload = (props: any) => {
     [setFieldValue, values.floorPlanUrl],
   );
 
-  const requestPermission = useCallback(async () => {
-    if (Platform.OS === 'android') {
-      const permission = PERMISSIONS.ANDROID.CAMERA;
-
-      let status = await check(permission);
-
-      if (status === RESULTS.DENIED) {
-        status = await request(permission);
-      }
-
-      if (status === RESULTS.BLOCKED) {
-        Alert.alert(
-          'Permission Required',
-          'Please Camera permission in settings to continue.',
-          [
-            {text: 'Cancel', style: 'cancel'},
-            {text: 'Open Settings', onPress: () => openSettings()},
-          ],
-        );
-      }
-    }
-    return true; // iOS handled by CameraRoll automatically
-  }, []);
 
   const scrollToEnd = (arg = false) => {
     if (!arg && values.imageUrls.length > 0 && flatListRef.current) {
@@ -139,8 +108,8 @@ const Step5MediaUpload = (props: any) => {
   };
 
   useEffect(() => {
-    requestPermission();
-  }, [requestPermission]);
+    requestCameraPermission();
+  }, []);
 
   const renderItem = useCallback(
     ({item}: {item: any}) => {

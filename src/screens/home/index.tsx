@@ -39,7 +39,7 @@ function Index({navigation}: any): React.JSX.Element {
       DeviceInfo.getModel(),
       DeviceInfo.getSystemVersion(),
     ]).then(([deviceId, version, model, osVersion]) => ({
-      deviceId: deviceId || '123456',
+      deviceId: deviceId,
       appVersion: version || '',
       deviceModel: model,
       osVersion: osVersion,
@@ -67,32 +67,6 @@ function Index({navigation}: any): React.JSX.Element {
   const getAppConfigData = useCallback(() => {
     getConfigData();
   }, []);
-
-  /** Handle deep links */
-  // const handleDeepLink = useCallback(
-  //   (event: {url: string}) => {
-  //     const url = event.url;
-  //     const match = url.match(/details\/(\w+)/);
-  //     if (match) {
-  //       const propertyId = match[1];
-  //       navigation.navigate('Details', {items: {_id: propertyId}});
-  //     }
-  //   },
-  //   [navigation],
-  // );
-
-  // /** Setup deep link listeners */
-  // useEffect(() => {
-  //   const subscription = Linking.addEventListener('url', handleDeepLink);
-
-  //   Linking.getInitialURL().then(url => {
-  //     if (url) {
-  //       setDeepLink({url});
-  //     }
-  //   });
-
-  //   return () => subscription.remove();
-  // }, [handleDeepLink]);
 
   /** Initialize app state when focused */
   useFocusEffect(
