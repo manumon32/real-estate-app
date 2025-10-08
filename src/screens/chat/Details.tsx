@@ -31,6 +31,7 @@ import ChatDetailSkeleton from '@components/SkeltonLoader/ChatDetailSkeleton';
 import ReportUserModal from './ReportUserModal';
 import Toast from 'react-native-toast-message';
 import {checkImageValidation} from '../../helpers/ImageCompressor';
+import ChatMessageSuggestions from './ChatMessageSuggestions';
 
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -58,55 +59,75 @@ const ChatFooter = React.memo(
     }, []);
     const isActive = items.property?.adStatus === 'active';
 
+    const suggestions = [
+      'Is this still available?',
+      'I’m interested, can you share more details?',
+      'When can I visit?',
+      'Can you lower the price?',
+    ];
+
     return (
       <View
-        style={[
-          styles.chatcontainer,
-          {backgroundColor: theme.colors.background},
-        ]}>
-        {!isActive && (
-          <Text style={styles.disabledtext}>
-            This ad is disabled by the owner.
-          </Text>
-        )}
-        {isActive && (
-          <>
-            <TouchableOpacity
-              onPress={() => !imageUploading && setAttachModalVisible(true)}>
-              <Icon
-                name="plus"
-                onPress={() => !imageUploading && setAttachModalVisible(true)}
-                size={28}
-                color={theme.colors.text}
+        style={{
+          backgroundColor: '#fff',
+          borderTopWidth: 0.5,
+          borderTopColor: '#6A6A6A40',
+        }}>
+        <ChatMessageSuggestions
+          suggestions={suggestions}
+          onSelectSuggestion={text => {
+            handleSend(text);
+          }}
+        />
+        <View
+          style={[
+            styles.chatcontainer,
+            {backgroundColor: theme.colors.background},
+          ]}>
+          {!isActive && (
+            <Text style={styles.disabledtext}>
+              This ad is disabled by the owner.
+            </Text>
+          )}
+          {isActive && (
+            <>
+              <TouchableOpacity
+                onPress={() => !imageUploading && setAttachModalVisible(true)}>
+                <Icon
+                  name="plus"
+                  onPress={() => !imageUploading && setAttachModalVisible(true)}
+                  size={28}
+                  color={theme.colors.text}
+                />
+              </TouchableOpacity>
+              <TextInput
+                ref={inputRef}
+                mode="outlined"
+                placeholder="Say something..."
+                value={message}
+                onChangeText={setMessage}
+                style={[styles.input]}
+                theme={{roundness: 50}}
+                outlineColor="#F5F6FA"
+                activeOutlineColor="#c1c1c1ff"
               />
-            </TouchableOpacity>
-            <TextInput
-              ref={inputRef}
-              mode="outlined"
-              placeholder="Say something..."
-              value={message}
-              onChangeText={setMessage}
-              style={[styles.input]}
-              theme={{roundness: 50}}
-              outlineColor="#F5F6FA"
-              activeOutlineColor="#c1c1c1ff"
-            />
-            <TouchableOpacity
-              onPress={() => {
-                if (message?.trim()) {
-                  setMessage(null);
-                  handleSend(message);
-                }
-              }}>
-              <Icon
-                name="send"
-                size={30}
-                disabled={!message?.trim()}
-                color={theme.colors.text}
-              />
-            </TouchableOpacity>
-          </>
-        )}
+              <TouchableOpacity
+                onPress={() => {
+                  if (message?.trim()) {
+                    setMessage(null);
+                    handleSend(message);
+                  }
+                }}>
+                <Icon
+                  name="send"
+                  size={30}
+                  disabled={!message?.trim()}
+                  color={theme.colors.text}
+                />
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
       </View>
     );
   },
@@ -188,6 +209,10 @@ const Chat = React.memo(({navigation}: any) => {
     fetchChatDetails(items.propertyId);
     updateChatUnreadCount(items.propertyId, 0);
   }, [items.propertyId]);
+
+  const handleLocationSelected = (location: { mapLink: any; }) => {
+    handleSendLocation(location.mapLink);
+  };
 
   const renderAdItem = useCallback(
     (items: any) => {
@@ -309,6 +334,28 @@ const Chat = React.memo(({navigation}: any) => {
       clientId,
       bearerToken,
     });
+  };
+   const handleSendLocation = async (message: string) => {
+      let payload = {
+        roomId: items.propertyId,
+        type: 'location',
+        status: 'sent',
+        // @ts-ignore
+        body: message?.join(),
+        createdAt: new Date().toISOString(),
+        messageId: uuid.v4(),
+      };
+      updateChat(payload);
+      try {
+        const res = sendChat(payload, {
+          token,
+          clientId,
+          bearerToken,
+        });
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+      }
   };
 
   const handleSend = async (message: string) => {
@@ -432,6 +479,17 @@ const Chat = React.memo(({navigation}: any) => {
         onPickDocument={() => {
           setAttachModalVisible(false);
         }}
+        onShareLocation={() => {
+          setAttachModalVisible(false);
+          setTimeout(
+            () =>
+              navigation.navigate('MapPickerScreen', {
+                items,
+                onLocationSelected: handleLocationSelected,
+              }),
+            200,
+          );
+        }}
       />
 
       <ReportUserModal
@@ -485,9 +543,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 8,
-    backgroundColor: '#fff',
-    borderTopWidth: 0.5,
-    borderTopColor: '#6A6A6A40',
   },
   disabledtext: {
     color: 'red',

@@ -16,6 +16,7 @@ interface AttachModalProps {
   onPickCamera: () => void;
   onPickGallery: () => void;
   onPickDocument?: () => void;
+  onShareLocation?: () => void;
 }
 
 const AttachFileModal: React.FC<AttachModalProps> = ({
@@ -23,6 +24,7 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
   onClose,
   onPickCamera,
   onPickGallery,
+  onShareLocation
   // onPickDocument,
 }) => {
   const insets = useSafeAreaInsets();
@@ -55,6 +57,10 @@ const AttachFileModal: React.FC<AttachModalProps> = ({
           <Text style={styles.optionText}>Gallery</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.option} onPress={onShareLocation}>
+          <Icon name="image" size={24} color="#2F8D79" />
+          <Text style={styles.optionText}>Share Location</Text>
+        </TouchableOpacity>
         {/* {onPickDocument && (
           <TouchableOpacity style={styles.option} onPress={onPickDocument}>
             <Icon name="file-document" size={24} color="#2F8D79" />

@@ -107,7 +107,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
         // @ts-ignore
         blurRadius={isActive ? 0 : 10} // Blur the image if the ad is not active
       />
-      {avatarUrl && (
+      {
         <View
           style={{
             borderRadius: 100,
@@ -123,7 +123,11 @@ const MessageCard: React.FC<MessageCardProps> = ({
               width: 32,
               borderRadius: 50,
             }}
-            source={{uri: avatarUrl}}
+            source={
+              avatarUrl
+                ? {uri: avatarUrl}
+                : require('@assets/images/user-avatar.png')
+            }
           />
           {onlineStatus && (
             <MaterialCommunityIcons
@@ -134,7 +138,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
             />
           )}
         </View>
-      )}
+      }
       <View style={styles.textContainer}>
         <View style={styles.headerRow}>
           <View style={{flexDirection: 'row', width: '80%'}}>
@@ -209,6 +213,20 @@ const MessageCard: React.FC<MessageCardProps> = ({
                   unreadCount <= 0 && {fontFamily: Fonts.REGULAR},
                 ]}>
                 {' Image'}
+              </Text>
+            </View>
+          )}
+          {type === 'location' && isActive && (
+            <View style={{flexDirection: 'row', width: '100%'}}>
+              <Icon name="map-marker" size={16} color={theme.colors.text} />
+              <Text
+                numberOfLines={2}
+                style={[
+                  styles.message,
+                  {color: theme.colors.text},
+                  unreadCount <= 0 && {fontFamily: Fonts.REGULAR},
+                ]}>
+                {' Location'}
               </Text>
             </View>
           )}
@@ -324,7 +342,7 @@ const Chat = React.memo(({navigation}: any) => {
     (item: any) => {
       return (
         <MessageCard
-          name={item?.item?.user?.name ?? 'User'}
+          name={item?.item?.user?.name ?? 'Hotplotz User'}
           type={item?.item?.lastMessage?.type ?? 'message'}
           message={item?.item?.lastMessage?.body}
           navigation={navigation}
@@ -346,14 +364,8 @@ const Chat = React.memo(({navigation}: any) => {
             setSelectedChats([item?.item?._id]);
           }}
           onSelect={id => toggleSelectChat(id)}
-          coverImage={
-            item?.item?.property?.coverImage ??
-            'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_items_boosted&w=740'
-          }
-          avatarUrl={
-            item?.item?.user?.profilePicture ??
-            'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_items_boosted&w=740'
-          }
+          coverImage={item?.item?.property?.coverImage}
+          avatarUrl={item?.item?.user?.profilePicture}
         />
       );
     },
@@ -522,28 +534,28 @@ const Chat = React.memo(({navigation}: any) => {
 
   const reportUsers = async (data: any) => {
     console.log(selectedChat);
-      const uploadParams = {token, clientId, bearerToken};
-      try {
-        let payload = {
-          reportedBy: user._id,
-          reportedUser: selectedChat,
-          status: 'pending',
-          ...data,
-        };
-        await reportUser(payload, uploadParams);
-        Toast.show({
-          type: 'success',
-          text1: 'Reported sucessfully',
-          position: 'bottom',
-        });
-      } catch (err) {
-        Toast.show({
-          type: 'error',
-          text1: 'Something went wrong',
-          position: 'bottom',
-        });
-      }
-    };
+    const uploadParams = {token, clientId, bearerToken};
+    try {
+      let payload = {
+        reportedBy: user._id,
+        reportedUser: selectedChat,
+        status: 'pending',
+        ...data,
+      };
+      await reportUser(payload, uploadParams);
+      Toast.show({
+        type: 'success',
+        text1: 'Reported sucessfully',
+        position: 'bottom',
+      });
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong',
+        position: 'bottom',
+      });
+    }
+  };
 
   return (
     <SafeAreaView

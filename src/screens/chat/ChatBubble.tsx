@@ -1,5 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import ImageViewerModal from '@components/Modal/ImageViewerModal';
+import PropertyMap from '@components/PropertyMap';
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
@@ -11,6 +12,9 @@ import {
   Image,
   TouchableOpacity,
   Keyboard,
+  Platform,
+  Linking,
+  Alert,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -30,6 +34,28 @@ export default function ChatBubble(props: any) {
   const items = props?.items?.items?.item ?? {};
   let left = !items?.senderId || items?.senderId === user?._id;
   const {theme} = useTheme();
+  let locationDetails = [];
+  if (items.type === 'location') {
+    locationDetails = items?.body?.split(',');
+  }
+
+  const openMap = (latitude: any, longitude: any) => {
+    const scheme = Platform.select({
+      ios: 'maps:0,0?q=',
+      android: 'geo:0,0?q=',
+    });
+    const latLng = `${latitude},${longitude}`;
+    const label = 'Custom Location';
+    const url = Platform.select({
+      ios: `${scheme}${label}@${latLng}`,
+      android: `${scheme}${latLng}(${label})`,
+    });
+
+    Linking.openURL(url!).catch(() => {
+      Alert.alert('Error', 'Unable to open the map app.');
+    });
+  };
+
   return (
     <>
       <ImageViewerModal
@@ -45,21 +71,23 @@ export default function ChatBubble(props: any) {
               style={styles.avatar}
             />
           )}
-          <View style={styles.messageWrapper}>
+          <View
+            style={[
+              styles.messageWrapper,
+              items.type === 'location' && styles.messageWrapperLocation,
+            ]}>
             {/* <Text style={styles.name}>Arnold Schurli</Text> */}
 
             <View
               style={[
-                styles.bubbleleft,
+                items.type !== 'location' && styles.bubbleleft,
                 {backgroundColor: theme.colors.chatBubbleLeft},
               ]}>
               {items.type == 'image' && (
                 <TouchableOpacity onPress={() => setVisible(true)}>
                   <Image
                     source={{
-                      uri:
-                        items.body ??
-                        'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?semt=ais_items_boosted&w=740',
+                      uri: items.body,
                     }}
                     style={styles.imageStyle}
                   />
@@ -70,6 +98,21 @@ export default function ChatBubble(props: any) {
               )}
             </View>
 
+            {items.type === 'location' && (
+              // <View style={[styles.bubble]}>
+              <TouchableOpacity
+                onPress={() => {
+                  openMap(locationDetails[0], locationDetails[1]);
+                }}>
+                <PropertyMap
+                  latitude={Number(locationDetails[0])}
+                  longitude={Number(locationDetails[1])}
+                  height={150} // optional
+                  zoomDelta={0.01} // optional
+                />
+              </TouchableOpacity>
+              // </View>
+            )}
             <Text style={[styles.timestamp, {color: theme.colors.text}]}>
               {getTimeAgo(new Date(items?.createdAt)?.getTime())}
             </Text>
@@ -77,7 +120,11 @@ export default function ChatBubble(props: any) {
         </View>
       ) : (
         <View style={styles.containerRight}>
-          <View style={styles.messageWrapper}>
+          <View
+            style={[
+              styles.messageWrapper,
+              items.type === 'location' && styles.messageWrapperLocation,
+            ]}>
             {items.type == 'image' && (
               <TouchableOpacity
                 onPress={async () => {
@@ -98,6 +145,21 @@ export default function ChatBubble(props: any) {
               <View style={[styles.bubble]}>
                 <Text style={[styles.messageTextRight]}>{items?.body}</Text>
               </View>
+            )}
+            {items.type === 'location' && (
+              // <View style={[styles.bubble]}>
+              <TouchableOpacity
+                onPress={() => {
+                  openMap(locationDetails[0], locationDetails[1]);
+                }}>
+                <PropertyMap
+                  latitude={Number(locationDetails[0])}
+                  longitude={Number(locationDetails[1])}
+                  height={150} // optional
+                  zoomDelta={0.01} // optional
+                />
+              </TouchableOpacity>
+              // </View>
             )}
             <View style={styles.recieveContainer}>
               <MaterialCommunityIcons
@@ -126,13 +188,13 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginVertical: 12,
+    marginVertical: 5,
     marginHorizontal: 16,
   },
   containerRight: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginVertical: 12,
+    marginVertical: 5,
     marginHorizontal: 16,
   },
   avatar: {
@@ -144,6 +206,10 @@ const styles = StyleSheet.create({
   },
   messageWrapper: {
     maxWidth: '80%',
+  },
+
+  messageWrapperLocation: {
+    width: '60%',
   },
   name: {
     color: '#282A37',

@@ -24,7 +24,6 @@ import {useNavigation} from '@react-navigation/native';
 import IconButton from '@components/Buttons/IconButton';
 import {useTheme} from '@theme/ThemeProvider';
 import Button from '@components/Buttons/Button';
-import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import Toast from 'react-native-toast-message';
 
 // import PropertyCard from '@components/PropertyCard';
@@ -39,6 +38,7 @@ import {navigate} from '@navigation/RootNavigation';
 import CustomDummyLoader from '@components/SkeltonLoader/CustomDummyLoader';
 import DateTimeModal from '@components/Modal/DateTimeModal';
 import SimilarAds from './SimilarAds';
+import PropertyMap from '@components/PropertyMap';
 
 const AdStatusEnum: any = {
   pending: 'Pending',
@@ -142,20 +142,6 @@ const PropertyDetails = React.memo(() => {
       </View>
     );
   }, []);
-
-  const isValidLatLng = (lat: any, lng: any): boolean => {
-    const latNum = parseFloat(lat);
-    const lngNum = parseFloat(lng);
-
-    return (
-      !isNaN(latNum) &&
-      !isNaN(lngNum) &&
-      latNum >= -90 &&
-      latNum <= 90 &&
-      lngNum >= -180 &&
-      lngNum <= 180
-    );
-  };
 
   const renderNearby = useCallback((item: any, index: number) => {
     return (
@@ -1016,7 +1002,13 @@ const PropertyDetails = React.memo(() => {
               property?.location?.coordinates[0],
             );
           }}>
-          {Platform.OS === 'android' &&
+          <PropertyMap
+            latitude={Number(property?.location?.coordinates[1])}
+            longitude={Number(property?.location?.coordinates[0])}
+            height={150} // optional
+            zoomDelta={0.01} // optional
+          />
+          {/* {Platform.OS === 'android' &&
             isValidLatLng(
               property?.location?.coordinates[1],
               property?.location?.coordinates[0],
@@ -1055,7 +1047,7 @@ const PropertyDetails = React.memo(() => {
                 }}
               />
             </MapView>
-          )}
+          )} */}
         </TouchableOpacity>
 
         <View style={styles.divider} />
