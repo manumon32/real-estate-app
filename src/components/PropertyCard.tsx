@@ -93,11 +93,11 @@ const PropertyCard = React.memo(
         style={[
           styles.card,
           {
-            bottom: arg ? 30 : 0,
-            top: arg ? -30 : 10,
             backgroundColor: theme.colors.background,
             borderColor: theme.colors.text,
-            borderWidth: isDarkMode ? 0.2 : 0,
+            borderWidth: isDarkMode ? 0.2 : Platform.OS === 'android' ? 0 : 0.2,
+            bottom: arg ? 30 : 0,
+            top: arg ? -30 : 10,
             width: horizontal ? '90%' : '47%',
           },
         ]}
@@ -126,14 +126,7 @@ const PropertyCard = React.memo(
           {/* Lazy Favorite button */}
           {(!user?._id || user?._id !== items.customerId) && (
             <Suspense fallback={<View style={styles.heart} />}>
-              <FavoriteButton
-                item={items}
-                tuchableStyle={{
-                  position: 'absolute',
-                  top: 4,
-                  right: 4,
-                }}
-              />
+              <FavoriteButton item={items} tuchableStyle={styles.favoriteBtn} />
             </Suspense>
           )}
         </View>
@@ -151,11 +144,11 @@ const PropertyCard = React.memo(
           </Text>
 
           {/* Address */}
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={styles.addressRow}>
             <IconButton
               iconSize={16}
               iconColor={theme.colors.text}
-              iconName={'map-marker'}
+              iconName="map-marker"
             />
             <Text
               numberOfLines={1}
@@ -190,7 +183,6 @@ const PropertyCard = React.memo(
 const styles = StyleSheet.create({
   card: {
     left: Platform.OS === 'android' ? 2 : 0,
-    width: '47%',
     backgroundColor: '#fff',
     borderRadius: 12,
     overflow: 'hidden',
@@ -225,8 +217,20 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
   },
+  favoriteBtn: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+  },
   content: {
     padding: 5,
+  },
+  price: {
+    fontSize: 16,
+    fontFamily: Fonts.MEDIUM,
+    fontWeight: 'bold',
+    marginTop: 4,
+    marginVertical: 6,
   },
   title: {
     fontSize: 14,
@@ -237,6 +241,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginVertical: 2,
     maxWidth: 150,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   infoRow: {
     flexDirection: 'row',
@@ -252,13 +260,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.REGULAR,
     fontWeight: '400',
-  },
-  price: {
-    fontSize: 16,
-    fontFamily: Fonts.MEDIUM,
-    fontWeight: 'bold',
-    marginTop: 4,
-    marginVertical: 6,
   },
 });
 

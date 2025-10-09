@@ -47,8 +47,8 @@ const ReportAdModal = ({visible, onClose, onSubmit}: any) => {
         <View style={styles.backdrop}>
           <KeyboardAvoidingView
             style={{flex: 1, justifyContent: 'flex-end'}}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+            behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 10}>
             <View style={styles.modal}>
               {/* Header */}
               <View style={styles.header}>

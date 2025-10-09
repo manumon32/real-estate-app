@@ -191,6 +191,8 @@ const PropertyDetails = React.memo(() => {
 
   const createRoom = async (payload: any) => {
     let newpayload = {...payload, postOwnerId: payload.postOwnerId?._id};
+
+    console.log('newpayload', newpayload);
     try {
       const res = await createRoomAPI(newpayload, {
         token,
@@ -624,7 +626,7 @@ const PropertyDetails = React.memo(() => {
                 setShowModal(true);
               } else {
                 // @ts-ignore
-                navigation.navigate('Appointments', {
+                navigation.replace('Appointments', {
                   items: {type: 'requestedAppointments'},
                 });
               }

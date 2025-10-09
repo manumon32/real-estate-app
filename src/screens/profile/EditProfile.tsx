@@ -29,7 +29,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@theme/ThemeProvider';
 import {compressImage} from '../../helpers/ImageCompressor';
 import Toast from 'react-native-toast-message';
-import {requestImageLibraryPermission} from '../../helpers/CommonHelper';
+// import {requestImageLibraryPermission} from '../../helpers/CommonHelper';
 const EditProfile = () => {
   const {
     user,
@@ -115,10 +115,10 @@ const EditProfile = () => {
     }
   };
   const pick = useCallback(async () => {
-    const hasPermission = await requestImageLibraryPermission();
-    if (!hasPermission) {
-      return;
-    }
+    // const hasPermission = await requestImageLibraryPermission();
+    // if (!hasPermission) {
+    //   return;
+    // }
     launchImageLibrary(
       {
         mediaType: 'photo',
@@ -189,7 +189,7 @@ const EditProfile = () => {
             }}
             rightButtonLoading={updateLoading || loading}
             rightButtonDisabled={
-              (!name || !image) ||
+              (!name && !image) ||
               !(name !== user.name || image !== user.profilePicture)
             }
           />

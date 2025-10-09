@@ -34,6 +34,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import Toast from 'react-native-toast-message';
 import {checkImageValidation} from '../../helpers/ImageCompressor';
+import {requestCameraPermission} from '../../helpers/CommonHelper';
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -141,7 +142,11 @@ const Verification = ({navigation}: any) => {
     );
   }, []);
 
-  const pickCamera = useCallback(() => {
+  const pickCamera = useCallback(async () => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) {
+      return;
+    }
     launchCamera(
       {
         mediaType: 'photo',
@@ -331,7 +336,7 @@ const Verification = ({navigation}: any) => {
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <CommonHeader
-        title={items?.user?.name ?? 'Loan Offers123'}
+        title={items?.user?.name ?? 'Loan Offers'}
         textColor="#171717"
       />
       <KeyboardAvoidingView
@@ -358,7 +363,8 @@ const Verification = ({navigation}: any) => {
               <View style={styles.textWrapper}>
                 {items.status === 'verified' && (
                   <Text style={[styles.text, {color: theme.colors.text}]}>
-                    This property is eligible for loan from {items.name}.
+                    This property is eligible for loan
+                    {items.name ? ' from' + items.name : '.'}.
                   </Text>
                 )}
                 {(items.status === 'pending' ||

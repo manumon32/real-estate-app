@@ -214,6 +214,7 @@ const PostAdContainer = (props: any) => {
   const handleSkeletonStateChange = useCallback((isLoading: boolean) => {
     setIsSkeletonLoading(isLoading);
   }, []);
+  console.log('values', values);
 
   const getMergedFields = useCallback(
     (id: any, argFields: string[]) => {

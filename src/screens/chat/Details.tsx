@@ -442,7 +442,7 @@ const Chat = React.memo(({navigation}: any) => {
     <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <CommonHeader
         onlineStatus={onlineUsers.includes(items.user?._id)}
-        title={items.user?.name ?? 'Chats'}
+        title={items?.user?.name ? items?.user?.name : 'Hotplotz user'}
         textColor="#171717"
         rightIcon="flag-outline"
         onRightPress={() => {
@@ -476,7 +476,7 @@ const Chat = React.memo(({navigation}: any) => {
             styles.flatListContainer,
             {
               backgroundColor: theme.colors.background,
-              minHeight: chat_loading ? 0 : '90%',
+              minHeight: chat_loading ? 0 : '50%',
             },
           ]}
           showsVerticalScrollIndicator={false}

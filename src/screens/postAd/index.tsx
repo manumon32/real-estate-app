@@ -57,6 +57,7 @@ const PostAd = () => {
     carpetArea: '',
     builtUpArea: '',
     superBuiltUpArea: '',
+    listedById: null,
     nearbyLandmarks: [
       {
         name: 'School',
@@ -117,6 +118,7 @@ const PostAd = () => {
         facingDirectionId: [newInitialValues.facingDirectionId?._id],
         numberOfBedrooms: [String(newInitialValues.numberOfBedrooms)],
         numberOfBathrooms: [String(newInitialValues.numberOfBedrooms)],
+        listedById: [newInitialValues.listedById?._id],
         state: newInitialValues.state,
         country: newInitialValues.country,
         district: newInitialValues.district,
@@ -128,6 +130,8 @@ const PostAd = () => {
         ...newInitialValues,
         // @ts-ignore
         listingTypeId: newInitialValues.listingTypeId?._id,
+        // @ts-ignore
+        listedById: newInitialValues.listedById?._id,
         // @ts-ignore
         propertyTypeId: newInitialValues.propertyTypeId?._id,
         amenityIds: amenityIds,

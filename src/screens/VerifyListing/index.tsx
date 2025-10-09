@@ -35,6 +35,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {checkImageValidation} from '../../helpers/ImageCompressor';
+import { requestCameraPermission } from '../../helpers/CommonHelper';
 
 // import SlideToRecordButton from './AudioRecord';
 // import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -162,7 +163,11 @@ const Verification = ({navigation}: any) => {
     }
   };
 
-  const pickCamera = useCallback(() => {
+  const pickCamera = useCallback( async () => {
+    const hasPermission = await requestCameraPermission();
+        if (!hasPermission) {
+          return;
+        }
     launchCamera(
       {
         mediaType: 'photo',

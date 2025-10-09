@@ -403,7 +403,7 @@ const MyAds = () => {
       <FlatList
         data={
           filterBy
-            ? myAds.filter((items: any) => items.adStatus == filterBy)
+            ? myAds.filter((items: any) => items.adStatus === filterBy)
             : myAds
         }
         renderItem={renderAdItem}

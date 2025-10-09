@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo} from 'react';
+import React, {useMemo} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import useBoundStore from '@stores/index';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -9,14 +9,9 @@ interface FilterChipsProps {
   theme: any;
 }
 
-const FilterChips: React.FC<FilterChipsProps> = ({
-  setFilters,
-  fetchFilterListings,
-  theme,
-}) => {
-  const {filters, filter_loading, clearFilterList, appConfigs} =
-    useBoundStore();
-  const {listingTypes = []}: any = appConfigs;
+const FilterChips: React.FC<FilterChipsProps> = ({setFilters, theme}) => {
+  const {filters, clearFilterList, appConfigs} = useBoundStore();
+  const {listingTypes = [], propertyTypes}: any = appConfigs;
 
   // 🔹 Get all listing type names from IDs
   const listingTypeNames = useMemo(() => {
@@ -31,6 +26,17 @@ const FilterChips: React.FC<FilterChipsProps> = ({
       .filter(Boolean) as {id: string; name: string}[];
   }, [filters.listingTypeId, listingTypes]);
 
+  const propertyTypeNames = useMemo(() => {
+    if (!filters.propertyTypeId || !Array.isArray(filters.propertyTypeId)) {
+      return [];
+    }
+    return filters.propertyTypeId
+      .map((id: string) => {
+        const item = propertyTypes.find((lt: {_id: string}) => lt._id === id);
+        return item ? {id: item._id, name: item.name} : null;
+      })
+      .filter(Boolean) as {id: string; name: string}[];
+  }, [filters.propertyTypeId, propertyTypes]);
 
   // 🔹 Remove a single listingTypeId
   const handleRemoveListingType = async (id: string) => {
@@ -40,10 +46,44 @@ const FilterChips: React.FC<FilterChipsProps> = ({
     clearFilterList();
     setFilters({...filters, listingTypeId: updatedIds});
   };
-
+  const handleRemovePropertyType = async (id: string) => {
+    const updatedIds = filters.propertyTypeId.filter(
+      (listingId: string) => listingId !== id,
+    );
+    clearFilterList();
+    setFilters({...filters, propertyTypeId: updatedIds});
+  };
   return (
     <View
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      {propertyTypeNames.map(({id, name}) => (
+        <View
+          key={id}
+          style={[
+            styles.chip,
+            filters.orderBy === 'distance' && styles.chipSelected,
+          ]}>
+          <TouchableOpacity
+            // eslint-disable-next-line react-native/no-inline-styles
+            style={{flexDirection: 'row', alignItems: 'center'}}
+            onPress={() => handleRemovePropertyType(id)}>
+            <Text
+              style={[
+                styles.chipText,
+                {color: theme.colors.text},
+                filters.orderBy === 'distance' && styles.chipTextSelected,
+              ]}>
+              {name}
+            </Text>
+            <MaterialCommunityIcons
+              name="close"
+              size={12}
+              color={filters.orderBy === 'distance' ? '#fff' : '#666'}
+              style={{}}
+            />
+          </TouchableOpacity>
+        </View>
+      ))}
       {listingTypeNames.map(({id, name}) => (
         <View
           key={id}

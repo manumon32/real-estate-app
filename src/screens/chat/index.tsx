@@ -342,8 +342,14 @@ const Chat = React.memo(({navigation}: any) => {
     (item: any) => {
       return (
         <MessageCard
-          name={item?.item?.user?.name ?? 'Hotplotz User'}
-          type={item?.item?.lastMessage?.type ?? 'message'}
+          name={
+            item?.item?.user?.name ? item?.item?.user?.name : 'Hotplotz User'
+          }
+          type={
+            item?.item?.lastMessage?.type
+              ? item?.item?.lastMessage?.type
+              : 'message'
+          }
           message={item?.item?.lastMessage?.body}
           navigation={navigation}
           title={item?.item?.property.title}

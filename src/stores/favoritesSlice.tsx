@@ -55,13 +55,6 @@ export const createFavoritesSlice = (set: any, get: any): FavoritesSlice => ({
     set({favoritesLoading: true});
     try {
       let filters = {};
-      if (get().location?.lat && get().location?.lng) {
-        filters = {
-          filter_near: [get().location?.lat, get().location?.lng, 1000].join(
-            ',',
-          ),
-        };
-      }
       const res = await fetchFavoritessAPI(filters, {
         token: get().token,
         clientId: get().clientId,

@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {StyleSheet, View, Text} from 'react-native';
 import TextInput from '@components/Input/textInput';
 import {Fonts} from '@constants/font';
@@ -23,6 +23,8 @@ const Step1BasicInfo = (props: any) => {
 
   const {appConfigs} = useBoundStore();
   const {theme} = useTheme();
+  const valueInputRef = useRef(null);
+  const descriptionInputRef = useRef(null);
 
   const PROPERTY_TYPES = appConfigs?.propertyTypes || [];
   const LISTING_TYPES = appConfigs?.listingTypes || [];
@@ -48,6 +50,13 @@ const Step1BasicInfo = (props: any) => {
     {name: '4', _id: '4', filterName: 'numberOfBathrooms'},
     {name: '4+', _id: '5', filterName: 'numberOfBathrooms'},
   ];
+
+  useEffect(() => {
+    if (touched?.title && errors?.title && valueInputRef.current) {
+      // @ts-ignore
+      valueInputRef.current?.focus();
+    }
+  }, [errors, touched]);
 
   // const scrollRefs = useRef<ScrollView[]>([]);
   // const ITEM_WIDTH = 80;
@@ -194,7 +203,8 @@ const Step1BasicInfo = (props: any) => {
             Title*
           </Text>
           {/* <TextInput onChangeText={() => {}} placeholder="Property Title" /> */}
-          <TextInput
+          <TextInput // @ts-ignore
+            ref={valueInputRef}
             placeholder="Property Title"
             value={values?.title}
             onChangeText={text => setFieldValue('title', text)}
@@ -218,7 +228,8 @@ const Step1BasicInfo = (props: any) => {
             ]}>
             Additional information*
           </Text>
-          <TextInput
+          <TextInput // @ts-ignore
+            ref={descriptionInputRef}
             onChangeText={text => setFieldValue('description', text)}
             value={values?.description}
             placeholder="Property Description"

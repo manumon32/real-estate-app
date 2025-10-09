@@ -9,6 +9,7 @@ import {
 import useBoundStore from '@stores/index';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useTheme} from '@theme/ThemeProvider';
+import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import {
   View,
   Text,
@@ -20,6 +21,7 @@ import {
   useColorScheme,
   ScrollView,
   Image,
+  useWindowDimensions,
   ActivityIndicator,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -29,6 +31,9 @@ import AdsListSkelton from '@components/SkeltonLoader/AdsListSkelton';
 import NoChats from '@components/NoChatFound';
 import Toast from 'react-native-toast-message';
 import RejectReasonModal from './RejectReasonModal';
+import {createRoomAPI} from '@api/services';
+import {getSocket} from '@soket/index';
+
 // import PropertyCard from '@components/PropertyCard';
 
 interface ListingCardProps {
@@ -46,6 +51,11 @@ interface ListingCardProps {
   updateStatus: any;
   setIsReportVisible: any;
   setSelectedItem: any;
+  sendSocket: any;
+  setChatRoomId: any;
+  token: any;
+  clientId: any;
+  bearerToken: any;
 }
 
 const FormattedDate = (arg: string | number | Date) => {
@@ -78,9 +88,59 @@ const ListingCard: React.FC<ListingCardProps> = ({
   updateStatus,
   setIsReportVisible,
   setSelectedItem,
+  sendSocket,
+  setChatRoomId,
+  token,
+  clientId,
+  bearerToken,
 }) => {
   const [loading, setLoading] = useState(false);
   const isDarkMode = useColorScheme() === 'dark';
+
+  const createRoom = async (payload: any, property: any, user: any) => {
+    setLoading(true);
+    let newpayload = {...payload, postOwnerId: payload.postOwnerId};
+    console.log('newpayload', newpayload);
+    try {
+      const res = await createRoomAPI(newpayload, {
+        token,
+        clientId,
+        bearerToken,
+      });
+      console.log(res);
+
+      setLoading(false);
+      if (res?._id) {
+        sendSocket(newpayload);
+        setChatRoomId({[newpayload.propertyId]: res?._id});
+        console.log('propertyId', {
+          ...payload,
+          propertyId: res?._id,
+        });
+        console.log(user);
+        // @ts-ignore
+        navigation.navigate('ChatDetails', {
+          items: {
+            ...payload,
+            propertyId: res?._id,
+            property: {
+              ...property,
+              coverImage: property?.imageUrls[0] ?? null,
+            },
+            user: user,
+          },
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log('error', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong',
+        position: 'bottom',
+      });
+    }
+  };
   const {label, backgroundColor, textColor} = useMemo(() => {
     switch (status) {
       case 'pending':
@@ -209,42 +269,72 @@ const ListingCard: React.FC<ListingCardProps> = ({
           </View>
         </View>
       </TouchableOpacity>
-      {filterBy === 'myAppointments' && status === 'pending' && (
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            onPress={() => {
-              setSelectedItem(items);
-              setIsReportVisible(true);
-            }}
-            style={styles.outlinedButton}>
-            <Text style={[styles.buttonText, {color: theme.colors.text}]}>
-              Reject
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setLoading(true);
-              updateStatus({
-                status: 'scheduled',
-                propertyId: items.propertyId._id,
-                appointmentId: items._id,
-                note: '',
-              });
-            }}
-            style={styles.boostButton}>
-            {loading && (
-              <ActivityIndicator
-                size={'small'}
-                color={theme.colors.background}
-              />
-            )}
-            {!loading && <Text style={[styles.boostButtonText]}>Accept</Text>}
-          </TouchableOpacity>
-        </View>
-      )}
+
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          onPress={() => {
+            let payload = {
+              propertyId: items.propertyId?._id,
+              postOwnerId: items?.ownerId?._id
+                ? items?.ownerId?._id
+                : items?.userId?._id,
+            };
+            createRoom(
+              payload,
+              items.propertyId,
+              items?.ownerId?._id ? items?.ownerId : items?.userId,
+            );
+          }}
+          style={styles.chatButton}>
+          {loading && (
+            <ActivityIndicator size={'small'} color={theme.colors.background} />
+          )}
+          {!loading && <Text style={[styles.boostButtonText]}>Chat</Text>}
+        </TouchableOpacity>
+        {filterBy === 'myAppointments' && status === 'pending' && (
+          <>
+            <TouchableOpacity
+              onPress={() => {
+                setSelectedItem(items);
+                setIsReportVisible(true);
+              }}
+              style={styles.outlinedButton}>
+              <Text style={[styles.buttonText, {color: theme.colors.text}]}>
+                Reject
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setLoading(true);
+                updateStatus({
+                  status: 'scheduled',
+                  propertyId: items.propertyId._id,
+                  appointmentId: items._id,
+                  note: '',
+                });
+              }}
+              style={styles.boostButton}>
+              {loading && (
+                <ActivityIndicator
+                  size={'small'}
+                  color={theme.colors.background}
+                />
+              )}
+              {!loading && <Text style={[styles.boostButtonText]}>Accept</Text>}
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
+      {/* {status === 'scheduled' && ( */}
+      <View style={styles.buttonRow}></View>
+      {/* )} */}
     </View>
   );
 };
+
+const FirstRoute = () => <View style={[styles.scene]}></View>;
+
+const SecondRoute = () => <View style={[styles.scene]}></View>;
 
 const Appointments = () => {
   const {
@@ -252,16 +342,32 @@ const Appointments = () => {
     fetchAppointments,
     appointmentsLoading,
     updateAppointments,
+    setChatRoomId,
+    token,
+    clientId,
+    bearerToken,
   } = useBoundStore();
   const route: any = useRoute();
   const items: any = route?.params?.items;
 
   const [filterBy, setFilterBy] = useState<string>('myAppointments');
+
+  const [filterByStatus, setFilterByStatus] = useState<any>(null);
   const [isReportVisible, setIsReportVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>({});
 
   const navigation = useNavigation();
   const {theme} = useTheme();
+
+  const sendSocket = (payload: any) => {
+    const socket = getSocket();
+
+    if (socket?.connected) {
+      socket.emit('newRoomCreated', payload);
+    } else {
+      console.log('Socket is not connected yet');
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -303,11 +409,20 @@ const Appointments = () => {
           navigation={navigation}
           items={items.item}
           theme={theme}
-          name={items.item?.ownerId.name || ''}
+          name={
+            items.item?.ownerId.name ||
+            items.item?.userId.name ||
+            'Hotplotz User'
+          }
           filterBy={filterBy}
           updateStatus={updateStatus}
           setIsReportVisible={setIsReportVisible}
           setSelectedItem={setSelectedItem}
+          sendSocket={sendSocket}
+          setChatRoomId={setChatRoomId}
+          token={token}
+          clientId={clientId}
+          bearerToken={bearerToken}
         />
       );
     },
@@ -315,15 +430,20 @@ const Appointments = () => {
   );
 
   const listFooter = () => {
+    const isEmpty = filterByStatus
+      ? // @ts-ignore
+        appointments[filterBy].filter(
+          (item: {status: any}) => item.status === filterByStatus,
+        ).length === 0
+      : // @ts-ignore
+        appointments[filterBy].length === 0;
     return (
       <>
         {/* @ts-ignore */}
-        {appointmentsLoading && appointments?.[filterBy].length === 0 && (
-          <AdsListSkelton />
-        )}
+        {appointmentsLoading && isEmpty && <AdsListSkelton />}
         {!appointmentsLoading &&
           // @ts-ignore
-          appointments?.[filterBy].length === 0 && (
+          isEmpty && (
             <NoChats
               onExplore={() => {
                 // @ts-ignore
@@ -340,12 +460,40 @@ const Appointments = () => {
     );
   };
 
+  const layout = useWindowDimensions();
+  const [index, setIndex] = React.useState(0);
+  const [routes] = React.useState([
+    {key: 'first', title: 'Requests'},
+    {key: 'second', title: 'My Appointments'},
+  ]);
+
+  const renderScene = SceneMap({
+    first: FirstRoute,
+    second: SecondRoute,
+  });
+
+  useEffect(() => {
+    setIndex(filterBy === 'myAppointments' ? 0 : 1);
+  }, [filterBy]);
+
+  useEffect(() => {
+    setFilterBy(index === 0 ? 'myAppointments' : 'requestedAppointments');
+    setFilterByStatus(null);
+  }, [index]);
+
   return (
     <SafeAreaView
       style={{backgroundColor: theme.colors.background, height: '100%'}}>
       <FlatList
-        // @ts-ignore
-        data={appointments[filterBy]}
+        data={
+          filterByStatus
+            ? // @ts-ignore
+              appointments[filterBy].filter(
+                (item: {status: any}) => item.status === filterByStatus,
+              )
+            : // @ts-ignore
+              appointments[filterBy]
+        }
         renderItem={renderAdItem}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -362,46 +510,94 @@ const Appointments = () => {
               textColor="#171717"
               // onBackPress={onBackPress}
             />
+
+            <TabView
+              navigationState={{index, routes}}
+              renderScene={renderScene}
+              onIndexChange={setIndex}
+              initialLayout={{width: layout.width}}
+              renderTabBar={props => (
+                <TabBar
+                  {...props}
+                  indicatorStyle={{backgroundColor: '#007bff'}}
+                  style={{backgroundColor: 'white'}}
+                  activeColor="#007bff"
+                  inactiveColor="black"
+                />
+              )}
+            />
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{padding: 10}}
               style={{flexDirection: 'row'}}>
               <TouchableOpacity
-                style={[
-                  styles.chip,
-                  filterBy === 'myAppointments' && styles.chipSelected,
-                ]}
+                style={[styles.chip, !filterByStatus && styles.chipSelected]}
                 onPress={() => {
-                  setFilterBy('myAppointments');
+                  setFilterByStatus(null);
                 }}>
                 <Text
                   style={[
                     // newselected?.includes(item._id)
                     styles.chipText,
                     {color: theme.colors.text},
-                    filterBy === 'myAppointments' && styles.chipTextSelected,
+                    !filterByStatus && styles.chipTextSelected,
                   ]}>
-                  {'Requests'}
+                  {'All'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
                   styles.chip,
-                  filterBy === 'requestedAppointments' && styles.chipSelected,
+                  filterByStatus === 'pending' && styles.chipSelected,
                 ]}
                 onPress={() => {
-                  setFilterBy('requestedAppointments');
+                  setFilterByStatus('pending');
                 }}>
                 <Text
                   style={[
                     // newselected?.includes(item._id)
                     styles.chipText,
                     {color: theme.colors.text},
-                    filterBy === 'requestedAppointments' &&
-                      styles.chipTextSelected,
+                    filterByStatus === 'pending' && styles.chipTextSelected,
                   ]}>
-                  {'My Appointments'}
+                  {'Pending'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  filterByStatus === 'scheduled' && styles.chipSelected,
+                ]}
+                onPress={() => {
+                  setFilterByStatus('scheduled');
+                }}>
+                <Text
+                  style={[
+                    // newselected?.includes(item._id)
+                    styles.chipText,
+                    {color: theme.colors.text},
+                    filterByStatus === 'scheduled' && styles.chipTextSelected,
+                  ]}>
+                  {'Scheduled'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  filterByStatus === 'rejected' && styles.chipSelected,
+                ]}
+                onPress={() => {
+                  setFilterByStatus('rejected');
+                }}>
+                <Text
+                  style={[
+                    // newselected?.includes(item._id)
+                    styles.chipText,
+                    {color: theme.colors.text},
+                    filterByStatus === 'rejected' && styles.chipTextSelected,
+                  ]}>
+                  {'Rejected'}
                 </Text>
               </TouchableOpacity>
             </ScrollView>
@@ -497,6 +693,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#888',
   },
+  scene: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   price: {
     fontSize: 15,
     fontWeight: 'bold',
@@ -533,6 +734,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
+  chatButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: 'teal',
+    backgroundColor: 'teal',
+    borderRadius: 10,
+    paddingVertical: 10,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
   boostButton: {
     flex: 1,
     borderWidth: 1,
@@ -585,6 +796,25 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   chipTextSelected: {
+    color: '#fff',
+  },
+
+  chipSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginRight: 5,
+    // marginBottom: 5,
+  },
+  chipTextSecondary: {
+    color: '#333',
+    fontSize: 14,
+  },
+  chipTextSelectedSecondary: {
     color: '#fff',
   },
 });

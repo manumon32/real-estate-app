@@ -135,10 +135,10 @@ api.interceptors.response.use(
       clearTimeout((response.config as any)._toastTimer);
     }
 
-    if (response.config.method === 'get') {
-      const key = `CACHE:${response.config.url}`;
-      await AsyncStorage.setItem(key, JSON.stringify(response.data));
-    }
+    // if (response.config.method === 'get') {
+    //   const key = `CACHE:${response.config.url}`;
+    //   await AsyncStorage.setItem(key, JSON.stringify(response.data));
+    // }
     return response;
   },
   async error => {
@@ -157,14 +157,14 @@ api.interceptors.response.use(
       // logoutAndRedirect();
     }
 
-    if (error.config?.method === 'get') {
-      const key = `CACHE:${error.config.url}`;
-      const cached = await AsyncStorage.getItem(key);
-      if (cached) {
-        console.log('Returning cached response for', error.config.url);
-        return Promise.resolve({...error.response, data: JSON.parse(cached)});
-      }
-    }
+    // if (error.config?.method === 'get') {
+    //   const key = `CACHE:${error.config.url}`;
+    //   const cached = await AsyncStorage.getItem(key);
+    //   if (cached) {
+    //     console.log('Returning cached response for', error.config.url);
+    //     return Promise.resolve({...error.response, data: JSON.parse(cached)});
+    //   }
+    // }
 
     return Promise.reject(error);
   },
