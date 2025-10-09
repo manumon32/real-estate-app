@@ -1,7 +1,7 @@
 /* SimilarAds.tsx */
 import PropertyCard from '@components/PropertyCard';
 import React, {useEffect, useState, useMemo, useCallback} from 'react';
-import {View, FlatList, ActivityIndicator} from 'react-native';
+import {View, FlatList, ActivityIndicator, Text} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {fetchListingsFromAPI} from '@api/services';
 
@@ -12,6 +12,9 @@ interface SimilarAdsProps {
   propertyTypeId: any;
   location: any;
   propertyId: any;
+  sectionColor: any;
+  headerStyle: any;
+  theme: any;
 }
 
 const SimilarAds: React.FC<SimilarAdsProps> = ({
@@ -21,6 +24,9 @@ const SimilarAds: React.FC<SimilarAdsProps> = ({
   propertyTypeId,
   location,
   propertyId,
+  sectionColor,
+  headerStyle,
+  theme,
 }) => {
   const [ads, setAds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,18 +115,34 @@ const SimilarAds: React.FC<SimilarAdsProps> = ({
   if (!memoizedAds.length) return null;
 
   return (
-    <FlatList
-      data={memoizedAds}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      keyExtractor={keyExtractor}
-      renderItem={renderAdItem}
-      initialNumToRender={3}
-      maxToRenderPerBatch={5}
-      windowSize={7}
-      removeClippedSubviews
-      contentContainerStyle={{padding:5}}
-    />
+    <>
+      {memoizedAds.length > 0 && (
+        <Text style={[headerStyle, sectionColor, {marginBottom: 10}]}>
+          Similar Ads
+        </Text>
+      )}
+      <View
+        style={[
+          // eslint-disable-next-line react-native/no-inline-styles
+          {
+            backgroundColor: theme.colors.backgroundHome,
+            paddingBottom: 10,
+          },
+        ]}>
+        <FlatList
+          data={memoizedAds}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={keyExtractor}
+          renderItem={renderAdItem}
+          initialNumToRender={3}
+          maxToRenderPerBatch={5}
+          windowSize={7}
+          removeClippedSubviews
+          contentContainerStyle={{padding: 5}}
+        />
+      </View>
+    </>
   );
 };
 

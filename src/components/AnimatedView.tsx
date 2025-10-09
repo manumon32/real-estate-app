@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Animated } from 'react-native';
 
-const SlideInView = ({ children, direction = 'right', duration = 600 }:any) => {
+const SlideInView = ({ children, direction = 'right', duration = 600, style }:any) => {
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   const translateX = slideAnim.interpolate({
@@ -18,7 +18,7 @@ const SlideInView = ({ children, direction = 'right', duration = 600 }:any) => {
   }, [slideAnim, duration]);
 
   return (
-    <Animated.View style={{ transform: [{ translateX }] }}>
+    <Animated.View style={[{ transform: [{ translateX }] }, style]}>
       {children}
     </Animated.View>
   );

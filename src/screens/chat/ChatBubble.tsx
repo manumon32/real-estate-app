@@ -1,15 +1,17 @@
 /* eslint-disable react-native/no-inline-styles */
+import React, {useState} from 'react';
+import AudioPlayer from '@components/AudioPlayer';
 import ImageViewerModal from '@components/Modal/ImageViewerModal';
 import PropertyMap from '@components/PropertyMap';
 import {Fonts} from '@constants/font';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
-import React, {useState} from 'react';
+import Image from 'react-native-fast-image';
+
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   Keyboard,
   Platform,
@@ -74,13 +76,16 @@ export default function ChatBubble(props: any) {
           <View
             style={[
               styles.messageWrapper,
-              items.type === 'location' && styles.messageWrapperLocation,
+              (items.type === 'location' || items.type === 'voice') &&
+                styles.messageWrapperLocation,
             ]}>
             {/* <Text style={styles.name}>Arnold Schurli</Text> */}
 
             <View
               style={[
-                items.type !== 'location' && styles.bubbleleft,
+                items.type !== 'location' &&
+                  items.type !== 'voice' &&
+                  styles.bubbleleft,
                 {backgroundColor: theme.colors.chatBubbleLeft},
               ]}>
               {items.type == 'image' && (
@@ -88,6 +93,8 @@ export default function ChatBubble(props: any) {
                   <Image
                     source={{
                       uri: items.body,
+                      priority: Image.priority.normal,
+                      cache: Image.cacheControl.immutable,
                     }}
                     style={styles.imageStyle}
                   />
@@ -97,6 +104,14 @@ export default function ChatBubble(props: any) {
                 <Text style={styles.messageText}>{items?.body}</Text>
               )}
             </View>
+            {items.type === 'voice' && (
+              <AudioPlayer
+                filePath={
+                  // items.body ??
+                  'https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3'
+                }
+              />
+            )}
 
             {items.type === 'location' && (
               // <View style={[styles.bubble]}>
@@ -123,7 +138,8 @@ export default function ChatBubble(props: any) {
           <View
             style={[
               styles.messageWrapper,
-              items.type === 'location' && styles.messageWrapperLocation,
+              (items.type === 'location' || items.type === 'voice') &&
+                styles.messageWrapperLocation,
             ]}>
             {items.type == 'image' && (
               <TouchableOpacity
@@ -136,12 +152,14 @@ export default function ChatBubble(props: any) {
                 <Image
                   source={{
                     uri: items.body,
+                    priority: Image.priority.normal,
+                    cache: Image.cacheControl.immutable,
                   }}
                   style={styles.imageStyle}
                 />
               </TouchableOpacity>
             )}
-            {items.type == 'text' && (
+            {items.type === 'text' && (
               <View style={[styles.bubble]}>
                 <Text style={[styles.messageTextRight]}>{items?.body}</Text>
               </View>
@@ -160,6 +178,14 @@ export default function ChatBubble(props: any) {
                 />
               </TouchableOpacity>
               // </View>
+            )}
+            {items.type === 'voice' && (
+              <AudioPlayer
+                filePath={
+                  items.body ??
+                  'https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3'
+                }
+              />
             )}
             <View style={styles.recieveContainer}>
               <MaterialCommunityIcons

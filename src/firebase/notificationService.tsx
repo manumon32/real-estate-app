@@ -96,13 +96,14 @@ const TabSCREENS: any = {
 export const navigateByNotification = async (notification: INotification) => {
   const {token, clientId, bearerToken, updateNotificationCount} =
     useBoundStore.getState();
-
+    console.log('Test', notification)
   if (!navigationRef?.isReady() || !isReady) {
     pendingNotification = notification;
     return;
   }
 
   const {entityType, entityId, metadata, notificationId} = notification;
+
 
   if (!entityType) {
     navigationRef.navigate('Main' as never);
@@ -152,7 +153,7 @@ export const navigateByNotification = async (notification: INotification) => {
         // @ts-ignore
         'Main' as never,
         {
-          screen: 'Chat',
+          screen: 'Home',
           params,
         } as never,
       );

@@ -55,8 +55,8 @@ const EditProfile = () => {
   } = useBoundStore();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [name, setName] = useState(user?.name || '');
-  const [image, setImage] = useState<any>(user?.profilePicture);
+  const [name, setName] = useState(user?.name || null);
+  const [image, setImage] = useState<any>(user?.profilePicture || null);
   const [email, setEmail] = useState(user?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
   const [loginVar, setLoginVar] = useState('');
@@ -135,7 +135,7 @@ const EditProfile = () => {
   const updateData = async () => {
     var imageUrls: any = '';
     try {
-      if (image.uri) {
+      if (image?.uri) {
         setLoading(true);
         let formData = new FormData();
         const sizeInMB = image?.fileSize ? image.fileSize / (1024 * 1024) : 0;
@@ -189,6 +189,7 @@ const EditProfile = () => {
             }}
             rightButtonLoading={updateLoading || loading}
             rightButtonDisabled={
+              (!name || !image) ||
               !(name !== user.name || image !== user.profilePicture)
             }
           />
@@ -354,8 +355,10 @@ const EditProfile = () => {
                   <TextInput
                     placeholder="Phone Number"
                     value={phoneNumber}
+                    keyboardType="number-pad"
+                    maxLength={10}
                     onChangeText={text => {
-                      setPhoneNumber(text);
+                      setPhoneNumber(text.replace(/\D/g, ''));
                     }}
                     // onBlur={handleBlur('title')}
                     // error={touched?.title && errors?.title ? true : false}

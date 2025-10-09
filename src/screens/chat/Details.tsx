@@ -49,7 +49,15 @@ const MessageCard: React.FC<MessageCardProps> = (props: any) => {
 };
 
 const ChatFooter = React.memo(
-  ({theme, setAttachModalVisible, handleSend, items, imageUploading}: any) => {
+  ({
+    theme,
+    setAttachModalVisible,
+    handleSend,
+    items,
+    imageUploading,
+    user,
+  }: any) => {
+    console.log('items', items);
     const [message, setMessage] = React.useState<any>('');
     // @ts-ignore
     const inputRef = useRef<TextInput>(null);
@@ -77,12 +85,14 @@ const ChatFooter = React.memo(
           borderTopWidth: 0.5,
           borderTopColor: '#6A6A6A40',
         }}>
-        <ChatMessageSuggestions
-          suggestions={suggestions}
-          onSelectSuggestion={text => {
-            handleSend(text);
-          }}
-        />
+        {user?._id !== items.property?.customerId && (
+          <ChatMessageSuggestions
+            suggestions={suggestions}
+            onSelectSuggestion={text => {
+              handleSend(text);
+            }}
+          />
+        )}
         <View
           style={[
             styles.chatcontainer,
@@ -486,6 +496,7 @@ const Chat = React.memo(({navigation}: any) => {
           items={items}
           theme={theme}
           imageUploading={imageUploading}
+          user={user}
         />
       </KeyboardAvoidingView>
 

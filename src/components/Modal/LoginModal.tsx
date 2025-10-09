@@ -520,7 +520,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
                         setShowPopup(false);
                       }}
                       style={{
-                        backgroundColor: '#007bff',
+                        backgroundColor: '#2A9D8F',
                         borderRadius: 8,
                         paddingVertical: 8,
                         paddingHorizontal: 20,

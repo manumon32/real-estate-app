@@ -422,25 +422,17 @@ const PropertyDetails = React.memo(() => {
   const SimilarAdContainer = () => {
     return property?.listingTypeId?._id || property?.propertyTypeId?._id ? (
       <>
-        <Text style={[styles.section, sectionColor, {marginBottom: 10}]}>
-          Similar Ads
-        </Text>
-        <View
-          style={[
-            {
-              backgroundColor: theme.colors.backgroundHome,
-              paddingBottom: 10,
-            },
-          ]}>
-          <SimilarAds
-            token={token}
-            clientId={clientId}
-            listingTypeId={property?.listingTypeId?._id}
-            propertyTypeId={property?.propertyTypeId?._id}
-            location={location}
-            propertyId={details?._id}
-          />
-        </View>
+        <SimilarAds
+          token={token}
+          clientId={clientId}
+          listingTypeId={property?.listingTypeId?._id}
+          propertyTypeId={property?.propertyTypeId?._id}
+          location={location}
+          propertyId={details?._id}
+          sectionColor={sectionColor}
+          headerStyle={styles.section}
+          theme={theme}
+        />
       </>
     ) : (
       <></>

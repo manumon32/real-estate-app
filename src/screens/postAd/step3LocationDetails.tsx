@@ -5,7 +5,6 @@ import TextInput from '@components/Input/textInput';
 import {Fonts} from '@constants/font';
 import SlideInView from '../../components/AnimatedView';
 import CommonDistanceInput from '@components/Input/distanceInput';
-import {FieldArray} from 'formik';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
@@ -151,89 +150,6 @@ const Step3LocationDetails = (props: any) => {
           />
         </View>
       )}
-      <FieldArray name="nearbyLandmarks">
-        {({push, remove}) => (
-          <View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}>
-              <Text style={[styles.headingText, {color: theme.colors.text}]}>
-                Location Benefits
-              </Text>
-
-              <TouchableOpacity
-                onPress={() =>
-                  push({
-                    name: '',
-                    unit: 'Km',
-                    value: '0',
-                  })
-                }
-                style={styles.button}>
-                <MaterialCommunityIcons name="plus" size={18} color="#fff" />
-              </TouchableOpacity>
-            </View>
-            {values.nearbyLandmarks.map((item: any, index: any) => (
-              <View
-                key={index}
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}>
-                <View style={[styles.inputContainer, {width: '95%'}]}>
-                  <CommonDistanceInput
-                    label={item?.name}
-                    editable
-                    unit={item.unit}
-                    value={item.value}
-                    name={item.name}
-                    placeholderUnit="km"
-                    placeholderValue="5"
-                    placeholder="Railway Station"
-                    onChangeText={value => {
-                      setFieldValue(`nearbyLandmarks[${index}].name`, value);
-                    }}
-                    onChange={value =>
-                      setFieldValue(`nearbyLandmarks[${index}].value`, value)
-                    }
-                    onChangeUnit={value =>
-                      setFieldValue(`nearbyLandmarks[${index}].unit`, value)
-                    }
-                  />
-                  {(errors?.nearbyLandmarks?.[index]?.name ||
-                    errors?.nearbyLandmarks?.[index]?.value ||
-                    errors?.nearbyLandmarks?.[index]?.unit) && (
-                    <Text style={styles.error}>
-                      {'Please fill all fields '}
-                    </Text>
-                  )}
-                </View>
-                {index !== 0 && (
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (values.nearbyLandmarks.length > 1) {
-                        try {
-                          remove(index);
-                        } catch (errors) {}
-                      }
-                    }}
-                    style={styles.buttonClose}>
-                    <MaterialCommunityIcons
-                      name="close"
-                      size={18}
-                      color="#fff"
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-            ))}
-          </View>
-        )}
-      </FieldArray>
     </SlideInView>
   );
 };
