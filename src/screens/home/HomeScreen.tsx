@@ -287,7 +287,6 @@ function HomeScreen({navigation}: any): React.JSX.Element {
         showsVerticalScrollIndicator={false}
         onEndReachedThreshold={0.5}
         onEndReached={() => {
-          console.log('onEndReached');
           loadMore();
         }}
         refreshControl={refreshControl}
@@ -297,5 +296,4 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     </SafeAreaView>
   );
 }
-
 export default HomeScreen;

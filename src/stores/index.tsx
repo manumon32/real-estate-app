@@ -93,8 +93,8 @@ const useBoundStore = create<StoreState>()(
           chatDetails: state.chatDetails,
           // listings: state.listings,
         }),
-        onRehydrateStorage: () => state => {
-          console.log('🔄 Rehydrated Zustand state:', state);
+        onRehydrateStorage: () => {
+          // console.log('🔄 Rehydrated Zustand state:', state);
         },
       },
     ),

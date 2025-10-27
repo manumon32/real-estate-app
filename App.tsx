@@ -99,6 +99,8 @@ export default function App() {
         ref={navigationRef}
         linking={linking}
         theme={DefaultTheme}
+        // @ts-ignore
+        testID="root-navigator"
         onReady={onNavigationReady}>
         <RootNavigator />
 

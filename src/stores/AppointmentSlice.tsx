@@ -59,5 +59,5 @@ export const createAppointmentsSlice = (
       set({appointmentsLoading: false});
     }
   },
-  resetAppointments: () => set({appointments: []}),
+  resetAppointments: () => set({appointments: {myAppointments: [], requestedAppointments: []}}),
 });

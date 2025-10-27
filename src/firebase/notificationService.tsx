@@ -27,7 +27,7 @@ let isReady = false;
 let pendingNotification: INotification | null = null;
 
 export const requestUserPermission = async () => {
-  const {bearerToken} = useBoundStore.getState();
+  const {bearerToken} = useBoundStore?.getState();
   const messaging = getMessaging(getApp());
 
   if (Platform.OS === 'android' && Platform.Version >= 33) {

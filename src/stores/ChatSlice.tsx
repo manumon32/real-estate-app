@@ -109,7 +109,7 @@ export const createChatSlice = (set: any, get: any): ChatSlice => ({
         chat_loading: false,
       }));
     } catch (err: any) {
-      set({error: err.message, loading: false});
+      set({error: err.message, loading: false, chat_loading: false});
     }
   },
   updateChatUnreadCount: (roomId: string, count: number) => {

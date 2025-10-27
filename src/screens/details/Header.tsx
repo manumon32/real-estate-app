@@ -178,12 +178,11 @@ function Header(props: any): React.JSX.Element {
           </View>
         </View>
         <Carousel
-          loop
           width={width}
           height={360}
           autoPlay={false}
           data={details?.imageUrls}
-          scrollAnimationDuration={1000}
+          scrollAnimationDuration={1}
           onSnapToItem={index => {
             setCurrentIndex(index);
           }}
