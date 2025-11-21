@@ -2,7 +2,6 @@
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import NetInfo from '@react-native-community/netinfo';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid';
 import Toast from 'react-native-toast-message';
 import {createHmacSignature, createBodyHash} from './handshake';

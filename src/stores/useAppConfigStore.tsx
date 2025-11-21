@@ -40,10 +40,6 @@ export const createAppConfigStore = (set: any, get: any): AppConfigState => ({
         token: get().token,
         clientId: get().clientId,
       });
-      console.log({
-        token: get().token,
-        clientId: get().clientId,
-      });
       if (resp) {
         set({appConfigs: resp});
       }

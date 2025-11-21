@@ -19,7 +19,7 @@ export function navigateandReset() {
           // @ts-ignore
           name: 'Main',
           state: {
-            index: 0, // 'MyAds' is the 4th tab (0-based index)
+            index: 0,
             routes: [
               {name: 'Home'},
               {name: 'Chat'},

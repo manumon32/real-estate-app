@@ -1,6 +1,5 @@
 import React, {useEffect} from 'react';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
-import {Linking} from 'react-native';
 import {ThemeProvider} from '@theme/ThemeProvider';
 import RootNavigator from '@navigation/RootNavigator';
 import CommonLocationModal from '@components/Modal/LocationSearchModal';
@@ -47,29 +46,14 @@ export default function App() {
     },
   };
 
+  const fetchNavigationMode = async () => {
+    const navInfo = await getNavigationMode();
+    setNavigationMode(navInfo.type);
+  };
   useEffect(() => {
-    const fetchNavigationMode = async () => {
-      const navInfo = await getNavigationMode();
-      setNavigationMode(navInfo.type);
-    };
-
     fetchNavigationMode();
-  }, [setNavigationMode]); // no dependencies → runs only once on mount
-  // ✅ Ensure we handle links if NavigationContainer misses it
-  useEffect(() => {
-    const handleDeepLink = (event: {url: string}) => {
-      console.log('🔗 Incoming link:', event.url);
-    };
-
-    const subscription = Linking.addEventListener('url', handleDeepLink);
-
-    // Check if app was cold-started with a link
-    Linking.getInitialURL().then(url => {
-      if (url) console.log('🔗 Initial link:', url);
-    });
-
-    return () => subscription.remove();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // no dependencies → runs only once on mount
 
   useEffect(() => {
     requestUserPermission();

@@ -1,54 +1,52 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import HomeScreen from '@screens/home/HomeScreen';
 import BottomTabBar from '@components/BottomTabBar';
-import Chat from '@screens/chat';
-import FilterScreen from '@screens/filter/index';
-import MyAds from '@screens/MyAds';
-import Profile from '@screens/profile';
-import PostAd from '@screens/postAd';
-// import Settings from '@screens/profile/Settings';
-// import Notifications from '@screens/profile/Notifications';
-// import Communication from '@screens/profile/Communication';
-// import PrivacyPolicy from '@screens/PrivacyPolicy';
-// import TermsConditions from '@screens/TermsConditions';
+
+// 🚀 Lazy load screens (improves performance)
+const HomeScreen = React.lazy(() => import('@screens/home/HomeScreen'));
+const ChatScreen = React.lazy(() => import('@screens/chat'));
+const PostAdScreen = React.lazy(() => import('@screens/postAd'));
+const MyAdsScreen = React.lazy(() => import('@screens/MyAds'));
+const ProfileScreen = React.lazy(() => import('@screens/profile'));
+const FilterScreen = React.lazy(() => import('@screens/filter'));
 
 export type MainTabParamList = {
   Home: undefined;
   Chat: undefined;
   AddPost: undefined;
-  Profile: undefined;
   MyAds: undefined;
-  filter: undefined;
-  Settings: undefined;
-  Notifications: undefined;
-  Communication: undefined;
-  PrivacyPolicy: undefined;
-  TermsConditions: undefined;
+  Profile: undefined;
+  Filter: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+
 const MainTabNavigator = () => {
+  // Memoize screenOptions to avoid remounting
+  const screenOptions = useMemo(
+    () => ({
+      headerShown: false,
+      lazy: true, // RN Navigation lazy loading
+    }),
+    [],
+  );
+
   return (
-    <Tab.Navigator
-      // eslint-disable-next-line react/no-unstable-nested-components
-      tabBar={props => <BottomTabBar {...props} />}
-      backBehavior="initialRoute"
-      screenOptions={{headerShown: false}}>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Chat" component={Chat} />
-      <Tab.Screen name="AddPost" component={PostAd} />
-      <Tab.Screen name="MyAds" component={MyAds} />
-      <Tab.Screen
-        name="Profile"
-        component={Profile}
-        options={{
-          headerShown: false,
-          headerTitle: 'My Profile',
-        }}
-      />
-      <Tab.Screen name="filter" component={FilterScreen} />
-    </Tab.Navigator>
+    <React.Suspense fallback={null}>
+      <Tab.Navigator
+        screenOptions={screenOptions}
+        backBehavior="initialRoute"
+        tabBar={props => <BottomTabBar {...props} />}>
+        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Chat" component={ChatScreen} />
+        <Tab.Screen name="AddPost" component={PostAdScreen} />
+        <Tab.Screen name="MyAds" component={MyAdsScreen} />
+
+        <Tab.Screen name="Profile" component={ProfileScreen} />
+        {/* @ts-ignore */}
+        <Tab.Screen name="filter" component={FilterScreen} />
+      </Tab.Navigator>
+    </React.Suspense>
   );
 };
 

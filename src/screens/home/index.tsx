@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import useBoundStore from '@stores/index';
 import DeviceInfo from 'react-native-device-info';
@@ -14,7 +15,7 @@ import {Fonts} from '@constants/font';
 import {useFocusEffect} from '@react-navigation/native';
 import AppUpdateChecker from './AppUpdateChecker';
 
-function Index({navigation}: any): React.JSX.Element {
+function Index({}: any): React.JSX.Element {
   const {
     token,
     gethandShakeToken,
@@ -28,6 +29,7 @@ function Index({navigation}: any): React.JSX.Element {
   } = useBoundStore();
 
   const [error, setError] = useState(false);
+  const [retryLoading, setRetryLoading] = useState(false);
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -54,11 +56,22 @@ function Index({navigation}: any): React.JSX.Element {
   /** Fetch handshake data */
   const fetchData = useCallback(async () => {
     setError(false);
+    setRetryLoading(true);
     try {
       const data = await deviceInfo;
-      console.log('handshake payload', data);
-      gethandShakeToken(data);
+      await gethandShakeToken(data);
+      if (bearerToken) {
+        fetchFavouriteAds();
+      }
+      // 4️⃣ Fetch initial listings
+      fetchInitialListings();
+
+      // 3️⃣ App config + suggestions (parallel)
+      Promise.allSettled([getAppConfigData(), fetchSuggestions()]);
+
+      setRetryLoading(false);
     } catch (err) {
+      setRetryLoading(false);
       setError(true);
     }
   }, [deviceInfo]);
@@ -71,30 +84,40 @@ function Index({navigation}: any): React.JSX.Element {
   /** Initialize app state when focused */
   useFocusEffect(
     useCallback(() => {
+      let isActive = true; // Prevent updates after unmount
+
       const initialize = async () => {
         setError(false);
+
         try {
-          if (!token || !clientId) {
-            await fetchData();
-          } else {
-            if (bearerToken) {
-              fetchFavouriteAds();
-            }
-            Promise.allSettled([getAppConfigData(), fetchSuggestions()]);
-            fetchInitialListings();
-          }
+          // 1️⃣ First-time load (token/clientId missing)
+          const dataResult: any = await fetchData(); // <-- MUST succeed
+
+          // If fetchData failed or returned nothing, stop
+          if (!dataResult || !isActive) return;
+
+          // 2️⃣ Authenticated flow
         } catch (err) {
-          setError(true);
+          if (isActive) {
+            setError(true);
+          }
         }
       };
+
       initialize();
+
+      return () => {
+        isActive = false; // cleanup
+      };
     }, [
       token,
       clientId,
       bearerToken,
       fetchData,
+      fetchFavouriteAds,
       getAppConfigData,
-      navigation,
+      fetchSuggestions,
+      fetchInitialListings,
     ]),
   );
 
@@ -131,7 +154,8 @@ function Index({navigation}: any): React.JSX.Element {
             🔌 APP Initialization failed. Please try again.
           </Text>
           <TouchableOpacity style={styles.loginBtn} onPress={fetchData}>
-            <Text style={styles.loginText}>Retry</Text>
+            {!retryLoading && <Text style={styles.loginText}>Retry</Text>}
+            {retryLoading && <ActivityIndicator color={'#fff'} />}
           </TouchableOpacity>
         </View>
       )}
