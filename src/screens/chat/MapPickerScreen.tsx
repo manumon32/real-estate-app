@@ -75,7 +75,7 @@ const MapPickerScreen: React.FC<MapPickerScreenProps> = ({navigation}) => {
           {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
         );
       } catch (err) {
-        console.error(err);
+        console.log(err);
       }
     };
 

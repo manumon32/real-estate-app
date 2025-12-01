@@ -169,7 +169,7 @@ const LoginModal: React.FC<Props> = ({visible, onClose}) => {
           console.log("Can't handle email link");
         }
       })
-      .catch(err => console.error('An error occurred', err));
+      .catch(err => console.log('An error occurred', err));
   };
 
   useEffect(() => {

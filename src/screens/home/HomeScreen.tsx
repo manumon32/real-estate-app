@@ -9,7 +9,7 @@ import {
   BackHandler,
   ToastAndroid,
   AppState,
-  Linking,
+  // Linking,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@theme/ThemeProvider';
@@ -17,78 +17,81 @@ import useBoundStore from '@stores/index';
 import {connectSocket, disconnectSocket} from './../../soket';
 import {useFocusEffect} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+
 import {
   getMessaging,
   onMessage,
   onNotificationOpenedApp,
   getInitialNotification,
 } from '@react-native-firebase/messaging';
+
 import {
   navigateByNotification,
   requestUserPermission,
 } from '../../firebase/notificationService';
 
-// Lazy loaded components
+// ⛔️ Lazy-loading PropertyCard causes jank inside FlatList → use memo instead
+import PropertyCard from '@components/PropertyCard';
+
+// Lazy load only heavy non-list UI
 const Header = React.lazy(() => import('./Header/Header'));
-const PropertyCard = React.lazy(() => import('@components/PropertyCard'));
 const HomepageSkelton = React.lazy(
   () => import('@components/SkeltonLoader/HomepageSkelton'),
 );
 const NoChats = React.lazy(() => import('@components/NoChatFound'));
 
-function HomeScreen({navigation}: any): React.JSX.Element {
-  const {
-    listings,
-    fetchListings,
-    hasMore,
-    loading,
-    triggerRefresh,
-    setTriggerRefresh,
-    location,
-    setTriggerRelaod,
-    bearerToken,
-    fetchChatListings,
-  } = useBoundStore();
-
+function HomeScreen({navigation}: any) {
+  const listings = useBoundStore(s => s.listings);
+  const fetchListings = useBoundStore(s => s.fetchListings);
+  const hasMore = useBoundStore(s => s.hasMore);
+  const loading = useBoundStore(s => s.loading);
+  const triggerRefresh = useBoundStore(s => s.triggerRefresh);
+  const setTriggerRefresh = useBoundStore(s => s.setTriggerRefresh);
+  const location = useBoundStore(s => s.location);
+  const setTriggerRelaod = useBoundStore(s => s.setTriggerRelaod);
+  const bearerToken = useBoundStore(s => s.bearerToken);
+  const fetchChatListings = useBoundStore(s => s.fetchChatListings);
   const {theme} = useTheme();
   const isDarkMode = useColorScheme() === 'dark';
-  const prevLocationRef = useRef<any>(null);
-  const backPressedOnce = useRef(false);
-  const flatListRef = useRef<FlatList>(null);
-  // const onEndReachedCalled = useRef(false); // prevent multiple calls
-  const loadMoreRef = useRef<any>(null);
 
-  /** Double back press exit */
+  const flatListRef = useRef<FlatList>(null);
+  const prevLocationRef = useRef<any>(null);
+  const onEndReachedCalledDuringMomentum = useRef(false);
+
+  /* --------------------- BACK PRESS EXIT --------------------- */
   useFocusEffect(
     useCallback(() => {
+      let backPressedOnce = false;
+
       const onBackPress = () => {
-        if (backPressedOnce.current) {
+        if (backPressedOnce) {
           BackHandler.exitApp();
           return true;
         }
-        backPressedOnce.current = true;
+        backPressedOnce = true;
         ToastAndroid.show('Press back again to exit', ToastAndroid.SHORT);
-        setTimeout(() => {
-          backPressedOnce.current = false;
-        }, 2000);
+        setTimeout(() => (backPressedOnce = false), 2000);
         return true;
       };
-      const backHandler = BackHandler.addEventListener(
+
+      const subscription = BackHandler.addEventListener(
         'hardwareBackPress',
         onBackPress,
       );
-      return () => backHandler.remove();
+
+      return () => subscription.remove();
     }, []),
   );
 
-  /** Connect socket when logged in */
+  /* --------------------- SOCKET MANAGEMENT --------------------- */
   useEffect(() => {
     if (bearerToken) {
       connectSocket();
     }
+    return () => disconnectSocket();
   }, [bearerToken]);
 
-  /** Fetch data when triggered refresh */
+  /* --------------------- PULL TO REFRESH --------------------- */
   useEffect(() => {
     if (triggerRefresh) {
       flatListRef.current?.scrollToOffset({offset: 0, animated: false});
@@ -96,31 +99,12 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     }
   }, [triggerRefresh]);
 
-  /** Load more data for pagination if onEndreached not triggered */
-  const onScroll = useCallback(
-    ({nativeEvent}: any) => {
-      const {layoutMeasurement, contentOffset, contentSize} = nativeEvent;
-      const isCloseToBottom =
-        layoutMeasurement.height + contentOffset.y >= contentSize.height - 100;
-      if (isCloseToBottom) {
-        console.log('CloseToBottom')
-        loadMore();
-      }
-    },
-    [loading, hasMore],
-  );
-
-  const loadMore = () => {
-    loadMoreRef.current = loadMoreRef.current ? loadMoreRef.current + 1 : 1;
-    if (!loading && hasMore) {
-      fetchListings();
-    }
-  };
-  /** Handle location changes */
+  /* --------------------- LOCATION CHANGE TRIGGER --------------------- */
   useEffect(() => {
-    const prevLat = prevLocationRef.current?.lat;
+    const oldLat = prevLocationRef.current?.lat;
     const newLat = location?.lat;
-    if (prevLat && newLat && prevLat !== newLat) {
+
+    if (oldLat && newLat && oldLat !== newLat) {
       setTriggerRelaod();
       flatListRef.current?.scrollToOffset({offset: 0, animated: false});
       fetchListings({pageNum: 1});
@@ -128,115 +112,68 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     prevLocationRef.current = location;
   }, [location]);
 
-  /** Handle app state changes */
+  /* --------------------- APP STATE --------------------- */
   useEffect(() => {
-    const handleAppStateChange = (nextState: string) => {
-      if (nextState === 'background' || nextState === 'inactive') {
+    const sub = AppState.addEventListener('change', next => {
+      if (next !== 'active') {
         disconnectSocket();
-      }
-      if (nextState === 'active' && bearerToken) {
+      } else if (bearerToken) {
         connectSocket();
         fetchChatListings();
       }
-    };
-    const subscription = AppState.addEventListener(
-      'change',
-      handleAppStateChange,
-    );
-    return () => subscription.remove();
+    });
+    return () => sub.remove();
   }, [bearerToken]);
 
-  /** Handle deep links */
-  const handleDeepLink = useCallback(
-    (event: {url: string}) => {
-      const url = event.url;
-      const match = url.match(/details\/(\w+)/);
-      if (match) {
-        const propertyId = match[1];
-        navigation.navigate('Details', {items: {_id: propertyId}});
-      }
-    },
-    [navigation],
-  );
-
-  /** Setup deep link listeners */
-  useEffect(() => {
-    const subscription = Linking.addEventListener('url', handleDeepLink);
-
-    Linking.getInitialURL().then(url => {
-      if (url) {
-        handleDeepLink({url});
-      }
-    });
-
-    return () => subscription.remove();
-  }, [handleDeepLink]);
-
-  /** Firebase notification handlers */
+  /* --------------------- NOTIFICATIONS --------------------- */
   useEffect(() => {
     requestUserPermission();
     const messaging = getMessaging();
 
-    const unsubscribeForeground = onMessage(messaging, remoteMessage => {
-      const data = remoteMessage?.data;
-      if (data?.type) {
+    const unsub1 = onMessage(messaging, msg => {
+      const d = msg?.data;
+      if (d?.type) {
         Toast.show({
           type: 'info',
-          text1: data?.title ? String(data.title) : 'Notification',
-          text2: data?.message ? String(data.message) : '',
+          text1: d?.title ? String(d.title) : 'Notification',
+          text2: d?.message ? String(d.message) : '',
           position: 'top',
-          onPress: () => navigateByNotification(data as any),
+          onPress: () => navigateByNotification(d as any),
         });
       }
     });
 
-    const unsubscribeOpenedApp = onNotificationOpenedApp(
-      messaging,
-      remoteMessage => {
-        const data = remoteMessage?.data;
-        if (data) {
-          navigateByNotification(data as any);
-        }
-      },
-    );
+    const unsub2 = onNotificationOpenedApp(messaging, msg => {
+      msg?.data && navigateByNotification(msg.data as any);
+    });
 
-    getInitialNotification(messaging).then(remoteMessage => {
-      if (remoteMessage?.data) {
-        navigateByNotification(remoteMessage.data as any);
-      }
+    getInitialNotification(messaging).then(msg => {
+      msg?.data && navigateByNotification(msg.data as any);
     });
 
     return () => {
-      unsubscribeForeground();
-      unsubscribeOpenedApp();
+      unsub1();
+      unsub2();
     };
-  }, [bearerToken]);
+  }, []);
 
-  /** Memoized render item */
-  const renderAdItem = useCallback(
+  /* --------------------- MEMOIZED RENDER ITEM --------------------- */
+  const renderItem = useCallback(
     ({item}: any) => (
-      <PropertyCard
-        items={item}
-        navigation={navigation}
-        arg={true}
-        showLocation
-      />
+      <PropertyCard items={item} navigation={navigation} arg showLocation />
     ),
     [navigation],
   );
 
-  /** Memoized header */
-  const MemoHeader = useMemo(
-    () => <Header navigation={navigation} />,
-    [navigation],
-  );
+  /* --------------------- HEADER --------------------- */
+  const ListHeader = useCallback(() => {
+    return <Header navigation={navigation} />;
+  }, [navigation]);
 
-  /** Footer component */
+  /* --------------------- FOOTER --------------------- */
   const ListFooter = useMemo(() => {
-    if (loading) {
-      return <HomepageSkelton />;
-    }
-    if (!loading && listings.length <= 0) {
+    if (loading) return <HomepageSkelton />;
+    if (!loading && listings.length === 0) {
       return (
         <NoChats
           icon="magnify-close"
@@ -249,51 +186,53 @@ function HomeScreen({navigation}: any): React.JSX.Element {
     return null;
   }, [loading, listings.length]);
 
-  /** Refresh control */
-  const refreshControl = useMemo(
-    () => (
-      <RefreshControl
-        refreshing={false}
-        onRefresh={setTriggerRefresh}
-        colors={['#40DABE', '#40DABE', '#227465']}
-      />
-    ),
-    [],
-  );
+  /* --------------------- PAGINATION --------------------- */
+  const loadMore = useCallback(() => {
+    if (loading || !hasMore || onEndReachedCalledDuringMomentum.current) return;
+    onEndReachedCalledDuringMomentum.current = true;
+    fetchListings();
+  }, [loading, hasMore]);
 
   return (
     <SafeAreaView
-      style={{backgroundColor: theme.colors.homepageSafeArea, flex: 1}}>
+      style={{flex: 1, backgroundColor: theme.colors.homepageSafeArea}}>
       <StatusBar
         barStyle={isDarkMode ? 'dark-content' : 'dark-content'}
         backgroundColor={theme.colors.homepageSafeArea}
       />
+
       <FlatList
         ref={flatListRef}
         data={listings}
-        renderItem={renderAdItem}
-        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+        renderItem={renderItem}
+        keyExtractor={item => item._id?.toString()}
         numColumns={2}
-        removeClippedSubviews
-        ListHeaderComponent={MemoHeader}
+        removeClippedSubviews={true}
+        initialNumToRender={12}
+        maxToRenderPerBatch={6}
+        updateCellsBatchingPeriod={80}
+        windowSize={7}
+        onMomentumScrollBegin={() =>
+          (onEndReachedCalledDuringMomentum.current = false)
+        }
+        onEndReachedThreshold={0.2}
+        onEndReached={loadMore}
+        ListHeaderComponent={ListHeader}
+        ListFooterComponent={ListFooter}
+        refreshControl={
+          <RefreshControl refreshing={false} onRefresh={setTriggerRefresh} />
+        }
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 100,
           backgroundColor:
             listings.length > 0
               ? theme.colors.backgroundHome
               : theme.colors.background,
-          minHeight: 900,
         }}
-        showsVerticalScrollIndicator={false}
-        onEndReachedThreshold={0.5}
-        onEndReached={() => {
-          loadMore();
-        }}
-        refreshControl={refreshControl}
-        ListFooterComponent={ListFooter}
-        onScroll={onScroll}
       />
     </SafeAreaView>
   );
 }
-export default HomeScreen;
+
+export default React.memo(HomeScreen);

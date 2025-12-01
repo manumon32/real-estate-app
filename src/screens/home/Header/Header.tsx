@@ -17,16 +17,29 @@ import SearchContent from './SearchContent';
 import HeaderIconContent from './HeaderIconContent';
 import useBoundStore from '@stores/index';
 
+import CommonLocationModal from '@components/Modal/LocationSearchModal';
+
+// const CommonLocationModal = React.lazy(
+//   () => import('@components/Modal/LocationSearchModal'),
+// );
+const GlobalSearchModal = React.lazy(
+  () => import('@components/Modal/GlobalSearchModal'),
+);
+
 function Header({navigation}: any): React.JSX.Element {
   const {theme} = useTheme();
-  const {
-    setlocationModalVisible,
-    location,
-    bearerToken,
-    setVisible,
-    notificationsCount,
-    listings,
-  } = useBoundStore();
+  const setlocationModalVisible = useBoundStore(s => s.setlocationModalVisible);
+  const location = useBoundStore(s => s.location);
+  const bearerToken = useBoundStore(s => s.bearerToken);
+  const setVisible = useBoundStore(s => s.setVisible);
+  const locationfetchLoading = useBoundStore(s => s.locationfetchLoading);
+  const notificationsCount = useBoundStore(s => s.notificationsCount);
+  const listings = useBoundStore(s => s.listings);
+  const setLocation = useBoundStore(s => s.setLocation);
+  const locationHistory = useBoundStore(s => s.locationHistory);
+  const locationModalvisible = useBoundStore(s => s.locationModalvisible);
+  const globalModalvisible = useBoundStore(s => s.globalModalvisible);
+  const setGlobalModalVisible = useBoundStore(s => s.setGlobalModalVisible);
 
   const backgroundStyle = {
     backgroundColor: theme.colors.background,
@@ -65,7 +78,11 @@ function Header({navigation}: any): React.JSX.Element {
               <Text
                 numberOfLines={1}
                 style={[styles.textStyle, {color: theme.colors.text}]}>
-                {location?.name || 'Kerala'}
+                {location?.default
+                  ? locationfetchLoading
+                    ? 'Fetching...'
+                    : location?.name || 'Kerala'
+                  : location?.name || 'Kerala'}
               </Text>
               <IconButton
                 iconSize={18}
@@ -105,6 +122,20 @@ function Header({navigation}: any): React.JSX.Element {
           <Text style={[styles.freshTextStyle, {color: theme.colors.text}]} />
         </View>
       )}
+      {globalModalvisible && (
+        <GlobalSearchModal
+          visible
+          onClose={setGlobalModalVisible}
+          onSelectLocation={setLocation}
+          locationHistory={locationHistory}
+        />
+      )}
+      <CommonLocationModal
+        visible={locationModalvisible}
+        onClose={setlocationModalVisible}
+        onSelectLocation={setLocation}
+        locationHistory={locationHistory}
+      />
     </>
   );
 }
@@ -173,4 +204,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Header;
+export default React.memo(Header);

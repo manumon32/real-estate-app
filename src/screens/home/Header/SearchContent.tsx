@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import SearchBar from '@components/SearchBar';
+// import SearchBar from '@components/SearchBar';
+const SearchBar = React.lazy(() => import('@components/SearchBar'));
 import IconButton from '@components/Buttons/IconButton';
 import {Fonts} from '@constants/font';
-import FilterModal from '@components/Filter';
+// import FilterModal from '@components/Filter';
+const FilterModal = React.lazy(() => import('@components/Filter'));
 
 import {useNavigation} from '@react-navigation/native';
 import useBoundStore from '@stores/index';
@@ -11,13 +13,11 @@ import useBoundStore from '@stores/index';
 function SearchContent(): React.JSX.Element {
   const [visible, setVisibles] = useState(false);
   const navigation = useNavigation();
-  const {
-    clearFilterList,
-    bearerToken,
-    setVisible,
-    setGlobalModalVisible,
-    resetFilters,
-  } = useBoundStore();
+  const clearFilterList = useBoundStore(s => s.clearFilterList);
+  const bearerToken = useBoundStore(s => s.bearerToken);
+  const setVisible = useBoundStore(s => s.setVisible);
+  const setGlobalModalVisible = useBoundStore(s => s.setGlobalModalVisible);
+  const resetFilters = useBoundStore(s => s.resetFilters);
   return (
     <>
       <View style={styles.container}>

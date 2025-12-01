@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useCallback, useEffect, useMemo} from 'react';
+import React, {useState, useCallback, useEffect, useMemo, useRef} from 'react';
 import {
   View,
   Text,
@@ -66,12 +66,13 @@ const GlobalSearchModal: React.FC<Props> = ({
   const [filterBy, setFilterBy] = useState<any>('');
   const [searchHistory, setSearchHistory] = useState<any>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
-
+  const textInputRef = useRef<any>(null);
   useEffect(() => {
     setQuery(location?.name ?? '');
-  }, [location]);
+  }, []);
 
   const {theme} = useTheme();
   const fetchPredictions = useCallback(async (text: string) => {
@@ -113,7 +114,7 @@ const GlobalSearchModal: React.FC<Props> = ({
 
       setPredictions(filtered || []);
     } catch (err) {
-      console.error('Prediction fetch failed', err);
+      console.log('Prediction fetch failed', err);
     }
   }, []);
 
@@ -178,7 +179,7 @@ const GlobalSearchModal: React.FC<Props> = ({
     return uniqueParts.join(', ');
   }
 
-  const checkAndRequestPermission = async () => {
+  const checkAndRequestPermission = useCallback(async () => {
     const permission =
       Platform.OS === 'ios'
         ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
@@ -207,10 +208,10 @@ const GlobalSearchModal: React.FC<Props> = ({
         ],
       );
     }
-  };
+  }, []);
 
   const fetchPlaceDetails = async (placeId: string) => {
-    setLoading(true);
+    // setLoading(true);
     const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`;
     try {
       const res = await fetch(url);
@@ -254,7 +255,7 @@ const GlobalSearchModal: React.FC<Props> = ({
         }
         name = components ? formatPlaceName(components) : name;
       }
-      onSelectLocation({
+      setSelectedLocation({
         name: name,
         lat: locations.lat,
         lng: locations.lng,
@@ -263,18 +264,17 @@ const GlobalSearchModal: React.FC<Props> = ({
         state: state_name,
         country: country_name,
       });
-      setQuery('');
+      setQuery(name);
       setPredictions([]);
       // onClose();
     } catch (err) {
-      console.error('Details fetch failed', err);
+      console.log('Details fetch failed', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    console.log('currentScreen', currentScreen);
     setFilterBy(currentScreen === 'Home' ? '' : filters?.searchText ?? '');
   }, [filters]);
 
@@ -285,17 +285,13 @@ const GlobalSearchModal: React.FC<Props> = ({
   const useCurrentLocation = () => {
     if (currentLocation?.name) {
       setQuery(currentLocation?.name ?? '');
-      onSelectLocation(currentLocation);
+      setCurrentLocation(currentLocation);
+      setSelectedLocation(currentLocation);
+      setFocusedIndex(0);
+      textInputRef.current?.focus();
     } else {
       checkAndRequestPermission();
     }
-  };
-
-  const setLocation = (updatelocation: any) => {
-    if ((!visible && location?.default) || visible) {
-      onSelectLocation(updatelocation);
-    }
-    setCurrentLocation(updatelocation);
   };
 
   const getCurrentLocation = async () => {
@@ -343,7 +339,7 @@ const GlobalSearchModal: React.FC<Props> = ({
           name = components ? formatPlaceName(components) : name;
         }
         console.log('locationslocationslocationslocationslocations', locations);
-        setLocation({
+        setCurrentLocation({
           name: name,
           lat: locations.lat,
           lng: locations.lng,
@@ -373,7 +369,11 @@ const GlobalSearchModal: React.FC<Props> = ({
   const renderItem = ({item}: {item: any}) => (
     <TouchableOpacity
       style={styles.item}
-      onPress={() => fetchPlaceDetails(item.place_id)}>
+      onPress={() => {
+        fetchPlaceDetails(item.place_id);
+        setFocusedIndex(0);
+        textInputRef.current?.focus();
+      }}>
       <MaterialCommunityIcons
         name="map-marker"
         size={20}
@@ -397,6 +397,7 @@ const GlobalSearchModal: React.FC<Props> = ({
     if (!arg && !menu && filterBy.trim().length === 0) {
       return;
     }
+    onSelectLocation(selectedLocation);
     resetFilters();
     clearFilterList();
     onClose();
@@ -462,6 +463,7 @@ const GlobalSearchModal: React.FC<Props> = ({
           <View style={styles.inputContainer}>
             <MaterialCommunityIcons name="magnify" size={20} color="#696969" />
             <TextInput
+              ref={textInputRef}
               value={filterBy}
               onChangeText={text => {
                 setFilterBy(text);
@@ -501,14 +503,7 @@ const GlobalSearchModal: React.FC<Props> = ({
                   keyExtractor={item => item.id.toString()}
                   renderItem={renderItemSearch}
                   keyboardShouldPersistTaps="handled"
-                  contentContainerStyle={{
-                    backgroundColor: '#fff',
-                    borderRadius: 12,
-                    borderColor: '#EBEBEB',
-                    borderWidth: 1,
-                    marginTop: 10,
-                    padding: 8,
-                  }}
+                  contentContainerStyle={styles.searchItemContainer}
                 />
               </View>
             )}
@@ -525,7 +520,7 @@ const GlobalSearchModal: React.FC<Props> = ({
               placeholderTextColor={theme.colors.background}
               style={[styles.input]}
               onFocus={() => setFocusedIndex(1)} // 👈 "Search" box focused
-              onBlur={() => setFocusedIndex(null)}
+              // onBlur={() => setFocusedIndex(null)}
               autoComplete="off" // disables autocomplete
               autoCorrect={false} // disables autocorrect
             />
@@ -544,26 +539,8 @@ const GlobalSearchModal: React.FC<Props> = ({
           </View>
 
           {focusedIndex === 0 && searchHistory.length > 0 && (
-            <View
-              style={{
-                backgroundColor: '#fff',
-                borderRadius: 12,
-                borderColor: '#EBEBEB',
-                borderWidth: 1,
-                marginTop: 10,
-                padding: 8,
-              }}>
-              {
-                <Text
-                  style={{
-                    fontSize: 14,
-                    marginTop: 15,
-                    color: '#696969',
-                    margin: 5,
-                  }}>
-                  Recent Searches
-                </Text>
-              }
+            <View style={styles.recentSearchContainer}>
+              {<Text style={styles.recentSearchTitle}>Recent Searches</Text>}
               {searchHistory?.map(
                 (item: string, index: number) =>
                   index <= 4 && (
@@ -591,10 +568,7 @@ const GlobalSearchModal: React.FC<Props> = ({
               <TouchableOpacity
                 style={styles.currentLocationBtn}
                 onPress={useCurrentLocation}>
-                <View
-                  style={{
-                    width: '10%',
-                  }}>
+                <View style={styles.locationIconWidth}>
                   <MaterialCommunityIcons
                     name="crosshairs-gps"
                     size={20}
@@ -606,26 +580,12 @@ const GlobalSearchModal: React.FC<Props> = ({
                     Use Current Location
                   </Text>
                   {!loading && currentLocation?.name && (
-                    <Text
-                      numberOfLines={1}
-                      style={{
-                        fontSize: 12,
-                        color: 'rgba(0, 0, 0, 0.55)',
-                        textAlign: 'left',
-                        maxWidth: 250,
-                      }}>
+                    <Text numberOfLines={1} style={styles.currentLocationName}>
                       {currentLocation?.name}
                     </Text>
                   )}
                   {loading && (
-                    <Text
-                      numberOfLines={1}
-                      style={{
-                        fontSize: 12,
-                        color: 'rgba(0, 0, 0, 0.55)',
-                        textAlign: 'left',
-                        maxWidth: 250,
-                      }}>
+                    <Text numberOfLines={1} style={styles.fetchingTextStyle}>
                       {'Fetching'}
                     </Text>
                   )}
@@ -633,7 +593,7 @@ const GlobalSearchModal: React.FC<Props> = ({
               </TouchableOpacity>
 
               {loading ? (
-                <ActivityIndicator style={{marginTop: 20}} />
+                <ActivityIndicator style={styles.topPadding} />
               ) : (
                 (predictions.length > 0 ||
                   locationHistory.filter(
@@ -644,27 +604,14 @@ const GlobalSearchModal: React.FC<Props> = ({
                     keyExtractor={item => item.place_id}
                     renderItem={renderItem}
                     keyboardShouldPersistTaps="handled"
-                    contentContainerStyle={{
-                      backgroundColor: '#fff',
-                      borderRadius: 12,
-                      borderColor: '#EBEBEB',
-                      borderWidth: 1,
-                      marginTop: 10,
-                      padding: 8,
-                    }}
+                    contentContainerStyle={styles.predictionItemContainer}
                     ListFooterComponent={
                       locationHistory.filter(
                         (item: {lat: any}) => currentLocation?.lat !== item.lat,
                       ).length > 0 ? (
                         <View>
                           {
-                            <Text
-                              style={{
-                                fontSize: 14,
-                                marginTop: 15,
-                                color: '#696969',
-                                margin: 5,
-                              }}>
+                            <Text style={styles.recentSearchTitle}>
                               Recent Searches
                             </Text>
                           }
@@ -676,7 +623,10 @@ const GlobalSearchModal: React.FC<Props> = ({
                                   key={index}
                                   style={styles.item}
                                   onPress={() => {
-                                    onSelectLocation(item);
+                                    setSelectedLocation(item);
+                                    setQuery(item.name);
+                                    setFocusedIndex(0);
+                                    textInputRef.current?.focus();
                                   }}>
                                   <MaterialCommunityIcons
                                     name="clock"
@@ -717,11 +667,37 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
+  recentSearchContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderColor: '#EBEBEB',
+    borderWidth: 1,
+    marginTop: 10,
+    padding: 8,
+  },
+  recentSearchTitle: {
+    fontSize: 14,
+    marginTop: 15,
+    color: '#696969',
+    margin: 5,
+  },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
     padding: 5,
+  },
+  predictionItemContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderColor: '#EBEBEB',
+    borderWidth: 1,
+    marginTop: 10,
+    padding: 8,
+  },
+  topPadding: {
+    marginTop: 20,
   },
   title: {
     fontSize: 18,
@@ -729,6 +705,15 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.MEDIUM,
     textAlign: 'center',
     color: '#171717',
+  },
+  currentLocationName: {
+    fontSize: 12,
+    color: 'rgba(0, 0, 0, 0.55)',
+    textAlign: 'left',
+    maxWidth: 250,
+  },
+  locationIconWidth: {
+    width: '10%',
   },
   inputContainer: {
     height: 48,
@@ -742,12 +727,26 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignItems: 'center',
   },
+  fetchingTextStyle: {
+    fontSize: 12,
+    color: 'rgba(0, 0, 0, 0.55)',
+    textAlign: 'left',
+    maxWidth: 250,
+  },
   input: {
     height: 48,
     width: '80%',
     borderRadius: 12,
     paddingHorizontal: 12,
     fontSize: 16,
+  },
+  searchItemContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderColor: '#EBEBEB',
+    borderWidth: 1,
+    marginTop: 10,
+    padding: 8,
   },
   item: {
     flexDirection: 'row',

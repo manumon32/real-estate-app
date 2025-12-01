@@ -264,7 +264,7 @@ const Step5MediaPreview: React.FC<Props> = ({
   //         throw new Error('Upload failed - no URL returned');
   //       }
   //     } catch (error) {
-  //       console.error('Retry upload failed:', error);
+  //       console.log('Retry upload failed:', error);
   //       // Mark as failed again
   //       // setFloorPlan(prev =>
   //       //   prev.map(item =>

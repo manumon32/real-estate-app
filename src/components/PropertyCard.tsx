@@ -8,13 +8,13 @@ import {
   Platform,
   useColorScheme,
 } from 'react-native';
-import Image from 'react-native-fast-image';
 import IconButton from '@components/Buttons/IconButton';
 // @ts-ignore
 import FeaturedIcon from '@assets/svg/featured.svg';
 import {Fonts} from '@constants/font';
 import {useTheme} from '@theme/ThemeProvider';
 import useBoundStore from '@stores/index';
+import FastImage from 'react-native-fast-image';
 
 // Lazy load favorite button
 const FavoriteButton = React.lazy(() => import('./FavoriteButton'));
@@ -47,6 +47,7 @@ const PropertyCard = React.memo(
     showLocation = false,
   }: PropertyCardProps) => {
     const {theme} = useTheme();
+    const [imageError, setImageError] = React.useState(false);
     const isDarkMode = useColorScheme() === 'dark';
     const {user} = useBoundStore();
 
@@ -84,7 +85,7 @@ const PropertyCard = React.memo(
       navigation.navigate('Details', {items});
     }, [navigation, items]);
 
-    const imageUrls = items?.thumbnailUrls
+    const imageUrls = items?.thumbnailUrls?.[0]
       ? items?.thumbnailUrls[0]
       : items?.imageUrls?.[0];
 
@@ -113,15 +114,26 @@ const PropertyCard = React.memo(
 
         {/* Property Image */}
         <View style={styles.imageWrapper}>
-          <Image
-            source={{
-              uri: imageUrls,
-              priority: Image.priority.normal,
-              cache: Image.cacheControl.immutable,
-            }}
-            resizeMode="cover"
-            style={styles.image}
-          />
+          {!imageError && (
+            <FastImage
+              source={{
+                uri: imageUrls,
+                priority: FastImage.priority.high,
+                cache: FastImage.cacheControl.immutable,
+              }}
+              onError={() => setImageError(true)}
+              resizeMode={FastImage.resizeMode.cover}
+              style={styles.image}
+            />
+          )}
+
+          {imageError && (
+            <FastImage
+              source={require('@assets/images/placeholder.png')}
+              style={styles.image}
+              resizeMode={FastImage.resizeMode.cover}
+            />
+          )}
 
           {/* Lazy Favorite button */}
           {(!user?._id || user?._id !== items.customerId) && (

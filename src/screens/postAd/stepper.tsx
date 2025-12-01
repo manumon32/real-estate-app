@@ -592,7 +592,7 @@ const PostAdContainer = (props: any) => {
       setFloorPlans([]);
       setFields([]);
     } catch (error) {
-      console.error('Post Ad Error:', error);
+      console.log('Post Ad Error:', error);
       setLoading(false);
     }
   }, [

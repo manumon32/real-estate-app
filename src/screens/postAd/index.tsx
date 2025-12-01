@@ -147,7 +147,7 @@ const PostAd = () => {
       setLoading(false);
       // TODO: setState(res) if you need to store it
     } catch (err) {
-      console.error('fetchDetails failed:', err);
+      console.log('fetchDetails failed:', err);
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

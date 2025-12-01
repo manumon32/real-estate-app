@@ -24,8 +24,13 @@ import SafeFooter from '@components/SafeFooter';
 
 const FilterModal = ({visible, onClose, onApply}: any) => {
   //
-  const {appConfigs, setFilters, resetFilters, filters, setLocation, location} =
-    useBoundStore();
+  const appConfigs = useBoundStore(s => s.appConfigs);
+  const filters = useBoundStore(s => s.filters);
+  const location = useBoundStore(s => s.location);
+  const setFilters = useBoundStore(s => s.setFilters);
+  const resetFilters = useBoundStore(s => s.resetFilters);
+  const setLocation = useBoundStore(s => s.setLocation);
+
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   // const [price, setprice] = useState<number[]>([1000000, 5000000]);
@@ -74,7 +79,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
       const json = await res.json();
       setPredictions(json?.predictions || []);
     } catch (err) {
-      console.error('Prediction fetch failed', err);
+      console.log('Prediction fetch failed', err);
     }
   }, []);
 
@@ -128,7 +133,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
       });
       setPredictions([]);
     } catch (err) {
-      console.error('Details fetch failed', err);
+      console.log('Details fetch failed', err);
     } finally {
       setLoading(false);
     }
@@ -405,7 +410,7 @@ const FilterModal = ({visible, onClose, onApply}: any) => {
               </>
             )}
           </ScrollView>
-          <SafeFooter style={{flexDirection: 'row', bottom: 10,}}>
+          <SafeFooter style={{flexDirection: 'row', bottom: 10}}>
             <TouchableOpacity
               style={styles.clearButton}
               onPress={() => {
@@ -494,7 +499,7 @@ const styles = StyleSheet.create({
     padding: 5,
     borderWidth: 1,
     marginRight: 5,
-    height:'60%',
+    height: '60%',
     marginLeft: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -504,7 +509,7 @@ const styles = StyleSheet.create({
     width: '45%',
     backgroundColor: '#2A9D8F',
     padding: 5,
-    height:'60%',
+    height: '60%',
     paddingRight: 15,
     borderRadius: 10,
     alignItems: 'center',

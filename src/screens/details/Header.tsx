@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -21,7 +21,6 @@ import Carousel from 'react-native-reanimated-carousel';
 import FavoriteButton from '@components/FavoriteButton';
 import ImageViewerModal from '@components/Modal/ImageViewerModal';
 import useBoundStore from '@stores/index';
-import FastImage from 'react-native-fast-image';
 function Header(props: any): React.JSX.Element {
   const {details} = props;
   const {theme} = useTheme();
@@ -91,27 +90,27 @@ function Header(props: any): React.JSX.Element {
     [handleImagePress],
   );
 
-  useEffect(() => {
-    // preload property images
-    if (details?.images?.length > 0) {
-      FastImage.preload(
-        details?.images.map((url: any) => ({
-          uri: url,
-          priority: FastImage.priority.high,
-        })),
-      );
-    }
+  // useEffect(() => {
+  //   // preload property images
+  //   if (details?.images?.length > 0) {
+  //     FastImage.preload(
+  //       details?.images.map((url: any) => ({
+  //         uri: url,
+  //         priority: FastImage.priority.high,
+  //       })),
+  //     );
+  //   }
 
-    // preload floor plan images
-    if (details?.floorPlanUrl?.length > 0) {
-      FastImage.preload(
-        details?.floorPlanUrl.map((url: any) => ({
-          uri: url,
-          priority: FastImage.priority.high,
-        })),
-      );
-    }
-  }, [details]);
+  //   // preload floor plan images
+  //   if (details?.floorPlanUrl?.length > 0) {
+  //     FastImage.preload(
+  //       details?.floorPlanUrl.map((url: any) => ({
+  //         uri: url,
+  //         priority: FastImage.priority.high,
+  //       })),
+  //     );
+  //   }
+  // }, [details]);
 
   return (
     <>

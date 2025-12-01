@@ -33,7 +33,7 @@ export const logoutAndRedirect = async (): Promise<void> => {
     // Navigate to main screen (e.g., login or home)
     navigate('Main');
   } catch (error) {
-    console.error('[logoutAndRedirect] Logout failed:', error);
+    console.log('[logoutAndRedirect] Logout failed:', error);
 
     // Still clear states and navigate even if API call fails
     resetAllZustandStores();

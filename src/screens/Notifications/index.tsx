@@ -212,7 +212,7 @@ export default function NotificationListSwipe() {
         text1: 'Failed to delete notifications',
         position: 'bottom',
       });
-      console.error('Error deleting notifications:', error);
+      console.log('Error deleting notifications:', error);
       return;
     }
   };
@@ -249,7 +249,7 @@ export default function NotificationListSwipe() {
           text1: 'Failed to mark notifications as read',
           position: 'bottom',
         });
-        console.error('Error marking notifications as read:', error);
+        console.log('Error marking notifications as read:', error);
       }
       return;
     }

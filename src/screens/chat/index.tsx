@@ -268,17 +268,16 @@ const MessageCard: React.FC<MessageCardProps> = ({
 };
 
 const Chat = React.memo(({navigation}: any) => {
-  const {
-    fetchChatListings,
-    chatList,
-    chatListloading,
-    user,
-    onlineUsers,
-    bearerToken,
-    token,
-    clientId,
-    setFilters,
-  } = useBoundStore();
+  const chatList = useBoundStore(s => s.chatList);
+  const chatListloading = useBoundStore(s => s.chatListloading);
+  const user = useBoundStore(s => s.user);
+  const onlineUsers = useBoundStore(s => s.onlineUsers);
+  const bearerToken = useBoundStore(s => s.bearerToken);
+  const token = useBoundStore(s => s.token);
+  const clientId = useBoundStore(s => s.clientId);
+  const fetchChatListings = useBoundStore(s => s.fetchChatListings);
+  const setFilters = useBoundStore(s => s.setFilters);
+
   const [filterBy, setFilterBy] = useState<any>(null);
   const [isReportVisible, setIsReportVisible] = useState(false);
 
@@ -322,7 +321,7 @@ const Chat = React.memo(({navigation}: any) => {
         text1: 'Failed to delete chats',
         position: 'bottom',
       });
-      console.error('Error deleting chats:', error);
+      console.log('Error deleting chats:', error);
       return;
     }
   };

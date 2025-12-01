@@ -291,7 +291,7 @@ const Verification = ({navigation}: any) => {
         return responses.map(res => res); // Extract actual response data
       })
       .catch(error => {
-        console.error('Upload error:', error);
+        console.log('Upload error:', error);
         throw error;
       });
   };

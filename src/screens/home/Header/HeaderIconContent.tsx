@@ -8,7 +8,9 @@ import useBoundStore from '@stores/index';
 function HeaderIconContent(): React.JSX.Element {
   const {theme} = useTheme();
   const navigation = useNavigation();
-  const {setFilters, resetFilters, clearFilterList} = useBoundStore();
+  const setFilters = useBoundStore(s => s.setFilters);
+  const resetFilters = useBoundStore(s => s.resetFilters);
+  const clearFilterList = useBoundStore(s => s.clearFilterList);
 
   const tabIcons = [
     {

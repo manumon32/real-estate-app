@@ -28,6 +28,14 @@ import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
 import NoChats from '@components/NoChatFound';
 import FilterChips from './FilterSort';
 
+const CommonLocationModal = React.lazy(
+  () => import('@components/Modal/LocationSearchModal'),
+);
+
+const GlobalSearchModal = React.lazy(
+  () => import('@components/Modal/GlobalSearchModal'),
+);
+
 const SortChips: React.FC<any> = ({setFilters, fetchFilterListings, theme}) => {
   const {filters, filter_loading, clearFilterList} = useBoundStore();
   const handleSort = useCallback(
@@ -139,23 +147,29 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings, theme}) => {
 };
 
 function App(): React.JSX.Element {
-  const {
-    filter_totalpages,
-    filter_listings,
-    fetchFilterListings,
-    filter_hasMore,
-    filter_loading,
-    filter_triggerRefresh,
-    clearFilterList,
-    filterSetTriggerRefresh,
-    setFilters,
-    updateFilter,
-    resetFilters,
-    filters,
-    setlocationModalVisible,
-    location,
-    setGlobalModalVisible,
-  } = useBoundStore();
+  const filter_totalpages = useBoundStore(s => s.filter_totalpages);
+  const filter_listings = useBoundStore(s => s.filter_listings);
+  const filter_hasMore = useBoundStore(s => s.filter_hasMore);
+  const filter_loading = useBoundStore(s => s.filter_loading);
+  const filter_triggerRefresh = useBoundStore(s => s.filter_triggerRefresh);
+
+  const filters = useBoundStore(s => s.filters);
+  const location = useBoundStore(s => s.location);
+  const locationHistory = useBoundStore(s => s.locationHistory);
+  const locationModalvisible = useBoundStore(s => s.locationModalvisible);
+  const globalModalvisible = useBoundStore(s => s.globalModalvisible);
+  const fetchFilterListings = useBoundStore(s => s.fetchFilterListings);
+  const clearFilterList = useBoundStore(s => s.clearFilterList);
+  const filterSetTriggerRefresh = useBoundStore(s => s.filterSetTriggerRefresh);
+
+  const setFilters = useBoundStore(s => s.setFilters);
+  const updateFilter = useBoundStore(s => s.updateFilter);
+  const resetFilters = useBoundStore(s => s.resetFilters);
+
+  const setlocationModalVisible = useBoundStore(s => s.setlocationModalVisible);
+  const setGlobalModalVisible = useBoundStore(s => s.setGlobalModalVisible);
+  const setLocation = useBoundStore(s => s.setLocation);
+
   const {theme} = useTheme();
   const [visible, setVisible] = useState(false);
   const [searchText, setSearchText] = useState(
@@ -172,7 +186,9 @@ function App(): React.JSX.Element {
   };
   const renderAdItem = useCallback(
     (items: any) => {
-      return <PropertyCard items={items.item} navigation={navigation} showLocation/>;
+      return (
+        <PropertyCard items={items.item} navigation={navigation} showLocation />
+      );
     },
     [navigation],
   );
@@ -182,7 +198,6 @@ function App(): React.JSX.Element {
     setSearchText(filters?.searchText ?? 'Search');
     // setSort(false);
   }, [filters]);
-
 
   const FilterView = useCallback(() => {
     return (
@@ -390,7 +405,10 @@ function App(): React.JSX.Element {
         centerContent={true}
         contentContainerStyle={{
           paddingBottom: 100,
-          backgroundColor: filter_listings.length >0 ? theme.colors.backgroundHome: theme.colors.background,
+          backgroundColor:
+            filter_listings.length > 0
+              ? theme.colors.backgroundHome
+              : theme.colors.background,
           minHeight: 800,
         }}
         showsVerticalScrollIndicator={false}
@@ -434,6 +452,22 @@ function App(): React.JSX.Element {
           !filter_loading && fetchFilterListings();
         }}
       />
+
+      {globalModalvisible && (
+        <GlobalSearchModal
+          visible
+          onClose={setGlobalModalVisible}
+          onSelectLocation={setLocation}
+          locationHistory={locationHistory}
+        />
+      )}
+      {locationModalvisible && (
+        <CommonLocationModal
+          onClose={setlocationModalVisible}
+          onSelectLocation={setLocation}
+          locationHistory={locationHistory}
+        />
+      )}
     </SafeAreaView>
   );
 }

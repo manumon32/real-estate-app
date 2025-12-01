@@ -16,17 +16,15 @@ import {useFocusEffect} from '@react-navigation/native';
 import AppUpdateChecker from './AppUpdateChecker';
 
 function Index({}: any): React.JSX.Element {
-  const {
-    token,
-    gethandShakeToken,
-    handShakeError,
-    clientId,
-    getConfigData,
-    fetchSuggestions,
-    fetchFavouriteAds,
-    bearerToken,
-    fetchInitialListings,
-  } = useBoundStore();
+  const token = useBoundStore(s => s.token);
+  const handShakeError = useBoundStore(s => s.handShakeError);
+  const clientId = useBoundStore(s => s.clientId);
+  const bearerToken = useBoundStore(s => s.bearerToken);
+  const gethandShakeToken = useBoundStore(s => s.gethandShakeToken);
+  const getConfigData = useBoundStore(s => s.getConfigData);
+  const fetchSuggestions = useBoundStore(s => s.fetchSuggestions);
+  const fetchFavouriteAds = useBoundStore(s => s.fetchFavouriteAds);
+  const fetchInitialListings = useBoundStore(s => s.fetchInitialListings);
 
   const [error, setError] = useState(false);
   const [retryLoading, setRetryLoading] = useState(false);
@@ -186,4 +184,4 @@ const styles = StyleSheet.create({
   init: {marginBottom: 10, fontFamily: Fonts.MEDIUM},
 });
 
-export default Index;
+export default React.memo(Index);

@@ -1,79 +1,114 @@
 import React from 'react';
-import {render, waitFor} from '@testing-library/react-native';
-import App from '../../App';
+import { render, fireEvent } from '@testing-library/react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from '../../src/screens/home/HomeScreen';
+import useBoundStore from '@stores/index';
 
-// Mock ThemeProvider (no-op)
-jest.mock('@theme/ThemeProvider', () => {
-  const React = require('react');
-  const theme = {
-    colors: {},
-    spacing: {},
-    typography: {},
-  }; // dummy theme
-  return {
-    ThemeProvider: ({children}: any) => <>{children}</>,
-    useTheme: () => ({theme, toggleTheme: jest.fn()}),
-  };
+const Stack = createNativeStackNavigator();
+
+// ---- Mock Zustand Store ----
+jest.mock('@stores/index', () => {
+  return jest.fn(() => ({
+    listings: [{ id: 1, title: 'Test Property' }],
+    fetchListings: jest.fn(),
+    hasMore: true,
+    loading: false,
+    triggerRefresh: false,
+    setTriggerRefresh: jest.fn(),
+    location: null,
+    setTriggerRelaod: jest.fn(),
+    bearerToken: 'abc123',
+    fetchChatListings: jest.fn(),
+  }));
 });
 
-// Mock Toast
+// ---- Mock Lazy Components ----
+jest.mock('../../src/screens/home/Header/Header', () => 'Header');
+jest.mock('@components/PropertyCard', () => 'PropertyCard');
+jest.mock('@components/SkeltonLoader/HomepageSkelton', () => 'HomepageSkelton');
+jest.mock('@components/NoChatFound', () => 'NoChats');
+
+// ---- Firebase & Socket mocks ----
+jest.mock('@react-native-firebase/messaging', () => ({
+  getMessaging: jest.fn(() => ({})),
+  onMessage: jest.fn(() => jest.fn()),
+  onNotificationOpenedApp: jest.fn(() => jest.fn()),
+  getInitialNotification: jest.fn(() => Promise.resolve(null)),
+}));
+
+jest.mock('../../src/firebase/notificationService', () => ({
+  navigateByNotification: jest.fn(),
+  requestUserPermission: jest.fn(),
+}));
+
+jest.mock('../../src/soket', () => ({
+  connectSocket: jest.fn(),
+  disconnectSocket: jest.fn(),
+}));
+
+// ---- AppState mock ----
+jest.mock('react-native/Libraries/AppState/AppState', () => ({
+  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+}));
+
+// ---- BackHandler mock ----
+jest.mock('react-native/Libraries/Utilities/BackHandler', () => ({
+  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+  removeEventListener: jest.fn(),
+}));
+
+
+// ---- Linking mock ----
+jest.mock('react-native/Libraries/Linking/Linking', () => ({
+  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+  getInitialURL: jest.fn(() => Promise.resolve(null)),
+}));
+
+// ---- Toast mock ----
 jest.mock('react-native-toast-message', () => ({
-  __esModule: true,
-  default: ({children}: any) => <>{children}</>,
   show: jest.fn(),
 }));
 
-// Mock Navigation
-jest.mock('@navigation/RootNavigator', () => () => <></>);
-jest.mock('@react-navigation/native', () => {
-  const actualNav = jest.requireActual('@react-navigation/native');
-  return {
-    ...actualNav,
-    useNavigation: () => ({
-      navigate: jest.fn(),
-      goBack: jest.fn(),
-      // add any other methods your component calls
-    }),
-  };
-});
 
-// Mock device info
-jest.mock('react-native-device-info', () => ({
-  getUniqueId: jest.fn(() => Promise.resolve('mock-id')),
-  getVersion: jest.fn(() => '1.0.0'),
-  getModel: jest.fn(() => 'mock-model'),
-  getSystemVersion: jest.fn(() => '1.0.0'),
-}));
+// Helper to wrap HomeScreen inside actual navigator (required for useFocusEffect)
+const renderWithNavigation = () =>
+  render(
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 
-// Mock your store
-jest.mock('@stores/index', () => () => ({
-  locationModalvisible: false,
-  setlocationModalVisible: jest.fn(),
-  globalModalvisible: false,
-  setGlobalModalVisible: jest.fn(),
-  setLocation: jest.fn(),
-  locationHistory: [],
-  visible: false,
-  setVisible: jest.fn(),
-  setNavigationMode: jest.fn(),
-  token: null,
-  clientId: null,
-  bearerToken: null,
-  gethandShakeToken: jest.fn(),
-  handShakeError: false,
-  getConfigData: jest.fn(),
-  fetchSuggestions: jest.fn(),
-  fetchFavouriteAds: jest.fn(),
-  fetchInitialListings: jest.fn(),
-}));
 
-describe('App Launch', () => {
-  it('renders App and shows Home page', async () => {
-    // const {queryByText} = render(<App />);
+describe('HomeScreen Integration Test (Simple)', () => {
 
-    // await waitFor(() => {
-    //   // Your Home page text or component
-    //   expect(queryByText(/Retry/i)).toBeTruthy();
-    // });
+  it('renders HomeScreen with FlatList and Header', () => {
+    const screen = renderWithNavigation();
+
+    // FlatList exists
+    expect(screen.UNSAFE_getByType(require('react-native').FlatList)).toBeTruthy();
+
+    // Header component
+    expect(screen.getByText('Header')).toBeTruthy();
+
+    // PropertyCard appears
+    expect(screen.getByText('PropertyCard')).toBeTruthy();
   });
+
+
+  // it('loads more items when onEndReached triggers', () => {
+  //   const mockStore = useBoundStore();
+  //   const fetchListings = mockStore.fetchListings;
+
+  //   const screen = renderWithNavigation();
+
+  //   const flatList = screen.UNSAFE_getByType(require('react-native').FlatList);
+
+  //   fireEvent(flatList, 'onEndReached');
+
+  //   expect(fetchListings).toHaveBeenCalled();
+  // });
+
 });

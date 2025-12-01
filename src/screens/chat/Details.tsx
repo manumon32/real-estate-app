@@ -205,21 +205,20 @@ const LoadImage = React.memo(({selectedImage, setImage}: any) => {
 const Chat = React.memo(({navigation}: any) => {
   const {theme} = useTheme();
   const route = useRoute();
-  const {
-    fetchChatListings,
-    fetchChatDetails,
-    chatDetails,
-    chat_loading,
-    updateChat,
-    token,
-    clientId,
-    bearerToken,
-    onlineUsers,
-    updateChatUnreadCount,
-    user,
-    imageUploading,
-    setImageUploading,
-  } = useBoundStore();
+  const chatDetails = useBoundStore(s => s.chatDetails);
+  const chat_loading = useBoundStore(s => s.chat_loading);
+  const token = useBoundStore(s => s.token);
+  const clientId = useBoundStore(s => s.clientId);
+  const bearerToken = useBoundStore(s => s.bearerToken);
+  const onlineUsers = useBoundStore(s => s.onlineUsers);
+  const user = useBoundStore(s => s.user);
+  const imageUploading = useBoundStore(s => s.imageUploading);
+  const fetchChatListings = useBoundStore(s => s.fetchChatListings);
+  const fetchChatDetails = useBoundStore(s => s.fetchChatDetails);
+  const updateChat = useBoundStore(s => s.updateChat);
+  const updateChatUnreadCount = useBoundStore(s => s.updateChatUnreadCount);
+  const setImageUploading = useBoundStore(s => s.setImageUploading);
+
   const {items}: any = route.params;
   const [attachModalVisible, setAttachModalVisible] = useState(false);
   const [selectedImage, setImage] = useState(null);
@@ -346,7 +345,7 @@ const Chat = React.memo(({navigation}: any) => {
         return responses.map(res => res); // Extract actual response data
       })
       .catch(error => {
-        console.error('Upload error:', error);
+        console.log('Upload error:', error);
         throw error;
       });
   };

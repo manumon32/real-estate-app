@@ -41,7 +41,7 @@ async function openRemoteFile(url: string) {
     // Open with viewer (now that it's local)
     await viewDocument({uri: `file://${localPath}`});
   } catch (err) {
-    console.error('Failed to open document:', err);
+    console.log('Failed to open document:', err);
   }
 }
 
@@ -94,7 +94,7 @@ export default function ChatBubble(props: any) {
                     isImageUrl(items.files?.[0])
                       ? setVisible(true)
                       : openRemoteFile(items.files?.[0]).catch(err =>
-                          console.error('Failed to view file', err),
+                          console.log('Failed to view file', err),
                         );
                   }}>
                   {isImageUrl(items.files?.[0]) ? (

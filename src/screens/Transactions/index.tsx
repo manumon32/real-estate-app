@@ -68,7 +68,7 @@ const ListingCard = ({item, theme, navigation}: any) => {
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to open document.');
-      console.error(error);
+      console.log(error);
     }
   };
 

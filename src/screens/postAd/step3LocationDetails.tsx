@@ -9,6 +9,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import useBoundStore from '@stores/index';
 import {useTheme} from '@theme/ThemeProvider';
 
+const CommonLocationModal = React.lazy(
+  () => import('@components/Modal/LocationSearchModal'),
+);
 const Step3LocationDetails = (props: any) => {
   const {
     currentStep,
@@ -19,8 +22,13 @@ const Step3LocationDetails = (props: any) => {
 
     touched,
   } = props;
-  const {setlocationModalVisible, locationForAdpost, setadPostModal} =
-    useBoundStore();
+
+  const setLocation = useBoundStore(s => s.setLocation);
+  const setlocationModalVisible = useBoundStore(s => s.setlocationModalVisible);
+  const locationForAdpost = useBoundStore(s => s.locationForAdpost);
+  const setadPostModal = useBoundStore(s => s.setadPostModal);
+  const locationHistory = useBoundStore(s => s.locationHistory);
+  const locationModalvisible = useBoundStore(s => s.locationModalvisible);
 
   const {theme} = useTheme();
   return (
@@ -149,6 +157,13 @@ const Step3LocationDetails = (props: any) => {
             onChange={text => setFieldValue('superBuiltUpArea', text)}
           />
         </View>
+      )}
+      {locationModalvisible && (
+        <CommonLocationModal
+          onClose={setlocationModalVisible}
+          onSelectLocation={setLocation}
+          locationHistory={locationHistory}
+        />
       )}
     </SlideInView>
   );

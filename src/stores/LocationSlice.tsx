@@ -7,6 +7,8 @@ export interface Location {
 export interface LocationSlice {
   locationModalvisible: boolean;
   globalModalvisible: boolean;
+  locationfetchLoading: boolean;
+  setLocationFetchLoading: (loading: boolean) => void;
   setGlobalModalVisible: () => Promise<void>;
   adPostModal: boolean;
   setlocationModalVisible: () => Promise<void>;
@@ -28,7 +30,7 @@ const defaultLocation: any = {
   district: null,
   state: null,
   country: 'India',
-  default:true,
+  default: true,
 };
 const getKey = (obj: any) => JSON.stringify(obj);
 
@@ -49,6 +51,9 @@ export const createLocationSlice = (set: any, get: any): LocationSlice => ({
   locationForAdpost: defaultLocation,
   locationModalvisible: false,
   globalModalvisible: false,
+  locationfetchLoading: false,
+  setLocationFetchLoading: (loading: boolean) =>
+    set(() => ({locationfetchLoading: loading})),
   locationHistory: [],
   adPostModal: false,
   setLocation: updates => {

@@ -1,7 +1,7 @@
 /* eslint-disable no-catch-shadow */
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import IconButton from '@components/Buttons/IconButton';
 import {useTheme} from '@theme/ThemeProvider';
 import Button from '@components/Buttons/Button';
 import Toast from 'react-native-toast-message';
+import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 
 // import PropertyCard from '@components/PropertyCard';
 import Header from './Header';
@@ -83,6 +84,32 @@ const PropertyDetails = React.memo(() => {
   const isOwner = details?.customerId?._id === user?._id;
   const isDarkMode = useColorScheme() === 'dark';
   const sectionColor = {color: theme.colors.text};
+  const scrollRef = useRef(null);
+  const horizontalGesture = useMemo(() => {
+    return Gesture.Pan()
+      .runOnJS(true)
+      .activeOffsetX([-10, 10]) // must move horizontally
+      .failOffsetY([-10, 10]) // slightest vertical → give scrollview control
+      .onStart(() => {
+          // @ts-ignore
+        scrollRef.current?.setNativeProps({scrollEnabled: false});
+      })
+      .onUpdate(e => {
+        // ONLY disable scroll if horizontal swipe is dominant
+        if (Math.abs(e.translationX) > Math.abs(e.translationY)) {
+          // @ts-ignore
+          scrollRef.current?.setNativeProps({scrollEnabled: false});
+        }
+      })
+      .onEnd(() => {
+          // @ts-ignore
+        scrollRef.current?.setNativeProps({scrollEnabled: true});
+      })
+      .onFinalize(() => {
+          // @ts-ignore
+        scrollRef.current?.setNativeProps({scrollEnabled: true});
+      });
+  }, []);
 
   const markasSold = async (adId: string) => {
     let payload = {
@@ -1094,10 +1121,15 @@ const PropertyDetails = React.memo(() => {
         </View>
       )}
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         style={styles.paddingStyle}>
-        <Header details={property ? property : items} />
+        <GestureDetector gesture={horizontalGesture}>
+          <View style={styles.gestureContainer}>
+            <Header details={property ? property : items} />
+          </View>
+        </GestureDetector>
 
         <TitleContainer />
 
@@ -1143,6 +1175,7 @@ const styles = StyleSheet.create({
   header: {padding: 16, borderRadius: 20, backgroundColor: '#fff', bottom: 10},
   title: {fontSize: 20, fontFamily: 'DMSans-Medium', marginBottom: 5},
   locationContainer: {left: -2, top: 8},
+  gestureContainer: {backgroundColor: 'transparent'},
   paddingStyle: {paddingBottom: 120},
   reportAdStyle: {
     right: 10,

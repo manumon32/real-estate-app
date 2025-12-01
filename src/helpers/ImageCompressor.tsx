@@ -43,7 +43,7 @@ export const compressImage = async (uri: string): Promise<string> => {
 
     return compressedUri;
   } catch (error) {
-    console.error('Image compression failed:', error);
+    console.log('Image compression failed:', error);
     return uri; // fallback to original if compression fails
   }
 };

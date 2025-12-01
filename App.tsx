@@ -1,112 +1,93 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import {ThemeProvider} from '@theme/ThemeProvider';
-import RootNavigator from '@navigation/RootNavigator';
-import CommonLocationModal from '@components/Modal/LocationSearchModal';
 import useBoundStore from '@stores/index';
-import {getMessaging, onMessage} from '@react-native-firebase/messaging';
 import Toast from 'react-native-toast-message';
 import {ToastConfig} from './src/config/ToastConfig';
-import NetworkStatus from '@components/NetworkStatus';
 import {navigationRef} from '@navigation/RootNavigation';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+
 import {
   navigateByNotification,
   onNavigationReady,
   requestUserPermission,
 } from './src/firebase/notificationService';
-import GlobalSearchModal from '@components/Modal/GlobalSearchModal';
-import LoginModal from '@components/Modal/LoginModal';
+
+import {getMessaging, onMessage} from '@react-native-firebase/messaging';
 import {getNavigationMode} from 'react-native-navigation-mode';
+const LoginModal = React.lazy(() => import('@components/Modal/LoginModal'));
+const NetworkStatus = React.lazy(() => import('@components/NetworkStatus'));
 
-export default function App() {
-  const {
-    locationModalvisible,
-    setlocationModalVisible,
-    globalModalvisible,
-    setGlobalModalVisible,
-    setLocation,
-    locationHistory,
-    visible,
-    setVisible,
-    setNavigationMode,
-  } = useBoundStore();
+// Lazy-load entire RootNavigator
+const RootNavigator = React.lazy(() => import('@navigation/RootNavigator'));
 
-  // ✅ Linking configuration
-  const linking = {
-    prefixes: ['myapp://', 'https://hotplotz.com', 'hotplotz://'],
-    config: {
-      screens: {
-        Root: {
-          screens: {
-            Home: '', // https://hotplotz.com → Home
-            Details: 'details/:id', // https://hotplotz.com/details/123 → Details
-          },
-        },
-      },
-    },
-  };
+function App() {
+  const visible = useBoundStore(s => s.visible);
+  const setVisible = useBoundStore(s => s.setVisible);
+  const setNavigationMode = useBoundStore(s => s.setNavigationMode);
 
-  const fetchNavigationMode = async () => {
-    const navInfo = await getNavigationMode();
-    setNavigationMode(navInfo.type);
-  };
+  /** Fetch navigation mode ONCE */
   useEffect(() => {
-    fetchNavigationMode();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // no dependencies → runs only once on mount
+    getNavigationMode().then(navInfo => setNavigationMode(navInfo.type));
+  }, [setNavigationMode]);
 
+  /** FCM Foreground listener */
   useEffect(() => {
     requestUserPermission();
     const messaging = getMessaging();
 
     const unsubscribeForeground = onMessage(messaging, remoteMessage => {
       const data = remoteMessage?.data;
-      if (data?.type) {
-        Toast.show({
-          type: 'info',
-          text1: data?.title ? String(data.title) : 'Notification',
-          text2: data?.message ? String(data.message) : '',
-          position: 'top',
-          onPress: () => navigateByNotification(data as any),
-        });
-      }
+      if (!data?.type) return;
+
+      Toast.show({
+        type: 'info',
+        text1: data?.title ? String(data.title) : 'Notification',
+        text2: data?.message ? String(data.message) : '',
+        position: 'top',
+        onPress: () => navigateByNotification(data as any),
+      });
     });
 
-    return () => {
-      unsubscribeForeground();
-    };
+    return unsubscribeForeground;
   }, []);
+
+  /** Memoized linking config (prevents re-renders) */
+  const linking = useMemo(
+    () => ({
+      prefixes: ['myapp://', 'https://hotplotz.com', 'hotplotz://'],
+      config: {
+        screens: {
+          Root: {
+            screens: {
+              Home: '',
+              Details: 'details/:id',
+            },
+          },
+        },
+      },
+    }),
+    [],
+  );
 
   return (
     <ThemeProvider>
-      <NavigationContainer
-        ref={navigationRef}
-        linking={linking}
-        theme={DefaultTheme}
-        // @ts-ignore
-        testID="root-navigator"
-        onReady={onNavigationReady}>
-        <RootNavigator />
-
-        <Toast config={ToastConfig} />
-        {/* Modals */}
-        <CommonLocationModal
-          visible={locationModalvisible}
-          onClose={() => setlocationModalVisible()}
-          onSelectLocation={setLocation}
-          locationHistory={locationHistory}
-        />
-
-        <GlobalSearchModal
-          visible={globalModalvisible}
-          onClose={() => setGlobalModalVisible()}
-          onSelectLocation={setLocation}
-          locationHistory={locationHistory}
-        />
-
-        <LoginModal visible={visible} onClose={() => setVisible()} />
-        <NetworkStatus />
-      </NavigationContainer>
+      <React.Suspense fallback={null}>
+        <GestureHandlerRootView style={{flex: 1}}>
+          <NavigationContainer
+            ref={navigationRef}
+            linking={linking}
+            theme={DefaultTheme}
+            onReady={onNavigationReady}>
+            <RootNavigator />
+          </NavigationContainer>
+          <Toast config={ToastConfig} />
+          {visible && <LoginModal visible onClose={setVisible} />}
+          <NetworkStatus />
+        </GestureHandlerRootView>
+      </React.Suspense>
     </ThemeProvider>
   );
 }
+
+export default React.memo(App);
