@@ -35,7 +35,7 @@ const ImageCarouselModal: React.FC<ImageCarouselModalProps> = ({
       width,
       height,
       autoPlay: false,
-      scrollAnimationDuration: 10,
+      scrollAnimationDuration: 1,
       mode: 'parallax' as const,
       modeConfig: {
         parallaxScrollingScale: 0.9,

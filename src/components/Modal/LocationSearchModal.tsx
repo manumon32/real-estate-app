@@ -11,8 +11,6 @@ import {
   StyleSheet,
   Platform,
   Alert,
-  TouchableWithoutFeedback,
-  Keyboard,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -75,7 +73,7 @@ const CommonLocationModal: React.FC<Props> = ({
     }
   }, []);
 
-  function formatPlaceName(components: any[]): string {
+  const formatPlaceName = useCallback((components: any[]): string => {
     let locality: any = null;
     let city: any = null;
     let district: any = null;
@@ -132,9 +130,9 @@ const CommonLocationModal: React.FC<Props> = ({
     );
 
     return uniqueParts.join(', ');
-  }
+  }, []);
 
-  const checkAndRequestPermission = async () => {
+  const checkAndRequestPermission = useCallback(async () => {
     setLocationFetchLoading(true);
     const permission =
       Platform.OS === 'ios'
@@ -164,9 +162,9 @@ const CommonLocationModal: React.FC<Props> = ({
         ],
       );
     }
-  };
+  }, []);
 
-  const fetchPlaceDetails = async (placeId: string) => {
+  const fetchPlaceDetails = useCallback(async (placeId: string) => {
     const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`;
     try {
       const res = await fetch(url);
@@ -238,30 +236,29 @@ const CommonLocationModal: React.FC<Props> = ({
     } finally {
       setLocationFetchLoading(false);
     }
-  };
+  }, [onClose, onSelectLocation, formatPlaceName]);
 
   React.useEffect(() => {
     checkAndRequestPermission();
   }, []);
 
-  const useCurrentLocation = () => {
+  const useCurrentLocation = useCallback(() => {
     if (currentLocation?.name) {
       onSelectLocation(currentLocation);
       onClose();
     } else {
       checkAndRequestPermission();
     }
-  };
+  }, [checkAndRequestPermission, currentLocation]);
 
-  const setLocation = (updatelocation: any) => {
-    console.log('setLocation called with', location);
-    if (location?.default) {
+  const setLocation = useCallback((updatelocation: any) => {
+    if (!visible && location.default) {
       onSelectLocation(updatelocation);
     }
     setCurrentLocation(updatelocation);
-  };
+  }, [visible, location.default, onSelectLocation]);
 
-  const locationFetchSuccess = async (position: any) => {
+  const locationFetchSuccess = useCallback(async (position: any) => {
     const {latitude, longitude} = position.coords;
     const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`;
 
@@ -310,9 +307,9 @@ const CommonLocationModal: React.FC<Props> = ({
     });
     visible && onClose();
     setLocationFetchLoading(false);
-  };
+  }, [onClose, setLocation]);
 
-  const locationFetchError = (err: any) => {
+  const locationFetchError = useCallback((err: any) => {
     if (err.code === 3) {
       // timeout
       Geolocation.getCurrentPosition(locationFetchSuccess, locationFetchError, {
@@ -328,9 +325,9 @@ const CommonLocationModal: React.FC<Props> = ({
         [{text: 'OK'}],
       );
     }
-  };
+  }, []);
 
-  const getCurrentLocation = async () => {
+  const getCurrentLocation = useCallback(async () => {
     setLocationFetchLoading(true);
     Geolocation.getCurrentPosition(
       locationFetchSuccess,
@@ -357,20 +354,23 @@ const CommonLocationModal: React.FC<Props> = ({
       },
       // {enableHighAccuracy: true, timeout: 15_000, maximumAge: 0},
     );
-  };
+  }, []);
 
-  const renderItem = ({item}: {item: any}) => (
-    <TouchableOpacity
-      style={styles.item}
-      onPress={() => fetchPlaceDetails(item.place_id)}>
-      <MaterialCommunityIcons
-        name="map-marker"
-        size={20}
-        color="#696969"
-        style={{marginRight: 10}}
-      />
-      <Text style={styles.itemText}>{item.description}</Text>
-    </TouchableOpacity>
+  const renderItem = useCallback(
+    ({item}: {item: any}) => (
+      <TouchableOpacity
+        style={styles.item}
+        onPress={() => fetchPlaceDetails(item.place_id)}>
+        <MaterialCommunityIcons
+          name="map-marker"
+          size={20}
+          color="#696969"
+          style={styles.marginRight}
+        />
+        <Text style={styles.itemText}>{item.description}</Text>
+      </TouchableOpacity>
+    ),
+    [fetchPlaceDetails],
   );
 
   return (
@@ -379,10 +379,8 @@ const CommonLocationModal: React.FC<Props> = ({
       animationType="slide"
       statusBarTranslucent
       onRequestClose={onClose}
-      transparent
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View  onStartShouldSetResponder={() => true} style={styles.overlay}>
+      transparent>
+      <View style={styles.overlay}>
         <View
           style={[
             styles.container,
@@ -419,10 +417,7 @@ const CommonLocationModal: React.FC<Props> = ({
           <TouchableOpacity
             style={styles.currentLocationBtn}
             onPress={useCurrentLocation}>
-            <View
-              style={{
-                width: '10%',
-              }}>
+            <View style={styles.gpsIconContainer}>
               <MaterialCommunityIcons
                 name="crosshairs-gps"
                 size={20}
@@ -436,24 +431,12 @@ const CommonLocationModal: React.FC<Props> = ({
               {!locationfetchLoading && currentLocation?.name && (
                 <Text
                   numberOfLines={1}
-                  style={{
-                    fontSize: 12,
-                    color: 'rgba(0, 0, 0, 0.55)',
-                    textAlign: 'left',
-                    maxWidth: 250,
-                  }}>
+                  style={styles.currentLocationTextPreview}>
                   {currentLocation?.name}
                 </Text>
               )}
               {locationfetchLoading && (
-                <Text
-                  numberOfLines={1}
-                  style={{
-                    fontSize: 12,
-                    color: 'rgba(0, 0, 0, 0.55)',
-                    textAlign: 'left',
-                    maxWidth: 250,
-                  }}>
+                <Text numberOfLines={1} style={styles.locationFetchingText}>
                   {'Fetching'}
                 </Text>
               )}
@@ -477,45 +460,20 @@ const CommonLocationModal: React.FC<Props> = ({
               data={predictions}
               keyExtractor={item => item.place_id}
               renderItem={renderItem}
-              keyboardShouldPersistTaps="always"
-              contentContainerStyle={{
-                backgroundColor: '#fff',
-                borderRadius: 12,
-                borderColor: '#EBEBEB',
-                borderWidth: 1,
-                marginTop: 10,
-                padding: 8,
-              }}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.listContainer}
               ListFooterComponent={
                 locationHistory.filter(
                   (item: {lat: any}, index: number) =>
                     index <= 4 && currentLocation?.lat !== item.lat,
                 ).length > 0 ? (
                   <View>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                      }}>
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          marginTop: 15,
-                          color: '#696969',
-                          margin: 5,
-                        }}>
+                    <View style={styles.recentSearchHeaderContainer}>
+                      <Text style={styles.recentSearchText}>
                         Recent Searches
                       </Text>
                       <TouchableOpacity onPress={resetLocationHistory}>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            marginTop: 15,
-                            color: '#696969',
-                            margin: 5,
-                          }}>
-                          Clear All
-                        </Text>
+                        <Text style={styles.clearAllText}>Clear All</Text>
                       </TouchableOpacity>
                     </View>
 
@@ -548,7 +506,6 @@ const CommonLocationModal: React.FC<Props> = ({
           )}
         </View>
       </View>
-      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -559,11 +516,41 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
+  currentLocationTextPreview: {
+    fontSize: 12,
+    color: 'rgba(0, 0, 0, 0.55)',
+    textAlign: 'left',
+    maxWidth: 250,
+  },
   container: {
     height: '90%',
     padding: 16,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+  },
+  clearAllText: {
+    fontSize: 14,
+    marginTop: 15,
+    color: '#696969',
+    margin: 5,
+  },
+  recentSearchHeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  locationFetchingText: {
+    fontSize: 12,
+    color: 'rgba(0, 0, 0, 0.55)',
+    textAlign: 'left',
+    maxWidth: 250,
+  },
+  listContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderColor: '#EBEBEB',
+    borderWidth: 1,
+    marginTop: 10,
+    padding: 8,
   },
   header: {
     flexDirection: 'row',
@@ -571,12 +558,24 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 5,
   },
+  gpsIconContainer: {
+    width: '10%',
+  },
   title: {
     fontSize: 18,
     fontWeight: '600',
     fontFamily: Fonts.MEDIUM,
     textAlign: 'center',
     color: '#171717',
+  },
+  marginRight: {
+    marginRight: 10,
+  },
+  recentSearchText: {
+    fontSize: 14,
+    marginTop: 15,
+    color: '#696969',
+    margin: 5,
   },
   inputContainer: {
     height: 48,

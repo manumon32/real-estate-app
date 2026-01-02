@@ -35,30 +35,42 @@ var isWeakNetwork = false;
 NetInfo.addEventListener(state => {
   isConnected = state.isConnected ?? false;
 
-  // Mark weak if on 2G/3G
-  const gen = (state.details as any)?.cellularGeneration;
-  if (gen === '2g' || gen === '3g') {
+  const details: any = state.details || {};
+  const gen = details.cellularGeneration;
+  const downlink = details.downlink; // Mbps (some devices support it)
+
+  // Detect weak network
+  const isSlow =
+    gen === '2g' ||
+    gen === '3g' ||
+    (typeof downlink === 'number' && downlink < 1); // less than ~1 Mbps = slow
+
+  if (isSlow && !isWeakNetwork) {
     isWeakNetwork = true;
+
     Toast.show({
       type: 'error',
-      text1: 'Internet is weak',
-      text2: 'Please wait...',
-      visibilityTime: 3000,
+      text1: 'Internet is slow',
+      text2: 'Some features may load slowly...',
       position: 'bottom',
+      visibilityTime: 2500,
     });
-  } else {
+  } else if (!isSlow) {
     isWeakNetwork = false;
   }
 
+  // Retry queued offline requests
   if (isConnected && offlineQueue.length > 0) {
-    offlineQueue.forEach(async item => {
+    const pending = [...offlineQueue];
+    offlineQueue.length = 0;
+
+    pending.forEach(async item => {
       try {
         await api(item.config);
-      } catch (e) {
-        console.log('Retry failed for queued request', e);
+      } catch (err) {
+        console.log('Retry failed for queued request', err);
       }
     });
-    offlineQueue.length = 0;
   }
 });
 

@@ -1,0 +1,43 @@
+{
+  "testRunner": "jest",
+  "runnerConfig": "e2e/jest.config.js",
+
+  "apps": {
+    "ios.debug": {
+      "type": "ios.app",
+      "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/Hotplotz.app",
+"build": "xcodebuild -workspace ios/Hotplotz.xcworkspace -scheme realEsateApp -configuration Debug -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16' -derivedDataPath ios/build"
+    },
+    "android.debug": {
+      "type": "android.apk",
+      "binaryPath": "android/app/build/outputs/apk/debug/app-debug.apk",
+      "build": "cd android && ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug"
+    }
+  },
+
+  "devices": {
+    "ios.sim": {
+      "type": "ios.simulator",
+      "device": {
+        "type": "iPhone 15"
+      }
+    },
+    "android.emu": {
+      "type": "android.emulator",
+      "device": {
+        "avdName": "Pixel_6_API_34"
+      }
+    }
+  },
+
+  "configurations": {
+    "ios": {
+      "device": "ios.sim",
+      "app": "ios.debug"
+    },
+    "android": {
+      "device": "android.emu",
+      "app": "android.debug"
+    }
+  }
+}

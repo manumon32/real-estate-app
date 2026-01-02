@@ -61,10 +61,10 @@ function Index({}: any): React.JSX.Element {
       if (bearerToken) {
         fetchFavouriteAds();
       }
-      // 4️⃣ Fetch initial listings
-      fetchInitialListings();
+      // Fetch initial listings
+      await fetchInitialListings();
 
-      // 3️⃣ App config + suggestions (parallel)
+      // App config + suggestions (parallel)
       Promise.allSettled([getAppConfigData(), fetchSuggestions()]);
 
       setRetryLoading(false);
@@ -72,7 +72,7 @@ function Index({}: any): React.JSX.Element {
       setRetryLoading(false);
       setError(true);
     }
-  }, [deviceInfo]);
+  }, []);
 
   /** Get config data */
   const getAppConfigData = useCallback(() => {

@@ -78,11 +78,9 @@ function Header({navigation}: any): React.JSX.Element {
               <Text
                 numberOfLines={1}
                 style={[styles.textStyle, {color: theme.colors.text}]}>
-                {location?.default
-                  ? locationfetchLoading
-                    ? 'Fetching...'
-                    : location?.name || 'Kerala'
-                  : location?.name || 'Kerala'}
+                {locationfetchLoading && location.default
+                  ? 'Fetching...'
+                  : location?.name || 'Kerala'} 
               </Text>
               <IconButton
                 iconSize={18}

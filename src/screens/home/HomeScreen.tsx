@@ -193,6 +193,20 @@ function HomeScreen({navigation}: any) {
     fetchListings();
   }, [loading, hasMore]);
 
+   /** Load more data for pagination if onEndreached not triggered */
+  const onScroll = useCallback(
+    ({nativeEvent}: any) => {
+      const {layoutMeasurement, contentOffset, contentSize} = nativeEvent;
+      const isCloseToBottom =
+        layoutMeasurement.height + contentOffset.y >= contentSize.height - 100;
+      if (isCloseToBottom) {
+        console.log('CloseToBottom');
+        loadMore();
+      }
+    },
+    [loading, hasMore],
+  );
+
   return (
     <SafeAreaView
       style={{flex: 1, backgroundColor: theme.colors.homepageSafeArea}}>
@@ -230,6 +244,7 @@ function HomeScreen({navigation}: any) {
               ? theme.colors.backgroundHome
               : theme.colors.background,
         }}
+        onScroll={onScroll}
       />
     </SafeAreaView>
   );

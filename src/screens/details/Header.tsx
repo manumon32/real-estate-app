@@ -181,7 +181,7 @@ function Header(props: any): React.JSX.Element {
           height={360}
           autoPlay={false}
           data={details?.imageUrls}
-          scrollAnimationDuration={1}
+          scrollAnimationDuration={300}
           onSnapToItem={index => {
             setCurrentIndex(index);
           }}
