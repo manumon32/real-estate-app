@@ -35,7 +35,6 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
   triggerRefresh: false,
   error: null,
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchListings: async () => {
     set({
       loading: true,
@@ -159,7 +158,7 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
       navigateandReset();
     } catch (err: any) {
       set({error: err.message, loading: false});
-      navigateandReset();
+      // navigateandReset();
     }
   },
   setTriggerRefresh: () =>

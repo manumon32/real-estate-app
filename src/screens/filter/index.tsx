@@ -173,7 +173,7 @@ function App(): React.JSX.Element {
   const {theme} = useTheme();
   const [visible, setVisible] = useState(false);
   const [searchText, setSearchText] = useState(
-    filters?.['searchText'] ?? 'Search',
+    filters?.searchText ?? 'Search',
   );
   const [sort, setSort] = useState(false);
   const abortRef = useRef<AbortController | null>(null);

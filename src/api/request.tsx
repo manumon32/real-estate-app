@@ -1,90 +1,82 @@
 import Toast from 'react-native-toast-message';
+import { AxiosError, AxiosResponse } from 'axios';
 import api from './axios';
-import {logoutAndRedirect} from '../utils/logoutAndRedirect';
+import { logoutAndRedirect } from '../utils/logoutAndRedirect';
 
 export type RequestMethod = 'get' | 'post' | 'put' | 'delete';
 
 interface ApiRequestProps {
   method: RequestMethod;
   url: string;
-  data?: any;
-  params?: any;
+  data?: unknown;
+  params?: unknown;
   headers?: Record<string, string>;
 }
 
-export const apiRequest = async ({
+const AUTH_ERROR_ENDPOINTS = [
+  '/auth/login',
+  '/user/send-email-otp',
+  '/user/verify-email-otp',
+  '/user/send-mobile-otp',
+  '/user/verify-mobile-otp',
+  '/auth/update-contact',
+  '/auth/send-mobile-otp',
+];
+
+const IMAGE_UPLOAD_ENDPOINT = '/files/upload-images';
+
+export const apiRequest = async <T = any>({
   method,
   url,
   data,
   params,
   headers,
-}: ApiRequestProps): Promise<ApiRequestProps> => {
+}: ApiRequestProps): Promise<T> => {
   try {
-    const response = await api.request<ApiRequestProps>({
+    const response: AxiosResponse<T> = await api.request({
       method,
       url,
       data,
       params,
       headers,
     });
-    console.log('response', response);
+
     return response.data;
-  } catch (error: any) {
+  } catch (err) {
+    const error = err as AxiosError<any>;
+
     console.log('--- API Error ---');
     console.log('Message:', error.message);
     console.log('Status:', error.response?.status);
     console.log('Response Data:', error.response?.data);
-    console.log('Request Config:', error.config?.url); // Optional
-    console.log('error Config URL:', error.config?.url); // Optional
-    if (
-      error.config.url === '/auth/login' ||
-      error.config.url === '/user/send-email-otp' ||
-      error.config.url === '/user/verify-email-otp' ||
-      error.config.url === '/user/send-mobile-otp' ||
-      error.config.url === '/user/verify-mobile-otp' ||
-      error.config.url === '/auth/update-contact' ||
-      error.config.url === '/auth/send-mobile-otp'
-    ) {
-      console.log('Response Data:', error.response?.data?.msg);
+    console.log('Request URL:', error.config?.url);
+
+    const requestUrl = error.config?.url;
+    const errorMessage =
+      error.response?.data?.msg || 'Something went wrong. Please try again later.';
+
+    if (requestUrl && AUTH_ERROR_ENDPOINTS.includes(requestUrl)) {
       Toast.show({
         type: 'error',
-        text1: error.response?.data?.msg
-          ? error.response?.data?.msg
-          : 'Invalid OTP.',
+        text1: error.response?.data?.msg || 'Invalid OTP.',
         position: 'bottom',
       });
-    } else if (
-      error.response?.status === 401 ||
-      error.response?.status === 403
-    ) {
-      // Optional: clear auth tokens here
-      Toast.show({
-        type: 'error',
-        text1: 'Please login.',
-        position: 'bottom',
-      });
+    } else if (error.response?.status === 401 || error.response?.status === 403) {
       logoutAndRedirect();
+    } else if (requestUrl === IMAGE_UPLOAD_ENDPOINT) {
+      Toast.show({
+        type: 'error',
+        text1: 'Some images failed to upload. Please retry.',
+        position: 'bottom',
+      });
     } else {
-      if (
-        error.config.url === '/files/upload-images' ||
-        error.config.url === '/files/upload-images'
-      ) {
-        Toast.show({
-          type: 'error',
-          text1: 'Some images failed to upload. Please retry.',
-          position: 'bottom',
-        });
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: error.response?.data?.msg
-            ? error.response?.data?.msg
-            : 'Something went wrong, please try again later.',
-          position: 'bottom',
-        });
-      }
+      Toast.show({
+        type: 'error',
+        text1: errorMessage,
+        position: 'bottom',
+      });
     }
-    // return error.response?.data
+
     throw error;
   }
 };

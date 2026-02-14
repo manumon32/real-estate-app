@@ -256,7 +256,7 @@ const CommonLocationModal: React.FC<Props> = ({
       onSelectLocation(updatelocation);
     }
     setCurrentLocation(updatelocation);
-  }, [visible, location.default, onSelectLocation]);
+  }, [visible, location, onSelectLocation]);
 
   const locationFetchSuccess = useCallback(async (position: any) => {
     const {latitude, longitude} = position.coords;

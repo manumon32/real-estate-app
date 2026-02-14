@@ -18,7 +18,6 @@ export const createHandShakeSlice = (set: any): HandShakeSlice => ({
   gethandShakeToken: async (data: any) => {
     try {
       const resp = await getHandshakeTokenApi(data);
-      console.log(resp);
       if (resp?.secretKey) {
         set({
           clientId: resp.clientId,
@@ -29,8 +28,9 @@ export const createHandShakeSlice = (set: any): HandShakeSlice => ({
         set({handShakeError: true, habdshakeErrorLog: resp});
       }
     } catch (error) {
-      console.log('error', error);
       set({handShakeError: true, habdshakeErrorLog: error});
+      console.log('Handshake error', error);
+      throw new Error('Failed');
     }
   },
   loadToken: async () => {

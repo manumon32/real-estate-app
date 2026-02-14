@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-native/no-inline-styles */
-import React, {useCallback, useEffect, useRef, useState, useMemo} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   Animated,
@@ -11,20 +10,21 @@ import {
 } from 'react-native';
 import useBoundStore from '@stores/index';
 import DeviceInfo from 'react-native-device-info';
+import uuid from 'react-native-uuid';
+
 import {Fonts} from '@constants/font';
 import {useFocusEffect} from '@react-navigation/native';
 import AppUpdateChecker from './AppUpdateChecker';
 
 function Index({}: any): React.JSX.Element {
-  const token = useBoundStore(s => s.token);
   const handShakeError = useBoundStore(s => s.handShakeError);
-  const clientId = useBoundStore(s => s.clientId);
   const bearerToken = useBoundStore(s => s.bearerToken);
   const gethandShakeToken = useBoundStore(s => s.gethandShakeToken);
   const getConfigData = useBoundStore(s => s.getConfigData);
   const fetchSuggestions = useBoundStore(s => s.fetchSuggestions);
   const fetchFavouriteAds = useBoundStore(s => s.fetchFavouriteAds);
   const fetchInitialListings = useBoundStore(s => s.fetchInitialListings);
+  const isFetchingRef = useRef(false);
 
   const [error, setError] = useState(false);
   const [retryLoading, setRetryLoading] = useState(false);
@@ -32,40 +32,55 @@ function Index({}: any): React.JSX.Element {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   /** Get device info once and memoize */
-  const deviceInfo = useMemo(() => {
-    return Promise.all([
-      DeviceInfo.getUniqueId(),
-      DeviceInfo.getVersion(),
-      DeviceInfo.getModel(),
-      DeviceInfo.getSystemVersion(),
-    ]).then(([deviceId, version, model, osVersion]) => ({
-      deviceId: deviceId,
+  const deviceInfo = useCallback(async () => {
+    let storedDeviceId = uuid.v4();
+
+    const [version, model, osVersion, isEmulator, installer, isDebug] =
+      await Promise.all([
+        DeviceInfo.getVersion(),
+        DeviceInfo.getModel(),
+        DeviceInfo.getSystemVersion(),
+        DeviceInfo.isEmulator(),
+        DeviceInfo.getInstallerPackageName(),
+        false,
+      ]);
+    console.log(installer);
+
+    return {
+      deviceId: String(storedDeviceId), // stable per install
       appVersion: version || '',
       deviceModel: model,
-      osVersion: osVersion,
-      fingerprintHash: 'hsde123231',
-      rooted: false,
-      emulator: false,
-      debug: false,
-      installer: 'com.android.vending',
-    }));
+      osVersion,
+      emulator: isEmulator,
+      debug: isDebug,
+      installer: '', //installer || 'unknown',
+      rooted: false, // use Play Integrity for real check
+      fingerprintHash: 'hsde123231', // generate on backend
+    };
   }, []);
 
   /** Fetch handshake data */
   const fetchData = useCallback(async () => {
+    // Ignore if already running
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    isFetchingRef.current = true;
+
     setError(false);
     setRetryLoading(true);
     try {
-      const data = await deviceInfo;
+      const data = await deviceInfo();
       await gethandShakeToken(data);
       if (bearerToken) {
         fetchFavouriteAds();
       }
-      // Fetch initial listings
-      await fetchInitialListings();
 
       // App config + suggestions (parallel)
       Promise.allSettled([getAppConfigData(), fetchSuggestions()]);
+      // Fetch initial listings
+      fetchInitialListings();
 
       setRetryLoading(false);
     } catch (err) {
@@ -92,7 +107,9 @@ function Index({}: any): React.JSX.Element {
           const dataResult: any = await fetchData(); // <-- MUST succeed
 
           // If fetchData failed or returned nothing, stop
-          if (!dataResult || !isActive) return;
+          if (!dataResult || !isActive) {
+            return;
+          }
 
           // 2️⃣ Authenticated flow
         } catch (err) {
@@ -107,16 +124,7 @@ function Index({}: any): React.JSX.Element {
       return () => {
         isActive = false; // cleanup
       };
-    }, [
-      token,
-      clientId,
-      bearerToken,
-      fetchData,
-      fetchFavouriteAds,
-      getAppConfigData,
-      fetchSuggestions,
-      fetchInitialListings,
-    ]),
+    }, []),
   );
 
   /** Start animation once */

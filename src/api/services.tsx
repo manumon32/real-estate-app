@@ -239,8 +239,8 @@ export const getHandshakeTokenApi = async (data: object): Promise<any> => {
     });
     return response.data ? response.data : response;
   } catch (error: any) {
-    return error;
-    // throw error;
+    // return error;
+    throw error;
   }
 };
 
@@ -365,7 +365,7 @@ export const fetchListingsFromAPI = async (
   configArg: any,
 ): Promise<Listing> => {
   try {
-    console.log('params', params);
+    console.log('params', configArg);
     const headers = await getHeaders(configArg);
     const apiConfig: any = {
       method: 'get',

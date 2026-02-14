@@ -602,13 +602,7 @@ const PostAdContainer = (props: any) => {
     token,
     clientId,
     bearerToken,
-    locationForAdpost.lat,
-    locationForAdpost.lng,
-    locationForAdpost.name,
-    locationForAdpost.state,
-    locationForAdpost.country,
-    locationForAdpost.district,
-    locationForAdpost.city,
+    locationForAdpost,
     resetForm,
     setImages,
     clearAllLoadingStates,
@@ -617,8 +611,7 @@ const PostAdContainer = (props: any) => {
     loadingStates,
     loadingStatesfloor,
     managePlansList,
-    user?.phone,
-    user?.email,
+    user,
   ]);
 
   useEffect(() => {

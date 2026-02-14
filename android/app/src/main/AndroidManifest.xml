@@ -18,8 +18,8 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize"
-            android:exported="true"
-            android:screenOrientation="portrait">
+            android:resizeableActivity="true"
+            android:exported="true">
 
             <!-- Launcher -->
             <intent-filter>

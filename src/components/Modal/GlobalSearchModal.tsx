@@ -517,7 +517,7 @@ const GlobalSearchModal: React.FC<Props> = ({
               value={query}
               onChangeText={fetchPredictions}
               placeholder="Enter location"
-              placeholderTextColor={theme.colors.background}
+              placeholderTextColor={theme.colors.text}
               style={[styles.input]}
               onFocus={() => setFocusedIndex(1)} // 👈 "Search" box focused
               // onBlur={() => setFocusedIndex(null)}
@@ -563,7 +563,7 @@ const GlobalSearchModal: React.FC<Props> = ({
             </View>
           )}
 
-          {focusedIndex == 1 && (
+          {focusedIndex === 1 && (
             <View>
               <TouchableOpacity
                 style={styles.currentLocationBtn}

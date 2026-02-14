@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import NetInfo from '@react-native-community/netinfo';
@@ -6,6 +5,7 @@ import uuid from 'react-native-uuid';
 import Toast from 'react-native-toast-message';
 import {createHmacSignature, createBodyHash} from './handshake';
 import {API_URL} from '@constants/api';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = API_URL;
 
@@ -131,6 +131,13 @@ api.interceptors.request.use(
         'X-NONCE': nonce,
         'X-CLIENT-ID': deviceId,
       };
+      // console.log('headers ',{
+      //   ...(config.headers || {}),
+      //   'X-TIMESTAMP': timestamp,
+      //   'X-SIGNATURE': signature,
+      //   'X-NONCE': nonce,
+      //   'X-CLIENT-ID': deviceId,
+      // });
     }
 
     return config;

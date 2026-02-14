@@ -172,7 +172,9 @@ function HomeScreen({navigation}: any) {
 
   /* --------------------- FOOTER --------------------- */
   const ListFooter = useMemo(() => {
-    if (loading) return <HomepageSkelton />;
+    if (loading) {
+      return <HomepageSkelton />;
+    }
     if (!loading && listings.length === 0) {
       return (
         <NoChats
@@ -188,12 +190,14 @@ function HomeScreen({navigation}: any) {
 
   /* --------------------- PAGINATION --------------------- */
   const loadMore = useCallback(() => {
-    if (loading || !hasMore || onEndReachedCalledDuringMomentum.current) return;
+    if (loading || !hasMore || onEndReachedCalledDuringMomentum.current) {
+      return;
+    }
     onEndReachedCalledDuringMomentum.current = true;
     fetchListings();
   }, [loading, hasMore]);
 
-   /** Load more data for pagination if onEndreached not triggered */
+  /** Load more data for pagination if onEndreached not triggered */
   const onScroll = useCallback(
     ({nativeEvent}: any) => {
       const {layoutMeasurement, contentOffset, contentSize} = nativeEvent;

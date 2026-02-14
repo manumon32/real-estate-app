@@ -15,6 +15,7 @@ import {
 
 import {getMessaging, onMessage} from '@react-native-firebase/messaging';
 import {getNavigationMode} from 'react-native-navigation-mode';
+import {StyleSheet} from 'react-native';
 const LoginModal = React.lazy(() => import('@components/Modal/LoginModal'));
 const NetworkStatus = React.lazy(() => import('@components/NetworkStatus'));
 
@@ -73,7 +74,7 @@ function App() {
   return (
     <ThemeProvider>
       <React.Suspense fallback={null}>
-        <GestureHandlerRootView style={{flex: 1}}>
+        <GestureHandlerRootView style={styles.gestureHandlerRootViewStyle}>
           <NavigationContainer
             ref={navigationRef}
             linking={linking}
@@ -90,4 +91,7 @@ function App() {
   );
 }
 
+const styles = StyleSheet.create({
+  gestureHandlerRootViewStyle: {flex: 1},
+});
 export default React.memo(App);

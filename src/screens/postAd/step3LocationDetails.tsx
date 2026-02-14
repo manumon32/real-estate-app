@@ -115,7 +115,7 @@ const Step3LocationDetails = (props: any) => {
         <View style={styles.inputContainer}>
           <CommonDistanceInput
             label="Area Size"
-            unit="/sq.ft"
+            unit={isStringInEitherArray('carpetArea') ? '/sq.ft' : '/cent '}
             value={String(values.areaSize)}
             error={touched?.areaSize && errors?.areaSize}
             onChange={text => setFieldValue('areaSize', text)}

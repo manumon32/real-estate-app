@@ -91,7 +91,7 @@ const PropertyDetails = React.memo(() => {
       .activeOffsetX([-10, 10]) // must move horizontally
       .failOffsetY([-10, 10]) // slightest vertical → give scrollview control
       .onStart(() => {
-          // @ts-ignore
+        // @ts-ignore
         scrollRef.current?.setNativeProps({scrollEnabled: false});
       })
       .onUpdate(e => {
@@ -102,11 +102,11 @@ const PropertyDetails = React.memo(() => {
         }
       })
       .onEnd(() => {
-          // @ts-ignore
+        // @ts-ignore
         scrollRef.current?.setNativeProps({scrollEnabled: true});
       })
       .onFinalize(() => {
-          // @ts-ignore
+        // @ts-ignore
         scrollRef.current?.setNativeProps({scrollEnabled: true});
       });
   }, []);
@@ -493,9 +493,12 @@ const PropertyDetails = React.memo(() => {
                 ? formatINR(property?.price)
                 : formatINR(items?.price)}
             </Text>
-            <Text style={[styles.squrft, {color: theme.colors.text}]}>
-              ({property?.areaSize}/ sq.ft)
-            </Text>
+            {!detailLoading && (
+              <Text style={[styles.squrft, {color: theme.colors.text}]}>
+                ({property?.areaSize}
+                {property?.carpetArea ? ' sq.ft' : ' cent'})
+              </Text>
+            )}
             <View style={styles.nogotiable}>
               <Text style={styles.nogotiableText}>Negotiable</Text>
             </View>
@@ -753,7 +756,7 @@ const PropertyDetails = React.memo(() => {
               <Text
                 numberOfLines={1}
                 style={[styles.iconsTextStle, {color: '#171717'}]}>
-                {'sq.ft'}
+                {property?.carpetArea ? ' sq.ft' : ' cent'}
               </Text>
             </View>
           )}
@@ -907,7 +910,8 @@ const PropertyDetails = React.memo(() => {
                     {'Area Size'}
                   </Text>
                   <Text style={[styles.value, sectionColor]}>
-                    {property?.areaSize} /{'sq.ft'}
+                    {property?.areaSize}
+                    {property?.carpetArea ? ' sq.ft' : ' cent'}
                   </Text>
                 </View>
               ) : (
@@ -919,10 +923,10 @@ const PropertyDetails = React.memo(() => {
                     {'Carpet Area'}
                   </Text>
                   <Text style={[styles.value, sectionColor]}>
-                    {property?.carpetArea} /
+                    {property?.carpetArea}
                     {property?.carpetAreaUnitId?.name
                       ? property?.carpetAreaUnitId?.name
-                      : 'sq.ft'}
+                      : ' sq.ft'}
                   </Text>
                 </View>
               ) : (
@@ -934,10 +938,10 @@ const PropertyDetails = React.memo(() => {
                     {'BuiltUp Area'}
                   </Text>
                   <Text style={[styles.value, sectionColor]}>
-                    {property?.builtUpArea} /
+                    {property?.builtUpArea}
                     {property?.builtUpAreaUnitId?.name
                       ? property?.builtUpAreaUnitId?.name
-                      : 'sq.ft'}
+                      : ' sq.ft'}
                   </Text>
                 </View>
               ) : (
@@ -949,10 +953,10 @@ const PropertyDetails = React.memo(() => {
                     {'Super BuiltUp Area'}
                   </Text>
                   <Text style={[styles.value, sectionColor]}>
-                    {property?.superBuiltUpArea} /
+                    {property?.superBuiltUpArea}
                     {property?.superBuiltAreaUnitId?.name
                       ? property?.superBuiltAreaUnitId?.name
-                      : 'sq.ft'}
+                      : ' sq.ft'}
                   </Text>
                 </View>
               ) : (

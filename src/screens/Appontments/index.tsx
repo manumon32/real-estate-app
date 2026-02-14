@@ -14,7 +14,6 @@ import {
   View,
   Text,
   StyleSheet,
-  // Image,
   TouchableOpacity,
   FlatList,
   RefreshControl,
@@ -58,7 +57,7 @@ interface ListingCardProps {
   bearerToken: any;
 }
 
-const FormattedDate = (arg: string | number | Date) => {
+const FormatDate = (arg: string | number | Date) => {
   const date = new Date(arg);
 
   const options: Intl.DateTimeFormatOptions = {
@@ -100,15 +99,12 @@ const ListingCard: React.FC<ListingCardProps> = ({
   const createRoom = async (payload: any, property: any, user: any) => {
     setLoading(true);
     let newpayload = {...payload, postOwnerId: payload.postOwnerId};
-    console.log('newpayload', newpayload);
     try {
       const res = await createRoomAPI(newpayload, {
         token,
         clientId,
         bearerToken,
       });
-      console.log(res);
-
       setLoading(false);
       if (res?._id) {
         sendSocket(newpayload);
@@ -262,7 +258,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
                   {status === 'pending'
                     ? 'Appointment requested for '
                     : 'Scheduled on '}
-                  {FormattedDate(date)}
+                  {FormatDate(date)}
                 </Text>
               </>
             )}
@@ -326,15 +322,15 @@ const ListingCard: React.FC<ListingCardProps> = ({
         )}
       </View>
       {/* {status === 'scheduled' && ( */}
-      <View style={styles.buttonRow}></View>
+      <View style={styles.buttonRow} />
       {/* )} */}
     </View>
   );
 };
 
-const FirstRoute = () => <View style={[styles.scene]}></View>;
+const FirstRoute = () => <View style={[styles.scene]} />;
 
-const SecondRoute = () => <View style={[styles.scene]}></View>;
+const SecondRoute = () => <View style={[styles.scene]} />;
 
 const Appointments = () => {
   const {

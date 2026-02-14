@@ -78,7 +78,7 @@ function Header({navigation}: any): React.JSX.Element {
               <Text
                 numberOfLines={1}
                 style={[styles.textStyle, {color: theme.colors.text}]}>
-                {locationfetchLoading && location.default
+                {locationfetchLoading && location?.default
                   ? 'Fetching...'
                   : location?.name || 'Kerala'} 
               </Text>
