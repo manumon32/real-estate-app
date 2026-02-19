@@ -212,26 +212,6 @@ jest.mock('react-native-image-crop-picker', () => ({
 }));
 
 // ------------------------
-// Audio Recorder Player
-// ------------------------
-jest.mock('react-native-audio-recorder-player', () => {
-  return jest.fn().mockImplementation(() => ({
-    startRecorder: jest.fn(() => Promise.resolve('file://mocked-path')),
-    stopRecorder: jest.fn(() => Promise.resolve('file://mocked-path')),
-    startPlayer: jest.fn(() => Promise.resolve()),
-    stopPlayer: jest.fn(() => Promise.resolve()),
-    pausePlayer: jest.fn(() => Promise.resolve()),
-    resumePlayer: jest.fn(() => Promise.resolve()),
-    addRecordBackListener: jest.fn(),
-    removeRecordBackListener: jest.fn(),
-    addPlayBackListener: jest.fn(),
-    removePlayBackListener: jest.fn(),
-    seekToPlayer: jest.fn(() => Promise.resolve()),
-    setVolume: jest.fn(),
-  }));
-});
-
-// ------------------------
 // Image Zoom Viewer
 // ------------------------
 jest.mock('react-native-image-zoom-viewer', () => {

@@ -2,56 +2,58 @@ import React, {useRef, useState, useEffect} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import Slider from '@react-native-community/slider';
 
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+// import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // For play/pause icon
 
 interface AudioPlayerProps {
   filePath: string;
 }
 
-const AudioPlayer: React.FC<AudioPlayerProps> = ({filePath}) => {
-  const player = useRef(new AudioRecorderPlayer()).current;
+const AudioPlayer: React.FC<AudioPlayerProps> = ({}) => {
+  // new AudioRecorderPlayer() filePath
+  const player = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState(0); // total duration in seconds
   const [position, setPosition] = useState(0); // current position in seconds
   const [paused, setPausedPosition] = useState(false);
   useEffect(() => {
     return () => {
-      player.stopPlayer();
-      player.removePlayBackListener();
+      // player?.stopPlayer();
+      // player?.removePlayBackListener();
     };
   }, [player]);
 
   const playPause = async () => {
+    setDuration(100); // Mock duration, replace with actual duration from player
     if (!playing) {
       // If paused, resume
       if (paused) {
-        await player.resumePlayer(); // resume from paused position
+        // await player.resumePlayer(); // resume from paused position
       } else {
-        await player.startPlayer(filePath); // start new
+        // await player.startPlayer(filePath); // start new
       }
 
-      player.addPlayBackListener(e => {
-        setPosition(Math.floor(e.currentPosition / 1000));
-        setDuration(Math.floor(e.duration / 1000));
+      // player.addPlayBackListener(e => {
+      //   setPosition(Math.floor(e.currentPosition / 1000));
+      //   setDuration(Math.floor(e.duration / 1000));
 
-        if (e.currentPosition === e.duration) {
-          player.stopPlayer();
-          setPlaying(false);
-          setPausedPosition(false);
-          player.removePlayBackListener();
-        }
-      });
+      //   if (e.currentPosition === e.duration) {
+      //     player.stopPlayer();
+      //     setPlaying(false);
+      //     setPausedPosition(false);
+      //     player.removePlayBackListener();
+      //   }
+      // });
       setPlaying(true);
     } else {
-      await player.pausePlayer(); // returns current position in ms
+      // await player.pausePlayer(); // returns current position in ms
       setPausedPosition(true); // save paused position
       setPlaying(false);
     }
   };
 
   const onSeek = async (value: number) => {
-    await player.seekToPlayer(value * 1000);
+    // await player.seekToPlayer(value * 1000);
     setPosition(value);
   };
 

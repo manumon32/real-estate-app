@@ -15,7 +15,7 @@ import {
   Alert,
   Easing,
 } from 'react-native';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+// import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function VoiceRecorder({
@@ -25,7 +25,7 @@ export default function VoiceRecorder({
   setRecording = arg => {},
   recording = false,
 }) {
-  const audioRecorderPlayer = useRef(new AudioRecorderPlayer()).current;
+  const audioRecorderPlayer = useRef<any>(null).current;
   const [recordSecs, setRecordSecs] = useState(0);
   const [recordTime, setRecordTime] = useState('00:00');
   const [cancelled, setCancelled] = useState(false);
