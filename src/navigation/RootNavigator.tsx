@@ -4,7 +4,9 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 const Stack = createNativeStackNavigator();
 
 /** Lazy loaded screens */
-const MainTabNavigator = React.lazy(() => import('./MainTabNavigator'));
+import MainTabNavigator from './MainTabNavigator';
+
+// const MainTabNavigator = React.lazy(() => import('./MainTabNavigator'));
 // const DetailsScreen = React.lazy(() => import('@screens/details'));
 
 import DetailsScreen from '@screens/details';
@@ -52,17 +54,17 @@ const RootNavigator = () => {
   return (
     <React.Suspense fallback={null}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen
-          name="HomeIndex"
-          component={HomePage}
-          listeners={{
-            beforeRemove: e => preventDoubleNavigation() && e.preventDefault(),
-          }}
-        />
 
         <Stack.Screen
           name="Main"
           component={MainTabNavigator}
+          listeners={{
+            beforeRemove: e => preventDoubleNavigation() && e.preventDefault(),
+          }}
+        />
+        <Stack.Screen
+          name="HomeIndex"
+          component={HomePage}
           listeners={{
             beforeRemove: e => preventDoubleNavigation() && e.preventDefault(),
           }}

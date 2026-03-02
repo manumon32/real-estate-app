@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
-// import SearchBar from '@components/SearchBar';
-const SearchBar = React.lazy(() => import('@components/SearchBar'));
+import SearchBar from '@components/SearchBar';
+// const SearchBar = React.lazy(() => import('@components/SearchBar'));
 import IconButton from '@components/Buttons/IconButton';
 import {Fonts} from '@constants/font';
 // import FilterModal from '@components/Filter';

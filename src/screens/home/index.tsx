@@ -16,7 +16,7 @@ import {Fonts} from '@constants/font';
 import {useFocusEffect} from '@react-navigation/native';
 import AppUpdateChecker from './AppUpdateChecker';
 
-function Index({}: any): React.JSX.Element {
+function HomeScreenIndex(): React.JSX.Element {
   const handShakeError = useBoundStore(s => s.handShakeError);
   const bearerToken = useBoundStore(s => s.bearerToken);
   const gethandShakeToken = useBoundStore(s => s.gethandShakeToken);
@@ -24,110 +24,112 @@ function Index({}: any): React.JSX.Element {
   const fetchSuggestions = useBoundStore(s => s.fetchSuggestions);
   const fetchFavouriteAds = useBoundStore(s => s.fetchFavouriteAds);
   const fetchInitialListings = useBoundStore(s => s.fetchInitialListings);
+
+  // Stable device ID for the lifetime of this component instance
+  const deviceIdRef = useRef<string>(String(uuid.v4()));
+  // Guard against concurrent fetches
   const isFetchingRef = useRef(false);
 
+  const isActive = {current: true};
   const [error, setError] = useState(false);
   const [retryLoading, setRetryLoading] = useState(false);
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  /** Get device info once and memoize */
-  const deviceInfo = useCallback(async () => {
-    let storedDeviceId = uuid.v4();
-
-    const [version, model, osVersion, isEmulator, installer, isDebug] =
+  /** Collect device metadata once per call */
+  const getDeviceInfo = useCallback(async () => {
+    const [version, model, osVersion, isEmulator, installer] =
       await Promise.all([
         DeviceInfo.getVersion(),
         DeviceInfo.getModel(),
         DeviceInfo.getSystemVersion(),
         DeviceInfo.isEmulator(),
         DeviceInfo.getInstallerPackageName(),
-        false,
       ]);
-    console.log(installer);
-
-    return {
-      deviceId: String(storedDeviceId), // stable per install
-      appVersion: version || '',
+    console.log('Device Info:', {
+      deviceId: deviceIdRef.current,
+      appVersion: version,
       deviceModel: model,
       osVersion,
       emulator: isEmulator,
-      debug: isDebug,
+      installer,
+    });
+
+    return {
+      deviceId: deviceIdRef.current,
+      appVersion: version ?? '',
+      deviceModel: model,
+      osVersion,
+      emulator: isEmulator,
+      debug: __DEV__,
       installer: '', //installer || 'unknown',
       rooted: false, // use Play Integrity for real check
       fingerprintHash: 'hsde123231', // generate on backend
     };
   }, []);
 
-  /** Fetch handshake data */
-  const fetchData = useCallback(async () => {
-    // Ignore if already running
-    if (isFetchingRef.current) {
-      return;
-    }
-
-    isFetchingRef.current = true;
-
-    setError(false);
-    setRetryLoading(true);
-    try {
-      const data = await deviceInfo();
-      await gethandShakeToken(data);
-      if (bearerToken) {
-        fetchFavouriteAds();
+  /** Initialise the app: handshake → config/suggestions → listings */
+  const fetchData = useCallback(
+    async (isActive: {current: boolean}, isHandshakeNeeded = false) => {
+      if (isFetchingRef.current) {
+        return;
       }
+      isFetchingRef.current = true;
+      setError(false);
+      setRetryLoading(true);
 
-      // App config + suggestions (parallel)
-      Promise.allSettled([getAppConfigData(), fetchSuggestions()]);
-      // Fetch initial listings
-      fetchInitialListings();
-
-      setRetryLoading(false);
-    } catch (err) {
-      setRetryLoading(false);
-      setError(true);
-    }
-  }, []);
-
-  /** Get config data */
-  const getAppConfigData = useCallback(() => {
-    getConfigData();
-  }, []);
-
-  /** Initialize app state when focused */
-  useFocusEffect(
-    useCallback(() => {
-      let isActive = true; // Prevent updates after unmount
-
-      const initialize = async () => {
-        setError(false);
-
-        try {
-          // 1️⃣ First-time load (token/clientId missing)
-          const dataResult: any = await fetchData(); // <-- MUST succeed
-
-          // If fetchData failed or returned nothing, stop
-          if (!dataResult || !isActive) {
-            return;
-          }
-
-          // 2️⃣ Authenticated flow
-        } catch (err) {
-          if (isActive) {
-            setError(true);
-          }
+      try {
+        if (isHandshakeNeeded) {
+          const data = await getDeviceInfo();
+          await gethandShakeToken(data);
+          fetchInitialListings();
         }
-      };
 
-      initialize();
+        if (bearerToken) {
+          fetchFavouriteAds();
+        }
 
-      return () => {
-        isActive = false; // cleanup
-      };
-    }, []),
+        // Run config + suggestions in parallel; don't block listings on them
+        Promise.allSettled([getConfigData(), fetchSuggestions()]);
+      } catch {
+        if (isActive.current) {
+          setError(true);
+        }
+      } finally {
+        isFetchingRef.current = false;
+        if (isActive.current) {
+          setRetryLoading(false);
+        }
+      }
+    },
+    [],
   );
 
-  /** Start animation once */
+  /** Retry handler exposed to the UI — always safe to call */
+  const handleRetry = useCallback(() => {
+    fetchData(isActive, true);
+  }, [fetchData]);
+
+  const fetchInitialData = useCallback(async () => {
+    try {
+      await fetchInitialListings();
+      fetchData(isActive);
+    } catch (err: any) {
+      fetchData(isActive, true);
+    }
+  }, [fetchData, fetchInitialListings]);
+
+  /** Initialize on first focus */
+  useFocusEffect(
+    useCallback(() => {
+      fetchInitialData();
+      return () => {
+        isActive.current = false;
+      };
+    }, [fetchInitialData]),
+  );
+
+  /** Pulse animation — runs once on mount */
   useEffect(() => {
     const pulse = Animated.loop(
       Animated.sequence([
@@ -145,7 +147,7 @@ function Index({}: any): React.JSX.Element {
     );
     pulse.start();
     return () => pulse.stop();
-  }, []);
+  }, [scaleAnim]);
 
   return (
     <View style={styles.container}>
@@ -159,9 +161,12 @@ function Index({}: any): React.JSX.Element {
           <Text style={styles.init}>
             🔌 APP Initialization failed. Please try again.
           </Text>
-          <TouchableOpacity style={styles.loginBtn} onPress={fetchData}>
-            {!retryLoading && <Text style={styles.loginText}>Retry</Text>}
-            {retryLoading && <ActivityIndicator color={'#fff'} />}
+          <TouchableOpacity style={styles.loginBtn} onPress={handleRetry}>
+            {retryLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginText}>Retry</Text>
+            )}
           </TouchableOpacity>
         </View>
       )}
@@ -192,4 +197,4 @@ const styles = StyleSheet.create({
   init: {marginBottom: 10, fontFamily: Fonts.MEDIUM},
 });
 
-export default React.memo(Index);
+export default React.memo(HomeScreenIndex);

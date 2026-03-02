@@ -41,6 +41,7 @@ const renderIcons = (routeName: string, isFocused: boolean) => {
 
 const BottomTabBar = ({state, navigation}: any) => {
   const {theme} = useTheme();
+  const initialLoading = useBoundStore(s => s.initialLoading);
   const {setVisible, bearerToken, unreadCount, setUnreadCount} =
     useBoundStore();
   const styles = getStyles(theme);
@@ -54,79 +55,83 @@ const BottomTabBar = ({state, navigation}: any) => {
   ];
 
   return (
-    <SafeFooter style={styles.container}>
-      <View style={styles.tabBar}>
-        {state.routes
-          .filter((item: {name: string}) => !ingoreRoutes.includes(item.name))
-          .map((route: any, index: number) => {
-            const isFocused = state.index === index;
-            const onPress = () => {
-              if (
-                (route.name === 'AddPost' ||
-                  route.name === 'Chat' ||
-                  route.name === 'Profile' ||
-                  route.name === 'MyAds') &&
-                !bearerToken
-              ) {
-                setVisible();
-              } else if (route.name === 'AddPost') {
-                navigation.navigate('PostAd');
-              } else {
-                if (route.name === 'Chat') {
-                  setUnreadCount(0);
-                }
-                const event = navigation.emit({
-                  type: 'tabPress',
-                  target: route.key,
-                  canPreventDefault: true,
-                });
+    !initialLoading && (
+      <SafeFooter style={styles.container}>
+        <View style={styles.tabBar}>
+          {state.routes
+            .filter((item: {name: string}) => !ingoreRoutes.includes(item.name))
+            .map((route: any, index: number) => {
+              const isFocused = state.index === index;
+              const onPress = () => {
+                if (
+                  (route.name === 'AddPost' ||
+                    route.name === 'Chat' ||
+                    route.name === 'Profile' ||
+                    route.name === 'MyAds') &&
+                  !bearerToken
+                ) {
+                  setVisible();
+                } else if (route.name === 'AddPost') {
+                  navigation.navigate('PostAd');
+                } else {
+                  if (route.name === 'Chat') {
+                    setUnreadCount(0);
+                  }
+                  const event = navigation.emit({
+                    type: 'tabPress',
+                    target: route.key,
+                    canPreventDefault: true,
+                  });
 
-                if (!isFocused && !event.defaultPrevented) {
-                  navigation.navigate(route.name);
+                  if (!isFocused && !event.defaultPrevented) {
+                    navigation.navigate(route.name);
+                  }
                 }
-              }
-            };
+              };
 
-            return (
-              <React.Fragment key={route.key}>
-                <TouchableOpacity onPress={onPress} style={styles.button}>
-                  {route.name !== 'AddPost' ? (
-                    <>
-                      {renderIcons(route.name, isFocused)}
-                      {route.name === 'Chat' &&
-                        unreadCount > 0 &&
-                        bearerToken &&
-                        !isFocused && (
-                          <View style={styles.badge}>
-                            <Text style={styles.badgeText}>{unreadCount}</Text>
-                          </View>
-                        )}
-                    </>
-                  ) : (
-                    <View style={styles.addButton}>
-                      <AdPostIcon />
-                    </View>
-                  )}
-                  <Text
-                    style={[
-                      isFocused ? styles.textFocusedStyle : styles.textStyle,
-                      // eslint-disable-next-line react-native/no-inline-styles
-                      {
-                        bottom: route.name === 'AddPost' ? 28 : 0,
-                      },
-                    ]}>
-                    {route.name === 'AddPost'
-                      ? 'Post Ad'
-                      : route.name === 'MyAds'
-                      ? 'My Ads'
-                      : route.name}
-                  </Text>
-                </TouchableOpacity>
-              </React.Fragment>
-            );
-          })}
-      </View>
-    </SafeFooter>
+              return (
+                <React.Fragment key={route.key}>
+                  <TouchableOpacity onPress={onPress} style={styles.button}>
+                    {route.name !== 'AddPost' ? (
+                      <>
+                        {renderIcons(route.name, isFocused)}
+                        {route.name === 'Chat' &&
+                          unreadCount > 0 &&
+                          bearerToken &&
+                          !isFocused && (
+                            <View style={styles.badge}>
+                              <Text style={styles.badgeText}>
+                                {unreadCount}
+                              </Text>
+                            </View>
+                          )}
+                      </>
+                    ) : (
+                      <View style={styles.addButton}>
+                        <AdPostIcon />
+                      </View>
+                    )}
+                    <Text
+                      style={[
+                        isFocused ? styles.textFocusedStyle : styles.textStyle,
+                        // eslint-disable-next-line react-native/no-inline-styles
+                        {
+                          bottom: route.name === 'AddPost' ? 28 : 0,
+                        },
+                      ]}>
+                      {route.name === 'AddPost'
+                        ? 'Post Ad'
+                        : route.name === 'MyAds'
+                        ? 'My Ads'
+                        : route.name}
+                    </Text>
+                  </TouchableOpacity>
+                </React.Fragment>
+              );
+            })}
+        </View>
+      </SafeFooter>
+    )
   );
 };
 

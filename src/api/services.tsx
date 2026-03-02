@@ -365,7 +365,6 @@ export const fetchListingsFromAPI = async (
   configArg: any,
 ): Promise<Listing> => {
   try {
-    console.log('params', configArg);
     const headers = await getHeaders(configArg);
     const apiConfig: any = {
       method: 'get',
@@ -376,7 +375,6 @@ export const fetchListingsFromAPI = async (
     const response = await apiRequest(apiConfig);
     return response?.data;
   } catch (error: any) {
-    console.log(error);
     throw error;
   }
 };

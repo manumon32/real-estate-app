@@ -9,6 +9,7 @@ import {
   BackHandler,
   ToastAndroid,
   AppState,
+  Modal,
   // Linking,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -17,6 +18,7 @@ import useBoundStore from '@stores/index';
 import {connectSocket, disconnectSocket} from './../../soket';
 import {useFocusEffect} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import HomeScreenIndex from './index';
 
 import {
   getMessaging,
@@ -32,12 +34,13 @@ import {
 
 // ⛔️ Lazy-loading PropertyCard causes jank inside FlatList → use memo instead
 import PropertyCard from '@components/PropertyCard';
-
+import Header from './Header/Header';
+import HomepageSkelton from '@components/SkeltonLoader/HomepageSkelton';
 // Lazy load only heavy non-list UI
-const Header = React.lazy(() => import('./Header/Header'));
-const HomepageSkelton = React.lazy(
-  () => import('@components/SkeltonLoader/HomepageSkelton'),
-);
+// const Header = React.lazy(() => import('./Header/Header'));
+// const HomepageSkelton = React.lazy(
+//   () => import('@components/SkeltonLoader/HomepageSkelton'),
+// );
 const NoChats = React.lazy(() => import('@components/NoChatFound'));
 
 function HomeScreen({navigation}: any) {
@@ -45,6 +48,7 @@ function HomeScreen({navigation}: any) {
   const fetchListings = useBoundStore(s => s.fetchListings);
   const hasMore = useBoundStore(s => s.hasMore);
   const loading = useBoundStore(s => s.loading);
+  const initialLoading = useBoundStore(s => s.initialLoading);
   const triggerRefresh = useBoundStore(s => s.triggerRefresh);
   const setTriggerRefresh = useBoundStore(s => s.setTriggerRefresh);
   const location = useBoundStore(s => s.location);
@@ -212,45 +216,55 @@ function HomeScreen({navigation}: any) {
   );
 
   return (
-    <SafeAreaView
-      style={{flex: 1, backgroundColor: theme.colors.homepageSafeArea}}>
-      <StatusBar
-        barStyle={isDarkMode ? 'dark-content' : 'dark-content'}
-        backgroundColor={theme.colors.homepageSafeArea}
-      />
+    <>
+      <Modal visible={initialLoading} animationType="fade" statusBarTranslucent>
+        <HomeScreenIndex />
+      </Modal>
+      {!initialLoading && (
+        <SafeAreaView
+          style={{flex: 1, backgroundColor: theme.colors.homepageSafeArea}}>
+          <StatusBar
+            barStyle={isDarkMode ? 'dark-content' : 'dark-content'}
+            backgroundColor={theme.colors.homepageSafeArea}
+          />
 
-      <FlatList
-        ref={flatListRef}
-        data={listings}
-        renderItem={renderItem}
-        keyExtractor={item => item._id?.toString()}
-        numColumns={2}
-        removeClippedSubviews={true}
-        initialNumToRender={12}
-        maxToRenderPerBatch={6}
-        updateCellsBatchingPeriod={80}
-        windowSize={7}
-        onMomentumScrollBegin={() =>
-          (onEndReachedCalledDuringMomentum.current = false)
-        }
-        onEndReachedThreshold={0.2}
-        onEndReached={loadMore}
-        ListHeaderComponent={ListHeader}
-        ListFooterComponent={ListFooter}
-        refreshControl={
-          <RefreshControl refreshing={false} onRefresh={setTriggerRefresh} />
-        }
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 100,
-          backgroundColor:
-            listings.length > 0
-              ? theme.colors.backgroundHome
-              : theme.colors.background,
-        }}
-        onScroll={onScroll}
-      />
-    </SafeAreaView>
+          <FlatList
+            ref={flatListRef}
+            data={listings}
+            renderItem={renderItem}
+            keyExtractor={item => item._id?.toString()}
+            numColumns={2}
+            removeClippedSubviews={true}
+            initialNumToRender={12}
+            maxToRenderPerBatch={6}
+            updateCellsBatchingPeriod={80}
+            windowSize={7}
+            onMomentumScrollBegin={() =>
+              (onEndReachedCalledDuringMomentum.current = false)
+            }
+            onEndReachedThreshold={0.2}
+            onEndReached={loadMore}
+            ListHeaderComponent={ListHeader}
+            ListFooterComponent={ListFooter}
+            refreshControl={
+              <RefreshControl
+                refreshing={false}
+                onRefresh={setTriggerRefresh}
+              />
+            }
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom: 100,
+              backgroundColor:
+                listings.length > 0
+                  ? theme.colors.backgroundHome
+                  : theme.colors.background,
+            }}
+            onScroll={onScroll}
+          />
+        </SafeAreaView>
+      )}
+    </>
   );
 }
 

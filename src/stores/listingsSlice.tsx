@@ -1,5 +1,4 @@
 import {fetchListingsFromAPI} from '@api/services';
-import {navigateandReset} from '@navigation/RootNavigation';
 
 // Types
 
@@ -19,6 +18,7 @@ export interface ListingsSlice {
   page: number;
   hasMore: boolean;
   loading: boolean;
+  initialLoading: boolean;
   error: string | null;
   triggerRefresh: boolean;
   setTriggerRefresh: () => void;
@@ -31,12 +31,14 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
   listings: [],
   page: 0,
   hasMore: false,
+  initialLoading: true,
   loading: false,
   triggerRefresh: false,
   error: null,
 
   fetchListings: async () => {
     set({
+      initialLoading: false,
       loading: true,
       triggerRefresh: false,
     });
@@ -102,6 +104,7 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
   },
   fetchInitialListings: async () => {
     set({
+      initialLoading: true,
       // loading: true,
       triggerRefresh: false,
     });
@@ -154,11 +157,11 @@ export const createListingsSlice = (set: any, get: any): ListingsSlice => ({
         page: res.pageNum,
         hasMore: res.pageNum < res.pages ? true : false,
         loading: false,
+        initialLoading: false,
       }));
-      navigateandReset();
     } catch (err: any) {
       set({error: err.message, loading: false});
-      // navigateandReset();
+      throw err;
     }
   },
   setTriggerRefresh: () =>

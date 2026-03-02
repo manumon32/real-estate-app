@@ -20,7 +20,9 @@ const LoginModal = React.lazy(() => import('@components/Modal/LoginModal'));
 const NetworkStatus = React.lazy(() => import('@components/NetworkStatus'));
 
 // Lazy-load entire RootNavigator
-const RootNavigator = React.lazy(() => import('@navigation/RootNavigator'));
+
+import RootNavigator from '@navigation/RootNavigator';
+// const RootNavigator = React.lazy(() => import('@navigation/RootNavigator'));
 
 function App() {
   const visible = useBoundStore(s => s.visible);
