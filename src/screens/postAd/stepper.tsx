@@ -490,13 +490,13 @@ const PostAdContainer = (props: any) => {
       mediaImages.length === 0 ||
       imageUploadLoading
     ) {
-      if (mediaImages.length === 0 || mediaImages.length > 10) {
+      if (mediaImages.length === 0 || mediaImages.length > 15) {
         Toast.show({
           type: 'error',
           text1:
             mediaImages.length === 0
               ? 'Please select at least one image.'
-              : 'You can only select up to 10 images',
+              : 'You can only select up to 15 images',
           position: 'bottom',
         });
       } else if (imageUploadLoading) {
@@ -872,7 +872,7 @@ const PostAdContainer = (props: any) => {
         }}>
         <SafeAreaView>
           <TouchableOpacity onPress={() => setPreview(false)}>
-            <Text>Colse</Text>
+            <Text>Close</Text>
           </TouchableOpacity>
           <Preview items={values} />
         </SafeAreaView>

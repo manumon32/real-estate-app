@@ -38,7 +38,7 @@ const Step4PropertyDetails = (props: any) => {
     <SlideInView
       style={{minHeight: 400}}
       direction={currentStep === 4 ? 'right' : 'left'}>
-      {isStringInEitherArray('"propertyFeatures"') && (
+      {isStringInEitherArray('propertyFeatures') && (
         <Text style={[styles.headingText, {color: theme.colors.text}]}>
           Property Features
         </Text>

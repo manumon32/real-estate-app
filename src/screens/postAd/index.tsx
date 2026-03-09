@@ -117,7 +117,7 @@ const PostAd = () => {
         ownershipTypeId: [newInitialValues.ownershipTypeId?._id],
         facingDirectionId: [newInitialValues.facingDirectionId?._id],
         numberOfBedrooms: [String(newInitialValues.numberOfBedrooms)],
-        numberOfBathrooms: [String(newInitialValues.numberOfBedrooms)],
+        numberOfBathrooms: [String(newInitialValues.numberOfBathrooms)],
         listedById: [newInitialValues.listedById?._id],
         state: newInitialValues.state,
         country: newInitialValues.country,
@@ -183,6 +183,7 @@ const PostAd = () => {
         <Formik
           initialValues={initialValues}
           validationSchema={postAdValidationSchema}
+          enableReinitialize
           onSubmit={values => {
             console.log('Form submitted!', values);
           }}>

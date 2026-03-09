@@ -64,8 +64,6 @@ const Step5MediaPreview: React.FC<Props> = ({
     (scrollY / (CONTENT_HEIGHT - visibleHeight)) *
     (visibleHeight - indicatorHeight);
 
-  console.log('managePlansList', managePlansList);
-
   const totalImages = imageUrls.length;
   const [imagesUplloadingCount, setImagesUplloadingCount] = useState(0);
   const [floorUplloadingCount, setFloorUplloadingCount] = useState(0);
@@ -94,11 +92,11 @@ const Step5MediaPreview: React.FC<Props> = ({
 
   useEffect(() => {
     // @ts-ignore
-    if (managePlansList?.[0].price) {
+    if (managePlansList?.[0]?.price) {
       // @ts-ignore
-      setPrice(managePlansList?.[0].price);
+      setPrice(managePlansList?.[0]?.price);
       // @ts-ignore
-      setBenifits(managePlansList?.[0].benifits);
+      setBenifits(managePlansList?.[0]?.benifits);
     }
   }, [managePlansList]);
 
@@ -560,14 +558,14 @@ const Step5MediaPreview: React.FC<Props> = ({
               Amount: ₹{price ?? 'N/A'}
             </Text>
             {/* @ts-ignore */}
-            {managePlansList?.[0].duration && (
+            {managePlansList?.[0]?.duration && (
               <Text
                 style={[
                   styles.popupAmount,
                   {color: theme.colors.text, fontSize: 12},
                 ]}>
                 {/* @ts-ignore */}
-                Package Avaliability: {managePlansList?.[0].duration} Days
+                Package Avaliability: {managePlansList?.[0]?.duration} Days
               </Text>
             )}
             <Text

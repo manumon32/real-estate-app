@@ -36,11 +36,10 @@ const Footer = () => {
 };
 
 const PropertyDetails = React.memo((props: any) => {
-    console.log('props', props);
   const {items}: any = props;
   const [error, setError] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [property, setProperty] = useState<Detail | null>();
-  console.warn(setProperty);
   const {theme} = useTheme();
 
   const renderAmenity = useCallback((item: any, index: number) => {

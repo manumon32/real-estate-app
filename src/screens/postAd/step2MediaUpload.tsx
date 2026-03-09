@@ -169,7 +169,8 @@ const Step5MediaUpload = (props: any) => {
   useEffect(() => {
     setFieldValue('showLoanOffers', isStringInEitherArray('loanEligible'));
     setFieldValue('showEmiCalculator', isStringInEitherArray('loanEligible'));
-  }, [isStringInEitherArray, setFieldValue]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle picker opening - show skeleton immediately
   const handlePickerOpen = useCallback(() => {
