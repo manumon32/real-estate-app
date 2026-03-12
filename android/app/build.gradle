@@ -137,6 +137,7 @@ dependencies {
         implementation jscFlavor
     }
     implementation(project(':react-native-compressor')) {
+        // 16kb memory issue in playstore fixed
         exclude group: 'com.github.banketree', module: 'AndroidLame-kotlin'
     }
 }
