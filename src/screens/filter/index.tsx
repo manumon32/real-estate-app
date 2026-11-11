@@ -85,7 +85,7 @@ const SortChips: React.FC<any> = ({setFilters, fetchFilterListings, theme}) => {
             {color: theme.colors.text},
             filters.orderBy == 'distance' && styles.chipTextSelected,
           ]}>
-          {'Disance'}
+          {'Distance'}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -431,7 +431,7 @@ function App(): React.JSX.Element {
               <NoChats
                 icon="message-text-outline"
                 // title="No Chat Found"
-                body="we cannot find anything on this search try again with diffrent options."
+                body="we cannot find anything on this search try again with different options."
                 // buttonText={'Explore'}
               />
             </>

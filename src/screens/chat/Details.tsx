@@ -425,7 +425,7 @@ const Chat = React.memo(({navigation}: any) => {
       await reportUser(payload, uploadParams);
       Toast.show({
         type: 'success',
-        text1: 'Reported sucessfully',
+        text1: 'Reported successfully',
         position: 'bottom',
       });
     } catch (err) {

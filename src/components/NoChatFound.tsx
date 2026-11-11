@@ -23,14 +23,14 @@ const NoChats = (props: any) => {
         return (
           <Image
             source={require('../assets/images/noappoinments.png')}
-            style={{width: 200, height: 200}}
+            style={styles.image}
           />
         );
       case 'MyAds':
         return (
           <Image
             source={require('../assets/images/nomyads.png')}
-            style={{width: 200, height: 200}}
+            style={styles.image}
           />
         );
       case 'Fav':
@@ -103,6 +103,10 @@ const styles = StyleSheet.create({
   icon: {
     marginBottom: 16,
   },
+  image: {
+    width: 200,
+    height: 200,
+  },
   title: {
     fontSize: 24,
     fontWeight: '600',
@@ -120,7 +124,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.REGULAR,
   },
   button: {
-    backgroundColor:  '#269669',
+    backgroundColor: '#269669',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

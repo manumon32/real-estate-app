@@ -192,7 +192,7 @@ const ManagePlans = () => {
                 fontFamily: Fonts.BOLD,
                 margin: 10,
               }}>
-              Avaialable Plans
+              Available Plans
             </Text>
           </>
         }

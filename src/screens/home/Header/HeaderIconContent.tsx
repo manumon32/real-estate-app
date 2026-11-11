@@ -38,7 +38,7 @@ function HeaderIconContent(): React.JSX.Element {
       type: 'propertyTypeId',
     },
     {
-      label: 'Commertial',
+      label: 'Commercial',
       icon: 'office-building',
       _id: ['684175aa4eb67a1a216b94ed'],
       type: 'propertyTypeId',

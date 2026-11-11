@@ -304,7 +304,7 @@ const MyAds = () => {
       );
       Toast.show({
         type: 'success',
-        text1: 'Your lising is successfully marked as Closed .',
+        text1: 'Your listing is successfully marked as Closed .',
         position: 'bottom',
       });
       fetchMyAds();

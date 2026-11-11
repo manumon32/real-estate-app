@@ -129,7 +129,7 @@ const PropertyDetails = React.memo(() => {
 
       Toast.show({
         type: 'success',
-        text1: 'Your lising is successfully marked as sold .',
+        text1: 'Your listing is successfully marked as sold .',
         position: 'bottom',
       });
       items?._id && fetchDetails(items?._id);

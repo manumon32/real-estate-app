@@ -565,7 +565,7 @@ const Step5MediaPreview: React.FC<Props> = ({
                   {color: theme.colors.text, fontSize: 12},
                 ]}>
                 {/* @ts-ignore */}
-                Package Avaliability: {managePlansList?.[0]?.duration} Days
+                Package Availability: {managePlansList?.[0]?.duration} Days
               </Text>
             )}
             <Text

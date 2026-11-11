@@ -122,7 +122,7 @@ const Settings = () => {
             onPress={async () => {
               Alert.alert(
                 'Logout?',
-                'You will not recieve any messages or notifications until you log in. Are sure want to log out?',
+                'You will not receive any messages or notifications until you log in. Are sure want to log out?',
                 [
                   {text: 'Cancel', style: 'cancel'},
                   {
@@ -153,7 +153,7 @@ const Settings = () => {
             onPress={async () => {
               Alert.alert(
                 'Logout from all devices?',
-                'You will not recieve any messages or notifications until you log in. Are sure want to log out?',
+                'You will not receive any messages or notifications until you log in. Are sure want to log out?',
                 [
                   {text: 'Cancel', style: 'cancel'},
                   {
@@ -185,7 +185,7 @@ const Settings = () => {
             onPress={async () => {
               Alert.alert(
                 'Delete your account?',
-                'You will not recieve any messages or notifications until you log in. Are sure want to delete your account?',
+                'You will not receive any messages or notifications until you log in. Are sure want to delete your account?',
                 [
                   {text: 'Cancel', style: 'cancel'},
                   {

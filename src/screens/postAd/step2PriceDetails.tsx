@@ -82,7 +82,7 @@ const Step2BasicInfo = (props: any) => {
       {isStringInEitherArray('maintanceCharge') && (
         <View style={styles.inputContainer}>
           <CommonDistanceInput
-            label="Maintance Charge"
+            label="Maintenance Charge"
             unit="/Month"
             value={values.maintenanceCharge}
             onChange={text => setFieldValue('maintenanceCharge', text)}

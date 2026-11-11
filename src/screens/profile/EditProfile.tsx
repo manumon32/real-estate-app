@@ -215,7 +215,7 @@ const EditProfile = () => {
                     styles.label,
                     {fontSize: 18, color: theme.colors.text},
                   ]}>
-                  Basic Informations
+                  Basic Information
                 </Text>
                 <View
                   style={{
@@ -281,7 +281,7 @@ const EditProfile = () => {
                     styles.label,
                     {fontSize: 18, color: theme.colors.text},
                   ]}>
-                  Contact Informations
+                  Contact Information
                 </Text>
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Email</Text>
